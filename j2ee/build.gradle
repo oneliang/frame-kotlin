@@ -1,0 +1,10 @@
+apply from: "${rootDir}/gradle/feature.gradle"
+apply from: "${rootDir}/gradle/maven-publish.gradle"
+
+dependencies {
+    implementation rootProject.ext.dependencies['javaee-api']
+    implementation project(":configuration")
+    implementation project(":context")
+    implementation project(":bean")
+    implementation project(":i18n")
+}

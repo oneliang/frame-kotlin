@@ -1,0 +1,13 @@
+ext {
+    dependencies = [
+            'junit'                  : 'junit:junit:4.12',
+            'common-util-kotlin'     : 'com.oneliang.ktx:common-util-kotlin:1.0',
+            'kotlin-reflect'         : "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version",
+            'kotlin-stdlib-js'       : "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version",
+            'javaee-api'             : 'javax:javaee-api:8.0',
+            'kotlin-test'            : "org.jetbrains.kotlin:kotlin-test",
+            'kotlin-test-junit'      : 'org.jetbrains.kotlin:kotlin-test-junit',
+            'kotlinx-coroutines-core': "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version",
+            'jexcelapi-jxl'          : 'net.sourceforge.jexcelapi:jxl:2.6.10'
+    ]
+}
