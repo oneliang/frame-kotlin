@@ -52,15 +52,15 @@ class JsonTree<T : Any> : Tree<T>() {
             val fieldName = entry.value
             var methodReturnValue = ObjectUtil.getterOrIsMethodInvoke(instance, fieldName)
             methodReturnValue = jsonProcessor.process<Any>(null, fieldName, methodReturnValue, false)
-            stringBuilder.append(Constants.Symbol.DOUBLE_QUOTES + key + Constants.Symbol.DOUBLE_QUOTES + Constants.Symbol.COLON + methodReturnValue.toString())
+            stringBuilder.append(Constants.Symbol.DOUBLE_QUOTE + key + Constants.Symbol.DOUBLE_QUOTE + Constants.Symbol.COLON + methodReturnValue.toString())
             if (iterator.hasNext()) {
                 stringBuilder.append(Constants.Symbol.COMMA)
             }
         }
         if (!root.isLeaf) {
             val childList = root.childNodeList
-            stringBuilder.append(Constants.Symbol.COMMA + Constants.Symbol.DOUBLE_QUOTES + hasChildren + Constants.Symbol.DOUBLE_QUOTES + Constants.Symbol.COLON + true)
-            stringBuilder.append(Constants.Symbol.COMMA + Constants.Symbol.DOUBLE_QUOTES + children + Constants.Symbol.DOUBLE_QUOTES + Constants.Symbol.COLON + Constants.Symbol.MIDDLE_BRACKET_LEFT)
+            stringBuilder.append(Constants.Symbol.COMMA + Constants.Symbol.DOUBLE_QUOTE + hasChildren + Constants.Symbol.DOUBLE_QUOTE + Constants.Symbol.COLON + true)
+            stringBuilder.append(Constants.Symbol.COMMA + Constants.Symbol.DOUBLE_QUOTE + children + Constants.Symbol.DOUBLE_QUOTE + Constants.Symbol.COLON + Constants.Symbol.MIDDLE_BRACKET_LEFT)
             var index = 0
             val lastIndex = childList.size - 1
             for (node in childList) {
@@ -72,7 +72,7 @@ class JsonTree<T : Any> : Tree<T>() {
             }
             stringBuilder.append(Constants.Symbol.MIDDLE_BRACKET_RIGHT)
         } else {
-            stringBuilder.append(Constants.Symbol.COMMA + Constants.Symbol.DOUBLE_QUOTES + hasChildren + Constants.Symbol.DOUBLE_QUOTES + Constants.Symbol.COLON + false)
+            stringBuilder.append(Constants.Symbol.COMMA + Constants.Symbol.DOUBLE_QUOTE + hasChildren + Constants.Symbol.DOUBLE_QUOTE + Constants.Symbol.COLON + false)
         }
         stringBuilder.append(Constants.Symbol.BIG_BRACKET_RIGHT)
         return stringBuilder.toString()
