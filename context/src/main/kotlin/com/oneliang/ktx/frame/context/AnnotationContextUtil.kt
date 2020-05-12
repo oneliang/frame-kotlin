@@ -12,7 +12,6 @@ import com.oneliang.ktx.util.jar.JarUtil
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.reflect.KClass
 
 object AnnotationContextUtil {
@@ -24,6 +23,7 @@ object AnnotationContextUtil {
     private const val PARAMETER_PATH = "-PATH="
 
     private object Type {
+        const val TXT = Constants.File.TXT
         const val JAR = Constants.File.JAR
         const val CLASSES_DIRECTORY = "classes_directory"
     }
@@ -60,31 +60,50 @@ object AnnotationContextUtil {
             parameterArray.forEach {
                 val parameter = it.trim()
                 when {
-                    parameter.startsWith(PARAMETER_TYPE) -> type = parameter.replaceFirst(PARAMETER_TYPE, Constants.String.BLANK)
-                    parameter.startsWith(PARAMETER_PACKAGE) -> packageName = parameter.replaceFirst(PARAMETER_PACKAGE, Constants.String.BLANK)
-                    parameter.startsWith(PARAMETER_PATH) -> path = parameter.replaceFirst(PARAMETER_PATH, Constants.String.BLANK)
+                    parameter.startsWith(PARAMETER_TYPE) -> type = parameter.replaceFirst(PARAMETER_TYPE, Constants.String.BLANK).trim()
+                    parameter.startsWith(PARAMETER_PACKAGE) -> packageName = parameter.replaceFirst(PARAMETER_PACKAGE, Constants.String.BLANK).trim()
+                    parameter.startsWith(PARAMETER_PATH) -> path = parameter.replaceFirst(PARAMETER_PATH, Constants.String.BLANK).trim()
                     else -> logger.error("Maybe parameter error, parameter:%s", parameter)
                 }
             }
             val filePathList = path.split(Constants.Symbol.COLON)
             val searchClassList = mutableListOf<KClass<*>>()
-            if (type.equals(Type.JAR, ignoreCase = true)) {
-                filePathList.forEach {
-                    val filePath = it.trim()
-                    val jarFileRealPath = File(fixedClassesRealPath, filePath).absolutePath
-                    logger.debug("search jar file real path:$jarFileRealPath")
-                    searchClassList.addAll(JarUtil.searchClassList(jarClassLoader, jarFileRealPath, packageName, annotationClass))
+            when {
+                type.equals(Type.JAR, ignoreCase = true) -> {
+                    filePathList.forEach {
+                        val filePath = it.trim()
+                        val jarFileRealPath = File(fixedClassesRealPath, filePath).absolutePath
+                        logger.debug("search jar file real path:$jarFileRealPath")
+                        searchClassList.addAll(JarUtil.searchClassList(jarClassLoader, jarFileRealPath, packageName, annotationClass))
+                    }
                 }
-            } else if (type.equals(Type.CLASSES_DIRECTORY, ignoreCase = true)) {
-                val packageToPath = packageName.replace(Constants.Symbol.DOT, Constants.Symbol.SLASH_LEFT)
-                filePathList.forEach {
-                    val filePath = it.trim()
-                    val otherClassesRealPathFile = File(fixedClassesRealPath, filePath)
-                    val otherClassesRealPath = otherClassesRealPathFile.absolutePath
-                    val searchClassPathFile = File(otherClassesRealPath, Constants.Symbol.SLASH_LEFT + packageToPath)
-                    val searchClassPath = searchClassPathFile.absolutePath
-                    logger.debug("search classes real path:%s, exists:%s, search class path:%s, exists:%s", otherClassesRealPath, otherClassesRealPathFile.exists(), searchClassPath, searchClassPathFile.exists())
-                    searchClassList.addAll(searchClassList(otherClassesRealPath, searchClassPath, annotationClass))
+                type.equals(Type.CLASSES_DIRECTORY, ignoreCase = true) -> {
+                    val packageToPath = packageName.replace(Constants.Symbol.DOT, Constants.Symbol.SLASH_LEFT)
+                    filePathList.forEach {
+                        val filePath = it.trim()
+                        val otherClassesRealPathFile = File(fixedClassesRealPath, filePath)
+                        val otherClassesRealPath = otherClassesRealPathFile.absolutePath
+                        val searchClassPathFile = File(otherClassesRealPath, Constants.Symbol.SLASH_LEFT + packageToPath)
+                        val searchClassPath = searchClassPathFile.absolutePath
+                        logger.debug("search classes real path:%s, exists:%s, search class path:%s, exists:%s", otherClassesRealPath, otherClassesRealPathFile.exists(), searchClassPath, searchClassPathFile.exists())
+                        searchClassList.addAll(searchClassList(otherClassesRealPath, searchClassPath, annotationClass))
+                    }
+                }
+                type.equals(Type.TXT, ignoreCase = true) -> {
+                    val classNameList = File(fixedClassesRealPath, path).readLines()
+                    classNameList.forEach { className ->
+                        val fixClassName = className.trim()
+                        if (fixClassName.isBlank()) {
+                            return@forEach//continue
+                        }
+                        val clazz = Thread.currentThread().contextClassLoader.loadClass(fixClassName)
+                        if (clazz.isAnnotationPresent(annotationClass.java)) {
+                            searchClassList.add(clazz.kotlin)
+                        }
+                    }
+                }
+                else -> {
+                    logger.debug("do not support type:", type)
                 }
             }
             searchClassList
@@ -145,5 +164,47 @@ object AnnotationContextUtil {
 
     private fun generateClassCacheKey(classesRealPath: String, searchClassPath: String): String {
         return classesRealPath + Constants.Symbol.COMMA + searchClassPath
+    }
+
+    fun findMatchAnnotationClassList(directory: String, fileSuffixArray: Array<String>, annotationClassNameArray: Array<String>): Map<String, List<String>> {
+        val matchOption = FileUtil.MatchOption()
+        val annotationClassNameMap = mutableMapOf<String, MutableList<String>>()
+        File(directory).findMatchFile(matchOption) {
+            val fullFilename = it.absolutePath
+            var currentFileSuffix = Constants.String.BLANK
+            fileSuffixArray.forEach { fileSuffix ->
+                if (!fullFilename.endsWith(fileSuffix)) {
+                    return@findMatchFile it.absolutePath
+                }
+                currentFileSuffix = fileSuffix
+            }
+            var packageName = Constants.String.BLANK
+            var annotationClassName = Constants.String.BLANK
+            val lines = it.readLines()
+            for (line in lines) {
+                val trimLine = line.trim()
+                if (trimLine.indexOf("package ") == 0) {
+                    packageName = trimLine
+                    packageName = packageName.replace("package ", Constants.String.BLANK).replace(Constants.Symbol.SEMICOLON, Constants.String.BLANK)
+                } else if (trimLine.startsWith("@")) {
+                    run loop@{
+                        annotationClassNameArray.forEach { name ->
+                            if (trimLine.startsWith(name)) {
+                                annotationClassName = name
+                            }
+                            return@loop
+                        }
+                    }
+                    if (annotationClassName.isNotBlank()) {
+                        val className = packageName + Constants.Symbol.DOT + it.name.replace(currentFileSuffix, Constants.String.BLANK)
+                        val classNameList = annotationClassNameMap.getOrPut(annotationClassName) { mutableListOf() }
+                        classNameList += className
+                    }
+                    break
+                }
+            }
+            it.absolutePath
+        }
+        return annotationClassNameMap
     }
 }
