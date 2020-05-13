@@ -8,10 +8,14 @@ class SocketClientSource : ResourceSource<SocketClient>() {
     var host: String = Constants.String.BLANK
     var port: Int = 0
 
-    lateinit var tcpPacketProcessor: TcpPacketProcessor
+    private lateinit var tcpPacketProcessor: TcpPacketProcessor
 
     override val resource: SocketClient?
         get() = SocketClient(this.host, this.port).also {
-            it.tcpPacketProcessor = tcpPacketProcessor
+            it.setTcpPacketProcessor(tcpPacketProcessor)
         }
+
+    fun setTcpPacketProcessor(tcpPacketProcessor: TcpPacketProcessor) {
+        this.tcpPacketProcessor = tcpPacketProcessor
+    }
 }

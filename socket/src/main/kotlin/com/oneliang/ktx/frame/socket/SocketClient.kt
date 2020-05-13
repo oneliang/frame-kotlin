@@ -13,7 +13,7 @@ class SocketClient(private val host: String, private val port: Int) {
     private val socket = Socket(this.host, this.port)
     private val lock = ReentrantLock()
 
-    lateinit var tcpPacketProcessor: TcpPacketProcessor
+    private lateinit var tcpPacketProcessor: TcpPacketProcessor
 
     /**
      * blocking method, when concurrent send
@@ -35,5 +35,9 @@ class SocketClient(private val host: String, private val port: Int) {
 
     fun close() {
         this.socket.close()
+    }
+
+    fun setTcpPacketProcessor(tcpPacketProcessor: TcpPacketProcessor) {
+        this.tcpPacketProcessor = tcpPacketProcessor
     }
 }
