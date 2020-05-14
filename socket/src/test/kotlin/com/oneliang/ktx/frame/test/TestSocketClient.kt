@@ -14,7 +14,7 @@ fun main() {
     socketClientPool.resourceSource = SocketClientSource().also {
         it.host = "localhost"
         it.port = 9999
-        it.tcpPacketProcessor = TcpPacketProcessor()
+        it.setTcpPacketProcessor(TcpPacketProcessor())
     }
     socketClientPool.initialize()
     object : Thread() {
