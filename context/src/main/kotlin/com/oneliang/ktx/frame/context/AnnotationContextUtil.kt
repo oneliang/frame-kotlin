@@ -93,7 +93,7 @@ object AnnotationContextUtil {
                     val classNameList = File(fixedClassesRealPath, path).readLines()
                     classNameList.forEach { className ->
                         val fixClassName = className.trim()
-                        if (fixClassName.isBlank()) {
+                        if (fixClassName.isBlank() || !fixClassName.startsWith(packageName)) {
                             return@forEach//continue
                         }
                         val clazz = Thread.currentThread().contextClassLoader.loadClass(fixClassName)
@@ -166,6 +166,18 @@ object AnnotationContextUtil {
         return classesRealPath + Constants.Symbol.COMMA + searchClassPath
     }
 
+    fun findMatchAnnotationClassList(directoryList: List<String>, fileSuffixArray: Array<String>, annotationClassNameArray: Array<String>): Map<String, List<String>> {
+        val annotationClassNameMap = mutableMapOf<String, MutableList<String>>()
+        directoryList.forEach {
+            val subAnnotationClassNameMap = findMatchAnnotationClassList(it, fileSuffixArray, annotationClassNameArray)
+            subAnnotationClassNameMap.forEach { (key, list) ->
+                val annotationClassNameList = annotationClassNameMap.getOrPut(key) { mutableListOf() }
+                annotationClassNameList += list
+            }
+        }
+        return annotationClassNameMap
+    }
+
     fun findMatchAnnotationClassList(directory: String, fileSuffixArray: Array<String>, annotationClassNameArray: Array<String>): Map<String, List<String>> {
         val matchOption = FileUtil.MatchOption()
         val annotationClassNameMap = mutableMapOf<String, MutableList<String>>()
@@ -191,8 +203,8 @@ object AnnotationContextUtil {
                         annotationClassNameArray.forEach { name ->
                             if (trimLine.startsWith(name)) {
                                 annotationClassName = name
+                                return@loop//break
                             }
-                            return@loop
                         }
                     }
                     if (annotationClassName.isNotBlank()) {
