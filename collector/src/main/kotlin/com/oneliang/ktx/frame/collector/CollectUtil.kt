@@ -65,7 +65,7 @@ object CollectUtil {
         val byteArrayOutputStream: ByteArrayOutputStream
         val filename = httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, "#")
         val fullFilename = cacheDirectory + "/" + filename + Constants.File.TXT
-        if (FileUtil.isExist(fullFilename)) {
+        if (FileUtil.exists(fullFilename)) {
             byteArrayOutputStream = collectFromLocal(fullFilename)
         } else {
             byteArrayOutputStream = collectFromHttp(httpUrl, httpHeaderList)
