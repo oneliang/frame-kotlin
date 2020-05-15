@@ -72,8 +72,13 @@ object AnnotationContextUtil {
                 type.equals(Type.JAR, ignoreCase = true) -> {
                     filePathList.forEach {
                         val filePath = it.trim()
-                        val jarFileRealPath = File(fixedClassesRealPath, filePath).absolutePath
-                        logger.debug("search jar file real path:$jarFileRealPath")
+                        val jarFile = File(fixedClassesRealPath, filePath)
+                        val jarFileRealPath = jarFile.absolutePath
+                        if (!jarFile.exists()) {
+                            logger.error("jar file do not exists, real path:%s", jarFile.absolutePath)
+                            return@forEach
+                        }
+                        logger.debug("search jar file real path:%s", jarFile.absolutePath)
                         searchClassList.addAll(JarUtil.searchClassList(jarClassLoader, jarFileRealPath, packageName, annotationClass))
                     }
                 }
@@ -81,16 +86,28 @@ object AnnotationContextUtil {
                     val packageToPath = packageName.replace(Constants.Symbol.DOT, Constants.Symbol.SLASH_LEFT)
                     filePathList.forEach {
                         val filePath = it.trim()
-                        val otherClassesRealPathFile = File(fixedClassesRealPath, filePath)
-                        val otherClassesRealPath = otherClassesRealPathFile.absolutePath
-                        val searchClassPathFile = File(otherClassesRealPath, Constants.Symbol.SLASH_LEFT + packageToPath)
+                        val classesDirectoryRealPathFile = File(fixedClassesRealPath, filePath)
+                        val classesDirectoryRealPath = classesDirectoryRealPathFile.absolutePath
+                        val searchClassPathFile = File(classesDirectoryRealPath, Constants.Symbol.SLASH_LEFT + packageToPath)
                         val searchClassPath = searchClassPathFile.absolutePath
-                        logger.debug("search classes real path:%s, exists:%s, search class path:%s, exists:%s", otherClassesRealPath, otherClassesRealPathFile.exists(), searchClassPath, searchClassPathFile.exists())
-                        searchClassList.addAll(searchClassList(otherClassesRealPath, searchClassPath, annotationClass))
+                        if (!classesDirectoryRealPathFile.exists()) {
+                            logger.error("classes directory real path do not exists, real path:%s", classesDirectoryRealPathFile.absolutePath)
+                            return@forEach
+                        }
+                        if (!searchClassPathFile.exists()) {
+                            logger.error("search class path do not exists, real path:%s", searchClassPathFile.absolutePath)
+                            return@forEach
+                        }
+                        logger.debug("classes directory real path:%s, search class path:%s", classesDirectoryRealPath, searchClassPath)
+                        searchClassList.addAll(searchClassList(classesDirectoryRealPath, searchClassPath, annotationClass))
                     }
                 }
                 type.equals(Type.TXT, ignoreCase = true) -> {
                     val txtFile = File(fixedClassesRealPath, path)
+                    if (!txtFile.exists()) {
+                        logger.error("txt file do not exists, real path:%s", txtFile.absolutePath)
+                        return emptyList()
+                    }
                     logger.debug("search txt file real path:%s", txtFile.absolutePath)
                     val classNameList = txtFile.readLines()
                     classNameList.forEach { className ->
