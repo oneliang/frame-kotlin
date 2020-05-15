@@ -90,7 +90,9 @@ object AnnotationContextUtil {
                     }
                 }
                 type.equals(Type.TXT, ignoreCase = true) -> {
-                    val classNameList = File(fixedClassesRealPath, path).readLines()
+                    val txtFile = File(fixedClassesRealPath, path)
+                    logger.debug("search txt file real path:%s", txtFile.absolutePath)
+                    val classNameList = txtFile.readLines()
                     classNameList.forEach { className ->
                         val fixClassName = className.trim()
                         if (fixClassName.isBlank() || !fixClassName.startsWith(packageName)) {
