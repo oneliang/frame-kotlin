@@ -43,7 +43,7 @@ class Calculator(private val code: String) {
                   optimizeResultProcessor: (result: Double) -> String = { it.toString() }): CalculateResult {
         if (!allFormulaItemMap.containsKey(code)) {
             logger.error("Please update formula item list first, map not contains cache data, product type code:%s", code)
-            return CalculateResult(false, emptyMap())
+            return CalculateResult(false, emptyMap(), emptyMap())
         }
         val allFormulaItemList = allFormulaItemMap[code] ?: emptyList()
         if (allFormulaItemList.isEmpty()) {
@@ -51,7 +51,7 @@ class Calculator(private val code: String) {
         }
         if (engine !is Invocable) {
             logger.error("engine is not invocable")
-            return CalculateResult(false, emptyMap())
+            return CalculateResult(false, emptyMap(), emptyMap())
         }
         val calculateResultItemMap = mutableMapOf<String, CalculateResultItem>()
         //mapping formula result without initialize formula type
@@ -65,12 +65,12 @@ class Calculator(private val code: String) {
             if (checkCalculateResultItem) {
                 if (!originalFormulaResultMap.containsKey(returnCode)) {
                     logger.error("check addition input data error, miss returnCode:$returnCode")
-                    return CalculateResult(false, calculateResultItemMap)
+                    return CalculateResult(false, emptyMap(), calculateResultItemMap)
                 }
                 val originalFormulaResult = originalFormulaResultMap[returnCode]
                 if (result != originalFormulaResult) {
                     logger.error("check addition input data error, returnCode:$returnCode, result:$result, original formula result:$originalFormulaResult")
-                    return CalculateResult(false, calculateResultItemMap)
+                    return CalculateResult(false, emptyMap(), calculateResultItemMap)
                 }
             }
             logger.info("Addition:$returnCode, result:$result")
@@ -80,9 +80,9 @@ class Calculator(private val code: String) {
             calculateResultItemMappingMap[returnCode] = calculateResultItem
         }
         //formula input data initialize
-        val optimizeInputDataMap = mutableMapOf<String, String>()
+        val optimizeInputMap = mutableMapOf<String, String>()
         inputMap.forEach { (key, value) ->
-            optimizeInputDataMap[key] = value
+            optimizeInputMap[key] = value
         }
 
         if (calculateResultItemMapping.isEmpty()) {
@@ -101,7 +101,7 @@ class Calculator(private val code: String) {
                     null -> Constants.String.NULL
                     is Bindings -> {
                         result.forEach { (key, value) ->
-                            optimizeInputDataMap[key] = value?.toString().nullToBlank()
+                            optimizeInputMap[key] = value?.toString().nullToBlank()
                         }
                         result.toJson()
                     }
@@ -115,7 +115,7 @@ class Calculator(private val code: String) {
                 //no need to save initialize data
                 if (result == null || result !is Bindings) {
                     logger.error("Error, result is null or result is not javax.script.Bindings, initialize formula execute error")
-                    return CalculateResult(false, calculateResultItemMap)
+                    return CalculateResult(false, optimizeInputMap, calculateResultItemMap)
                 }
             }
 
@@ -138,8 +138,8 @@ class Calculator(private val code: String) {
                         return@parameterList
                     }
                     when {
-                        optimizeInputDataMap.containsKey(parameterKey) -> {
-                            formulaInputList.add(optimizeInputDataMap.getValue(parameterKey))
+                        optimizeInputMap.containsKey(parameterKey) -> {
+                            formulaInputList.add(optimizeInputMap.getValue(parameterKey))
                         }
                         calculateResultItemMap.containsKey(parameterKey) -> {
                             val result = calculateResultItemMap[parameterKey]!!.value
@@ -169,14 +169,14 @@ class Calculator(private val code: String) {
                 }
                 if (result == null) {
                     logger.error("Error, result is null, did you forget the keyword 'return'")
-                    return CalculateResult(false, calculateResultItemMap, calculateResultItemMappingMap)
+                    return CalculateResult(false, optimizeInputMap, calculateResultItemMap, calculateResultItemMappingMap)
                 } else {
                     if (formulaItemTypeCode == resultFormulaTypeCode) {
                         resultList += result.toString()
                         if (checkCalculateResultItem) {
                             if (!originalFormulaResultMap.containsKey(formulaReturnCode)) {
                                 logger.error("Check original formula result error, miss formulaReturnCode:$formulaReturnCode")
-                                return CalculateResult(false, calculateResultItemMap, calculateResultItemMappingMap)
+                                return CalculateResult(false, optimizeInputMap, calculateResultItemMap, calculateResultItemMappingMap)
                             }
                             val originalFormulaResult = originalFormulaResultMap[formulaReturnCode]
                             if (result.toString() != originalFormulaResult) {
@@ -204,8 +204,8 @@ class Calculator(private val code: String) {
         calculateResultItemMap[resultCode] = totalCalculateResultItem
         calculateResultItemMappingMap[resultCode] = totalCalculateResultItem
         if (checkCalculateResultItem && !match) {
-            return CalculateResult(false, calculateResultItemMap, calculateResultItemMappingMap, totalCalculateResultItem)
+            return CalculateResult(false, optimizeInputMap, calculateResultItemMap, calculateResultItemMappingMap, totalCalculateResultItem)
         }
-        return CalculateResult(true, calculateResultItemMap, calculateResultItemMappingMap, totalCalculateResultItem)
+        return CalculateResult(true, optimizeInputMap, calculateResultItemMap, calculateResultItemMappingMap, totalCalculateResultItem)
     }
 }

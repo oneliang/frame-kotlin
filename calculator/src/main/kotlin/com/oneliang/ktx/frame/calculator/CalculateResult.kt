@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.calculator
 
-class CalculateResult(var result: Boolean = false,
-                      var calculateResultItemMap: Map<String, CalculateResultItem>,
-                      var calculateResultItemMappingMap: Map<String, CalculateResultItem> = calculateResultItemMap,
-                      var totalCalculateResultItem: CalculateResultItem = CalculateResultItem())
+class CalculateResult(val result: Boolean = false,
+                      val optimizeInputMap: Map<String, String>,
+                      val calculateResultItemMap: Map<String, CalculateResultItem>,
+                      val calculateResultItemMappingMap: Map<String, CalculateResultItem> = calculateResultItemMap,
+                      val totalCalculateResultItem: CalculateResultItem = CalculateResultItem())
