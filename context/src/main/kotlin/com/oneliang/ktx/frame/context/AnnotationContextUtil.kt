@@ -200,6 +200,9 @@ object AnnotationContextUtil {
     fun findMatchAnnotationClassList(directory: String, fileSuffixArray: Array<String>, annotationClassNameArray: Array<String>): Map<String, List<String>> {
         val matchOption = FileUtil.MatchOption()
         val annotationClassNameMap = mutableMapOf<String, MutableList<String>>()
+        annotationClassNameArray.forEach { name ->
+            annotationClassNameMap[name] = mutableListOf()
+        }
         File(directory).findMatchFile(matchOption) {
             val fullFilename = it.absolutePath
             var currentFileSuffix = Constants.String.BLANK
