@@ -29,9 +29,9 @@ class Server(private val host: String, private val port: Int) : LoopThread() {
             this.serverSocketChannel?.register(this.acceptSelector, SelectionKey.OP_ACCEPT)
             logger.debug("server start")
             super.run()
-        }) {
+        }, failure = {
             logger.error("server exception，shutdown", it)
-        }
+        })
     }
 
     @Throws(Throwable::class)

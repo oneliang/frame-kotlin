@@ -71,8 +71,8 @@ class Client(private val host: String, private val port: Int, private val select
                     break
                 }
             }
-        }) {
+        }, failure = {
             logger.error("client exception, please restart", it)
-        }
+        })
     }
 }

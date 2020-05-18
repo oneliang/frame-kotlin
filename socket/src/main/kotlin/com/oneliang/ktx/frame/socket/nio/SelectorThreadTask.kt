@@ -37,11 +37,11 @@ open class SelectorThreadTask(val selector: Selector) : ThreadTask {
                             logger.debug("byte array md5:%s, byte array size:%s", byteArray.MD5String(), byteArray.size)
 //                            this.selector.wakeup()
 //                            socketChannel.register(this.selector, SelectionKey.OP_READ)
-                        }) {
+                        }, failure = {
                             logger.error("disconnect", it)
                             key.cancel()
                             socketChannel.close()
-                        }
+                        })
                     }
                 }
             }
