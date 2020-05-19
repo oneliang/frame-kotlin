@@ -142,12 +142,14 @@ class Calculator(private val code: String) {
                     }
                 }
                 logger.info("Formula:%s(%s),result:%s, %s", formulaItem.name, formulaItemCode, resultJson, inputJson)
-                if (formulaItem.formulaType != FormulaItem.FormulaType.RESULT) {
-                    return@forEach//continue, no need to save
-                }
                 val formulaReturnCode = formulaItem.returnCode
                 calculateResultItemMap[formulaReturnCode] = CalculateResultItem(formulaItem.name, formulaReturnCode, inputJson = inputJson, value = result?.toString()
                         ?: Constants.String.NULL, codeType = CODE_TYPE_FORMULA)
+
+                if (formulaItem.formulaType != FormulaItem.FormulaType.RESULT) {
+                    return@forEach//continue, no need to save
+                }
+
                 //map quote formula result
                 if (calculateResultItemMapping.containsKey(formulaItemCode)) {
                     val formulaReturnCodeMapping = calculateResultItemMapping[formulaItemCode].nullToBlank()
