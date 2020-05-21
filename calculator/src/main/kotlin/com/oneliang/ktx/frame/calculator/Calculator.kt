@@ -142,8 +142,13 @@ class Calculator(private val code: String) {
                     }
                 }
                 logger.info("Formula:%s(%s),result:%s, %s", formulaItem.name, formulaItemCode, resultJson, inputJson)
+                val fixInputJson = if (formulaItem.parameterType == FormulaItem.ParameterType.JSON_OBJECT) {
+                    Constants.String.BLANK
+                } else {
+                    inputJson
+                }
                 val formulaReturnCode = formulaItem.returnCode
-                calculateResultItemMap[formulaReturnCode] = CalculateResultItem(formulaItem.name, formulaReturnCode, inputJson = inputJson, value = result?.toString()
+                calculateResultItemMap[formulaReturnCode] = CalculateResultItem(formulaItem.name, formulaReturnCode, inputJson = fixInputJson, value = result?.toString()
                         ?: Constants.String.NULL, codeType = CODE_TYPE_FORMULA)
 
                 if (formulaItem.formulaType != FormulaItem.FormulaType.RESULT) {
