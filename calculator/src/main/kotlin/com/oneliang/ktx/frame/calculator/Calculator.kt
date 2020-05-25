@@ -129,22 +129,27 @@ class Calculator(private val code: String) {
                         inputJson to this.engine.invokeFunction(formulaItemCode, *(inputTypeArray))
                     }
                 }
-                val resultJson = when (result) {
-                    null -> Constants.String.NULL
+                val (fixValue, resultJson) = when (result) {
+                    null -> Constants.String.NULL to Constants.String.NULL
                     is Bindings -> {
                         result.forEach { (key, value) ->
                             optimizeInputMap[key] = value?.toString().nullToBlank()
                         }
-                        result.toJson()
+                        Constants.String.BLANK to result.toJson()
                     }
                     else -> {
-                        result.toString()
+                        val value = result.toString()
+                        value to value
                     }
                 }
                 logger.info("Formula:%s(%s),result:%s, %s", formulaItem.name, formulaItemCode, resultJson, inputJson)
+                val fixInputJson = if (formulaItem.parameterType == FormulaItem.ParameterType.JSON_OBJECT) {
+                    Constants.String.BLANK
+                } else {
+                    inputJson
+                }
                 val formulaReturnCode = formulaItem.returnCode
-                calculateResultItemMap[formulaReturnCode] = CalculateResultItem(formulaItem.name, formulaReturnCode, inputJson = inputJson, value = result?.toString()
-                        ?: Constants.String.NULL, codeType = CODE_TYPE_FORMULA)
+                calculateResultItemMap[formulaReturnCode] = CalculateResultItem(formulaItem.name, formulaReturnCode, inputJson = fixInputJson, value = fixValue, codeType = CODE_TYPE_FORMULA)
 
                 if (formulaItem.formulaType != FormulaItem.FormulaType.RESULT) {
                     return@forEach//continue, no need to save
