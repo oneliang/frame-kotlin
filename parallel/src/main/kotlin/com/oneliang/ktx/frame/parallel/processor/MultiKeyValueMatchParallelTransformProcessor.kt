@@ -15,8 +15,8 @@ class MultiKeyValueMatchParallelTransformProcessor(private val keyValueArrayMap:
             parallelContext.collect(EMPTY_MULTI_KEY_VALUE_MATCH_DATA)
             return
         }
-        val map = value.second
-        val matchKeyList = map.matchesBy(this.keyValueArrayMap)
+        val dataMap = value.second
+        val matchKeyList = dataMap.matchesBy(this.keyValueArrayMap)
         if (matchKeyList.isEmpty()) {
             parallelContext.collect(EMPTY_MULTI_KEY_VALUE_MATCH_DATA)
             return
@@ -25,13 +25,13 @@ class MultiKeyValueMatchParallelTransformProcessor(private val keyValueArrayMap:
             MultiKeyValueMatchData().apply {
                 val keyValueMatchMap = mutableMapOf<String, String>()
                 val complexKey = it.joinToString(separator = Constants.Symbol.COMMA) { key ->
-                    map[key].nullToBlank().also {
+                    dataMap[key].nullToBlank().also {
                         keyValueMatchMap[key] = it
                     }
                 }
                 this.complexKey = complexKey
                 this.keyValueMatchMap = keyValueMatchMap
-                this.dataMap = map
+                this.dataMap = dataMap
             }
         }
         parallelContext.collect(multiKeyValueMatchData)
