@@ -1,12 +1,13 @@
 package com.oneliang.ktx.frame.parallel
 
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.frame.parallel.cache.CacheData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 internal class DefaultParallelSourceContext(
-        private val coroutineScope: CoroutineScope,
+        private val coroutine: Coroutine,
         private val parallelSourceProcessor: ParallelSourceProcessor<Any>,
         private val parallelJobStepList: List<ParallelJobStep<Any>>,
         private val parallelJob: ParallelJob<Any>) : ParallelSourceContext<Any> {
@@ -17,8 +18,8 @@ internal class DefaultParallelSourceContext(
     override suspend fun collect(value: Any, parallelContextAction: ParallelContextAction) {
         this.parallelJobStepList.forEach {
             if (this.parallelJob.parallelJobConfiguration.async) {
-                this.coroutineScope.launch(this.coroutineScope.coroutineContext) {
-                    ParallelContextUtil.collectForParallelProcessor(coroutineScope, parallelJob, it, value, parallelContextAction)
+                this.coroutine.launch {
+                    ParallelContextUtil.collectForParallelProcessor(this.coroutine, this.parallelJob, it, value, parallelContextAction)
                 }
             } else {
                 if ((parallelContextAction == ParallelContextAction.SAVEPOINT
@@ -29,7 +30,7 @@ internal class DefaultParallelSourceContext(
                     this.parallelSourceProcessor.savepoint(sourceData)
                     this.parallelJob.updateSourceData(sourceKey, sourceData)
                 }
-                ParallelContextUtil.collectForParallelProcessor(coroutineScope, parallelJob, it, value, parallelContextAction)
+                ParallelContextUtil.collectForParallelProcessor(this.coroutine, this.parallelJob, it, value, parallelContextAction)
             }
         }
     }

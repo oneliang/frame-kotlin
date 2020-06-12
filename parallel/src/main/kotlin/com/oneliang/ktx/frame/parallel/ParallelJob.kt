@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.parallel
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.cache.CacheManager
 import com.oneliang.ktx.frame.cache.FileCacheManager
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.frame.parallel.cache.*
 import com.oneliang.ktx.util.common.findAllChild
 import com.oneliang.ktx.util.common.nullToBlank
@@ -24,14 +25,7 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
     private lateinit var cacheManager: CacheManager
     private var cacheData: CacheData? = null
 
-    private val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-        logger.error("Throws an exception with message: ${throwable.message}", throwable)
-    }
-
-    private val coroutineScope = object : CoroutineScope {
-        override val coroutineContext: CoroutineContext
-            get() = EmptyCoroutineContext
-    }
+    private val coroutine = Coroutine()
 
     fun addParallelSourceProcessor(parallelSourceProcessor: ParallelSourceProcessor<IN>) {
         this.parallelSourceProcessorSet += parallelSourceProcessor
@@ -60,7 +54,7 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
         }
         logInfo("execute")
         this.countDownLatch = CountDownLatch(this.parallelSourceProcessorSet.size)
-        runBlocking(this.coroutineScope) {
+        this.coroutine.runBlocking {
             if (this.parallelJobConfiguration.useCache) {
                 val json = this.cacheManager.getFromCache(this.jobName, String::class).nullToBlank()
                 this.cacheData = CacheData.fromJson(json)
@@ -80,9 +74,9 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
                 }
                 val sourceData = this.cacheData?.getSourceData(sourceCacheKey)
                 parallelSourceProcessor.initialize(sourceData)
-                launch(this.coroutineScope) {
+                this.coroutine.launch {
                     val parallelJob = this as ParallelJob<Any>
-                    val parallelSourceContext = DefaultParallelSourceContext(this.coroutineScope, parallelSourceProcessor, this.firstParallelJobStepList, parallelJob)
+                    val parallelSourceContext = DefaultParallelSourceContext(this.coroutine, parallelSourceProcessor, this.firstParallelJobStepList, parallelJob)
                     parallelSourceProcessor.process(parallelSourceContext)
                 }
             }
@@ -165,17 +159,5 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
 
     private fun logInfo(message: String, vararg args: Any) {
         logger.info(Constants.Symbol.MIDDLE_BRACKET_LEFT + this.jobName + Constants.Symbol.MIDDLE_BRACKET_RIGHT + message, *args)
-    }
-
-    private fun runBlocking(coroutineScope: CoroutineScope, block: suspend () -> Unit) {
-        runBlocking(coroutineScope.coroutineContext + exceptionHandler) {
-            block()
-        }
-    }
-
-    private fun launch(coroutineScope: CoroutineScope, block: suspend () -> Unit): Job {
-        return coroutineScope.launch(coroutineScope.coroutineContext + exceptionHandler) {
-            block()
-        }
     }
 }

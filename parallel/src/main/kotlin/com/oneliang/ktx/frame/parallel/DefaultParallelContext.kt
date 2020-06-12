@@ -1,11 +1,12 @@
 package com.oneliang.ktx.frame.parallel
 
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.util.logging.LoggerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 internal class DefaultParallelContext(
-        private val coroutineScope: CoroutineScope,
+        private val coroutine: Coroutine,
         private val parallelJobStep: ParallelJobStep<Any>,
         override val parentParallelContextAction: ParallelContextAction = ParallelContextAction.NONE,
         private val parallelJob: ParallelJob<Any>) : ParallelContext<Any> {
@@ -15,11 +16,11 @@ internal class DefaultParallelContext(
 
     override suspend fun collect(value: Any) {
         if (this.parallelJob.parallelJobConfiguration.async) {
-            this.coroutineScope.launch(this.coroutineScope.coroutineContext) {
-                ParallelContextUtil.collectForParallelProcessor(coroutineScope, parallelJob, parallelJobStep, value, parentParallelContextAction)
+            this.coroutine.launch() {
+                ParallelContextUtil.collectForParallelProcessor(this.coroutine, this.parallelJob, this.parallelJobStep, value, this.parentParallelContextAction)
             }
         } else {
-            ParallelContextUtil.collectForParallelProcessor(coroutineScope, parallelJob, parallelJobStep, value, parentParallelContextAction)
+            ParallelContextUtil.collectForParallelProcessor(this.coroutine, this.parallelJob, this.parallelJobStep, value, this.parentParallelContextAction)
         }
     }
 

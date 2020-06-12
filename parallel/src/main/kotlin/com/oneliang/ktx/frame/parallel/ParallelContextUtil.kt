@@ -1,13 +1,12 @@
 package com.oneliang.ktx.frame.parallel
 
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.frame.parallel.cache.CacheData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 internal object ParallelContextUtil {
     private val logger = LoggerManager.getLogger(ParallelContextUtil::class)
-    internal suspend fun collectForParallelProcessor(coroutineScope: CoroutineScope, parallelJob: ParallelJob<Any>, parallelJobStep: ParallelJobStep<Any>, value: Any, parentParallelContextAction: ParallelContextAction) {
+    internal suspend fun collectForParallelProcessor(coroutine: Coroutine, parallelJob: ParallelJob<Any>, parallelJobStep: ParallelJobStep<Any>, value: Any, parentParallelContextAction: ParallelContextAction) {
         when {
             parallelJobStep.isParallelTransformProcessor() -> {
                 logger.info("transform processor, value:%s", value)
@@ -18,7 +17,7 @@ internal object ParallelContextUtil {
                 if (nextParallelJobStep == null) {
                     logger.error("this parallel job step is used for a transform processor, but next parallel job step is null, you may be need to add a transform processor or a sink processor for next job, this:%s", parallelJobStep)
                 } else {
-                    val nextParallelContext = DefaultParallelContext(coroutineScope, nextParallelJobStep, parentParallelContextAction, parallelJob)
+                    val nextParallelContext = DefaultParallelContext(coroutine, nextParallelJobStep, parentParallelContextAction, parallelJob)
                     parallelJobStep.parallelTransformProcessor.process(value, nextParallelContext)
                 }
             }
@@ -26,7 +25,7 @@ internal object ParallelContextUtil {
                 logger.info("sink processor, value:%s, parent context action:%s", value, parentParallelContextAction)
                 for (parallelSinkProcessor in parallelJobStep.parallelSinkProcessorList) {
                     if (parallelJob.parallelJobConfiguration.async) {
-                        coroutineScope.launch(coroutineScope.coroutineContext) {
+                        coroutine.launch {
                             parallelSinkProcessor.sink(value)
                         }
                     } else {
