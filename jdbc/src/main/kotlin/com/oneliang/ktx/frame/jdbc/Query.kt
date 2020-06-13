@@ -211,6 +211,21 @@ interface Query : BaseQuery {
     fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType): T?
 
     /**
+     * Method: select object, by column, table, condition, parameters,it is sql binding
+     * but you must attention it ,it only return the first object, or null when no data
+     * @param <T>
+     * @param kClass
+     * @param selectColumns
+     * @param table
+     * @param condition
+     * @param parameters
+     * @return T or null
+     * @throws QueryException
+    </T></T> */
+    @Throws(QueryException::class)
+    fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>()): T?
+
+    /**
      * Method: select object list,by column,table,condition,parameters,it is sql binding
      * @param <T>
      * @param kClass

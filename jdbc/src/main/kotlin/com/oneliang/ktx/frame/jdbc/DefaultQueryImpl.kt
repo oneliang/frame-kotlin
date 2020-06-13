@@ -284,6 +284,27 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     }
 
     /**
+     * Method: select object, by column, table, condition, parameters,it is sql binding
+     * but you must attention it ,it only return the first object, or null when no data
+     * @param <T>
+     * @param kClass
+     * @param selectColumns
+     * @param table
+     * @param condition
+     * @param parameters
+     * @return T or null
+     * @throws QueryException
+    </T></T> */
+    override fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, parameters: Array<*>): T? {
+        val list = this.selectObjectList(kClass, selectColumns, table, condition, parameters)
+        return if (list.isNotEmpty()) {
+            list[0]
+        } else {
+            null
+        }
+    }
+
+    /**
      * Method: select object list,by column,table,condition,parameters,it is sql binding
      * @param <T>
      * @param kClass
