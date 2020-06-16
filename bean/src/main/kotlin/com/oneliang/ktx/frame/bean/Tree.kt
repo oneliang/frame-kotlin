@@ -13,7 +13,7 @@ open class Tree<T : Any> {
          * @param values
          * @return boolean
          */
-        internal fun checkValue(fieldValue: Any, values: Array<Any>): Boolean {
+        internal fun checkValue(fieldValue: Any?, values: Array<Any?>): Boolean {
             var sign = false
             for (value in values) {
                 if (fieldValue == value) {
@@ -40,7 +40,7 @@ open class Tree<T : Any> {
      * @param childFieldName
      * @return the tree node has the child
      */
-    fun createTree(farther: TreeNode<T>, list: List<T>, fartherFieldName: String, fartherValueSet: Array<Any>, childFieldName: String): TreeNode<T> {
+    fun createTree(farther: TreeNode<T>, list: List<T>, fartherFieldName: String, fartherValueSet: Array<Any?>, childFieldName: String): TreeNode<T> {
         this.root = farther
         val copyOnWriteList = CopyOnWriteArrayList(list)
         val queue = ConcurrentLinkedQueue<TreeNode<T>>()

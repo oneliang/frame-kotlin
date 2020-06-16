@@ -22,7 +22,7 @@ open class Forest<T : Any> {
      * @param fartherValueSet
      * @return List<TreeNode></TreeNode><T>>
     </T> */
-    protected fun createTreeRootList(list: List<T>, fartherFieldName: String, fartherValueSet: Array<Any>): List<TreeNode<T>> {
+    protected fun createTreeRootList(list: List<T>, fartherFieldName: String, fartherValueSet: Array<Any?>): List<TreeNode<T>> {
         val treeRootList = mutableListOf<TreeNode<T>>()
         try {
             for (instance in list) {
@@ -51,7 +51,7 @@ open class Forest<T : Any> {
      * @param childFieldName
      * @return List<Tree></Tree><T>>
     </T> */
-    open fun createForest(list: List<T>, fartherFieldName: String, fartherValueSet: Array<Any>, childFieldName: String): List<Tree<T>> {
+    open fun createForest(list: List<T>, fartherFieldName: String, fartherValueSet: Array<Any?>, childFieldName: String): List<Tree<T>> {
         val rootList = this.createTreeRootList(list, fartherFieldName, fartherValueSet)
         for (root in rootList) {
             val tree = Tree<T>()

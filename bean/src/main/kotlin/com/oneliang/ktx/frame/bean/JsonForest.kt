@@ -22,7 +22,7 @@ class JsonForest<T : Any> : Forest<T>() {
      * @param childFieldName
      * @return List<Tree></Tree><T>>
     </T> */
-    override fun createForest(list: List<T>, fartherFieldName: String, fartherValueSet: Array<Any>, childFieldName: String): List<Tree<T>> {
+    override fun createForest(list: List<T>, fartherFieldName: String, fartherValueSet: Array<Any?>, childFieldName: String): List<Tree<T>> {
         val rootList = this.createTreeRootList(list, fartherFieldName, fartherValueSet)
         for (root in rootList) {
             val tree = JsonTree<T>()
