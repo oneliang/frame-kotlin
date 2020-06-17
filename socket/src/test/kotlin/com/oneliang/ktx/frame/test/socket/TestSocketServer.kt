@@ -1,4 +1,4 @@
-package com.oneliang.ktx.frame.test
+package com.oneliang.ktx.frame.test.socket
 
 import com.oneliang.ktx.frame.socket.SocketServer
 import com.oneliang.ktx.frame.socket.TcpPacket

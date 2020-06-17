@@ -1,10 +1,9 @@
-package com.oneliang.ktx.frame.test
+package com.oneliang.ktx.frame.test.socket
 
 import com.oneliang.ktx.frame.socket.nio.Server
 import com.oneliang.ktx.frame.socket.TcpPacket
 import com.oneliang.ktx.frame.socket.TcpPacketProcessor
 import com.oneliang.ktx.frame.socket.nio.SelectorProcessor
-import com.oneliang.ktx.frame.socket.nio.SelectorThreadTask
 import com.oneliang.ktx.util.common.toByteArray
 import com.oneliang.ktx.util.concurrent.ThreadPool
 import java.io.ByteArrayInputStream
