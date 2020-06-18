@@ -39,7 +39,9 @@ open class BaseQueryImpl : BaseQuery {
                 this.sqlProcessor.statementProcess(preparedStatement, index, parameter)
                 index++
             }
+            val begin = System.currentTimeMillis()
             preparedStatement.execute()
+            logger.info("execute cost:%s, sql:%s", (System.currentTimeMillis() - begin), parsedSql)
         } catch (e: Throwable) {
             throw QueryException(e)
         } finally {
@@ -187,7 +189,9 @@ open class BaseQueryImpl : BaseQuery {
                     index++
                 }
             }
+            val begin = System.currentTimeMillis()
             resultSet = preparedStatement.executeQuery()
+            logger.info("execute cost:%s, sql:%s", (System.currentTimeMillis() - begin), parsedSql)
         } catch (e: Throwable) {
             throw QueryException(e)
         }
@@ -399,7 +403,9 @@ open class BaseQueryImpl : BaseQuery {
                 this.sqlProcessor.statementProcess(preparedStatement, index, parameter)
                 index++
             }
+            val begin = System.currentTimeMillis()
             preparedStatement!!.execute()
+            logger.info("execute cost:%s, sql:%s", (System.currentTimeMillis() - begin), parsedSql)
             resultSet = preparedStatement.generatedKeys
             if (resultSet != null && resultSet.next()) {
                 id = resultSet.getInt(1)
@@ -595,8 +601,9 @@ open class BaseQueryImpl : BaseQuery {
                 this.sqlProcessor.statementProcess(preparedStatement, index, parameter)
                 index++
             }
+            val begin = System.currentTimeMillis()
             updateResult = preparedStatement.executeUpdate()
-            logger.debug("sql update result:%s, sql:%s", updateResult, parsedSql)
+            logger.info("execute cost:%s, sql update result:%s, sql:%s", (System.currentTimeMillis() - begin), updateResult, parsedSql)
         } catch (e: Throwable) {
             throw QueryException(e)
         } finally {
@@ -633,7 +640,9 @@ open class BaseQueryImpl : BaseQuery {
                     logger.info(parsedSql)
                     statement.addBatch(parsedSql)
                 }
+                val begin = System.currentTimeMillis()
                 results = statement.executeBatch()
+                logger.info("execute cost:%s, batch result:%s", (System.currentTimeMillis() - begin), results)
                 statement.clearBatch()
                 results
             } finally {
@@ -670,7 +679,9 @@ open class BaseQueryImpl : BaseQuery {
                     }
                     preparedStatement.addBatch()
                 }
+                val begin = System.currentTimeMillis()
                 results = preparedStatement.executeBatch()
+                logger.info("execute cost:%s, batch result:%s", (System.currentTimeMillis() - begin), results)
                 preparedStatement.clearBatch()
                 results
             } finally {
