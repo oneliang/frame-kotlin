@@ -36,7 +36,7 @@ object CollectUtil {
                     newInputStream = GZIPInputStream(inputStream)
                 }
                 byteArrayOutputStream.use {
-                    FileUtil.copyStream(newInputStream, it)
+                    newInputStream.copyTo(it)
                 }
             }
 
