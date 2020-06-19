@@ -28,10 +28,10 @@ open class BaseAction {
      */
     protected val basePath: String
         get() {
-            val request = ActionUtil.servletRequest
-            val httpRequest = request as HttpServletRequest
-            val contextPath = httpRequest.contextPath
-            return request.getScheme() + Constants.Symbol.COLON + Constants.Symbol.SLASH_LEFT + Constants.Symbol.SLASH_LEFT + request.getServerName() + Constants.Symbol.COLON + request.getServerPort() + contextPath
+            val servletRequest = ActionUtil.servletRequest
+            val httpServletRequest = servletRequest as HttpServletRequest
+            val contextPath = httpServletRequest.contextPath
+            return servletRequest.getScheme() + Constants.Symbol.COLON + Constants.Symbol.SLASH_LEFT + Constants.Symbol.SLASH_LEFT + servletRequest.getServerName() + Constants.Symbol.COLON + servletRequest.getServerPort() + contextPath
         }
 
     /**
@@ -51,8 +51,8 @@ open class BaseAction {
      */
     protected val requestIp: String
         get() {
-            val request = ActionUtil.servletRequest
-            return request.remoteAddr
+            val servletRequest = ActionUtil.servletRequest
+            return servletRequest.remoteAddr
         }
 
     /**
@@ -61,10 +61,10 @@ open class BaseAction {
      */
     protected val requestUri: String
         get() {
-            val request = ActionUtil.servletRequest
-            val httpRequest = request as HttpServletRequest
-            var uri = httpRequest.requestURI
-            val front = httpRequest.contextPath.length
+            val servletRequest = ActionUtil.servletRequest
+            val httpServletRequest = servletRequest as HttpServletRequest
+            var uri = httpServletRequest.requestURI
+            val front = httpServletRequest.contextPath.length
             uri = uri.substring(front, uri.length)
             return uri
         }
@@ -76,13 +76,13 @@ open class BaseAction {
         @Throws(Exception::class)
         get() {
             val byteArrayOutputStream = ByteArrayOutputStream()
-            val request = ActionUtil.servletRequest
-            val contentType = request.contentType
+            val servletRequest = ActionUtil.servletRequest
+            val contentType = servletRequest.contentType
             if (contentType != null) {
                 if (contentType.indexOf(Constants.Http.ContentType.APPLICATION_OCTET_STREAM) >= 0 || contentType.indexOf(Constants.Http.ContentType.BINARY_OCTET_STREAM) >= 0) {
                     try {
                         val buffer = ByteArray(Constants.Capacity.BYTES_PER_KB)
-                        val inputStream = request.inputStream
+                        val inputStream = servletRequest.inputStream
                         var length = inputStream.read(buffer, 0, buffer.size)
                         while (length != -1) {
                             byteArrayOutputStream.write(buffer, 0, length)
@@ -102,53 +102,54 @@ open class BaseAction {
         }
 
     /**
-     *
-     *
      * Method: set the instance object to the request
-     *
      * @param <T>
      * @param key
      * @param value
     </T> */
     protected fun <T : Any> setObjectToRequest(key: String, value: T) {
-        val request = ActionUtil.servletRequest
-        request.setAttribute(key, value)
+        val servletRequest = ActionUtil.servletRequest
+        servletRequest.setAttribute(key, value)
     }
 
     /**
-     *
-     *
      * Method: set the instance object to the session
-     *
      * @param <T>
      * @param key
      * @param value
     </T> */
     protected fun <T : Any> setObjectToSession(key: String, value: T) {
-        val request = ActionUtil.servletRequest
-        (request as HttpServletRequest).session.setAttribute(key, value)
+        val servletRequest = ActionUtil.servletRequest
+        (servletRequest as HttpServletRequest).session.setAttribute(key, value)
     }
 
     /**
-     *
      * Method: get object from request attribute
      * @param key
      * @return Object
      */
     @Suppress("UNCHECKED_CAST")
     protected fun <T : Any> getObjectFromRequest(key: String): T? {
-        val request = ActionUtil.servletRequest
-        return request.getAttribute(key) as T?
+        val servletRequest = ActionUtil.servletRequest
+        return servletRequest.getAttribute(key) as T?
     }
 
     /**
-     *
+     * Method: remove object from session attribute
+     * @param key
+     */
+    protected fun removeObjectFromRequest(key: String) {
+        val servletRequest = ActionUtil.servletRequest
+        servletRequest.removeAttribute(key)
+    }
+
+    /**
      * Method: remove object from session attribute
      * @param key
      */
     protected fun removeObjectFromSession(key: String) {
-        val request = ActionUtil.servletRequest
-        (request as HttpServletRequest).session.removeAttribute(key)
+        val servletRequest = ActionUtil.servletRequest
+        (servletRequest as HttpServletRequest).session.removeAttribute(key)
     }
 
     /**
@@ -160,43 +161,34 @@ open class BaseAction {
     }
 
     /**
-     *
-     *
      * Method: get the instance object to the session by key
-     *
      * @param key
      * @return Object
      */
     @Suppress("UNCHECKED_CAST")
     protected fun <T : Any> getObjectFromSession(key: String): T? {
-        val request = ActionUtil.servletRequest
-        return (request as HttpServletRequest).session.getAttribute(key) as T?
+        val servletRequest = ActionUtil.servletRequest
+        return (servletRequest as HttpServletRequest).session.getAttribute(key) as T?
     }
 
     /**
-     *
-     *
      * Method: get the parameter from request
-     *
      * @param parameter
      * @return String
      */
     protected fun getParameter(parameter: String): String {
-        val request = ActionUtil.servletRequest
-        return request.getParameter(parameter).nullToBlank()
+        val servletRequest = ActionUtil.servletRequest
+        return servletRequest.getParameter(parameter).nullToBlank()
     }
 
     /**
-     *
-     *
      * Method:get the parameter values from request
-     *
      * @param parameter
      * @return String[]
      */
     protected fun getParameterValues(parameter: String): Array<String> {
-        val request = ActionUtil.servletRequest
-        return request.getParameterValues(parameter) ?: emptyArray()
+        val servletRequest = ActionUtil.servletRequest
+        return servletRequest.getParameterValues(parameter) ?: emptyArray()
     }
 
     /**
@@ -205,8 +197,8 @@ open class BaseAction {
      * @return String
      */
     protected fun getHeader(name: String): String {
-        val request = ActionUtil.servletRequest
-        val httpServletRequest = request as HttpServletRequest
+        val servletRequest = ActionUtil.servletRequest
+        val httpServletRequest = servletRequest as HttpServletRequest
         return httpServletRequest.getHeader(name).nullToBlank()
     }
 
@@ -217,9 +209,9 @@ open class BaseAction {
      */
     @Throws(Exception::class)
     protected fun forward(path: String) {
-        val request = ActionUtil.servletRequest
-        val response = ActionUtil.servletResponse
-        request.getRequestDispatcher(path).forward(request, response)
+        val servletRequest = ActionUtil.servletRequest
+        val servletResponse = ActionUtil.servletResponse
+        servletRequest.getRequestDispatcher(path).forward(servletRequest, servletResponse)
     }
 
     /**
@@ -275,11 +267,11 @@ open class BaseAction {
     @Throws(Exception::class)
     protected fun uploadForForm(filePath: String, saveFilenames: Array<String>): List<FileUploadResult>? {
         var tempFilePath = filePath
-        val request = ActionUtil.servletRequest
+        val servletRequest = ActionUtil.servletRequest
         val response = ActionUtil.servletResponse
         response.contentType = Constants.Http.ContentType.TEXT_PLAIN
         // get content type of client request
-        val contentType = request.contentType
+        val contentType = servletRequest.contentType
         var fileUploadResultList: List<FileUploadResult>? = null
         if (contentType != null) {
             val fileUpload = FileUpload()
@@ -291,7 +283,7 @@ open class BaseAction {
             fileUpload.saveFilePath = tempFilePath
             // make sure content type is multipart/form-data,form file use
             if (contentType.indexOf(Constants.Http.ContentType.MULTIPART_FORM_DATA) >= 0) {
-                fileUploadResultList = fileUpload.upload(request.inputStream, request.contentLength, saveFilenames)
+                fileUploadResultList = fileUpload.upload(servletRequest.inputStream, servletRequest.contentLength, saveFilenames)
             }
         }
         return fileUploadResultList
@@ -307,11 +299,11 @@ open class BaseAction {
     @Throws(Exception::class)
     protected fun uploadForStream(filePath: String, filename: String): FileUploadResult? {
         var tempFilePath = filePath
-        val request = ActionUtil.servletRequest
+        val servletRequest = ActionUtil.servletRequest
         val response = ActionUtil.servletResponse
         response.contentType = Constants.Http.ContentType.TEXT_PLAIN
         // get content type of client request
-        val contentType = request.contentType
+        val contentType = servletRequest.contentType
         var fileUploadResult: FileUploadResult? = null
         if (contentType != null) {
             val fileUpload = FileUpload()
@@ -323,7 +315,7 @@ open class BaseAction {
             // make sure content type is application/octet-stream or binary/octet-stream,flash jpeg picture use or file upload use
             if (contentType.indexOf(Constants.Http.ContentType.APPLICATION_OCTET_STREAM) >= 0 || contentType.indexOf(Constants.Http.ContentType.BINARY_OCTET_STREAM) >= 0) {
                 if (filename.isNotBlank()) {
-                    fileUploadResult = fileUpload.upload(request.inputStream, filename)
+                    fileUploadResult = fileUpload.upload(servletRequest.inputStream, filename)
                 }
             }
         }
@@ -372,16 +364,16 @@ open class BaseAction {
 
 fun <T : Any> BaseAction.setObjectToRequest(block: () -> Array<Pair<String, T>>) {
     val valueArray = block()
-    val request = ActionUtil.servletRequest
+    val servletRequest = ActionUtil.servletRequest
     for (pair in valueArray) {
-        request.setAttribute(pair.first, pair.second)
+        servletRequest.setAttribute(pair.first, pair.second)
     }
 }
 
 fun <T : Any> BaseAction.setObjectToSession(block: () -> Array<Pair<String, T>>) {
     val valueArray = block()
-    val request = ActionUtil.servletRequest
-    val session = (request as HttpServletRequest).session
+    val servletRequest = ActionUtil.servletRequest
+    val session = (servletRequest as HttpServletRequest).session
     for (pair in valueArray) {
         session.setAttribute(pair.first, pair.second)
     }
