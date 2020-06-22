@@ -1,29 +1,36 @@
 package com.oneliang.ktx.frame.test.mail
 
 import com.oneliang.ktx.frame.mail.Mail
+import com.oneliang.ktx.frame.mail.ReceiveMailInformation
 import com.oneliang.ktx.frame.mail.SendMailInformation
 import com.oneliang.ktx.frame.mail.ToAddress
+import com.oneliang.ktx.util.file.FileUtil
 
 fun main() {
-    val mailBean = SendMailInformation()
-    mailBean.fromAddress = "stephen8558@163.com"
-    mailBean.host = "smtp.163.com"
-    mailBean.user = "stephen8558"
-    mailBean.password = "GHIZBBBUIYZWDPDX"
-    mailBean.subject = "test"
-    mailBean.content = "test"
-    mailBean.addToAddress(ToAddress("582199098@qq.com"))
-    Mail.send(mailBean)
+    val sendMailInformation = SendMailInformation()
+    sendMailInformation.host = "smtp.exmail.qq.com"
+    sendMailInformation.port = 465
+    sendMailInformation.user = "liangwenxiang@findsteel.cn"
+    sendMailInformation.password = "owabHiQvxCCk4yDg"
+    sendMailInformation.ssl = true
+    sendMailInformation.subject = "test"
+    sendMailInformation.content = "test"
+    sendMailInformation.fromAddress = "liangwenxiang@findsteel.cn"
+    sendMailInformation.addToAddress(ToAddress("582199098@qq.com"))
+    Mail.send(sendMailInformation)
     //receive
-//		ReceiveMailInformation receiveMailInformation=new ReceiveMailInformation();
-//		receiveMailInformation.setHost("mail.kidgrow.cn");
-//		receiveMailInformation.setUser("noreply@kidgrow.cn");
-//		receiveMailInformation.setPassword("t6g4f3");
-//		List<MailMessage> mailMessageList=Mail.receive(receiveMailInformation);
-//		String path="C:\\temp";
-//		FileUtil.createDirectory(path);
-//		for(MailMessage mailMessage:mailMessageList){
-//			System.out.println(mailMessage.getFromAddress());
-//			mailMessage.saveAccessories(path);
-//		}
+    val receiveMailInformation = ReceiveMailInformation()
+    receiveMailInformation.host = "imap.exmail.qq.com"
+    receiveMailInformation.port = 993
+    receiveMailInformation.user = "liangwenxiang@findsteel.cn"
+    receiveMailInformation.password = "owabHiQvxCCk4yDg"
+    receiveMailInformation.ssl = true
+    receiveMailInformation.protocol = Mail.IMAP
+    val mailMessageList = Mail.receive(receiveMailInformation)
+    val path = "/C:/temp";
+    FileUtil.createDirectory(path);
+    for (mailMessage in mailMessageList) {
+        println(mailMessage.fromAddress);
+        mailMessage.saveAccessories(path);
+    }
 }

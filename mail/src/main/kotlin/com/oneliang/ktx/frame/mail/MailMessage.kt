@@ -13,7 +13,7 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeUtility
 
-class MailMessage(val part: Part) {
+class MailMessage(private val part: Part) {
     companion object {
         private val logger = LoggerManager.getLogger(MailMessage::class)
         private const val TYPE_TEXT_PLAIN = "text/plain"
@@ -88,17 +88,17 @@ class MailMessage(val part: Part) {
             nameSign = true
         }
         if (part.isMimeType(TYPE_TEXT_PLAIN) && !nameSign) {
-            bodyText.append(part.getContent() as String)
+            bodyText.append(part.content as String)
         } else if (part.isMimeType(TYPE_TEXT_HTML) && !nameSign) {
-            bodyText.append(part.getContent() as String)
+            bodyText.append(part.content as String)
         } else if (part.isMimeType(TYPE_MULTIPART)) {
-            val multipart: Multipart = part.getContent() as Multipart
-            val count: Int = multipart.getCount()
+            val multipart: Multipart = part.content as Multipart
+            val count: Int = multipart.count
             for (i in 0 until count) {
                 bodyText.append(getMailBodyText(multipart.getBodyPart(i)))
             }
         } else if (part.isMimeType(TYPE_MESSAGE_RFC822)) {
-            bodyText.append(getMailBodyText(part.getContent() as Part))
+            bodyText.append(getMailBodyText(part.content as Part))
         }
         return bodyText.toString()
     }
@@ -124,12 +124,12 @@ class MailMessage(val part: Part) {
      * @return is new
      * @throws Exception
      */
-    @get:Throws(Exception::class)
     val isNew: Boolean
+        @Throws(Exception::class)
         get() {
             var isNew = false
-            val flags: Flags = (part as MimeMessage).getFlags()
-            val flag: Array<Flags.Flag> = flags.getSystemFlags()
+            val flags: Flags = (part as MimeMessage).flags
+            val flag: Array<Flags.Flag> = flags.systemFlags
             for (i in flag.indices) {
                 if (flag[i] == Flags.Flag.SEEN) {
                     isNew = true
@@ -144,8 +144,8 @@ class MailMessage(val part: Part) {
      * @return boolean
      * @throws Exception
      */
-    @get:Throws(Exception::class)
     val isContainAccessories: Boolean
+        @Throws(Exception::class)
         get() = isContainAccessories(part)
 
     /**
@@ -158,8 +158,8 @@ class MailMessage(val part: Part) {
     private fun isContainAccessories(part: Part): Boolean {
         var isContainAccessories = false
         if (part.isMimeType(TYPE_MULTIPART)) {
-            val multipart: Multipart = part.getContent() as Multipart
-            val count: Int = multipart.getCount()
+            val multipart: Multipart = part.content as Multipart
+            val count: Int = multipart.count
             for (i in 0 until count) {
                 val bodyPart: BodyPart = multipart.getBodyPart(i)
                 val dispostion: String = bodyPart.disposition
@@ -169,8 +169,8 @@ class MailMessage(val part: Part) {
                 } else if (bodyPart.isMimeType(TYPE_MULTIPART)) {
                     isContainAccessories = isContainAccessories(bodyPart)
                 } else {
-                    val contentType: String = bodyPart.getContentType()
-                    if (contentType.toLowerCase().indexOf("appliaction") != -1) {
+                    val contentType: String = bodyPart.contentType
+                    if (contentType.toLowerCase().indexOf("application") != -1) {
                         isContainAccessories = true
                     }
                     if (contentType.toLowerCase().indexOf("name") != -1) {
@@ -179,7 +179,7 @@ class MailMessage(val part: Part) {
                 }
             }
         } else if (part.isMimeType(TYPE_MESSAGE_RFC822)) {
-            isContainAccessories = isContainAccessories(part.getContent() as Part)
+            isContainAccessories = isContainAccessories(part.content as Part)
         }
         return isContainAccessories
     }
@@ -200,32 +200,33 @@ class MailMessage(val part: Part) {
      */
     @Throws(Exception::class)
     private fun saveAccessories(part: Part, path: String) {
-        var filename: String? = null
         if (part.isMimeType(TYPE_MULTIPART)) {
-            val multipart: Multipart = part.getContent() as Multipart
+            val multipart: Multipart = part.content as Multipart
             for (i in 0 until multipart.count) {
                 val bodyPart: BodyPart = multipart.getBodyPart(i)
-                val dispostion: String = bodyPart.disposition
-                if ((dispostion == Part.ATTACHMENT || (dispostion
-                                == Part.INLINE))) {
-                    filename = bodyPart.getFileName()
-                    if (filename != null && filename.toLowerCase().indexOf(Constants.Encoding.GB2312.toLowerCase()) != -1) {
-                        filename = MimeUtility.decodeText(filename)
+                val dispostion = bodyPart.disposition ?: Constants.String.BLANK
+                when {
+                    dispostion == Part.ATTACHMENT || dispostion == Part.INLINE -> {
+                        var filename = bodyPart.fileName
+                        if (filename != null && filename.toLowerCase().indexOf(Constants.Encoding.GB2312.toLowerCase()) != -1) {
+                            filename = MimeUtility.decodeText(filename)
+                            saveFile(path, filename, bodyPart.inputStream)
+                        }
                     }
-                    saveFile(path, filename, bodyPart.getInputStream())
-                } else if (bodyPart.isMimeType(TYPE_MULTIPART)) {
-                    this.saveAccessories(bodyPart, path)
-                } else {
-                    filename = bodyPart.getFileName()
-                    if (filename != null
-                            && filename.toLowerCase().indexOf(Constants.Encoding.GB2312.toLowerCase()) != -1) {
-                        filename = MimeUtility.decodeText(filename)
+                    bodyPart.isMimeType(TYPE_MULTIPART) -> {
+                        this.saveAccessories(bodyPart, path)
                     }
-                    saveFile(path, filename, bodyPart.getInputStream())
+                    else -> {
+                        var filename = bodyPart.fileName
+                        if (filename != null && filename.toLowerCase().indexOf(Constants.Encoding.GB2312.toLowerCase()) != -1) {
+                            filename = MimeUtility.decodeText(filename)
+                            saveFile(path, filename, bodyPart.inputStream)
+                        }
+                    }
                 }
             }
         } else if (part.isMimeType(TYPE_MESSAGE_RFC822)) {
-            this.saveAccessories(part.getContent() as Part, path)
+            this.saveAccessories(part.content as Part, path)
         }
     }
 
