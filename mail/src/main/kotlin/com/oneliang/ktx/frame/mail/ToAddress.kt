@@ -1,26 +1,16 @@
 package com.oneliang.ktx.frame.mail
 
-class ToAddress {
-    /**
-     * @return the type
-     */
-    /**
-     * @param type the type to set
-     */
-    var type = Type.TO
-    /**
-     * @return the address
-     */
-    /**
-     * @param address the address to set
-     */
-    var address: String? = null
+import com.oneliang.ktx.Constants
 
-    constructor(address: String?) {
+class ToAddress {
+    var type = Type.TO
+    var address = Constants.String.BLANK
+
+    constructor(address: String) {
         this.address = address
     }
 
-    constructor(type: Type, address: String?) {
+    constructor(type: Type, address: String) {
         this.type = type
         this.address = address
     }

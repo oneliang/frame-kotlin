@@ -16,7 +16,7 @@ fun main() {
     sendMailInformation.subject = "test"
     sendMailInformation.content = "test"
     sendMailInformation.fromAddress = "liangwenxiang@findsteel.cn"
-    sendMailInformation.addToAddress(ToAddress("582199098@qq.com"))
+    sendMailInformation.toAddressList = listOf(ToAddress("582199098@qq.com"))
     Mail.send(sendMailInformation)
     //receive
     val receiveMailInformation = ReceiveMailInformation()
