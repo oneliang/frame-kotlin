@@ -23,9 +23,46 @@ class ActionListener : HttpServlet() {
         private val logger = LoggerManager.getLogger(ActionListener::class)
 
         private const val INIT_PARAMETER_CLASS_PROCESSOR = "classProcessor"
+        private const val INIT_PARAMETER_LIFECYCLE = "lifecycle"
     }
 
     private var classProcessor = KotlinClassUtil.DEFAULT_KOTLIN_CLASS_PROCESSOR
+    private var lifecycle: Lifecycle? = null
+
+    /**
+     * Initialization of the servlet. <br></br>
+     * @throws ServletException if an error occurs
+     */
+    @Throws(ServletException::class)
+    override fun init() {
+        logger.info("System is starting up, listener is initial.")
+        val classProcessorClassName = this.getInitParameter(INIT_PARAMETER_CLASS_PROCESSOR)
+        if (!classProcessorClassName.isNullOrBlank()) {
+            val fixClassProcessorClassName = classProcessorClassName.replaceAllSpace().replaceAllLines()
+            try {
+                val clazz = Thread.currentThread().contextClassLoader.loadClass(fixClassProcessorClassName)
+                if (ObjectUtil.isInterfaceImplement(clazz, KotlinClassUtil.KotlinClassProcessor::class.java)) {
+                    this.classProcessor = clazz.newInstance() as KotlinClassUtil.KotlinClassProcessor
+                }
+            } catch (e: Throwable) {
+                logger.error(Constants.Base.EXCEPTION, e)
+            }
+            logger.info("Class processor is initial, class name:%s", fixClassProcessorClassName)
+        }
+        val lifecycleClassName = this.getInitParameter(INIT_PARAMETER_LIFECYCLE)
+        if (!lifecycleClassName.isNullOrBlank()) {
+            val fixLifecycleClassName = lifecycleClassName.replaceAllSpace().replaceAllLines()
+            try {
+                val clazz = Thread.currentThread().contextClassLoader.loadClass(fixLifecycleClassName)
+                if (ObjectUtil.isInterfaceImplement(clazz, Lifecycle::class.java)) {
+                    this.lifecycle = clazz.newInstance() as Lifecycle
+                }
+            } catch (e: Throwable) {
+                logger.error(Constants.Base.EXCEPTION, e)
+            }
+            logger.info("Lifecycle is initial, class name:%s", fixLifecycleClassName)
+        }
+    }
 
     /**
      * Returns information about the servlet, such as
@@ -40,7 +77,7 @@ class ActionListener : HttpServlet() {
     @Throws(ServletException::class, IOException::class)
     override fun service(request: HttpServletRequest, response: HttpServletResponse) {
         //servlet bean
-        var servletBean: ActionUtil.ServletBean? = ActionUtil.servletBean
+        var servletBean = ActionUtil.servletBean
         if (servletBean == null) {
             servletBean = ActionUtil.ServletBean()
             ActionUtil.servletBean = servletBean
@@ -75,9 +112,7 @@ class ActionListener : HttpServlet() {
 
     /**
      * The doHead method of the servlet. <br></br>
-     *
      * This method is called when a HTTP head request is received.
-     *
      * @param request the request send by the client to the server
      * @param response the response send by the server to the client
      * @throws ServletException if an error occurred
@@ -107,9 +142,7 @@ class ActionListener : HttpServlet() {
 
     /**
      * The doOptions method of the servlet. <br></br>
-     *
      * This method is called when a HTTP options request is received.
-     *
      * @param request the request send by the client to the server
      * @param response the response send by the server to the client
      * @throws ServletException if an error occurred
@@ -129,9 +162,7 @@ class ActionListener : HttpServlet() {
 
     /**
      * The doDelete method of the servlet. <br></br>
-     *
      * This method is called when a HTTP delete request is received.
-     *
      * @param request the request send by the client to the server
      * @param response the response send by the server to the client
      * @throws ServletException if an error occurred
@@ -144,9 +175,7 @@ class ActionListener : HttpServlet() {
 
     /**
      * The doGet method of the servlet. <br></br>
-     *
      * This method is called when a form has its tag value method equals to get.
-     *
      * @param request the request send by the client to the server
      * @param response the response send by the server to the client
      * @throws ServletException if an error occurred
@@ -159,9 +188,7 @@ class ActionListener : HttpServlet() {
 
     /**
      * The doPost method of the servlet. <br></br>
-     *
      * This method is called when a form has its tag value method equals to post.
-     *
      * @param request the request send by the client to the server
      * @param response the response send by the server to the client
      * @throws ServletException if an error occurred
@@ -175,9 +202,7 @@ class ActionListener : HttpServlet() {
 
     /**
      * The doPut method of the servlet. <br></br>
-     *
      * This method is called when a HTTP put request is received.
-     *
      * @param request the request send by the client to the server
      * @param response the response send by the server to the client
      * @throws ServletException if an error occurred
@@ -200,19 +225,31 @@ class ActionListener : HttpServlet() {
     private fun dispatch(request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
         //uri
         var uri = request.requestURI
-
         logger.info("It is requesting uri:%s, http method:%s", uri, httpRequestMethod.name)
 
         val front = request.contextPath.length
-        //		int rear=uri.lastIndexOf(StaticVar.DOT)
-        //		if(rear>front){
         uri = uri.substring(front, uri.length)
-        //		}
-        //		uri=uri.substring(front,rear)
         logger.info("The request name is:$uri")
 
         request.setAttribute(ConstantsAction.RequestKey.KEY_STRING_CURRENT_REQUEST_URI, uri)
 
+        this.lifecycle?.onRequest(uri, request, response, httpRequestMethod)
+
+        this.dispatchToDoAction(uri, request, response, httpRequestMethod)
+
+        this.lifecycle?.onResponse(uri, request, response, httpRequestMethod)
+    }
+
+    /**
+     * dispatch http request
+     * @param request
+     * @param response
+     * @param httpRequestMethod
+     * @throws ServletException
+     * @throws IOException
+     */
+    @Throws(ServletException::class, IOException::class)
+    private fun dispatchToDoAction(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
         val beforeGlobalInterceptorResult = this.doBeforeGlobalInterceptor(uri, request, response)
         if (!beforeGlobalInterceptorResult) {
             return
@@ -220,27 +257,6 @@ class ActionListener : HttpServlet() {
         val actionResult = doAction(uri, request, response, httpRequestMethod)
         if (!actionResult) {
             return
-        }
-    }
-
-    /**
-     * Initialization of the servlet. <br></br>
-     *
-     * @throws ServletException if an error occurs
-     */
-    @Throws(ServletException::class)
-    override fun init() {
-        logger.info("System is starting up,listener is initial")
-        val classProcessorClassName = getInitParameter(INIT_PARAMETER_CLASS_PROCESSOR)
-        if (classProcessorClassName != null && classProcessorClassName.isNotBlank()) {
-            try {
-                val clazz = Thread.currentThread().contextClassLoader.loadClass(classProcessorClassName)
-                if (ObjectUtil.isInterfaceImplement(clazz, KotlinClassUtil.KotlinClassProcessor::class.java)) {
-                    this.classProcessor = clazz.newInstance() as KotlinClassUtil.KotlinClassProcessor
-                }
-            } catch (e: Throwable) {
-                logger.error(Constants.Base.EXCEPTION, e)
-            }
         }
     }
 
@@ -669,5 +685,17 @@ class ActionListener : HttpServlet() {
             return InterceptorInterface.Result(InterceptorInterface.Result.Type.ERROR)
         }
         return InterceptorInterface.Result()
+    }
+
+    interface Lifecycle {
+        /**
+         * on request
+         */
+        fun onRequest(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod)
+
+        /**
+         * on response
+         */
+        fun onResponse(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod)
     }
 }

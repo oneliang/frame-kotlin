@@ -6,11 +6,7 @@ import javax.servlet.ServletResponse
 interface ActionInterface {
 
     /**
-     *
-     *
      * abstract Method: This method is abstract
-     *
-     *
      * This method is to execute
      */
     @Throws(ActionExecuteException::class)
