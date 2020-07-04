@@ -13,7 +13,7 @@ import java.sql.DriverManager
  * @author Dandelion
  * @since 2008-08-22
  */
-class ConnectionSource : ResourceSource<Connection>() {
+open class ConnectionSource : ResourceSource<Connection>() {
 
     companion object {
         private val logger = LoggerManager.getLogger(ConnectionSource::class)
@@ -23,22 +23,13 @@ class ConnectionSource : ResourceSource<Connection>() {
         const val USER = "user"
         const val PASSWORD = "password"
     }
+
     /**
-     * data base properties
-     */
-    /**
-     * @return the connectionSourceName
-     */
-    /**
-     * @param connectionSourceName the connectionSourceName to set
+     * connection source name
      */
     var connectionSourceName: String = Constants.String.BLANK
     /**
-     * @return the driver
-     */
-    /**
-     * @param driver
-     * the driver to set
+     * driver
      */
     var driver: String = Constants.String.BLANK
         set(driver) {
@@ -52,27 +43,15 @@ class ConnectionSource : ResourceSource<Connection>() {
             }
         }
     /**
-     * @return the url
-     */
-    /**
-     * @param url
-     * the url to set
+     * url
      */
     var url: String = Constants.String.BLANK
     /**
-     * @return the user
-     */
-    /**
-     * @param user
-     * the user to set
+     * user
      */
     var user: String = Constants.String.BLANK
     /**
-     * @return the password
-     */
-    /**
-     * @param password
-     * the password to set
+     * password
      */
     var password: String = Constants.String.BLANK
 
@@ -82,13 +61,18 @@ class ConnectionSource : ResourceSource<Connection>() {
      * This method initial the config file
      */
     override val resource: Connection?
-        @Synchronized get() {
-            var connection: Connection? = null
-            try {
-                connection = DriverManager.getConnection(this.url, this.user, this.password)
-            } catch (e: Exception) {
-                logger.error(Constants.Base.EXCEPTION, e)
-            }
-            return connection
+        get() {
+            return getConnection(this.url, this.user, this.password)
         }
+
+    @Synchronized
+    protected fun getConnection(url: String, user: String, password: String): Connection? {
+        var connection: Connection? = null
+        try {
+            connection = DriverManager.getConnection(url, user, password)
+        } catch (e: Exception) {
+            logger.error(Constants.Base.EXCEPTION, e)
+        }
+        return connection
+    }
 }

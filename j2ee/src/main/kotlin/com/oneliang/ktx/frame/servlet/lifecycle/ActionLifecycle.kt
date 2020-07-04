@@ -10,14 +10,27 @@ import javax.servlet.http.HttpServletResponse
 class ActionLifecycle : ActionListener.Lifecycle {
     companion object {
         private val logger = LoggerManager.getLogger(ActionLifecycle::class)
-        val lifecycleList = CopyOnWriteArrayList<ActionListener.Lifecycle>()
+        private val lifecycleList = CopyOnWriteArrayList<ActionListener.Lifecycle>()
+        fun registerLifecycle(lifecycle: ActionListener.Lifecycle) {
+            lifecycleList += lifecycle
+        }
+
+        fun unRegisterLifecycle(lifecycle: ActionListener.Lifecycle) {
+            lifecycleList -= lifecycle
+        }
     }
 
     override fun onRequest(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
         logger.info("Action lifecycle on request, uri:%s", uri)
+        for (lifecycle in lifecycleList) {
+            lifecycle.onRequest(uri, request, response, httpRequestMethod)
+        }
     }
 
     override fun onResponse(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
         logger.info("Action lifecycle on response, uri:%s", uri)
+        for (lifecycle in lifecycleList) {
+            lifecycle.onResponse(uri, request, response, httpRequestMethod)
+        }
     }
 }
