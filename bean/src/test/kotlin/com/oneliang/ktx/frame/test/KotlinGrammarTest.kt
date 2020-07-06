@@ -30,12 +30,18 @@ class FieldDelegate {
 
 }
 
+class ByForMap(map: Map<String, *>) {
+    val field: String by map
+}
+
 fun main(args: Array<String>) {
-    val byteForField = ByForField()
-    byteForField.field = "1"//original value:1, need to set value:1
-    println(byteForField.field)
-    byteForField.lazyField
-    byteForField.lazyField
-    byteForField.observerStringField = "observer"
-    byteForField.observerIntField = 2
+    val byForField = ByForField()
+    byForField.field = "1"//original value:1, need to set value:1
+    println(byForField.field)
+    byForField.lazyField
+    byForField.lazyField
+    byForField.observerStringField = "observer"
+    byForField.observerIntField = 2
+    val byForMap = ByForMap(mapOf("field" to "test"))
+    println(byForMap.field)
 }
