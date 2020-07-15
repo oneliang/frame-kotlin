@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.jdbc
 
+import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.KotlinClassUtil
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.sql.PreparedStatement
@@ -13,6 +14,8 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
     companion object {
         private val logger = LoggerManager.getLogger(AbstractSqlProcessor::class)
     }
+
+    var nullable: Boolean = false
 
     override fun statementProcess(preparedStatement: PreparedStatement, index: Int, parameter: Any?) {
         try {
@@ -56,19 +59,45 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
         try {
             val classType = KotlinClassUtil.getClassType(parameterType)
             when (classType) {
-                KotlinClassUtil.ClassType.KOTLIN_CHARACTER -> value = resultSet.getString(columnName).toCharArray()[0]
-                KotlinClassUtil.ClassType.KOTLIN_STRING -> value = resultSet.getString(columnName)
-                KotlinClassUtil.ClassType.KOTLIN_BYTE -> value = java.lang.Byte.valueOf(resultSet.getByte(columnName))
-                KotlinClassUtil.ClassType.KOTLIN_SHORT -> value = java.lang.Short.valueOf(resultSet.getShort(columnName))
-                KotlinClassUtil.ClassType.KOTLIN_INTEGER -> value = Integer.valueOf(resultSet.getInt(columnName))
-                KotlinClassUtil.ClassType.KOTLIN_LONG -> value = java.lang.Long.valueOf(resultSet.getLong(columnName))
-                KotlinClassUtil.ClassType.KOTLIN_FLOAT -> value = java.lang.Float.valueOf(resultSet.getFloat(columnName))
-                KotlinClassUtil.ClassType.KOTLIN_DOUBLE -> value = java.lang.Double.valueOf(resultSet.getDouble(columnName))
-                KotlinClassUtil.ClassType.KOTLIN_BOOLEAN -> value = java.lang.Boolean.valueOf(resultSet.getBoolean(columnName))
+                KotlinClassUtil.ClassType.KOTLIN_CHARACTER -> {
+                    value = resultSet.getString(columnName)?.toCharArray()?.get(0)
+                    if (!this.nullable) {
+                        value = value ?: Constants.String.BLANK.toCharArray()[0]
+                    }
+                }
+                KotlinClassUtil.ClassType.KOTLIN_STRING -> {
+                    value = resultSet.getString(columnName)
+                    if (!this.nullable) {
+                        value = value ?: Constants.String.BLANK
+                    }
+                }
+                KotlinClassUtil.ClassType.KOTLIN_BYTE -> {//getByte() always not null
+                    value = java.lang.Byte.valueOf(resultSet.getByte(columnName))
+                }
+                KotlinClassUtil.ClassType.KOTLIN_SHORT -> {//getShort() always not null
+                    value = java.lang.Short.valueOf(resultSet.getShort(columnName))
+                }
+                KotlinClassUtil.ClassType.KOTLIN_INTEGER -> {//getInt() always not null
+                    value = Integer.valueOf(resultSet.getInt(columnName))
+                }
+                KotlinClassUtil.ClassType.KOTLIN_LONG -> {//getLong() always not null
+                    value = java.lang.Long.valueOf(resultSet.getLong(columnName))
+                }
+                KotlinClassUtil.ClassType.KOTLIN_FLOAT -> {//getFloat() always not null
+                    value = java.lang.Float.valueOf(resultSet.getFloat(columnName))
+                }
+                KotlinClassUtil.ClassType.KOTLIN_DOUBLE -> {//getDouble() always not null
+                    value = java.lang.Double.valueOf(resultSet.getDouble(columnName))
+                }
+                KotlinClassUtil.ClassType.KOTLIN_BOOLEAN -> {//getBoolean() always not null
+                    value = java.lang.Boolean.valueOf(resultSet.getBoolean(columnName))
+                }
                 KotlinClassUtil.ClassType.JAVA_UTIL_DATE -> {
                     value = resultSet.getTimestamp(columnName)
                     if (value != null) {
                         value = Date(value.time)
+                    } else if (!this.nullable) {
+                        value = Date(0)
                     }
                 }
                 else -> {
