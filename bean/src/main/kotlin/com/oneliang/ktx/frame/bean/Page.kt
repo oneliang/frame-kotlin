@@ -1,5 +1,7 @@
 package com.oneliang.ktx.frame.bean
 
+import com.oneliang.ktx.util.common.calculatePiece
+
 /**
  * @author Dandelion
  * @since 2008-11-10
@@ -69,11 +71,6 @@ class Page {
         this.firstPage = 1
         this.totalRows = totalRows
         this.rowsPerPage = rowsPerPage
-        val totalPagesCount = this.totalRows % this.rowsPerPage
-        if (totalPagesCount == 0) {
-            this.totalPages = this.totalRows / this.rowsPerPage
-        } else {
-            this.totalPages = this.totalRows / this.rowsPerPage + 1
-        }
+        this.totalPages = this.totalRows.calculatePiece(this.rowsPerPage)
     }
 }
