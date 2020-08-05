@@ -162,13 +162,38 @@ object SqlUtil {
     }
 
     /**
-     * Method: class to select sql with id
+     * Method: class to select single id sql
      * @param <T>
      * @param kClass
      * @param mappingBean
      * @return String
     </T> */
-    fun <T : Any> classToSelectIdSql(kClass: KClass<T>, mappingBean: MappingBean): String {
+    fun <T : Any> classToSelectSingleIdSql(kClass: KClass<T>, mappingBean: MappingBean): String {
+        return classToSelectIdSql(kClass, emptyArray(), mappingBean, SelectIdType.SINGLE_ID)
+    }
+
+    /**
+     * Method: class to select multiple id sql, only for single id column
+     * @param <T>
+     * @param kClass
+     * @param ids
+     * @param mappingBean
+     * @return String
+    </T> */
+    fun <T : Any, IdType : Any> classToSelectMultipleIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean): String {
+        return classToSelectIdSql(kClass, ids, mappingBean, SelectIdType.MULTIPLE_ID)
+    }
+
+    /**
+     * Method: class to select id sql, only for single id column
+     * @param <T>
+     * @param kClass
+     * @param ids
+     * @param mappingBean
+     * @param selectIdType
+     * @return String
+    </T> */
+    private fun <T : Any, IdType : Any> classToSelectIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, selectIdType: SelectIdType): String {
         val methods = kClass.java.methods
         val condition = StringBuilder()
         for (mappingColumnBean in mappingBean.mappingColumnBeanList) {
@@ -184,7 +209,17 @@ object SqlUtil {
             if (!isId) {
                 continue
             }
-            condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " = ?")
+            when (selectIdType) {
+                SelectIdType.SINGLE_ID -> condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " = ?")
+                SelectIdType.MULTIPLE_ID -> {
+                    if (ids.isEmpty()) {
+                        throw NullPointerException("ids can not be null or empty.select id type:${selectIdType}")
+                    }
+                    val idsJson = ids.toJson()
+                    val idsSql = idsJson.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), "").replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), "")
+                    condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " IN ($idsSql)")
+                }
+            }
         }
         val table = fixTable(Constants.String.BLANK, mappingBean)
         return selectSql(emptyArray(), table, condition.toString())
@@ -201,8 +236,8 @@ object SqlUtil {
      * @throws Exception
     </T> */
     @Throws(Exception::class)
-    fun <T : Any, IdType : Any> classToDeleteOneRowSql(kClass: KClass<T>, id: IdType, mappingBean: MappingBean): String {
-        return classToDeleteSql(kClass, arrayOf<Any>(id), mappingBean, DeleteType.ONE_ROW)
+    fun <T : Any, IdType : Any> classToDeleteSingleRowSql(kClass: KClass<T>, id: IdType, mappingBean: MappingBean): String {
+        return classToDeleteSql(kClass, arrayOf<Any>(id), mappingBean, DeleteType.SINGLE_ROW)
     }
 
     /**
@@ -247,11 +282,11 @@ object SqlUtil {
             }
             if (isId) {
                 when (deleteType) {
-                    DeleteType.ONE_ROW -> condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='" + ids[0] + "'")
+                    DeleteType.SINGLE_ROW -> condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='" + ids[0] + "'")
                     DeleteType.MULTIPLE_ROW -> {
-                        var id = ids.toJson()
-                        id = id.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), "").replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), "")
-                        condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " IN ($id)")
+                        val idsJson = ids.toJson()
+                        val idsSql = idsJson.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), "").replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), "")
+                        condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " IN ($idsSql)")
                     }
                 }
             }
@@ -534,6 +569,10 @@ object SqlUtil {
     }
 
     private enum class DeleteType {
-        ONE_ROW, MULTIPLE_ROW
+        SINGLE_ROW, MULTIPLE_ROW
+    }
+
+    private enum class SelectIdType {
+        SINGLE_ID, MULTIPLE_ID
     }
 }

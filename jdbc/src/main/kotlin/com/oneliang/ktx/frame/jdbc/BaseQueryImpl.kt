@@ -105,12 +105,51 @@ open class BaseQueryImpl : BaseQuery {
     @Throws(QueryException::class)
     override fun <T : Any, IdType : Any> executeQueryById(connection: Connection, kClass: KClass<T>, id: IdType): T? {
         var instance: T? = null
+        val list: List<T> = executeQueryByIdOrIds(connection, kClass, arrayOf<Any>(id), true)
+        if (list.isNotEmpty()) {
+            instance = list[0]
+        }
+        return instance
+    }
+
+    /**
+     * Method: execute query with ids
+     * @param <T>
+     * @param connection
+     * @param kClass
+     * @param ids
+     * @return T
+     * @throws QueryException
+    </T> */
+    @Throws(QueryException::class)
+    override fun <T : Any, IdType : Any> executeQueryByIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>): List<T> {
+        return executeQueryByIdOrIds(connection, kClass, ids, false)
+    }
+
+    /**
+     * Method: execute query with id or ids
+     * @param <T>
+     * @param connection
+     * @param kClass
+     * @param ids
+     * @param singleId
+     * @return T
+     * @throws QueryException
+    </T> */
+    @Throws(QueryException::class)
+    private fun <T : Any, IdType : Any> executeQueryByIdOrIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>, singleId: Boolean): List<T> {
         val list: List<T>
         var resultSet: ResultSet? = null
         try {
             val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
-            val sql = SqlUtil.classToSelectIdSql(kClass, mappingBean)
-            resultSet = this.executeQueryBySql(connection, sql, arrayOf<Any>(id))
+            val sql: String
+            if (singleId) {
+                sql = SqlUtil.classToSelectSingleIdSql(kClass, mappingBean)
+                resultSet = this.executeQueryBySql(connection, sql, ids)
+            } else {
+                sql = SqlUtil.classToSelectMultipleIdSql(kClass, ids, mappingBean)
+                resultSet = this.executeQueryBySql(connection, sql)
+            }
             list = SqlUtil.resultSetToObjectList(resultSet, kClass, mappingBean, this.sqlProcessor)
             logger.debug("sql select result:%s, sql:%s", list.size, sql)
         } catch (e: Throwable) {
@@ -123,13 +162,9 @@ open class BaseQueryImpl : BaseQuery {
                 } catch (e: Throwable) {
                     throw QueryException(e)
                 }
-
             }
         }
-        if (list.isNotEmpty()) {
-            instance = list[0]
-        }
-        return instance
+        return list
     }
 
     /**
@@ -233,7 +268,6 @@ open class BaseQueryImpl : BaseQuery {
     }
 
     /**
-     *
      * Method: execute insert collection(list),transaction
      * @param <T>
      * @param connection
@@ -248,7 +282,6 @@ open class BaseQueryImpl : BaseQuery {
     }
 
     /**
-     *
      * Method: execute update
      * @param connection
      * @param instance
@@ -263,7 +296,6 @@ open class BaseQueryImpl : BaseQuery {
     }
 
     /**
-     *
      * Method: execute update collection,transaction
      * @param <T>
      * @param connection
@@ -278,7 +310,6 @@ open class BaseQueryImpl : BaseQuery {
     }
 
     /**
-     *
      * Method: execute delete with id
      * @param <T>
      * @param connection
@@ -292,7 +323,7 @@ open class BaseQueryImpl : BaseQuery {
         val sql: String
         try {
             val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
-            sql = SqlUtil.classToDeleteOneRowSql(kClass, id, mappingBean)
+            sql = SqlUtil.classToDeleteSingleRowSql(kClass, id, mappingBean)
         } catch (e: Throwable) {
             throw QueryException(e)
         }
@@ -300,7 +331,6 @@ open class BaseQueryImpl : BaseQuery {
     }
 
     /**
-     *
      * Method: execute delete with multi id,transaction
      * @param <T>
      * @param connection
@@ -327,7 +357,6 @@ open class BaseQueryImpl : BaseQuery {
     }
 
     /**
-     *
      * Method: execute delete,condition of auto generate include by id
      * @param connection
      * @param instance
@@ -342,7 +371,6 @@ open class BaseQueryImpl : BaseQuery {
     }
 
     /**
-     *
      * Method: execute delete
      * @param <T>
      * @param connection
@@ -362,12 +390,10 @@ open class BaseQueryImpl : BaseQuery {
         } catch (e: Throwable) {
             throw QueryException(e)
         }
-
         return result
     }
 
     /**
-     *
      * Method: execute delete collection,transaction
      * @param <T>
      * @param connection
@@ -707,7 +733,7 @@ open class BaseQueryImpl : BaseQuery {
             val sqls = Array(batchObjectCollection.size) { Constants.String.BLANK }
             for ((i, batchObject) in batchObjectCollection.withIndex()) {
                 val instance = batchObject.instance
-                val executeType = batchObject.excuteType
+                val executeType = batchObject.executeType
                 val condition = batchObject.condition
                 val kClass = instance.javaClass
                 val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass.kotlin) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")

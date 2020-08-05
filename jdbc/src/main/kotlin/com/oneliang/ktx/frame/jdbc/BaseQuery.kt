@@ -13,7 +13,6 @@ import kotlin.reflect.KClass
 interface BaseQuery {
 
     /**
-     *
      * Method: execute by sql,for all sql
      * @param connection
      * @param sql
@@ -24,9 +23,7 @@ interface BaseQuery {
     fun executeBySql(connection: Connection, sql: String, parameters: Array<*> = emptyArray<Any>())
 
     /**
-     *
      * Through the class generate the sql
-     *
      * Method: execute query base on connection and  class and selectColumns and table and condition
      * @param <T>
      * @param connection
@@ -42,7 +39,6 @@ interface BaseQuery {
     fun <T : Any> executeQuery(connection: Connection, kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>()): List<T>
 
     /**
-     *
      * Method: execute query with id
      * @param <T>
      * @param connection
@@ -55,7 +51,18 @@ interface BaseQuery {
     fun <T : Any, IdType : Any> executeQueryById(connection: Connection, kClass: KClass<T>, id: IdType): T?
 
     /**
-     *
+     * Method: execute query with ids
+     * @param <T>
+     * @param connection
+     * @param kClass
+     * @param ids
+     * @return T
+     * @throws QueryException
+    </T> */
+    @Throws(QueryException::class)
+    fun <T : Any, IdType : Any> executeQueryByIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>): List<T>
+
+    /**
      * Method: execute query base on the connection and sql command
      * @param connection
      * @param kClass
@@ -68,9 +75,7 @@ interface BaseQuery {
     fun <T : Any> executeQueryBySql(connection: Connection, kClass: KClass<T>, sql: String, parameters: Array<*> = emptyArray<Any>()): List<T>
 
     /**
-     *
      * Method: execute query base on the connection and sql command
-     *
      * Caution: use this method must get Statement from the ResultSet and close it and close the ResultSet
      * @param connection
      * @param sql
@@ -82,7 +87,6 @@ interface BaseQuery {
     fun executeQueryBySql(connection: Connection, sql: String, parameters: Array<*> = emptyArray<Any>()): ResultSet
 
     /**
-     *
      * Method: execute insert
      * @param connection
      * @param <T>
@@ -94,7 +98,6 @@ interface BaseQuery {
     fun <T : Any> executeInsert(connection: Connection, instance: T, table: String = Constants.String.BLANK): Int
 
     /**
-     *
      * Method: execute insert for auto increment
      * @param connection
      * @param <T>
@@ -106,7 +109,6 @@ interface BaseQuery {
     fun <T : Any> executeInsertForAutoIncrement(connection: Connection, instance: T, table: String = Constants.String.BLANK): Int
 
     /**
-     *
      * Method: execute insert collection(list),transaction
      * @param <T>
      * @param connection
@@ -119,7 +121,6 @@ interface BaseQuery {
     fun <T : Any> executeInsert(connection: Connection, collection: Collection<T>, table: String = Constants.String.BLANK): IntArray
 
     /**
-     *
      * Method: execute update
      * @param connection
      * @param instance
@@ -132,7 +133,6 @@ interface BaseQuery {
     fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK): Int
 
     /**
-     *
      * Method: execute update collection,transaction
      * @param <T>
      * @param connection
@@ -145,7 +145,6 @@ interface BaseQuery {
     fun <T : Any> executeUpdate(connection: Connection, collection: Collection<T>, table: String = Constants.String.BLANK): IntArray
 
     /**
-     *
      * Method: execute delete by id
      * @param <T>
      * @param connection
@@ -158,7 +157,6 @@ interface BaseQuery {
     fun <T : Any, IdType : Any> executeDeleteById(connection: Connection, kClass: KClass<T>, id: IdType): Int
 
     /**
-     *
      * Method: execute delete with multi id,transaction
      * @param <T>
      * @param connection
@@ -171,7 +169,6 @@ interface BaseQuery {
     fun <T : Any, IdType : Any> executeDeleteByIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>): Int
 
     /**
-     *
      * Method: execute delete
      * @param connection
      * @param instance
@@ -184,7 +181,6 @@ interface BaseQuery {
     fun <T : Any> executeDelete(connection: Connection, instance: T, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK): Int
 
     /**
-     *
      * Method: execute delete
      * @param <T>
      * @param connection
@@ -198,7 +194,6 @@ interface BaseQuery {
     fun <T : Any> executeDelete(connection: Connection, kClass: KClass<T>, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>()): Int
 
     /**
-     *
      * Method: execute delete collection,transaction
      * @param <T>
      * @param connection
@@ -223,7 +218,6 @@ interface BaseQuery {
     fun executeInsertForAutoIncrementBySql(connection: Connection, sql: String, parameters: Array<*>): Int
 
     /**
-     *
      * Method: execute update by sql statement
      * @param connection
      * @param sql include insert delete update
@@ -235,7 +229,6 @@ interface BaseQuery {
     fun executeUpdateBySql(connection: Connection, sql: String, parameters: Array<*> = emptyArray<Any>()): Int
 
     /**
-     *
      * Method: execute batch by connection,transaction
      * @param connection
      * @param sqls
@@ -246,7 +239,6 @@ interface BaseQuery {
     fun executeBatch(connection: Connection, sqls: Array<String>): IntArray
 
     /**
-     *
      * Method: execute batch by connection,transaction
      * @param connection
      * @param sql include insert update delete sql only the same sql many data
@@ -258,7 +250,6 @@ interface BaseQuery {
     fun executeBatch(connection: Connection, sql: String, parametersList: List<Array<*>>): IntArray
 
     /**
-     *
      * Method: execute batch by connection,transaction
      * @param connection
      * @param batchObjectCollection
@@ -272,5 +263,5 @@ interface BaseQuery {
         INSERT, UPDATE_BY_ID, UPDATE_NOT_BY_ID, DELETE_BY_ID, DELETE_NOT_BY_ID
     }
 
-    class BatchObject(val instance: Any, val condition: String = Constants.String.BLANK, val excuteType: ExecuteType)
+    class BatchObject(val instance: Any, val condition: String = Constants.String.BLANK, val executeType: ExecuteType)
 }

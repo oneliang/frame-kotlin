@@ -269,7 +269,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     }
 
     /**
-     * Method: select object by id
+     * Method: select object by id, only for single id column
      * @param <T>
      * @param kClass
      * @param id
@@ -280,6 +280,21 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     override fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType): T? {
         return useStableConnection {
             this.executeQueryById(it, kClass, id)
+        }
+    }
+
+    /**
+     * Method: select object by ids, only for single id column
+     * @param <T>
+     * @param kClass
+     * @param ids
+     * @return List<T>
+     * @throws QueryException
+    </T> */
+    @Throws(QueryException::class)
+    override fun <T : Any, IdType : Any> selectObjectByIds(kClass: KClass<T>, ids: Array<IdType>): List<T> {
+        return useStableConnection {
+            this.executeQueryByIds(it, kClass, ids)
         }
     }
 

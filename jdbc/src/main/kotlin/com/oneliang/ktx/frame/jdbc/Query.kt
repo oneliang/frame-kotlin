@@ -200,15 +200,26 @@ interface Query : BaseQuery {
     fun <T : Any, M : Any> updateObject(collection: Collection<T>, kClass: KClass<M>, table: String = Constants.String.BLANK): IntArray
 
     /**
-     * Method: select object by id
+     * Method: select object by id, only for single id column
      * @param <T>
      * @param kClass
      * @param id
-     * @return int
+     * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
     fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType): T?
+
+    /**
+     * Method: select object by ids, only for single id column
+     * @param <T>
+     * @param kClass
+     * @param ids
+     * @return List<T>
+     * @throws QueryException
+    </T> */
+    @Throws(QueryException::class)
+    fun <T : Any, IdType : Any> selectObjectByIds(kClass: KClass<T>, ids: Array<IdType>): List<T>
 
     /**
      * Method: select object, by column, table, condition, parameters,it is sql binding
