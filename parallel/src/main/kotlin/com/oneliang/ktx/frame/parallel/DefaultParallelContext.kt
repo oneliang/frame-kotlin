@@ -16,7 +16,7 @@ internal class DefaultParallelContext(
 
     override suspend fun collect(value: Any) {
         if (this.parallelJob.parallelJobConfiguration.async) {
-            this.coroutine.launch() {
+            this.coroutine.launch {
                 ParallelContextUtil.collectForParallelProcessor(this.coroutine, this.parallelJob, this.parallelJobStep, value, this.parentParallelContextAction)
             }
         } else {
