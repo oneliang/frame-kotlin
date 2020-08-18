@@ -117,6 +117,9 @@ class Calculator(private val code: String) {
                                 optimizeInputMap.containsKey(parameterKey) -> {
                                     formulaInputList.add(optimizeInputMap.getValue(parameterKey))
                                 }
+                                additionInputMap.containsKey(parameterKey) -> {
+                                    formulaInputList.add(additionInputMap.getValue(parameterKey))
+                                }
                                 calculateResultItemMap.containsKey(parameterKey) -> {
                                     val result = calculateResultItemMap[parameterKey]!!.value
                                     formulaInputList.add(result)
