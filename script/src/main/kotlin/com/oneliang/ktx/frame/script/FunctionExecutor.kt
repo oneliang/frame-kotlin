@@ -43,7 +43,7 @@ class FunctionExecutor(private val code: String) {
     fun execute(inputMap: Map<String, String>,
                 stableValueInputMap: Map<String, String> = emptyMap(),
                 totalResultCode: String = Constants.String.BLANK,//no total result
-                functionResultItemMapping: Map<String, String> = emptyMap(),
+                functionItemCodeMapping: Map<String, String> = emptyMap(),
                 stableValueCodeType: String = CODE_TYPE_STABLE,
                 functionResultCode: String = CODE_TYPE_FUNCTION,
                 checkFunctionResultItem: Boolean = false,
@@ -66,7 +66,7 @@ class FunctionExecutor(private val code: String) {
         val functionResultItemMappingMap = mutableMapOf<String, FunctionResultItem>()
         val resultList = mutableListOf<String>()
         var stableValue = 0F//固定值求和
-        //addition result
+        //stable value
         stableValueInputMap.forEach {
             val returnCode = it.key + RETURN_SUFFIX
             val result = it.value
@@ -90,13 +90,13 @@ class FunctionExecutor(private val code: String) {
         //function input data initialize
         val optimizeInputMap = inputMap.toMutableMap()
 
-        if (functionResultItemMapping.isEmpty()) {
+        if (functionItemCodeMapping.isEmpty()) {
             logger.info("function result item mapping is empty, code:%s", code)
         } else {
             //function process and result
             allFunctionItemList.forEach { functionItem ->
                 val functionItemCode = functionItem.code
-                if (!functionResultItemMapping.containsKey(functionItemCode)) {
+                if (!functionItemCodeMapping.containsKey(functionItemCode)) {
                     logger.verbose("No need to execute function, code:%s", functionItemCode)
                     return@forEach
                 }
@@ -161,10 +161,10 @@ class FunctionExecutor(private val code: String) {
                 }
 
                 //map quote function result
-                if (functionResultItemMapping.containsKey(functionItemCode)) {
-                    val functionReturnCodeMapping = functionResultItemMapping[functionItemCode].nullToBlank()
+                if (functionItemCodeMapping.containsKey(functionItemCode)) {
+                    val functionReturnCodeMapping = functionItemCodeMapping[functionItemCode].nullToBlank()
                     if (functionReturnCodeMapping.isNotBlank()) {
-                        val functionResultValue = result.toString().toDoubleSafely()
+                        val functionResultValue = fixValue.toDoubleSafely()
                         val functionResultItem = functionResultItemMappingMap.getOrPut(functionReturnCodeMapping) { FunctionResultItem(functionReturnCodeMapping, functionReturnCodeMapping, Constants.String.ZERO, codeType = functionResultCode) }
                         val originalFunctionResultItemValue = functionResultItem.value.toDoubleSafely()
                         functionResultItem.value = "%.2f".format(originalFunctionResultItemValue + functionResultValue)
