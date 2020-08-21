@@ -24,7 +24,7 @@ class MultiKeyValueMatchParallelTransformProcessor(private val keyValueArrayMap:
         val multiKeyValueMatchData = matchKeyList.transform {
             MultiKeyValueMatchData().apply {
                 val keyValueMatchMap = mutableMapOf<String, String>()
-                val complexKey = it.joinToString(separator = Constants.Symbol.COMMA) { key ->
+                val complexKey = it.joinToString(separator = Constants.Symbol.COMMA, postfix = Constants.Symbol.COMMA) { key ->
                     dataMap[key].nullToBlank().also {
                         keyValueMatchMap[key] = it
                     }
