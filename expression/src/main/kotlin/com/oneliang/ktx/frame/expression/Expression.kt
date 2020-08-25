@@ -1,8 +1,10 @@
 package com.oneliang.ktx.frame.expression
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.util.common.perform
 import com.oneliang.ktx.util.common.toUtilDate
 import java.util.*
+import kotlin.math.pow
 
 object Expression {
     private val INVALID_DATA = Any()
@@ -25,7 +27,7 @@ object Expression {
         // 是否需要操作数
         var requireOperand = false
         while (success) {
-            if (currentExpressionNode.type == ExpressionNode.Type.NUMERIC
+            if (currentExpressionNode.type == ExpressionNode.Type.NUMBER
                     || currentExpressionNode.type == ExpressionNode.Type.STRING
                     || currentExpressionNode.type == ExpressionNode.Type.DATE) { // 操作数， 直接加入后缀表达式中
                 if (unitaryNode != null) { // 设置一元操作符节点
@@ -101,48 +103,48 @@ object Expression {
     }
 
     /**
-     * 对逆波兰表达式进行计算
-     *
+     * eval expression
      * @param nodeList
-     * @return
+     * @return Any, in fact is boolean or double or string or INVALID_CALCULATE_RESULT
      */
-    private fun calculateExpression(nodeList: MutableList<ExpressionNode>): Any? {
-        if (nodeList.size == 0) return null
+    private fun evalExpression(nodeList: MutableList<ExpressionNode>): Any {
+        if (nodeList.size == 0) return INVALID_CALCULATE_RESULT
         if (nodeList.size > 1) {
             var index = 0
             // 储存数据
             val valueList = mutableListOf<Any>()//not include operator
             while (index < nodeList.size) {
                 val node = nodeList[index]
-                when (node.type) {
-                    ExpressionNode.Type.NUMERIC, ExpressionNode.Type.STRING, ExpressionNode.Type.DATE -> {
-                        valueList.add(node.value!!)
-                        index++
+                if (node.isDataNode()) {
+                    valueList.add(node.calculateValue)
+                    index++
+                } else {
+                    // 二元表达式，需要二个参数， 如果是Not的话，则只要一个参数
+                    var paramCount = 2
+                    if (node.type == ExpressionNode.Type.NOT) paramCount = 1
+                    // 计算操作数的值
+                    if (valueList.size < paramCount) {
+                        throw ExpressionException("lose operator")
                     }
-                    else -> {
-                        // 二元表达式，需要二个参数， 如果是Not的话，则只要一个参数
-                        var paramCount = 2
-                        if (node.type == ExpressionNode.Type.NOT) paramCount = 1
-                        // 计算操作数的值
-                        if (valueList.size < paramCount) {
-                            throw ExpressionException("lose operator")
-                        }
-                        // 传入参数
-                        val data = Array(paramCount) {
-                            valueList[index - paramCount + it]
-                        }
-                        // 将计算结果再存入当前节点
-                        node.value = calculate(node.type, data)
-                        node.type = ExpressionNode.Type.NUMERIC
-                        // 将操作数节点删除
-                        var i = 0
-                        while (i < paramCount) {
-                            nodeList.removeAt(index - i - 1)
-                            valueList.removeAt(index - i - 1)
-                            i++
-                        }
-                        index -= paramCount
+                    // 传入参数
+                    val data = Array(paramCount) {
+                        valueList[index - paramCount + it]
                     }
+                    // 将计算结果再存入当前节点
+                    node.calculateValue = calculate(node.type, data)
+                    node.type = if (node.calculateValue is String) {
+                        ExpressionNode.Type.STRING
+                    } else {
+                        ExpressionNode.Type.NUMBER
+                    }
+                    // 将操作数节点删除
+                    var i = 0
+                    while (i < paramCount) {
+                        nodeList.removeAt(index - i - 1)
+                        valueList.removeAt(index - i - 1)
+                        i++
+                    }
+                    index -= paramCount
                 }
             }
         }
@@ -151,8 +153,8 @@ object Expression {
         }
         val node = nodeList[0]
         return when (node.type) {
-            ExpressionNode.Type.NUMERIC -> node.value
-            ExpressionNode.Type.STRING, ExpressionNode.Type.DATE -> node.value.toString().replace("\"", Constants.String.BLANK)
+            ExpressionNode.Type.NUMBER -> node.calculateValue
+            ExpressionNode.Type.STRING, ExpressionNode.Type.DATE -> node.calculateValue.toString().replace("\"", Constants.String.BLANK)
             else -> {
                 throw ExpressionException("lose operator")
             }
@@ -163,7 +165,7 @@ object Expression {
      * calculate node
      * @param type type
      * @param dataArray size may be one or two
-     * @return Any
+     * @return Any, in fact is boolean or double or string or INVALID_CALCULATE_RESULT
      */
     private fun calculate(type: ExpressionNode.Type, dataArray: Array<Any>): Any {
         if (!(dataArray.size == 1 || dataArray.size == 2)) {
@@ -197,7 +199,7 @@ object Expression {
                 return one / two
             }
             ExpressionNode.Type.POWER -> {
-                return Math.pow(convertToDouble(dataOne), convertToDouble(dataTwo))
+                return convertToDouble(dataOne).pow(convertToDouble(dataTwo))
             }
             ExpressionNode.Type.MODULUS -> {
                 val one = convertToDouble(dataOne)
@@ -296,12 +298,12 @@ object Expression {
                     false
                 } else !stringOne.contains(stringTwo)
             }
-            ExpressionNode.Type.START_WITH -> {
+            ExpressionNode.Type.STARTS_WITH -> {
                 return if (!stringFlag) {
                     false
                 } else stringOne.startsWith(stringTwo)
             }
-            ExpressionNode.Type.END_WITH -> {
+            ExpressionNode.Type.ENDS_WITH -> {
                 return if (!stringFlag) {
                     false
                 } else stringOne.endsWith(stringTwo)
@@ -311,24 +313,22 @@ object Expression {
     }
 
     /**
-     * 某个值转换为bool值
-     *
+     * convert to boolean
      * @param value
      * @return
      */
-    private fun convertToBoolean(value: Any?): Boolean {
+    private fun convertToBoolean(value: Any): Boolean {
         return if (value is Boolean) {
             value
         } else {
-            value != null
+            false
         }
     }
 
     /**
-     * 将某个值转换为decimal值
-     *
+     * convert to double
      * @param value
-     * @return
+     * @return Double
      */
     private fun convertToDouble(value: Any): Double {
         return if (value is Boolean) {
@@ -338,13 +338,44 @@ object Expression {
         }
     }
 
-    /**
-     * @param expression 要计算的表达式,如"1+2+3+4"
-     * @return 返回计算结果, 如果带有逻辑运算符则返回true/false,否则返回数值
-     */
-    fun eval(expression: String): Any? {
-        return calculateExpression(parseExpression(expression))
-    }
+    fun eval(expression: String): Any = perform({
+        evalExpression(parseExpression(expression))
+    }, failure = {
+        INVALID_CALCULATE_RESULT
+    })
+
+    fun evalBoolean(expression: String): Boolean = perform({
+        val result = eval(expression)
+        if (result is Boolean) {
+            result
+        } else {
+            false
+        }
+    }, failure = {
+        false
+    })
+
+    fun evalNumber(expression: String): Double = perform({
+        val result = eval(expression)
+        if (result is Double) {
+            result
+        } else {
+            0.0
+        }
+    }, failure = {
+        0.0
+    })
+
+    fun evalString(expression: String) = perform({
+        val result = eval(expression)
+        if (result is String) {
+            result
+        } else {
+            Constants.String.BLANK
+        }
+    }, failure = {
+        Constants.String.BLANK
+    })
 
     fun evalThreeOperand(expression: String): Any? {
         var index = expression.indexOf("?")
@@ -352,10 +383,10 @@ object Expression {
             val stringOne = expression.substring(0, index)
             val stringTwo = expression.substring(index + 1)
             index = stringTwo.indexOf(":")
-            return if (java.lang.Boolean.parseBoolean(calculateExpression(parseExpression(stringOne)).toString())) {
+            return if (java.lang.Boolean.parseBoolean(evalExpression(parseExpression(stringOne)).toString())) {
                 eval(stringTwo.substring(0, index))
             } else eval(stringTwo.substring(index + 1))
         }
-        return calculateExpression(parseExpression(expression))
+        return evalExpression(parseExpression(expression))
     }
 }

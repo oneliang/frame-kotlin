@@ -56,11 +56,11 @@ class ExpressionParser(var expression: String) {
                 }
             }
             if (flag) {
-                position++
+                this.position++
                 stringBuilder.append(char)
             } else {
                 if (char.isWhitespace()) {
-                    if (whileSpacePosition >= 0 && position - whileSpacePosition > 1) {
+                    if (whileSpacePosition >= 0 && this.position - whileSpacePosition > 1) {
                         throw ExpressionException(String.format("expression \"%s\" in position (%s) is illegal", expression, position))
                     }
                     whileSpacePosition = if (stringBuilder.isEmpty()) {
