@@ -234,6 +234,31 @@ open class BaseQueryImpl : BaseQuery {
     }
 
     /**
+     * Method: execute query base on the connection and sql command for map data
+     * @param connection
+     * @param sql
+     * @param columnClassMapping
+     * @param parameters
+     * @return List<Map<String, *>>
+     * @throws QueryException
+     */
+    @Throws(QueryException::class)
+    override fun executeQueryBySqlForMap(connection: Connection, sql: String, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>> {
+        val list = mutableListOf<Map<String, *>>()
+        val resultSet = this.executeQueryBySql(connection, sql, parameters)
+        resultSet.use {
+            while (resultSet.next()) {
+                val map = mutableMapOf<String, Any?>()
+                columnClassMapping.forEach { (columnName, kClass) ->
+                    map[columnName] = sqlProcessor.afterSelectProcess(kClass, it, columnName)
+                }
+                list += map
+            }
+        }
+        return list
+    }
+
+    /**
      * Method: execute insert
      * @param connection
      * @param instance

@@ -298,6 +298,17 @@ interface Query : BaseQuery {
     fun executeQueryBySql(sql: String, parameters: Array<*> = emptyArray<Any>()): ResultSet
 
     /**
+     * Method: execute query by sql statement for map data
+     * @param sql
+     * @param columnClassMapping
+     * @param parameters
+     * @return List<Map<String, *>>
+     * @throws QueryException
+     */
+    @Throws(QueryException::class)
+    fun executeQueryBySqlForMap(sql: String, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>>
+
+    /**
      * Method: execute update
      * @param instance
      * @param table

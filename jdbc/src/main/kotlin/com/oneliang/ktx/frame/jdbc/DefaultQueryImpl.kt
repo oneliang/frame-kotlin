@@ -406,6 +406,20 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     }
 
     /**
+     * Method: execute query by sql statement for map data
+     * @param sql
+     * @param columnClassMapping
+     * @param parameters
+     * @return List<Map<String, *>>
+     * @throws QueryException
+     */
+    override fun executeQueryBySqlForMap(sql: String, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>> {
+        return useStableConnection {
+            this.executeQueryBySqlForMap(it, sql, columnClassMapping, parameters)
+        }
+    }
+
+    /**
      * Method: execute insert for auto increment and return auto increment id
      * @param instance
      * @param table

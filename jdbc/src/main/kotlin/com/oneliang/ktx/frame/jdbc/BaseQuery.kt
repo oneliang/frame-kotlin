@@ -87,6 +87,18 @@ interface BaseQuery {
     fun executeQueryBySql(connection: Connection, sql: String, parameters: Array<*> = emptyArray<Any>()): ResultSet
 
     /**
+     * Method: execute query base on the connection and sql command for map data
+     * @param connection
+     * @param sql
+     * @param columnClassMapping
+     * @param parameters
+     * @return List<Map<String, *>>
+     * @throws QueryException
+     */
+    @Throws(QueryException::class)
+    fun executeQueryBySqlForMap(connection: Connection, sql: String, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>>
+
+    /**
      * Method: execute insert
      * @param connection
      * @param <T>
