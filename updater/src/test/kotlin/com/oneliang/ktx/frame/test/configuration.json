@@ -1,0 +1,9 @@
+{
+  "host": "122.51.110.167",
+  "port": 22,
+  "localWarFullFilename": "/D:/settings.zip",
+  "remoteTomcatDirectory": "/home/wwwroot/apache-tomcat-backend",
+  "password": "a",
+  "remoteWarName": "a.zip",
+  "user": "root"
+}

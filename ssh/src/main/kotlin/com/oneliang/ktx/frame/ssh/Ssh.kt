@@ -22,8 +22,12 @@ object Ssh {
         configurationMap.forEach { (key, value) ->
             session.setConfig(key, value);
         }
-        session.connect(connectTimeout)
-        afterSessionConnect(session)
+        perform({
+            session.connect(connectTimeout)
+            afterSessionConnect(session)
+        }, failure = {
+            logger.error(Constants.Base.EXCEPTION, it)
+        })
         return session
     }
 
@@ -42,16 +46,20 @@ object Ssh {
         (channelExec as ChannelExec).setCommand(command)
         channelExec.setInputStream(null)
         channelExec.setErrStream(System.err)
-        channelExec.connect()
-        afterChannelConnect(channelExec)
+        perform({
+            channelExec.connect()
+            afterChannelConnect(channelExec)
+        }, failure = {
+            logger.error(decodeInputStream(channelExec.inputStream), it)
+        })
         channelExec.disconnect()
     }
 
     fun sftp(session: Session, afterChannelConnect: (channelSftp: ChannelSftp) -> Unit = {}) {
         val channelSftp = session.openChannel("sftp")
         channelSftp as ChannelSftp
-        channelSftp.connect()
         perform({
+            channelSftp.connect()
             afterChannelConnect(channelSftp)
         }, failure = {
             logger.error(decodeInputStream(channelSftp.inputStream), it)
@@ -62,6 +70,6 @@ object Ssh {
     fun decodeInputStream(inputStream: InputStream): String {
         val byteArrayOutputStream = ByteArrayOutputStream()
         inputStream.copyTo(byteArrayOutputStream)
-        return String(byteArrayOutputStream.toByteArray())
+        return String(byteArrayOutputStream.toByteArray()).trim()
     }
 }
