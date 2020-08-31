@@ -6,8 +6,8 @@ import com.oneliang.ktx.util.concurrent.ThreadPool
 class UpdaterExecutor {
     private val threadPool = ThreadPool().also { it.start() }
 
-    fun addTomcatAutoUpdater(tomcatAutoUpdater: TomcatAutoUpdater){
-        threadPool.addThreadTask {
+    fun addTomcatAutoUpdater(tomcatAutoUpdater: TomcatAutoUpdater) {
+        this.threadPool.addThreadTask {
             tomcatAutoUpdater.update()
         }
     }
