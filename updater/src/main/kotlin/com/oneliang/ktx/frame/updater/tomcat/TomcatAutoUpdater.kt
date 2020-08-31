@@ -93,7 +93,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
 
     fun update() {
         val begin = System.currentTimeMillis()
-        Ssh.connect(this.configuration.host,
+        Ssh.connect(host = this.configuration.host,
                 user = this.configuration.user,
                 port = this.configuration.port,
                 password = this.configuration.password,

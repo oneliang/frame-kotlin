@@ -16,11 +16,12 @@ object Ssh {
     }
 
     fun connect(host: String, port: Int = 22, user: String, password: String, configurationMap: Map<String, String> = emptyMap(), connectTimeout: Int = 0, afterSessionConnect: (session: Session) -> Unit): Session {
+        logger.info("ssh connecting, host:[%s], port:[%s], user:[%s]", host, port, user)
         val jSch = JSch()
         val session = jSch.getSession(user, host, port)
         session.setPassword(password)
         configurationMap.forEach { (key, value) ->
-            session.setConfig(key, value);
+            session.setConfig(key, value)
         }
         perform({
             session.connect(connectTimeout)
