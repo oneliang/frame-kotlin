@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.test
 
 import com.oneliang.ktx.frame.updater.UpdaterExecutor
 import com.oneliang.ktx.frame.updater.tomcat.TomcatAutoUpdater
+import com.oneliang.ktx.util.common.perform
 import com.oneliang.ktx.util.file.readContentIgnoreLine
 import com.oneliang.ktx.util.json.jsonToObjectList
 import java.io.File
@@ -26,7 +27,12 @@ fun main() {
     val updaterExecutor = UpdaterExecutor()
     val countDownLatch = CountDownLatch(configurationList.size)
     configurationList.forEach {
-        it.password = JOptionPane.showInputDialog("Please Enter password:${it.host}")
+        it.password = perform({
+            JOptionPane.showInputDialog("(${it.host}) Please Enter password")
+        }, failure = { e ->
+            e.printStackTrace()
+            it.password
+        })
         val tomcatAutoUpdater = TomcatAutoUpdater(it)
         updaterExecutor.addTomcatAutoUpdater(tomcatAutoUpdater){
             countDownLatch.countDown()
