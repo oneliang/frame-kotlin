@@ -7,6 +7,7 @@ import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.file.fileExists
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.logging.LoggerManager
+import java.io.File
 
 class TomcatAutoUpdater(private val configuration: Configuration) {
     companion object {
@@ -35,9 +36,11 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
         }
 
         private fun uploadWar(session: Session, war: Configuration.War) {
-            logger.info("upload local war:[%s], to remote war:[%s]", war.localWarFullFilename, war.remoteWarFullFilename)
-            if (!war.localWarFullFilename.fileExists()) {
-                error("file not exists, file:${war.localWarFullFilename} ")
+            val localWarFile = File(war.localWarFile)
+            val localWarFullFilename = localWarFile.absolutePath
+            logger.info("upload local war:[%s], to remote war:[%s]", localWarFullFilename, war.remoteWarFullFilename)
+            if (!localWarFile.exists()) {
+                error("file not exists, file:${localWarFullFilename} ")
             }
             Ssh.sftp(session) { channelSftp ->
                 val warDirectory = war.remoteWarDirectory
@@ -47,7 +50,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                     logger.error(Ssh.decodeInputStream(channelSftp.inputStream), it)
                     channelSftp.mkdir(warDirectory)
                 })
-                channelSftp.put(war.localWarFullFilename, war.remoteWarFullFilename)
+                channelSftp.put(localWarFullFilename, war.remoteWarFullFilename)
             }
         }
 
@@ -79,7 +82,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
         var warArray = emptyArray<War>()
 
         class War {
-            var localWarFullFilename = Constants.String.BLANK
+            var localWarFile = Constants.String.BLANK
             var remoteTomcatDirectory = Constants.String.BLANK
             val remoteTomcatStartup: String
                 get() = "$remoteTomcatDirectory/bin/startup.sh"

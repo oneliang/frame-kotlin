@@ -5,12 +5,12 @@
   "user": "root",
   "warArray": [
     {
-      "localWarFullFilename": "/D:/settings.zip",
+      "localWarFile": "/D:/settings.zip",
       "remoteTomcatDirectory": "/home/wwwroot/apache-tomcat-backend",
       "remoteWarName": "a.zip"
     },
     {
-      "localWarFullFilename": "/D:/settings.zip",
+      "localWarFile": "/D:/settings.zip",
       "remoteTomcatDirectory": "/home/wwwroot/apache-tomcat-backend",
       "remoteWarName": "a.zip"
     }
