@@ -99,7 +99,7 @@ object SqlInjectUtil {
      * @param mappingBean
      * @return Pair<String, List<Any>>
     </T> */
-    fun <T : Any> objectToUpdateSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean): Pair<String, List<Any>> {
+    fun <T : Any> objectToUpdateSql(instance: T, updateFields: Array<String> = emptyArray(), table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean): Pair<String, List<Any>> {
         val sql = StringBuilder()
         val idList = mutableListOf<Any>()
         val valueList = mutableListOf<Any>()
@@ -108,6 +108,8 @@ object SqlInjectUtil {
             val methods = instance.javaClass.methods
             val columnsAndValues = StringBuilder()
             val condition = StringBuilder()
+            val updateFieldSet = updateFields.toHashSet()
+            val allColumn = updateFieldSet.isEmpty()
             for (method in methods) {
                 val methodName = method.name
                 val fieldName = ObjectUtil.methodNameToFieldName(methodName)
@@ -119,6 +121,9 @@ object SqlInjectUtil {
                     continue
                 }
                 val isId = mappingBean.isId(fieldName)
+                if (!allColumn && !updateFieldSet.contains(fieldName) && !isId) {
+                    continue
+                }
                 val value = method.invoke(instance)
                 if (byId && isId) {
                     val result: String

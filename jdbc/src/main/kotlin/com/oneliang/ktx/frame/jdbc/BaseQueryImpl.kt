@@ -268,7 +268,7 @@ open class BaseQueryImpl : BaseQuery {
      */
     @Throws(QueryException::class)
     override fun <T : Any> executeInsert(connection: Connection, instance: T, table: String): Int {
-        return this.executeUpdate(connection, instance, table, Constants.String.BLANK, BaseQuery.ExecuteType.INSERT)
+        return this.executeUpdate(connection, instance, table, condition = Constants.String.BLANK, executeType = BaseQuery.ExecuteType.INSERT)
     }
 
     /**
@@ -316,8 +316,8 @@ open class BaseQueryImpl : BaseQuery {
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    override fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String, condition: String): Int {
-        return this.executeUpdate(connection, instance, table, condition, BaseQuery.ExecuteType.UPDATE_BY_ID)
+    override fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String, updateFields: Array<String>, condition: String): Int {
+        return this.executeUpdate(connection, instance, table, updateFields, condition, BaseQuery.ExecuteType.UPDATE_BY_ID)
     }
 
     /**
@@ -392,7 +392,7 @@ open class BaseQueryImpl : BaseQuery {
      */
     @Throws(QueryException::class)
     override fun <T : Any> executeDelete(connection: Connection, instance: T, table: String, condition: String): Int {
-        return this.executeUpdate(connection, instance, table, condition, BaseQuery.ExecuteType.DELETE_BY_ID)
+        return this.executeUpdate(connection, instance, table, condition = condition, executeType = BaseQuery.ExecuteType.DELETE_BY_ID)
     }
 
     /**
@@ -486,21 +486,22 @@ open class BaseQueryImpl : BaseQuery {
      * Method: execute update include insert sql and update sql,for sql binding
      * @param connection
      * @param instance
+     * @param updateFields, only for update
      * @param table
      * @param executeType
      * @return int
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    protected fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String, condition: String, executeType: BaseQuery.ExecuteType): Int {
+    protected fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String, updateFields: Array<String> = emptyArray(), condition: String, executeType: BaseQuery.ExecuteType): Int {
         val rows: Int
         try {
             val kClass = instance::class
             val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
             val (sql, parameterList) = when (executeType) {
                 BaseQuery.ExecuteType.INSERT -> SqlInjectUtil.objectToInsertSql(instance, table, mappingBean)
-                BaseQuery.ExecuteType.UPDATE_BY_ID -> SqlInjectUtil.objectToUpdateSql(instance, table, condition, true, mappingBean)
-                BaseQuery.ExecuteType.UPDATE_NOT_BY_ID -> SqlInjectUtil.objectToUpdateSql(instance, table, condition, false, mappingBean)
+                BaseQuery.ExecuteType.UPDATE_BY_ID -> SqlInjectUtil.objectToUpdateSql(instance, updateFields, table, condition, true, mappingBean)
+                BaseQuery.ExecuteType.UPDATE_NOT_BY_ID -> SqlInjectUtil.objectToUpdateSql(instance, updateFields, table, condition, false, mappingBean)
                 BaseQuery.ExecuteType.DELETE_BY_ID -> SqlInjectUtil.objectToDeleteSql(instance, table, condition, true, mappingBean)
                 BaseQuery.ExecuteType.DELETE_NOT_BY_ID -> SqlInjectUtil.objectToDeleteSql(instance, table, condition, false, mappingBean)
             }

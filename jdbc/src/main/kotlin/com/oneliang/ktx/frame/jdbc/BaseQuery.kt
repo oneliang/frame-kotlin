@@ -137,12 +137,13 @@ interface BaseQuery {
      * @param connection
      * @param instance
      * @param table
+     * @param updateFields
      * @param condition
      * @return int
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK): Int
+    fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String = Constants.String.BLANK, updateFields: Array<String> = emptyArray(),condition: String = Constants.String.BLANK): Int
 
     /**
      * Method: execute update collection,transaction

@@ -66,7 +66,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T> */
     @Throws(QueryException::class)
     override fun <T : Any> deleteObject(instance: T, table: String, condition: String): Int {
-        return this.executeUpdate(instance, table, condition, BaseQuery.ExecuteType.DELETE_BY_ID)
+        return this.executeUpdate(instance, table, condition = condition, executeType = BaseQuery.ExecuteType.DELETE_BY_ID)
     }
 
     /**
@@ -80,7 +80,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T> */
     @Throws(QueryException::class)
     override fun <T : Any> deleteObjectNotById(instance: T, table: String, condition: String): Int {
-        return this.executeUpdate(instance, table, condition, BaseQuery.ExecuteType.DELETE_NOT_BY_ID)
+        return this.executeUpdate(instance, table, condition = condition, executeType = BaseQuery.ExecuteType.DELETE_NOT_BY_ID)
     }
 
     /**
@@ -169,7 +169,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T> */
     @Throws(QueryException::class)
     override fun <T : Any> insertObject(instance: T, table: String): Int {
-        return this.executeUpdate(instance, table, Constants.String.BLANK, BaseQuery.ExecuteType.INSERT)
+        return this.executeUpdate(instance, table, condition = Constants.String.BLANK, executeType = BaseQuery.ExecuteType.INSERT)
     }
 
     /**
@@ -217,13 +217,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param <T>
      * @param instance
      * @param table
+     * @param updateFields
      * @param condition
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any> updateObject(instance: T, table: String, condition: String): Int {
-        return this.executeUpdate(instance, table, condition, BaseQuery.ExecuteType.UPDATE_BY_ID)
+    override fun <T : Any> updateObject(instance: T, table: String, updateFields: Array<String>, condition: String): Int {
+        return this.executeUpdate(instance, table, updateFields, condition, BaseQuery.ExecuteType.UPDATE_BY_ID)
     }
 
     /**
@@ -231,13 +232,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param <T>
      * @param instance
      * @param table
+     * @param updateFields
      * @param condition
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any> updateObjectNotById(instance: T, table: String, condition: String): Int {
-        return this.executeUpdate(instance, table, condition, BaseQuery.ExecuteType.UPDATE_NOT_BY_ID)
+    override fun <T : Any> updateObjectNotById(instance: T, table: String, updateFields: Array<String>, condition: String): Int {
+        return this.executeUpdate(instance, table, updateFields, condition, BaseQuery.ExecuteType.UPDATE_NOT_BY_ID)
     }
 
     /**
@@ -437,14 +439,15 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * Method: execute update
      * @param instance
      * @param table
+     * @param updateFields
      * @param executeType
      * @return int
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    override fun <T : Any> executeUpdate(instance: T, table: String, condition: String, executeType: BaseQuery.ExecuteType): Int {
+    override fun <T : Any> executeUpdate(instance: T, table: String, updateFields: Array<String>, condition: String, executeType: BaseQuery.ExecuteType): Int {
         return useConnection {
-            this.executeUpdate(it, instance, table, condition, executeType)
+            this.executeUpdate(it, instance, table, updateFields, condition, executeType)
         }
     }
 

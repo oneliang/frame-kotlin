@@ -156,24 +156,26 @@ interface Query : BaseQuery {
      * @param <T>
      * @param instance
      * @param table
+     * @param updateFields
      * @param condition
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any> updateObject(instance: T, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK): Int
+    fun <T : Any> updateObject(instance: T, table: String = Constants.String.BLANK, updateFields: Array<String> = emptyArray(), condition: String = Constants.String.BLANK): Int
 
     /**
      * Method: update object not by id,by table,condition,sql binding,null value field is not update
      * @param <T>
      * @param instance
      * @param table
+     * @param updateFields
      * @param condition
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any> updateObjectNotById(instance: T, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK): Int
+    fun <T : Any> updateObjectNotById(instance: T, table: String = Constants.String.BLANK, updateFields: Array<String> = emptyArray(), condition: String = Constants.String.BLANK): Int
 
     /**
      * Method: update object collection,transaction,not for sql binding
@@ -312,12 +314,13 @@ interface Query : BaseQuery {
      * Method: execute update
      * @param instance
      * @param table
+     * @param updateFields
      * @param executeType
      * @return int
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun <T : Any> executeUpdate(instance: T, table: String, condition: String, executeType: BaseQuery.ExecuteType): Int
+    fun <T : Any> executeUpdate(instance: T, table: String, updateFields: Array<String> = emptyArray(), condition: String, executeType: BaseQuery.ExecuteType): Int
 
     /**
      * Method: execute update by sql statement it is sql binding
