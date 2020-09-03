@@ -4,7 +4,6 @@ import com.jcraft.jsch.Session
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ssh.Ssh
 import com.oneliang.ktx.util.common.*
-import com.oneliang.ktx.util.file.fileExists
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
@@ -40,14 +39,20 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
             val localWarFullFilename = localWarFile.absolutePath
             logger.info("upload local war:[%s], to remote war:[%s]", localWarFullFilename, war.remoteWarFullFilename)
             if (!localWarFile.exists()) {
-                error("file not exists, file:${localWarFullFilename} ")
+                logger.error("file not exists, file:${localWarFullFilename} ")
+                return
             }
             Ssh.sftp(session) { channelSftp ->
                 val warDirectory = war.remoteWarDirectory
                 perform({
                     channelSftp.cd(warDirectory)
-                }, failure = {
-                    logger.error(Ssh.decodeInputStream(channelSftp.inputStream), it)
+                }, failure = { e ->
+                    channelSftp.inputStream?.also {
+                        logger.error(Ssh.decodeInputStream(it), e)
+                    }
+                    channelSftp.extInputStream?.also {
+                        logger.info(Ssh.decodeInputStream(it), e)
+                    }
                     channelSftp.mkdir(warDirectory)
                 })
                 channelSftp.put(localWarFullFilename, war.remoteWarFullFilename)
@@ -104,7 +109,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
             this.configuration.warArray.forEach {
                 killTomcatProcess(session, it)
                 uploadWar(session, it)
-                unzipWar(session, it)
+//                unzipWar(session, it)
                 startupTomcat(session, it)
             }
             session.disconnect()
