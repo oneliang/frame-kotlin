@@ -43,9 +43,9 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                 return
             }
             Ssh.sftp(session) { channelSftp ->
-                val warDirectory = war.remoteWarDirectory
+                val webAppDirectory = war.remoteTomcatWebAppDirectory
                 perform({
-                    channelSftp.cd(warDirectory)
+                    channelSftp.cd(webAppDirectory)
                 }, failure = { e ->
                     channelSftp.inputStream?.also {
                         logger.error(Ssh.decodeInputStream(it), e)
@@ -53,14 +53,22 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                     channelSftp.extInputStream?.also {
                         logger.info(Ssh.decodeInputStream(it), e)
                     }
-                    channelSftp.mkdir(warDirectory)
+                    channelSftp.mkdir(webAppDirectory)
                 })
                 channelSftp.put(localWarFullFilename, war.remoteWarFullFilename)
             }
         }
 
+        private fun removeWarDirectory(session: Session, war: Configuration.War) {
+            val warDirectoryName = war.remoteWarName.substring(0, war.remoteWarName.lastIndexOf(Constants.Symbol.DOT))
+            val warDirectory = war.remoteTomcatWebAppDirectory + Constants.Symbol.SLASH_LEFT + warDirectoryName
+            Ssh.exec(session, "rm -rf $warDirectory") {
+                logger.info(Ssh.decodeInputStream(it.inputStream))
+            }
+        }
+
         private fun unzipWar(session: Session, war: Configuration.War) {
-            Ssh.exec(session, "unzip -d ${war.remoteWarDirectory} ${war.remoteWarFullFilename}") {
+            Ssh.exec(session, "unzip -d ${war.remoteTomcatWebAppDirectory} ${war.remoteWarFullFilename}") {
                 logger.info(Ssh.decodeInputStream(it.inputStream))
             }
         }
@@ -91,11 +99,11 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
             var remoteTomcatDirectory = Constants.String.BLANK
             val remoteTomcatStartup: String
                 get() = "$remoteTomcatDirectory/bin/startup.sh"
-            val remoteWarDirectory: String
+            val remoteTomcatWebAppDirectory: String
                 get() = "$remoteTomcatDirectory/webapps"
             var remoteWarName = Constants.String.BLANK
             val remoteWarFullFilename: String
-                get() = "$remoteWarDirectory/$remoteWarName"
+                get() = "$remoteTomcatWebAppDirectory/$remoteWarName"
         }
     }
 
@@ -109,6 +117,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
             this.configuration.warArray.forEach {
                 killTomcatProcess(session, it)
                 uploadWar(session, it)
+                removeWarDirectory(session, it)
 //                unzipWar(session, it)
                 startupTomcat(session, it)
             }
