@@ -50,8 +50,16 @@ object Ssh {
         perform({
             channelExec.connect()
             afterChannelConnect(channelExec)
-        }, failure = {
-            logger.error(decodeInputStream(channelExec.inputStream), it)
+        }, failure = { e ->
+            channelExec.inputStream?.also {
+                logger.error(decodeInputStream(it), e)
+            }
+            channelExec.errStream?.also {
+                logger.error(decodeInputStream(it), e)
+            }
+            channelExec.extInputStream?.also {
+                logger.info(decodeInputStream(it), e)
+            }
         })
         channelExec.disconnect()
     }
@@ -62,8 +70,13 @@ object Ssh {
         perform({
             channelSftp.connect()
             afterChannelConnect(channelSftp)
-        }, failure = {
-            logger.error(decodeInputStream(channelSftp.inputStream), it)
+        }, failure = { e ->
+            channelSftp.inputStream?.also {
+                logger.error(decodeInputStream(it), e)
+            }
+            channelSftp.extInputStream?.also {
+                logger.info(decodeInputStream(it), e)
+            }
         })
         channelSftp.disconnect()
     }
