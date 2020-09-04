@@ -84,7 +84,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                 it.inputStream.readContentIgnoreLine { line ->
                     logger.info(line)
                     val stringList = line.splitForWhitespace()
-                    if (stringList.size > 1) {
+                    if (stringList.isNotEmpty()) {
                         remoteFileMd5 = stringList[0]
                     }
                     return@readContentIgnoreLine false
