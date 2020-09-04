@@ -4,6 +4,7 @@ import com.jcraft.jsch.Session
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ssh.Ssh
 import com.oneliang.ktx.util.common.*
+import com.oneliang.ktx.util.file.fileExists
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
@@ -35,6 +36,11 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
         }
 
         private fun uploadWarForRetry(session: Session, war: Configuration.War): Boolean {
+            logger.info("upload local war:[%s], to remote war:[%s]", war.localWarFullFilename, war.remoteWarFullFilename)
+            if (!war.localWarFullFilename.fileExists()) {
+                logger.error("file not exists, file:${war.localWarFullFilename} ")
+                return false
+            }
             var uploadResult = uploadWar(session, war)
             if (!uploadResult) {
                 for (i in 1..war.uploadRetryCount) {
@@ -49,11 +55,8 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
         }
 
         private fun uploadWar(session: Session, war: Configuration.War): Boolean {
-            val localWarFile = File(war.localWarFile)
-            val localWarFullFilename = localWarFile.absolutePath
-            logger.info("upload local war:[%s], to remote war:[%s]", localWarFullFilename, war.remoteWarFullFilename)
-            if (!localWarFile.exists()) {
-                logger.error("file not exists, file:${localWarFullFilename} ")
+            if (!war.localWarFullFilename.fileExists()) {
+                logger.error("file not exists, file:${war.localWarFullFilename} ")
                 return false
             }
             Ssh.sftp(session) { channelSftp ->
@@ -69,10 +72,10 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                     }
                     channelSftp.mkdir(webAppDirectory)
                 })
-                channelSftp.put(localWarFullFilename, war.remoteWarFullFilename)
+                channelSftp.put(war.localWarFullFilename, war.remoteWarFullFilename)
             }
             val remoteFileMd5 = execRemoteFileMd5(session, war.remoteWarFullFilename)
-            return localWarFile.MD5String().equals(remoteFileMd5, true)
+            return war.localWarFullFilename.toFile().MD5String().equals(remoteFileMd5, true)
         }
 
         private fun execRemoteFileMd5(session: Session, remoteFullFilename: String): String {
@@ -127,6 +130,13 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
 
         class War {
             var localWarFile = Constants.String.BLANK
+                set(value) {
+                    field = value
+                    val file = File(field)
+                    localWarFullFilename = file.absolutePath
+                }
+            var localWarFullFilename = Constants.String.BLANK
+                private set
             var remoteTomcatDirectory = Constants.String.BLANK
             val remoteTomcatStartup: String
                 get() = "$remoteTomcatDirectory/bin/startup.sh"
