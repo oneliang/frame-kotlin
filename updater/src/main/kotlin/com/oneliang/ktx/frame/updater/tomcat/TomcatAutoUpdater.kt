@@ -34,13 +34,27 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
             }
         }
 
-        private fun uploadWar(session: Session, war: Configuration.War) {
+        private fun uploadWarForRetry(session: Session, war: Configuration.War): Boolean {
+            var uploadResult = uploadWar(session, war)
+            if (!uploadResult) {
+                for (i in 1..war.uploadRetryCount) {
+                    logger.info("upload retry:%s, remote war full filename:%s", i, war.remoteWarFullFilename)
+                    uploadResult = uploadWar(session, war)
+                    if (uploadResult) {
+                        break
+                    }
+                }
+            }
+            return uploadResult
+        }
+
+        private fun uploadWar(session: Session, war: Configuration.War): Boolean {
             val localWarFile = File(war.localWarFile)
             val localWarFullFilename = localWarFile.absolutePath
             logger.info("upload local war:[%s], to remote war:[%s]", localWarFullFilename, war.remoteWarFullFilename)
             if (!localWarFile.exists()) {
                 logger.error("file not exists, file:${localWarFullFilename} ")
-                return
+                return false
             }
             Ssh.sftp(session) { channelSftp ->
                 val webAppDirectory = war.remoteTomcatWebAppDirectory
@@ -57,27 +71,44 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                 })
                 channelSftp.put(localWarFullFilename, war.remoteWarFullFilename)
             }
+            val remoteFileMd5 = execRemoteFileMd5(session, war.remoteWarFullFilename)
+            return localWarFile.MD5String().equals(remoteFileMd5, true)
         }
 
-        private fun removeWarDirectory(session: Session, war: Configuration.War) {
-            val warDirectoryName = war.remoteWarName.substring(0, war.remoteWarName.lastIndexOf(Constants.Symbol.DOT))
-            val warDirectory = war.remoteTomcatWebAppDirectory + Constants.Symbol.SLASH_LEFT + warDirectoryName
-            Ssh.exec(session, "rm -rf $warDirectory") {
-                logger.info(Ssh.decodeInputStream(it.inputStream))
+        private fun execRemoteFileMd5(session: Session, remoteFullFilename: String): String {
+            var remoteFileMd5 = Constants.String.BLANK
+            Ssh.exec(session, "md5sum $remoteFullFilename") {
+                it.inputStream.readContentIgnoreLine { line ->
+                    logger.info(line)
+                    val stringList = line.splitForWhitespace()
+                    if (stringList.size > 1) {
+                        remoteFileMd5 = stringList[0]
+                    }
+                    return@readContentIgnoreLine false
+                }
             }
+            return remoteFileMd5
         }
+    }
 
-        private fun unzipWar(session: Session, war: Configuration.War) {
-            Ssh.exec(session, "unzip -d ${war.remoteTomcatWebAppDirectory} ${war.remoteWarFullFilename}") {
-                logger.info(Ssh.decodeInputStream(it.inputStream))
-            }
+    private fun removeWarDirectory(session: Session, war: Configuration.War) {
+        val warDirectoryName = war.remoteWarName.substring(0, war.remoteWarName.lastIndexOf(Constants.Symbol.DOT))
+        val warDirectory = war.remoteTomcatWebAppDirectory + Constants.Symbol.SLASH_LEFT + warDirectoryName
+        Ssh.exec(session, "rm -rf $warDirectory") {
+            logger.info(Ssh.decodeInputStream(it.inputStream))
         }
+    }
 
-        private fun startupTomcat(session: Session, war: Configuration.War) {
-            logger.info("startup the tomcat process, tomcat:[%s]", war.remoteTomcatDirectory)
-            Ssh.exec(session, war.remoteTomcatStartup) {
-                logger.info(Ssh.decodeInputStream(it.inputStream))
-            }
+    private fun unzipWar(session: Session, war: Configuration.War) {
+        Ssh.exec(session, "unzip -d ${war.remoteTomcatWebAppDirectory} ${war.remoteWarFullFilename}") {
+            logger.info(Ssh.decodeInputStream(it.inputStream))
+        }
+    }
+
+    private fun startupTomcat(session: Session, war: Configuration.War) {
+        logger.info("startup the tomcat process, tomcat:[%s]", war.remoteTomcatDirectory)
+        Ssh.exec(session, war.remoteTomcatStartup) {
+            logger.info(Ssh.decodeInputStream(it.inputStream))
         }
     }
 
@@ -104,6 +135,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
             var remoteWarName = Constants.String.BLANK
             val remoteWarFullFilename: String
                 get() = "$remoteTomcatWebAppDirectory/$remoteWarName"
+            var uploadRetryCount = 2
         }
     }
 
@@ -116,10 +148,14 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                 configurationMap = mapOf(Ssh.Configuration.USERAUTH_GSSAPI_WITH_MIC to "no", Ssh.Configuration.STRICT_HOST_KEY_CHECKING to "no"), afterSessionConnect = { session ->
             this.configuration.warArray.forEach {
                 killTomcatProcess(session, it)
-                uploadWar(session, it)
-                removeWarDirectory(session, it)
+                val uploadResult = uploadWarForRetry(session, it)
+                if (uploadResult) {
+                    removeWarDirectory(session, it)
 //                unzipWar(session, it)
-                startupTomcat(session, it)
+                    startupTomcat(session, it)
+                } else {
+                    return@forEach
+                }
             }
             session.disconnect()
         })
