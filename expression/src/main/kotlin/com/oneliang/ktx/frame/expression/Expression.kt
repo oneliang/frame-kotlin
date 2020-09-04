@@ -338,11 +338,18 @@ object Expression {
         }
     }
 
-    fun eval(expression: String): Any = perform({
-        evalExpression(parseExpression(expression))
-    }, failure = {
-        INVALID_CALCULATE_RESULT
-    })
+    fun eval(expression: String): Any {
+        val value = perform({
+            evalExpression(parseExpression(expression))
+        }, failure = {
+            INVALID_CALCULATE_RESULT
+        })
+        return if (value != INVALID_CALCULATE_RESULT) {
+            value
+        } else {
+            expression
+        }
+    }
 
     fun evalBoolean(expression: String): Boolean = perform({
         val result = eval(expression)

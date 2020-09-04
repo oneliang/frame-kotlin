@@ -1,11 +1,43 @@
 package com.oneliang.ktx.frame.test
 
-import com.oneliang.ktx.frame.expression.Expression
-import com.oneliang.ktx.frame.expression.evalBoolean
-import com.oneliang.ktx.frame.expression.evalNumber
-import com.oneliang.ktx.frame.expression.evalString
+import com.oneliang.ktx.frame.expression.*
 
 fun main() {
+    val expressionModelList = listOf(
+            ExpressionModel().apply {
+                this.id = 1
+                this.leftId = 2
+                this.rightId = 3
+                this.parameters = "a"
+                this.expression = "{a}>4"
+                this.resultCode = "1_RESULT"
+                this.type = ExpressionModel.Type.START.value
+                this.calculateType = ExpressionModel.CalculateType.BOOLEAN.value
+            },
+            ExpressionModel().apply {
+                this.id = 2
+                this.leftId = 0
+                this.rightId = 0
+                this.expression = "7.75"
+                this.resultCode = "2_RESULT"
+                this.type = ExpressionModel.Type.END.value
+                this.calculateType = ExpressionModel.CalculateType.CONSTANT.value
+            },
+            ExpressionModel().apply {
+                this.id = 3
+                this.leftId = 0
+                this.rightId = 0
+                this.expression = "7.93"
+                this.resultCode = "3_RESULT"
+                this.type = ExpressionModel.Type.END.value
+                this.calculateType = ExpressionModel.CalculateType.CONSTANT.value
+            }
+    )
+    val begin = System.currentTimeMillis()
+    val result = ExpressionExecutor.execute(mapOf("a" to "5"), expressionModelList)
+    println("cost:" + (System.currentTimeMillis() - begin) + "," + result)
+    return
+    println("true".eval())
     val s1 = "1+2+3+4"
     println(s1.evalNumber())
     val s2 = "(20 - 6) >= 14"

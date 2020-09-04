@@ -16,12 +16,12 @@ import kotlin.math.abs
 
 class FunctionExecutor(private val code: String) {
     companion object {
+        private val logger = LoggerManager.getLogger(FunctionExecutor::class)
         private const val CODE_TYPE_STABLE = "STABLE"
         private const val CODE_TYPE_FUNCTION = "FUNCTION"
         private const val RETURN_SUFFIX = "_RESULT"
     }
 
-    private val logger = LoggerManager.getLogger(FunctionExecutor::class)
     private val scriptEngineManager = ScriptEngineManager()
     private val engine = scriptEngineManager.getEngineByName("js")
     private val allFunctionItemMap = ConcurrentHashMap<String, List<FunctionItem>>()
