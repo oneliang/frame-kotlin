@@ -2,7 +2,7 @@ package com.oneliang.ktx.frame.expression
 
 import com.oneliang.ktx.Constants
 
-class ExpressionModel {
+class ExpressionItem {
     var id = 0
     var leftId = 0
     var rightId = 0

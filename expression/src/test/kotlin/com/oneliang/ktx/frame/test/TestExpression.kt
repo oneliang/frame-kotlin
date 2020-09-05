@@ -4,33 +4,33 @@ import com.oneliang.ktx.frame.expression.*
 
 fun main() {
     val expressionModelList = listOf(
-            ExpressionModel().apply {
+            ExpressionItem().apply {
                 this.id = 1
                 this.leftId = 2
                 this.rightId = 3
                 this.parameters = "a"
                 this.expression = "{a}>4"
                 this.resultCode = "1_RESULT"
-                this.type = ExpressionModel.Type.START.value
-                this.calculateType = ExpressionModel.CalculateType.BOOLEAN.value
+                this.type = ExpressionItem.Type.START.value
+                this.calculateType = ExpressionItem.CalculateType.BOOLEAN.value
             },
-            ExpressionModel().apply {
+            ExpressionItem().apply {
                 this.id = 2
                 this.leftId = 0
                 this.rightId = 0
                 this.expression = "7.75"
                 this.resultCode = "2_RESULT"
-                this.type = ExpressionModel.Type.END.value
-                this.calculateType = ExpressionModel.CalculateType.CONSTANT.value
+                this.type = ExpressionItem.Type.END.value
+                this.calculateType = ExpressionItem.CalculateType.CONSTANT.value
             },
-            ExpressionModel().apply {
+            ExpressionItem().apply {
                 this.id = 3
                 this.leftId = 0
                 this.rightId = 0
                 this.expression = "7.93"
                 this.resultCode = "3_RESULT"
-                this.type = ExpressionModel.Type.END.value
-                this.calculateType = ExpressionModel.CalculateType.CONSTANT.value
+                this.type = ExpressionItem.Type.END.value
+                this.calculateType = ExpressionItem.CalculateType.CONSTANT.value
             }
     )
     val begin = System.currentTimeMillis()

@@ -8,12 +8,21 @@ import com.oneliang.ktx.util.logging.LoggerManager
 object ExpressionExecutor {
     private val logger = LoggerManager.getLogger(ExpressionExecutor::class)
 
-    fun execute(inputMap: Map<String, String>, expressionModel: List<ExpressionModel>): Any {
-        var startExpressionModel: ExpressionModel? = null
-        val expressionModelMap = expressionModel.toMap {
-            if (it.type == ExpressionModel.Type.START.value) {
-                if (startExpressionModel == null) {
-                    startExpressionModel = it
+    fun execute(expressionGroupList: List<ExpressionGroup>): List<ExpressionResult> {
+        return expressionGroupList.map { execute(it) }
+    }
+
+    fun execute(expressionGroup: ExpressionGroup): ExpressionResult {
+        val value = execute(expressionGroup.inputMap, expressionGroup.expressionItemList)
+        return ExpressionResult(value)
+    }
+
+    fun execute(inputMap: Map<String, String>, expressionItem: List<ExpressionItem>): Any {
+        var startExpressionItem: ExpressionItem? = null
+        val expressionItemMap = expressionItem.toMap {
+            if (it.type == ExpressionItem.Type.START.value) {
+                if (startExpressionItem == null) {
+                    startExpressionItem = it
                 } else {
                     error("duplicate start expression, ${it.expression}")
                 }
@@ -21,57 +30,57 @@ object ExpressionExecutor {
             it.id to it
         }
         val resultMap = mutableMapOf<String, Any>()
-        var currentExpressionModel = startExpressionModel
-        while (currentExpressionModel != null) {
-            val resultCode = currentExpressionModel.resultCode
-            val expressionModelType = currentExpressionModel.type
-            currentExpressionModel = executeExpressionModelAndFindNext(inputMap, expressionModelMap, currentExpressionModel, resultMap)
-            if (expressionModelType == ExpressionModel.Type.END.value) {
-                return resultMap[resultCode] ?: Expression.INVALID_CALCULATE_RESULT
+        var currentExpressionItem = startExpressionItem
+        while (currentExpressionItem != null) {
+            val resultCode = currentExpressionItem.resultCode
+            val expressionItemType = currentExpressionItem.type
+            currentExpressionItem = executeExpressionItemAndFindNext(inputMap, expressionItemMap, currentExpressionItem, resultMap)
+            if (expressionItemType == ExpressionItem.Type.END.value) {
+                return resultMap[resultCode] ?: Expression.INVALID_EVAL_RESULT
             }
         }
-        return Expression.INVALID_CALCULATE_RESULT
+        return Expression.INVALID_EVAL_RESULT
     }
 
-    private fun executeExpressionModelAndFindNext(inputMap: Map<String, String>, expressionModelMap: Map<Int, ExpressionModel>, expressionModel: ExpressionModel, resultMap: MutableMap<String, Any>): ExpressionModel? {
-        val parameterList = if (expressionModel.parameters.isBlank()) {
+    private fun executeExpressionItemAndFindNext(inputMap: Map<String, String>, expressionItemMap: Map<Int, ExpressionItem>, expressionItem: ExpressionItem, resultMap: MutableMap<String, Any>): ExpressionItem? {
+        val parameterList = if (expressionItem.parameters.isBlank()) {
             emptyList()
         } else {
-            expressionModel.parameters.trim().split(Constants.Symbol.COMMA)
+            expressionItem.parameters.trim().split(Constants.Symbol.COMMA)
         }
-        val resultCode = expressionModel.resultCode
-        val calculateType = expressionModel.calculateType
+        val resultCode = expressionItem.resultCode
+        val calculateType = expressionItem.calculateType
         val expression = if (parameterList.isEmpty()) {
-            expressionModel.expression
+            expressionItem.expression
         } else {
-            var replaceExpression = expressionModel.expression
+            var replaceExpression = expressionItem.expression
             parameterList.forEach {
                 replaceExpression = replaceExpression.replace(Constants.Symbol.BIG_BRACKET_LEFT + it + Constants.Symbol.BIG_BRACKET_RIGHT, inputMap[it].nullToBlank())
             }
             replaceExpression
         }
         val result: Any
-        val nextExpressionModel: ExpressionModel?
+        val nextExpressionItem: ExpressionItem?
         when (calculateType) {
-            ExpressionModel.CalculateType.BOOLEAN.value -> {
+            ExpressionItem.CalculateType.BOOLEAN.value -> {
                 result = expression.evalBoolean()
-                nextExpressionModel = if (result) {
-                    expressionModelMap[expressionModel.leftId]
+                nextExpressionItem = if (result) {
+                    expressionItemMap[expressionItem.leftId]
                 } else {
-                    expressionModelMap[expressionModel.rightId]
+                    expressionItemMap[expressionItem.rightId]
                 }
             }
-            ExpressionModel.CalculateType.NUMBER.value -> {
+            ExpressionItem.CalculateType.NUMBER.value -> {
                 result = expression.evalNumber()
-                nextExpressionModel = expressionModelMap[expressionModel.rightId]
+                nextExpressionItem = expressionItemMap[expressionItem.rightId]
             }
-            ExpressionModel.CalculateType.STRING.value -> {
+            ExpressionItem.CalculateType.STRING.value -> {
                 result = expression.evalString()
-                nextExpressionModel = expressionModelMap[expressionModel.rightId]
+                nextExpressionItem = expressionItemMap[expressionItem.rightId]
             }
-            ExpressionModel.CalculateType.CONSTANT.value -> {
+            ExpressionItem.CalculateType.CONSTANT.value -> {
                 result = expression
-                nextExpressionModel = expressionModelMap[expressionModel.rightId]
+                nextExpressionItem = expressionItemMap[expressionItem.rightId]
             }
             else -> {
                 logger.error("It is not support the calculate type:%s", calculateType)
@@ -81,6 +90,6 @@ object ExpressionExecutor {
         if (resultCode.isNotBlank()) {
             resultMap[resultCode] = result
         }
-        return nextExpressionModel
+        return nextExpressionItem
     }
 }

@@ -8,7 +8,7 @@ import kotlin.math.pow
 
 object Expression {
     private val INVALID_DATA = Any()
-    val INVALID_CALCULATE_RESULT = INVALID_DATA
+    val INVALID_EVAL_RESULT = INVALID_DATA
     /**
      * 将算术表达式转换为逆波兰表达式
      * @param expression 要计算的表达式,如"1+2+3+4"
@@ -105,10 +105,10 @@ object Expression {
     /**
      * eval expression
      * @param nodeList
-     * @return Any, in fact is boolean or double or string or INVALID_CALCULATE_RESULT
+     * @return Any, in fact is boolean or double or string or INVALID_EVAL_RESULT
      */
     private fun evalExpression(nodeList: MutableList<ExpressionNode>): Any {
-        if (nodeList.size == 0) return INVALID_CALCULATE_RESULT
+        if (nodeList.size == 0) return INVALID_EVAL_RESULT
         if (nodeList.size > 1) {
             var index = 0
             // 储存数据
@@ -165,11 +165,11 @@ object Expression {
      * calculate node
      * @param type type
      * @param dataArray size may be one or two
-     * @return Any, in fact is boolean or double or string or INVALID_CALCULATE_RESULT
+     * @return Any, in fact is boolean or double or string or INVALID_EVAL_RESULT
      */
     private fun calculate(type: ExpressionNode.Type, dataArray: Array<Any>): Any {
         if (!(dataArray.size == 1 || dataArray.size == 2)) {
-            return INVALID_CALCULATE_RESULT
+            return INVALID_EVAL_RESULT
         }
         val dataOne = dataArray[0]
         val dataTwo = dataArray.getOrElse(1) { INVALID_DATA }
@@ -342,9 +342,9 @@ object Expression {
         val value = perform({
             evalExpression(parseExpression(expression))
         }, failure = {
-            INVALID_CALCULATE_RESULT
+            INVALID_EVAL_RESULT
         })
-        return if (value != INVALID_CALCULATE_RESULT) {
+        return if (value != INVALID_EVAL_RESULT) {
             value
         } else {
             expression
