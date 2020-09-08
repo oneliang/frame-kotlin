@@ -8,18 +8,28 @@ import com.oneliang.ktx.util.logging.LoggerManager
 object ExpressionExecutor {
     private val logger = LoggerManager.getLogger(ExpressionExecutor::class)
 
-    fun execute(expressionGroupList: List<ExpressionGroup>): List<ExpressionResult> {
+    fun execute(inputMap: Map<String, String>, expressionGroupList: List<ExpressionGroup>): List<ExpressionResult> {
         val sortedExpressionGroupList = expressionGroupList.sortedBy { it.order }
         val priorityInputMap = mutableMapOf<String, String>()
         return sortedExpressionGroupList.map {
-            val expressionResult = execute(it, priorityInputMap)
+            val expressionResult = execute(inputMap, it, priorityInputMap)
             priorityInputMap[it.resultCode] = expressionResult.value.toString()
             expressionResult
         }
     }
 
-    fun execute(expressionGroup: ExpressionGroup, priorityInputMap: Map<String, String> = emptyMap()): ExpressionResult {
-        val value = execute(expressionGroup.inputMap, priorityInputMap, expressionGroup.expressionItemList)
+    fun execute(inputMap: Map<String, String>, expressionGroup: ExpressionGroup, priorityInputMap: Map<String, String> = emptyMap()): ExpressionResult {
+        val parameters = expressionGroup.parameters
+        val parameterList = if (parameters.isNotBlank()) {
+            parameters.trim().split(Constants.Symbol.COMMA)
+        } else {
+            emptyList()
+        }
+        val optimizeInputMap = mutableMapOf<String, String>()
+        parameterList.forEach {
+            optimizeInputMap[it] = inputMap[it].nullToBlank()
+        }
+        val value = execute(optimizeInputMap, priorityInputMap, expressionGroup.expressionItemList)
         return ExpressionResult(value)
     }
 
