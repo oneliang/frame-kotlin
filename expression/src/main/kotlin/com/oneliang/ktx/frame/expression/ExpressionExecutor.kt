@@ -61,7 +61,7 @@ object ExpressionExecutor {
         } else {
             var replaceExpression = expressionItem.expression
             parameterList.forEach {
-                val value = priorityInputMap[it] ?: inputMap[it].nullToBlank()
+                val value = resultMap[it]?.toString() ?: priorityInputMap[it] ?: inputMap[it].nullToBlank()
                 replaceExpression = replaceExpression.replace(Constants.Symbol.BIG_BRACKET_LEFT + it + Constants.Symbol.BIG_BRACKET_RIGHT, value)
             }
             replaceExpression
