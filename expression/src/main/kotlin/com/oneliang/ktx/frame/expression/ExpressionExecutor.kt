@@ -9,15 +9,21 @@ object ExpressionExecutor {
     private val logger = LoggerManager.getLogger(ExpressionExecutor::class)
 
     fun execute(expressionGroupList: List<ExpressionGroup>): List<ExpressionResult> {
-        return expressionGroupList.map { execute(it) }
+        val sortedExpressionGroupList = expressionGroupList.sortedBy { it.order }
+        val priorityInputMap = mutableMapOf<String, String>()
+        return sortedExpressionGroupList.map {
+            val expressionResult = execute(it, priorityInputMap)
+            priorityInputMap[it.resultCode] = expressionResult.value.toString()
+            expressionResult
+        }
     }
 
-    fun execute(expressionGroup: ExpressionGroup): ExpressionResult {
-        val value = execute(expressionGroup.inputMap, expressionGroup.expressionItemList)
+    fun execute(expressionGroup: ExpressionGroup, priorityInputMap: Map<String, String> = emptyMap()): ExpressionResult {
+        val value = execute(expressionGroup.inputMap, priorityInputMap, expressionGroup.expressionItemList)
         return ExpressionResult(value)
     }
 
-    fun execute(inputMap: Map<String, String>, expressionItem: List<ExpressionItem>): Any {
+    fun execute(inputMap: Map<String, String>, priorityInputMap: Map<String, String> = emptyMap(), expressionItem: List<ExpressionItem>): Any {
         var startExpressionItem: ExpressionItem? = null
         val expressionItemMap = expressionItem.toMap {
             if (it.type == ExpressionItem.Type.START.value) {
@@ -34,7 +40,7 @@ object ExpressionExecutor {
         while (currentExpressionItem != null) {
             val resultCode = currentExpressionItem.resultCode
             val expressionItemType = currentExpressionItem.type
-            currentExpressionItem = executeExpressionItemAndFindNext(inputMap, expressionItemMap, currentExpressionItem, resultMap)
+            currentExpressionItem = executeExpressionItemAndFindNext(inputMap, priorityInputMap, expressionItemMap, currentExpressionItem, resultMap)
             if (expressionItemType == ExpressionItem.Type.END.value) {
                 return resultMap[resultCode] ?: Expression.INVALID_EVAL_RESULT
             }
@@ -42,7 +48,7 @@ object ExpressionExecutor {
         return Expression.INVALID_EVAL_RESULT
     }
 
-    private fun executeExpressionItemAndFindNext(inputMap: Map<String, String>, expressionItemMap: Map<Int, ExpressionItem>, expressionItem: ExpressionItem, resultMap: MutableMap<String, Any>): ExpressionItem? {
+    private fun executeExpressionItemAndFindNext(inputMap: Map<String, String>, priorityInputMap: Map<String, String>, expressionItemMap: Map<Int, ExpressionItem>, expressionItem: ExpressionItem, resultMap: MutableMap<String, Any>): ExpressionItem? {
         val parameterList = if (expressionItem.parameters.isBlank()) {
             emptyList()
         } else {
@@ -55,7 +61,8 @@ object ExpressionExecutor {
         } else {
             var replaceExpression = expressionItem.expression
             parameterList.forEach {
-                replaceExpression = replaceExpression.replace(Constants.Symbol.BIG_BRACKET_LEFT + it + Constants.Symbol.BIG_BRACKET_RIGHT, inputMap[it].nullToBlank())
+                val value = priorityInputMap[it] ?: inputMap[it].nullToBlank()
+                replaceExpression = replaceExpression.replace(Constants.Symbol.BIG_BRACKET_LEFT + it + Constants.Symbol.BIG_BRACKET_RIGHT, value)
             }
             replaceExpression
         }
