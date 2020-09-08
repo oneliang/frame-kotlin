@@ -27,7 +27,7 @@ object ExpressionExecutor {
         }
         val optimizeInputMap = mutableMapOf<String, String>()
         parameterList.forEach {
-            optimizeInputMap[it] = inputMap[it].nullToBlank()
+            optimizeInputMap[it] = priorityInputMap[it] ?: inputMap[it].nullToBlank()
         }
         val value = execute(optimizeInputMap, priorityInputMap, expressionGroup.expressionItemList)
         return ExpressionResult(value)
@@ -59,10 +59,10 @@ object ExpressionExecutor {
     }
 
     private fun executeExpressionItemAndFindNext(inputMap: Map<String, String>, priorityInputMap: Map<String, String>, expressionItemMap: Map<Int, ExpressionItem>, expressionItem: ExpressionItem, resultMap: MutableMap<String, Any>): ExpressionItem? {
-        val parameterList = if (expressionItem.parameters.isBlank()) {
-            emptyList()
-        } else {
+        val parameterList = if (expressionItem.parameters.isNotBlank()) {
             expressionItem.parameters.trim().split(Constants.Symbol.COMMA)
+        } else {
+            emptyList()
         }
         val resultCode = expressionItem.resultCode
         val calculateType = expressionItem.calculateType
