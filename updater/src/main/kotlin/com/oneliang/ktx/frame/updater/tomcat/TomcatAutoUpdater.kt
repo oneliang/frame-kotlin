@@ -13,7 +13,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
     companion object {
         private val logger = LoggerManager.getLogger(TomcatAutoUpdater::class)
         private fun killTomcatProcess(session: Session, war: Configuration.War) {
-            var tomcatPid = 0
+            val tomcatPidList = mutableListOf<Int>()
             Ssh.exec(session, "ps -ef|grep ${war.remoteTomcatDirectory}") {
                 it.inputStream.readContentIgnoreLine { line ->
                     val found = line.finds(war.remoteTomcatDirectory)
@@ -21,17 +21,18 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                         logger.info(line)
                         val stringList = line.splitForWhitespace()
                         if (stringList.size > 1) {
-                            tomcatPid = stringList[1].toIntSafely()
+                            tomcatPidList += stringList[1].toIntSafely()
                         }
-                        return@readContentIgnoreLine false
                     }
                     true
                 }
             }
-            logger.info("tomcat:[%s], pid:[%s]", war.remoteTomcatDirectory, tomcatPid)
-            if (tomcatPid > 0) {
-                logger.info("kill the tomcat process, tomcat:[%s], pid:[%s]", war.remoteTomcatDirectory, tomcatPid)
-                Ssh.exec(session, "kill -9 $tomcatPid")
+            tomcatPidList.forEach { tomcatPid ->
+                logger.info("tomcat:[%s], pid:[%s]", war.remoteTomcatDirectory, tomcatPid)
+                if (tomcatPid > 0) {
+                    logger.info("kill the tomcat process, tomcat:[%s], pid:[%s]", war.remoteTomcatDirectory, tomcatPid)
+                    Ssh.exec(session, "kill -9 $tomcatPid")
+                }
             }
         }
 
