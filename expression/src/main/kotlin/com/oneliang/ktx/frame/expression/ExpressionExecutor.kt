@@ -4,6 +4,8 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.toMap
 import com.oneliang.ktx.util.logging.LoggerManager
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 object ExpressionExecutor {
     private val logger = LoggerManager.getLogger(ExpressionExecutor::class)
@@ -30,7 +32,23 @@ object ExpressionExecutor {
             optimizeInputMap[it] = priorityInputMap[it] ?: inputMap[it].nullToBlank()
         }
         val value = execute(optimizeInputMap, priorityInputMap, expressionGroup.expressionItemList)
-        return ExpressionResult(value)
+        return when (expressionGroup.resultType) {
+            ExpressionGroup.ResultType.ROUND_HALF_UP.value -> {
+                val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.HALF_UP }
+                ExpressionResult(decimalFormat.format(value))
+            }
+            ExpressionGroup.ResultType.ROUND_CEILING.value -> {
+                val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.CEILING }
+                ExpressionResult(decimalFormat.format(value))
+            }
+            ExpressionGroup.ResultType.ROUND_FLOOR.value -> {
+                val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.FLOOR }
+                ExpressionResult(decimalFormat.format(value))
+            }
+            else -> {
+                ExpressionResult(value)
+            }
+        }
     }
 
     fun execute(inputMap: Map<String, String>, priorityInputMap: Map<String, String> = emptyMap(), expressionItem: List<ExpressionItem>): Any {
