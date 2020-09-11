@@ -12,7 +12,7 @@ import java.io.File
 class TomcatAutoUpdater(private val configuration: Configuration) {
     companion object {
         private val logger = LoggerManager.getLogger(TomcatAutoUpdater::class)
-        private fun killTomcatProcess(session: Session, war: Configuration.War) {
+        private fun findTomcatProcessPid(session: Session, war: Configuration.War): List<Int> {
             val tomcatPidList = mutableListOf<Int>()
             Ssh.exec(session, "ps -ef|grep ${war.remoteTomcatDirectory}") {
                 it.inputStream.readContentIgnoreLine { line ->
@@ -27,6 +27,10 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                     true
                 }
             }
+            return tomcatPidList
+        }
+
+        private fun killTomcatProcess(session: Session, war: Configuration.War, tomcatPidList: List<Int>) {
             tomcatPidList.forEach { tomcatPid ->
                 logger.info("tomcat:[%s], pid:[%s]", war.remoteTomcatDirectory, tomcatPid)
                 if (tomcatPid > 0) {
@@ -158,12 +162,15 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                 password = this.configuration.password,
                 configurationMap = mapOf(Ssh.Configuration.USERAUTH_GSSAPI_WITH_MIC to "no", Ssh.Configuration.STRICT_HOST_KEY_CHECKING to "no"), afterSessionConnect = { session ->
             this.configuration.warArray.forEach {
-                killTomcatProcess(session, it)
+                val tomcatPidList = findTomcatProcessPid(session, it)
+                killTomcatProcess(session, it, tomcatPidList)
                 val uploadResult = uploadWarForRetry(session, it)
                 if (uploadResult) {
                     removeWarDirectory(session, it)
 //                unzipWar(session, it)
                     startupTomcat(session, it)
+                    val tomcatPidListAfterStartup = findTomcatProcessPid(session, it)
+                    logger.info("after tomcat start up, tomcat pid list size:%s, tomcat:[%s]", tomcatPidListAfterStartup.size, it.remoteTomcatDirectory)
                 } else {
                     return@forEach
                 }
