@@ -5,6 +5,7 @@ import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import com.oneliang.ktx.frame.bean.Page
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.resource.ResourcePool
+import java.io.IOException
 import java.sql.Connection
 import java.sql.ResultSet
 import kotlin.reflect.KClass
@@ -33,6 +34,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
             block(connection)
         } catch (e: Exception) {
             throw QueryException(e)
+        } catch (e: IOException) {
+            this.connectionPool.releaseResource(connection, true)
+            throw QueryException(e)
         } finally {
             this.connectionPool.releaseResource(connection)
         }
@@ -49,6 +53,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
             connection = this.connectionPool.stableResource!!
             block(connection)
         } catch (e: Exception) {
+            throw QueryException(e)
+        } catch (e: IOException) {
+            this.connectionPool.releaseStableResource(connection, true)
             throw QueryException(e)
         } finally {
             this.connectionPool.releaseStableResource(connection)
