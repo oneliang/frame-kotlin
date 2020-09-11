@@ -33,15 +33,15 @@ object ExpressionExecutor {
         }
         val value = execute(optimizeInputMap, priorityInputMap, expressionGroup.expressionItemList)
         return when (expressionGroup.resultType) {
-            ExpressionGroup.ResultType.NUMBER_ROUND_HALF_UP.value -> {
+            ExpressionGroup.ResultType.ROUND_HALF_UP.value -> {
                 val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.HALF_UP }
                 ExpressionResult(decimalFormat.format(value))
             }
-            ExpressionGroup.ResultType.NUMBER_ROUND_CEILING.value -> {
+            ExpressionGroup.ResultType.ROUND_CEILING.value -> {
                 val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.CEILING }
                 ExpressionResult(decimalFormat.format(value))
             }
-            ExpressionGroup.ResultType.NUMBER_ROUND_FLOOR.value -> {
+            ExpressionGroup.ResultType.ROUND_FLOOR.value -> {
                 val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.FLOOR }
                 ExpressionResult(decimalFormat.format(value))
             }
