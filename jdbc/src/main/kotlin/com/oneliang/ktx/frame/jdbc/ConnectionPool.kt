@@ -20,10 +20,10 @@ class ConnectionPool : ResourcePool<Connection>() {
 
     private var connectionPoolProcessor: ConnectionPoolProcessor? = null
 
-    override val resource: Connection?
+    override val resource: Connection
         @Throws(ResourcePoolException::class)
         get() {
-            val connection: Connection?
+            val connection: Connection
             val customTransaction = TransactionManager.isCustomTransaction()
             if (customTransaction) {
                 if (TransactionManager.customTransactionConnection.get() != null) {

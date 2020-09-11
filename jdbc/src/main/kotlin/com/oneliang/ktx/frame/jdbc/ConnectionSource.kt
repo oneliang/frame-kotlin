@@ -60,18 +60,21 @@ open class ConnectionSource : ResourceSource<Connection>() {
      * default file
      * This method initial the config file
      */
-    override val resource: Connection?
+    override val resource: Connection
         get() {
             return getConnection(this.url, this.user, this.password)
         }
 
     @Synchronized
-    protected fun getConnection(url: String, user: String, password: String): Connection? {
+    protected fun getConnection(url: String, user: String, password: String): Connection {
         var connection: Connection? = null
         try {
             connection = DriverManager.getConnection(url, user, password)
         } catch (e: Exception) {
             logger.error(Constants.Base.EXCEPTION, e)
+        }
+        if (connection == null) {
+            throw NullPointerException("connection can not be null")
         }
         return connection
     }

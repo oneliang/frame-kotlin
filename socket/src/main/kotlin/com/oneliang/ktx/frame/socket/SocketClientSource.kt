@@ -10,7 +10,7 @@ class SocketClientSource : ResourceSource<SocketClient>() {
 
     private lateinit var tcpPacketProcessor: TcpPacketProcessor
 
-    override val resource: SocketClient?
+    override val resource: SocketClient
         get() = SocketClient(this.host, this.port).also {
             it.setTcpPacketProcessor(tcpPacketProcessor)
         }

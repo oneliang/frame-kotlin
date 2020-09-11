@@ -24,7 +24,7 @@ class ConnectionSourceWithTest : ConnectionSource() {
     /**
      * get resource
      */
-    override val resource: Connection?
+    override val resource: Connection
         get() {
             return if (!useTest) {
                 super.resource

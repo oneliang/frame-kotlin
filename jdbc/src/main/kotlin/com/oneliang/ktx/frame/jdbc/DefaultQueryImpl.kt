@@ -30,12 +30,12 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     override fun <R> useConnection(block: (connection: Connection) -> R): R {
         var connection: Connection? = null
         return try {
-            connection = this.connectionPool.resource!!
+            connection = this.connectionPool.resource
             block(connection)
-        } catch (e: Exception) {
-            throw QueryException(e)
         } catch (e: IOException) {
             this.connectionPool.releaseResource(connection, true)
+            throw QueryException(e)
+        } catch (e: Exception) {
             throw QueryException(e)
         } finally {
             this.connectionPool.releaseResource(connection)
@@ -50,12 +50,12 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     override fun <R> useStableConnection(block: (connection: Connection) -> R): R {
         var connection: Connection? = null
         return try {
-            connection = this.connectionPool.stableResource!!
+            connection = this.connectionPool.stableResource
             block(connection)
-        } catch (e: Exception) {
-            throw QueryException(e)
         } catch (e: IOException) {
             this.connectionPool.releaseStableResource(connection, true)
+            throw QueryException(e)
+        } catch (e: Exception) {
             throw QueryException(e)
         } finally {
             this.connectionPool.releaseStableResource(connection)
