@@ -417,14 +417,15 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     /**
      * Method: execute query by sql statement for map data
      * @param sql
+     * @param columnDataKeyMap
      * @param columnClassMapping
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
-    override fun executeQueryBySqlForMap(sql: String, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>> {
+    override fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>> {
         return useStableConnection {
-            this.executeQueryBySqlForMap(it, sql, columnClassMapping, parameters)
+            this.executeQueryBySqlForMap(it, sql, columnDataKeyMap, columnClassMapping, parameters)
         }
     }
 

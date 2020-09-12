@@ -90,13 +90,14 @@ interface BaseQuery {
      * Method: execute query base on the connection and sql command for map data
      * @param connection
      * @param sql
+     * @param columnDataKeyMap
      * @param columnClassMapping
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeQueryBySqlForMap(connection: Connection, sql: String, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>>
+    fun executeQueryBySqlForMap(connection: Connection, sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>>
 
     /**
      * Method: execute insert
@@ -143,7 +144,7 @@ interface BaseQuery {
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String = Constants.String.BLANK, updateFields: Array<String> = emptyArray(),condition: String = Constants.String.BLANK): Int
+    fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String = Constants.String.BLANK, updateFields: Array<String> = emptyArray(), condition: String = Constants.String.BLANK): Int
 
     /**
      * Method: execute update collection,transaction

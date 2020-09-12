@@ -302,13 +302,14 @@ interface Query : BaseQuery {
     /**
      * Method: execute query by sql statement for map data
      * @param sql
+     * @param columnDataKeyMap
      * @param columnClassMapping
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeQueryBySqlForMap(sql: String, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>>
+    fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>>
 
     /**
      * Method: execute update
