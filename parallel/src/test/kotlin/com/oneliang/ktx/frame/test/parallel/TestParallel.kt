@@ -56,7 +56,7 @@ fun main() {
                 parallelContext.collect(Constants.String.BLANK)
                 return
             }
-            parallelContext.collect("a")
+            parallelContext.collect(value)
         }
     }).addParallelSinkProcessor(object : ParallelSinkProcessor<String> {
         private var count = AtomicInteger()
@@ -83,15 +83,15 @@ fun main() {
         override val cacheKey: String
             get() = "sink"
     })
-//    parallelJob.generateFirstParallelJobStep().addParallelTransformProcessor(object : ParallelTransformProcessor<String, String> {
-//        override suspend fun process(value: String, parallelContext: ParallelContext<String>) {
-//            parallelContext.collect("b")
-//        }
-//    }).addParallelSinkProcessor(object : ParallelSinkProcessor<String> {
-//        override suspend fun sink(value: String) {
-//            println("sink value:$value")
-//        }
-//    })
+    parallelJob.generateFirstParallelJobStep().addParallelTransformProcessor(object : ParallelTransformProcessor<String, String> {
+        override suspend fun process(value: String, parallelContext: ParallelContext<String>) {
+            parallelContext.collect(value)
+        }
+    }).addParallelSinkProcessor(object : ParallelSinkProcessor<String> {
+        override suspend fun sink(value: String) {
+            println("sink value:$value")
+        }
+    })
     parallelExecutor.execute(parallelJob)
 //    parallelExecutor.execute(parallelJob)
 }

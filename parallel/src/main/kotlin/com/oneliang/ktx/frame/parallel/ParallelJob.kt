@@ -9,10 +9,7 @@ import com.oneliang.ktx.util.common.findAllChild
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
-import kotlinx.coroutines.*
 import java.util.concurrent.CountDownLatch
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfiguration: ParallelJobConfiguration = ParallelJobConfiguration()) {
     companion object {
