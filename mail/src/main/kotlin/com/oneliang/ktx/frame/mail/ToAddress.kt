@@ -10,6 +10,10 @@ class ToAddress {
         this.address = address
     }
 
+    constructor() {
+
+    }
+
     constructor(type: Type, address: String) {
         this.type = type
         this.address = address
