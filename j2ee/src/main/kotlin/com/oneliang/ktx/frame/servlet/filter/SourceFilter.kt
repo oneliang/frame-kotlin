@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.servlet.filter
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.matchesPattern
+import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.IOException
 import javax.servlet.*
@@ -30,9 +31,9 @@ class SourceFilter : Filter {
     @Throws(ServletException::class)
     override fun init(filterConfig: FilterConfig) {
         logger.info("initialize filter:${this::class}")
-        val excludePaths = filterConfig.getInitParameter(EXCLUDE_PATH)
-        this.errorForward = filterConfig.getInitParameter(ERROR_FORWARD)
-        if (excludePaths != null) {
+        val excludePaths = filterConfig.getInitParameter(EXCLUDE_PATH).nullToBlank()
+        this.errorForward = filterConfig.getInitParameter(ERROR_FORWARD).nullToBlank()
+        if (excludePaths.isNotBlank()) {
             val excludePathArray = excludePaths.split(COMMA_SPLIT)
             this.excludePathArray = Array(excludePathArray.size) { Constants.String.BLANK }
             for ((i, excludePath) in excludePathArray.withIndex()) {
