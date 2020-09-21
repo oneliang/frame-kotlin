@@ -34,7 +34,7 @@ fun main() {
             }
     )
     val begin = System.currentTimeMillis()
-    val result = ExpressionExecutor.execute(mapOf("a" to "5"), expressionModelList)
+    val result = ExpressionExecutor.execute(mapOf("a" to "5"), emptyMap(), expressionModelList)
     println("cost:" + (System.currentTimeMillis() - begin) + "," + result)
     return
     println("true".eval())
