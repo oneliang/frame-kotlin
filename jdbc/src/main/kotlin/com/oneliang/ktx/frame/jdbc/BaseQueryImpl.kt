@@ -625,8 +625,10 @@ open class BaseQueryImpl : BaseQuery {
                     }
                     preparedStatement.addBatch()
                 }
+                val begin = System.currentTimeMillis()
                 rows = preparedStatement.executeBatch()
                 preparedStatement.clearBatch()
+                logger.info("execute cost:%s, sql execute batch result:%s, sql:%s", (System.currentTimeMillis() - begin), rows, sql)
                 rows
             } finally {
                 preparedStatement?.close()
