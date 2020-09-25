@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.expression
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.nullToBlank
+import com.oneliang.ktx.util.common.parseRegexGroup
 import com.oneliang.ktx.util.common.toMap
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.math.RoundingMode
@@ -9,6 +10,7 @@ import java.text.DecimalFormat
 
 object ExpressionExecutor {
     private val logger = LoggerManager.getLogger(ExpressionExecutor::class)
+    private const val REGEX_KEYWORD = "\\{([\\w]+?)\\}"
 
     fun execute(inputMap: Map<String, String>, expressionGroupList: List<ExpressionGroup>): List<ExpressionResult> {
         val sortedExpressionGroupList = expressionGroupList.sortedBy { it.order }
@@ -21,17 +23,7 @@ object ExpressionExecutor {
     }
 
     fun execute(inputMap: Map<String, String>, expressionGroup: ExpressionGroup, priorityInputMap: Map<String, String> = emptyMap()): ExpressionResult {
-        val parameters = expressionGroup.parameters
-        val parameterList = if (parameters.isNotBlank()) {
-            parameters.trim().split(Constants.Symbol.COMMA)
-        } else {
-            emptyList()
-        }
-        val optimizeInputMap = mutableMapOf<String, String>()
-        parameterList.forEach {
-            optimizeInputMap[it] = priorityInputMap[it] ?: inputMap[it].nullToBlank()
-        }
-        val value = execute(optimizeInputMap, priorityInputMap, expressionGroup.expressionItemList)
+        val value = execute(inputMap, priorityInputMap, expressionGroup.expressionItemList)
         return when (expressionGroup.resultType) {
             ExpressionGroup.ResultType.NUMBER_ROUND_HALF_UP.value -> {
                 val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.HALF_UP }
@@ -77,13 +69,9 @@ object ExpressionExecutor {
     }
 
     private fun executeExpressionItemAndFindNext(inputMap: Map<String, String>, priorityInputMap: Map<String, String>, expressionItemMap: Map<Int, ExpressionItem>, expressionItem: ExpressionItem, resultMap: MutableMap<String, Any>): ExpressionItem? {
-        val parameterList = if (expressionItem.parameters.isNotBlank()) {
-            expressionItem.parameters.trim().split(Constants.Symbol.COMMA)
-        } else {
-            emptyList()
-        }
         val resultCode = expressionItem.resultCode
         val calculateType = expressionItem.calculateType
+        val parameterList = expressionItem.expression.parseRegexGroup(REGEX_KEYWORD)
         val expression = if (parameterList.isEmpty()) {
             expressionItem.expression
         } else {

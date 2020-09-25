@@ -6,7 +6,6 @@ class ExpressionItem {
     var id = 0
     var leftId = 0
     var rightId = 0
-    var parameters = Constants.String.BLANK
     var resultCode = Constants.String.BLANK
     var expression = Constants.String.BLANK
     var type = Type.DEFAULT.value
