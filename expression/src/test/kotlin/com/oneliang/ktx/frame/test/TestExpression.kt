@@ -9,7 +9,6 @@ fun main() {
                 this.id = 1
                 this.leftId = 2
                 this.rightId = 3
-                this.parameters = "a"
                 this.expression = "{a}>4"
                 this.resultCode = "1_RESULT"
                 this.type = ExpressionItem.Type.START.value
