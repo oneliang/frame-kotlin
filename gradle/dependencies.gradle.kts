@@ -16,6 +16,7 @@ val dependencies by extra {
             "util-kotlin-resource" to "com.oneliang.ktx:util-kotlin-resource:1.0",
             "util-kotlin-state" to "com.oneliang.ktx:util-kotlin-state:1.0",
             "util-kotlin-upload" to "com.oneliang.ktx:util-kotlin-upload:1.0",
+            "util-kotlin-math" to "com.oneliang.ktx:util-kotlin-math:1.0",
             "kotlin-reflect" to "org.jetbrains.kotlin:kotlin-reflect:${Constants.kotlinVersion}",
             "kotlin-stdlib-js" to "org.jetbrains.kotlin:kotlin-stdlib-js:${Constants.kotlinVersion}",
             "javaee-api" to "javax:javaee-api:8.0",

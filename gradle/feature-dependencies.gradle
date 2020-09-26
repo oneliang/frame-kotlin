@@ -16,6 +16,7 @@ dependencies {
     implementation rootProject.ext.dependencies['util-kotlin-resource']
     implementation rootProject.ext.dependencies['util-kotlin-state']
     implementation rootProject.ext.dependencies['util-kotlin-upload']
+    implementation rootProject.ext.dependencies['util-kotlin-math']
     implementation rootProject.ext.dependencies['kotlin-reflect']
     implementation rootProject.ext.dependencies["kotlinx-coroutines-core"]
 }
