@@ -8,5 +8,5 @@ class PlanTime(var begin: Long, var end: Long) {
 }
 
 fun List<PlanTime>.toSegmentList(): List<Segmenter.Segment<Any?>> {
-    return this.map { Segmenter.Segment<Any?>(it.begin, it.end) }
+    return this.map { Segmenter.Segment<Any?>(begin = it.begin, end = it.end) }
 }
