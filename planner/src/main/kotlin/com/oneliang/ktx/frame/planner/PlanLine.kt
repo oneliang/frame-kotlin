@@ -51,8 +51,8 @@ class PlanLine {
             if (data != null && data is Pair<*, *>) {
                 val task = data.first
                 val taskStep = data.second
-                if (task != null && taskStep != null) {
-                    this.privatePlanStepList += PlanStep(planTask, planTaskStep).apply {
+                if (task != null && task is PlanTask && taskStep != null && taskStep is PlanTask.Step) {
+                    this.privatePlanStepList += PlanStep(task, taskStep).apply {
                         this.planBeginTime = it.begin
                         this.planEndTime = it.end
                     }
@@ -63,12 +63,16 @@ class PlanLine {
         }
     }
 
-    fun getLastIdleTime(): Long {
+    fun getLastIdleTime(length: Long = 0L): Long {
         return if (this.planStepList.isEmpty()) {//when plan step list is empty, get the first plan time
             this.planTimeList.first().begin
         } else {
-            val lastPlanStepEndTime = this.planStepList.last().planEndTime
-            Segmenter.findSuitableBegin(this.planTimeSegmentList, lastPlanStepEndTime)
+            val (found, begin) = Segmenter.findSuitableBegin(this.planTimeSegmentList, 0L, length)
+            if (found) {
+                begin
+            } else {
+                this.planStepList.last().planEndTime
+            }
         }
     }
 

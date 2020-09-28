@@ -58,7 +58,7 @@ fun main() {
     }
     val planner = Planner()
     planner.planLineGroupList = listOf(planLineGroupA, planLineGroupB, planLineGroupC)
-    planner.planTaskList = listOf(planTaskABC)//, planTaskA, planTaskB, planTaskC)
+    planner.planTaskList = listOf(planTaskABC, planTaskA, planTaskB, planTaskC)
     planner.plan()
     planner.print()
 }

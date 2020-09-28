@@ -19,11 +19,11 @@ class Planner {
 //        val multiStepPlanTaskList = mutableListOf<PlanTask>()
         val sortedPlanTaskList = this.planTaskList.sortedByDescending { it.getTotalPlanCostTime() }
         sortedPlanTaskList.forEach { planTask ->
-            if (planTask.isSingleStepTask()) {
+            //            if (planTask.isSingleStepTask()) {
 //                singleStepPlanTaskList += planTask
-            } else {
+//            } else {
 //                multiStepPlanTaskList += planTask
-            }
+//            }
             for (step in planTask.stepList) {
                 val costTime = planLineGroupAllPlanStepCostMap.getOrPut(step.planLineGroupKey) { 0L }
                 planLineGroupAllPlanStepCostMap[step.planLineGroupKey] = costTime + step.planCostTime
@@ -47,6 +47,7 @@ class Planner {
                 if (previousPlanLine != null) {
                     beginTime = previousPlanLine.getLastIdleTime()
                 }
+                logger.info("add plan task step, task key:%s, plan line group key:%s, begin time:%s", planTask.key, planTaskStep.planLineGroupKey, beginTime)
                 planLine.addPlanTaskStep(planTask, planTaskStep, beginTime)
                 previousPlanLine = planLine
             }
