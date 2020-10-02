@@ -15,12 +15,21 @@ class PlanLineGroup {
 
     fun findSuitablePlanLine(): PlanLine? {
         var suitablePlanLine: PlanLine? = null
-        var minimumLastIdleTime = 0L
-        for (planLine in this.planLineList) {
-            val lastIdleTime = planLine.getLastIdleTime()
-            if (minimumLastIdleTime == 0L || minimumLastIdleTime < lastIdleTime) {
-                minimumLastIdleTime = lastIdleTime
+        var minimumPlanCostTime = 0L
+        var minimumLastPlanEndTime = 0L
+        for ((index, planLine) in this.planLineList.withIndex()) {
+            val totalPlanCostTime = planLine.getTotalPlanCostTime()
+            val lastPlanEndTime = planLine.getLastPlanEndTime()
+            if (index == 0) {
+                minimumPlanCostTime = totalPlanCostTime
+                minimumLastPlanEndTime = lastPlanEndTime
                 suitablePlanLine = planLine
+            } else if (lastPlanEndTime < minimumLastPlanEndTime) {
+                minimumLastPlanEndTime = lastPlanEndTime
+                suitablePlanLine = planLine
+//            } else if (totalPlanCostTime < minimumPlanCostTime) {
+//                minimumPlanCostTime = totalPlanCostTime
+//                suitablePlanLine = planLine
             }
         }
         return suitablePlanLine

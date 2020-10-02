@@ -3,21 +3,16 @@ package com.oneliang.ktx.frame.planner
 import com.oneliang.ktx.util.common.toMap
 import com.oneliang.ktx.util.logging.LoggerManager
 
-class Planner {
-    companion object {
-        private val logger = LoggerManager.getLogger(Planner::class)
-    }
+object Planner {
+    private val logger = LoggerManager.getLogger(Planner::class)
 
-    var planLineGroupList = emptyList<PlanLineGroup>()
-    var planTaskList = emptyList<PlanTask>()
-
-    fun plan() {
+    fun plan(planLineGroupList: List<PlanLineGroup>, planTaskList: List<PlanTask>) {
         //1.find the single step task
-        val planLineGroupMap = this.planLineGroupList.toMap { it.key to it }
+        val planLineGroupMap = planLineGroupList.toMap { it.key to it }
         val planLineGroupAllPlanStepCostMap = mutableMapOf<String, Long>()
 //        val singleStepPlanTaskList = mutableListOf<PlanTask>()
 //        val multiStepPlanTaskList = mutableListOf<PlanTask>()
-        val sortedPlanTaskList = this.planTaskList.sortedByDescending { it.getTotalPlanCostTime() }
+        val sortedPlanTaskList = planTaskList.sortedByDescending { it.getTotalPlanCostTime() }
         sortedPlanTaskList.forEach { planTask ->
             //            if (planTask.isSingleStepTask()) {
 //                singleStepPlanTaskList += planTask
@@ -45,17 +40,17 @@ class Planner {
                 val planLine = planLineGroup.findSuitablePlanLine() ?: error("$groupKey no suitable plan line")
                 var beginTime = 0L
                 if (previousPlanLine != null) {
-                    beginTime = previousPlanLine.getLastIdleTime()
+                    beginTime = previousPlanLine.getLastIdleTime(planTaskStep.planCostTime)
                 }
-                logger.info("add plan task step, task key:%s, plan line group key:%s, begin time:%s", planTask.key, planTaskStep.planLineGroupKey, beginTime)
+                logger.info("plan line name:%s, add plan task step, task key:%s, plan line group key:%s, begin time:%s", planLine.name, planTask.key, planTaskStep.planLineGroupKey, beginTime)
                 planLine.addPlanTaskStep(planTask, planTaskStep, beginTime)
                 previousPlanLine = planLine
             }
         }
     }
 
-    fun print() {
-        this.planLineGroupList.forEach { planLineGroup ->
+    fun print(planLineGroupList: List<PlanLineGroup>) {
+        planLineGroupList.forEach { planLineGroup ->
             logger.info("group key:%s", planLineGroup.key)
             planLineGroup.planLineList.forEach { planLine ->
                 planLine.planStepList.forEach { planStep ->
@@ -63,6 +58,7 @@ class Planner {
                     val planTaskStep = planStep.planTaskStep
                     logger.info("plan task key:%s, plan task step, plan line group key:%s, plan cost time:%s, begin time:%s, end time:%s, cost time:%s", planTask.key, planTaskStep.planLineGroupKey, planTaskStep.planCostTime, planStep.planBeginTime, planStep.planEndTime, planTaskStep.planCostTime)
                 }
+                logger.info("plan line name:%s, total plan cost time:%s", planLine.name, planLine.getTotalPlanCostTime())
             }
         }
     }

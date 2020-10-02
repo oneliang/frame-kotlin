@@ -1,9 +1,10 @@
 package com.oneliang.ktx.frame.planner
 
+import com.oneliang.ktx.util.common.sumByLong
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.math.Segmenter
 
-class PlanLine {
+class PlanLine(val name: String) {
     companion object {
         private val logger = LoggerManager.getLogger(PlanLine::class)
     }
@@ -63,7 +64,7 @@ class PlanLine {
         }
     }
 
-    fun getLastIdleTime(length: Long = 0L): Long {
+    fun getLastIdleTime(length: Long): Long {
         return if (this.planStepList.isEmpty()) {//when plan step list is empty, get the first plan time
             this.planTimeList.first().begin
         } else {
@@ -77,6 +78,10 @@ class PlanLine {
     }
 
     fun getTotalPlanCostTime(): Long {
+        return this.planStepList.sumByLong { it.planEndTime - it.planBeginTime }
+    }
+
+    fun getLastPlanEndTime(): Long {
         return this.planStepList.lastOrNull()?.planEndTime ?: 0L
     }
 }
