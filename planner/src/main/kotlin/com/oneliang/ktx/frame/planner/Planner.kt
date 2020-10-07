@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.planner
 
 import com.oneliang.ktx.util.common.toMap
+import com.oneliang.ktx.util.common.toUtilDate
 import com.oneliang.ktx.util.logging.LoggerManager
 
 object Planner {
@@ -49,14 +50,16 @@ object Planner {
         }
     }
 
-    fun print(planLineGroupList: List<PlanLineGroup>) {
+    fun print(planLineGroupList: List<PlanLineGroup>, beginTime: Long) {
         planLineGroupList.forEach { planLineGroup ->
             logger.info("group key:%s", planLineGroup.key)
             planLineGroup.planLineList.forEach { planLine ->
                 planLine.planStepList.forEach { planStep ->
                     val planTask = planStep.planTask
                     val planTaskStep = planStep.planTaskStep
-                    logger.info("plan task key:%s, plan task step, plan line group key:%s, plan cost time:%s, begin time:%s, end time:%s, cost time:%s", planTask.key, planTaskStep.planLineGroupKey, planTaskStep.planCostTime, planStep.planBeginTime, planStep.planEndTime, planTaskStep.planCostTime)
+                    val planBeginDate = (beginTime + planStep.planBeginTime).toUtilDate()
+                    val planEndDate = (beginTime + planStep.planEndTime).toUtilDate()
+                    logger.info("plan task key:%s, plan task step, plan line group key:%s, begin time:%s, end time:%s, cost time:%s", planTask.key, planTaskStep.planLineGroupKey, planBeginDate, planEndDate, planTaskStep.planCostTime)
                 }
                 logger.info("plan line name:%s, total plan cost time:%s", planLine.name, planLine.getTotalPlanCostTime())
             }
