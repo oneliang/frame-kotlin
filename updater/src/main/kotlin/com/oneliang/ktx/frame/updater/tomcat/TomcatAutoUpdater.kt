@@ -107,6 +107,13 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
         }
     }
 
+    private fun removeTomcatLogDirectory(session: Session, war: Configuration.War) {
+        val logDirectory = war.remoteTomcatLogDirectory + Constants.Symbol.SLASH_LEFT + Constants.Symbol.WILDCARD
+        Ssh.exec(session, "rm -rf $logDirectory") {
+            logger.info(Ssh.decodeInputStream(it.inputStream))
+        }
+    }
+
     private fun unzipWar(session: Session, war: Configuration.War) {
         Ssh.exec(session, "unzip -d ${war.remoteTomcatWebAppDirectory} ${war.remoteWarFullFilename}") {
             logger.info(Ssh.decodeInputStream(it.inputStream))
@@ -147,6 +154,8 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                 get() = "$remoteTomcatDirectory/bin/startup.sh"
             val remoteTomcatWebAppDirectory: String
                 get() = "$remoteTomcatDirectory/webapps"
+            val remoteTomcatLogDirectory: String
+                get() = "$remoteTomcatDirectory/logs"
             var remoteWarName = Constants.String.BLANK
             val remoteWarFullFilename: String
                 get() = "$remoteTomcatWebAppDirectory/$remoteWarName"
@@ -167,6 +176,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                 val uploadResult = uploadWarForRetry(session, it)
                 if (uploadResult) {
                     removeWarDirectory(session, it)
+                    removeTomcatLogDirectory(session, it)
 //                unzipWar(session, it)
                     startupTomcat(session, it)
                     val tomcatPidListAfterStartup = findTomcatProcessPid(session, it)
