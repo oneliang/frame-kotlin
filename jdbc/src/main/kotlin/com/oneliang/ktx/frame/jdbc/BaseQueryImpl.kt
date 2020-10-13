@@ -41,7 +41,7 @@ open class BaseQueryImpl : BaseQuery {
             }
             val begin = System.currentTimeMillis()
             preparedStatement.execute()
-            logger.info("execute cost:%s, sql:%s", (System.currentTimeMillis() - begin), parsedSql)
+            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameters.joinToString())
         } catch (e: Throwable) {
             throw QueryException(e)
         } finally {
@@ -77,7 +77,7 @@ open class BaseQueryImpl : BaseQuery {
             val sql = SqlUtil.selectSql(selectColumns, table, condition, mappingBean)
             resultSet = this.executeQueryBySql(connection, sql, parameters)
             list = SqlUtil.resultSetToObjectList(resultSet, kClass, mappingBean, this.sqlProcessor)
-            logger.debug("sql select result:%s, sql:%s", list.size, sql)
+            logger.debug("sql select result:%s, sql:%s, parameters:[%s]", list.size, sql, parameters.joinToString())
         } catch (e: Throwable) {
             throw QueryException(e)
         } finally {
@@ -226,7 +226,7 @@ open class BaseQueryImpl : BaseQuery {
             }
             val begin = System.currentTimeMillis()
             resultSet = preparedStatement.executeQuery()
-            logger.info("execute cost:%s, sql:%s", (System.currentTimeMillis() - begin), parsedSql)
+            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameters.joinToString())
         } catch (e: Throwable) {
             throw QueryException(e)
         }
@@ -458,7 +458,7 @@ open class BaseQueryImpl : BaseQuery {
             }
             val begin = System.currentTimeMillis()
             preparedStatement!!.execute()
-            logger.info("execute cost:%s, sql:%s", (System.currentTimeMillis() - begin), parsedSql)
+            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameters.joinToString())
             resultSet = preparedStatement.generatedKeys
             if (resultSet != null && resultSet.next()) {
                 id = resultSet.getInt(1)
@@ -659,7 +659,7 @@ open class BaseQueryImpl : BaseQuery {
             }
             val begin = System.currentTimeMillis()
             updateResult = preparedStatement.executeUpdate()
-            logger.info("execute cost:%s, sql update result:%s, sql:%s", (System.currentTimeMillis() - begin), updateResult, parsedSql)
+            logger.info("execute cost:%s, sql update result:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), updateResult, parsedSql, parameters.joinToString())
         } catch (e: Throwable) {
             throw QueryException(e)
         } finally {
