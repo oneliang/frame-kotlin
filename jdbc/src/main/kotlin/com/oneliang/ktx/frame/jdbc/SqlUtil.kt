@@ -216,7 +216,7 @@ object SqlUtil {
                         throw NullPointerException("ids can not be null or empty.select id type:${selectIdType}")
                     }
                     val idsJson = ids.toJson()
-                    val idsSql = idsJson.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), "").replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), "")
+                    val idsSql = idsJson.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), Constants.String.BLANK).replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), Constants.String.BLANK)
                     condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " IN ($idsSql)")
                 }
             }
