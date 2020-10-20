@@ -138,6 +138,9 @@ open class BaseQueryImpl : BaseQuery {
     </T> */
     @Throws(QueryException::class)
     private fun <T : Any, IdType : Any> executeQueryByIdOrIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>, singleId: Boolean): List<T> {
+        if (ids.isEmpty()) {
+            return emptyList()
+        }
         val list: List<T>
         var resultSet: ResultSet? = null
         try {
