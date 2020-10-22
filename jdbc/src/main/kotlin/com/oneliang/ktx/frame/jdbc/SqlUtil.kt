@@ -81,25 +81,25 @@ object SqlUtil {
 
     /**
      * Method: the simple select sql
-     * @param columns can be null
+     * @param selectColumns can be empty
      * @param table can not be null
-     * @param condition can be null
+     * @param condition can be blank
      * @return String
      */
-    fun selectSql(columns: Array<String> = emptyArray(), table: String, condition: String = Constants.String.BLANK): String {
-        var selectColumn = StringBuilder()
-        if (columns.isNotEmpty()) {
-            for (column in columns) {
-                selectColumn.append(column + Constants.Symbol.COMMA)
+    fun selectSql(selectColumns: Array<String> = emptyArray(), table: String, condition: String = Constants.String.BLANK): String {
+        var selectColumnStringBuilder = StringBuilder()
+        if (selectColumns.isNotEmpty()) {
+            for (selectColumn in selectColumns) {
+                selectColumnStringBuilder.append(selectColumn + Constants.Symbol.COMMA)
             }
-            selectColumn = selectColumn.delete(selectColumn.length - 1, selectColumn.length)
+            selectColumnStringBuilder = selectColumnStringBuilder.delete(selectColumnStringBuilder.length - 1, selectColumnStringBuilder.length)
         } else {
-            selectColumn.append(Constants.Symbol.WILDCARD)
+            selectColumnStringBuilder.append(Constants.Symbol.WILDCARD)
         }
         val sql = StringBuilder()
         sql.append("SELECT ")
         sql.append("DISTINCT ")
-        sql.append(selectColumn)
+        sql.append(selectColumnStringBuilder)
         sql.append(" FROM ")
         sql.append(table)
         sql.append(" WHERE 1=1 ")
@@ -110,15 +110,15 @@ object SqlUtil {
     /**
      * Method: class to select sql
      * @param <T>
-     * @param columns String[] which columns do you select
+     * @param selectColumns String[] which columns do you select
      * @param table
      * @param condition
      * @param mappingBean
      * @return String
     </T> */
-    fun selectSql(columns: Array<String>, table: String, condition: String = Constants.String.BLANK, mappingBean: MappingBean?): String {
+    fun selectSql(selectColumns: Array<String>, table: String, condition: String = Constants.String.BLANK, mappingBean: MappingBean?): String {
         val tempTable = fixTable(table, mappingBean)
-        return selectSql(columns, tempTable, condition)
+        return selectSql(selectColumns, tempTable, condition)
     }
 
     fun insertSql(table: String, columnNameArray: Array<String>, valueArray: Array<String>): String {
