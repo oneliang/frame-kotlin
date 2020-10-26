@@ -6,6 +6,7 @@ val VERSION by extra(Constants.version)
 buildscript {
     repositories {
         mavenLocal()
+//        maven("https://maven.aliyun.com/repository/public/")
         google()
         jcenter()
     }
@@ -20,6 +21,7 @@ buildscript {
 allprojects {
     repositories {
         mavenLocal()
+//        maven("https://maven.aliyun.com/repository/public/")
         google()
         jcenter()
     }
