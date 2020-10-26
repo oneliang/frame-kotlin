@@ -213,7 +213,7 @@ interface Query : BaseQuery {
     fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType): T?
 
     /**
-     * Method: select object by ids, only for single id column
+     * Method: select object list by ids, only for single id column
      * @param <T>
      * @param kClass
      * @param ids
@@ -221,7 +221,7 @@ interface Query : BaseQuery {
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any, IdType : Any> selectObjectByIds(kClass: KClass<T>, ids: Array<IdType>): List<T>
+    fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>): List<T>
 
     /**
      * Method: select object, by column, table, condition, parameters,it is sql binding
