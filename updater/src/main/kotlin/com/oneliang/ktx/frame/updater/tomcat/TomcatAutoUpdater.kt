@@ -43,7 +43,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
         private fun uploadWarForRetry(session: Session, war: Configuration.War): Boolean {
             logger.info("upload local war:[%s], to remote war:[%s]", war.localWarFullFilename, war.remoteWarFullFilename)
             if (!war.localWarFullFilename.fileExists()) {
-                logger.error("file not exists, file:${war.localWarFullFilename} ")
+                logger.error("file not exists, file:${war.localWarFullFilename}")
                 return false
             }
             var uploadResult = uploadWar(session, war)
