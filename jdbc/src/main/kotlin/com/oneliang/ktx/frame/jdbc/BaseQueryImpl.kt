@@ -32,7 +32,8 @@ open class BaseQueryImpl : BaseQuery {
         var preparedStatement: PreparedStatement? = null
         try {
             parsedSql = DatabaseMappingUtil.parseSql(parsedSql)
-            logger.info(parsedSql)
+            val parameterString = parameters.joinToString()
+            logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             preparedStatement = connection.prepareStatement(parsedSql)
             var index = 1
             for (parameter in parameters) {
@@ -41,7 +42,7 @@ open class BaseQueryImpl : BaseQuery {
             }
             val begin = System.currentTimeMillis()
             preparedStatement.execute()
-            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameters.joinToString())
+            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameterString)
         } catch (e: Throwable) {
             throw QueryException(e)
         } finally {
@@ -218,7 +219,8 @@ open class BaseQueryImpl : BaseQuery {
         val resultSet: ResultSet
         try {
             val parsedSql = DatabaseMappingUtil.parseSql(sql)
-            logger.info(parsedSql)
+            val parameterString = parameters.joinToString()
+            logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             val preparedStatement = connection.prepareStatement(parsedSql)
             if (parameters.isNotEmpty()) {
                 var index = 1
@@ -229,7 +231,7 @@ open class BaseQueryImpl : BaseQuery {
             }
             val begin = System.currentTimeMillis()
             resultSet = preparedStatement.executeQuery()
-            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameters.joinToString())
+            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameterString)
         } catch (e: Throwable) {
             throw QueryException(e)
         }
@@ -452,7 +454,8 @@ open class BaseQueryImpl : BaseQuery {
         var resultSet: ResultSet? = null
         try {
             val parsedSql = DatabaseMappingUtil.parseSql(sql)
-            logger.info(parsedSql)
+            val parameterString = parameters.joinToString()
+            logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             preparedStatement = connection.prepareStatement(parsedSql, Statement.RETURN_GENERATED_KEYS)
             var index = 1
             for (parameter in parameters) {
@@ -461,7 +464,7 @@ open class BaseQueryImpl : BaseQuery {
             }
             val begin = System.currentTimeMillis()
             preparedStatement!!.execute()
-            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameters.joinToString())
+            logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameterString)
             resultSet = preparedStatement.generatedKeys
             if (resultSet != null && resultSet.next()) {
                 id = resultSet.getInt(1)
@@ -653,7 +656,8 @@ open class BaseQueryImpl : BaseQuery {
         val updateResult: Int
         try {
             val parsedSql = DatabaseMappingUtil.parseSql(sql)
-            logger.info(parsedSql)
+            val parameterString = parameters.joinToString()
+            logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             preparedStatement = connection.prepareStatement(parsedSql)!!
             var index = 1
             for (parameter in parameters) {
@@ -662,7 +666,7 @@ open class BaseQueryImpl : BaseQuery {
             }
             val begin = System.currentTimeMillis()
             updateResult = preparedStatement.executeUpdate()
-            logger.info("execute cost:%s, sql update result:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), updateResult, parsedSql, parameters.joinToString())
+            logger.info("execute cost:%s, sql update result:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), updateResult, parsedSql, parameterString)
         } catch (e: Throwable) {
             throw QueryException(e)
         } finally {
