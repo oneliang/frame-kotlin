@@ -202,10 +202,11 @@ class FunctionExecutor(private val code: String) {
         }
         val originalResult = originalFunctionResultMap["${totalResultCode}$RETURN_SUFFIX"]?.toDouble() ?: 0.0
         val result = stableValue + totalValue
-        val optimizeResult = optimizeResultProcessor(result)
+        val fixResult = if (result.isNaN()) 0.0 else result
+        val optimizeResult = optimizeResultProcessor(fixResult)
         logger.info("Addition:$stableValue, total value:$totalValue")
-        val match = abs(result - originalResult) < 10
-        logger.info("Result:%.2f, optimize result:%s, original result:%s, match:%s".format(result, optimizeResult, originalResult, match))
+        val match = abs(fixResult - originalResult) < 10
+        logger.info("Result:%.2f, fix result:%s, optimize result:%s, original result:%s, match:%s".format(result, fixResult, optimizeResult, originalResult, match))
         val totalFunctionResultItem = FunctionResultItem(totalResultCode, totalResultCode, value = optimizeResult, codeType = functionResultCode)
         functionResultItemMap[totalResultCode] = totalFunctionResultItem
         functionResultItemMappingMap[totalResultCode] = totalFunctionResultItem
