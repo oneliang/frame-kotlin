@@ -28,10 +28,9 @@ open class BaseQueryImpl : BaseQuery {
      */
     @Throws(QueryException::class)
     override fun executeBySql(connection: Connection, sql: String, parameters: Array<*>) {
-        var parsedSql = sql
         var preparedStatement: PreparedStatement? = null
         try {
-            parsedSql = DatabaseMappingUtil.parseSql(parsedSql)
+            val parsedSql = DatabaseMappingUtil.parseSql(sql)
             val parameterString = parameters.joinToString()
             logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             preparedStatement = connection.prepareStatement(parsedSql)
@@ -612,16 +611,16 @@ open class BaseQueryImpl : BaseQuery {
             var preparedStatement: PreparedStatement? = null
             try {
                 val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
-                var (sql, fieldNameList) = when (executeType) {
+                val (sql, fieldNameList) = when (executeType) {
                     BaseQuery.ExecuteType.INSERT -> SqlInjectUtil.classToInsertSql(kClass, table, mappingBean)
                     BaseQuery.ExecuteType.UPDATE_BY_ID -> SqlInjectUtil.classToUpdateSql(kClass, table, Constants.String.BLANK, true, mappingBean)
                     BaseQuery.ExecuteType.UPDATE_NOT_BY_ID -> SqlInjectUtil.classToUpdateSql(kClass, table, Constants.String.BLANK, false, mappingBean)
                     BaseQuery.ExecuteType.DELETE_BY_ID -> SqlInjectUtil.classToDeleteSql(kClass, table, Constants.String.BLANK, true, mappingBean)
                     BaseQuery.ExecuteType.DELETE_NOT_BY_ID -> SqlInjectUtil.classToDeleteSql(kClass, table, Constants.String.BLANK, false, mappingBean)
                 }
-                sql = DatabaseMappingUtil.parseSql(sql)
-                logger.info(sql)
-                preparedStatement = connection.prepareStatement(sql)
+                val parsedSql = DatabaseMappingUtil.parseSql(sql)
+                logger.info(parsedSql)
+                preparedStatement = connection.prepareStatement(parsedSql)
                 for (instance in collection) {
                     var index = 1
                     for (fieldName in fieldNameList) {
@@ -634,7 +633,7 @@ open class BaseQueryImpl : BaseQuery {
                 val begin = System.currentTimeMillis()
                 rows = preparedStatement.executeBatch()
                 preparedStatement.clearBatch()
-                logger.info("execute cost:%s, sql execute batch result:%s, sql:%s", (System.currentTimeMillis() - begin), rows.size, sql)
+                logger.info("execute cost:%s, sql execute batch result:%s, sql:%s", (System.currentTimeMillis() - begin), rows.size, parsedSql)
                 rows
             } finally {
                 preparedStatement?.close()
