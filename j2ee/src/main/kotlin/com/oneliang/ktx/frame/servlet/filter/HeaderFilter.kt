@@ -26,7 +26,6 @@ class HeaderFilter : Filter {
     private val accessControlSet = mutableSetOf<String>()
 
     /**
-     *
      * Method: public void init(FilterConfig filterConfig) throws ServletException
      * @param filterConfig
      * @throws ServletException
@@ -44,7 +43,7 @@ class HeaderFilter : Filter {
                     val headerJsonArray = JsonArray(fixResponseHeaderJson)
                     for (i in 0 until headerJsonArray.length()) {
                         val headerJsonObject = headerJsonArray.getJsonObject(i)
-                        headerList.add(HttpUtil.HttpNameValue(headerJsonObject.getString(HEADER_KEY), headerJsonObject.getString(HEADER_VALUE)))
+                        this.headerList.add(HttpUtil.HttpNameValue(headerJsonObject.getString(HEADER_KEY), headerJsonObject.getString(HEADER_VALUE)))
                     }
                 }
             } catch (e: Throwable) {
@@ -62,7 +61,6 @@ class HeaderFilter : Filter {
     }
 
     /**
-     *
      * Method: public void doFilter(ServletRequest,ServletResponse,FilterChain) throws IOException,ServletException
      * @param servletRequest
      * @param servletResponse
@@ -73,10 +71,10 @@ class HeaderFilter : Filter {
     @Throws(IOException::class, ServletException::class)
     override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
         val httpServletResponse = servletResponse as HttpServletResponse
-        headerList.forEach {
+        this.headerList.forEach {
             httpServletResponse.setHeader(it.name, it.value)
         }
-        if (accessControlSet.isNotEmpty()) {
+        if (this.accessControlSet.isNotEmpty()) {
             val httpServletRequest = servletRequest as HttpServletRequest
             val httpHeaderOrigin = httpServletRequest.getHeader(Constants.Http.HeaderKey.ORIGIN).nullToBlank()
             logger.info("header[Origin] is:%s", httpHeaderOrigin)
