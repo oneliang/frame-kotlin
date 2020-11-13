@@ -89,10 +89,7 @@ object SqlUtil {
     fun selectSql(selectColumns: Array<String> = emptyArray(), table: String, condition: String = Constants.String.BLANK): String {
         var selectColumnStringBuilder = StringBuilder()
         if (selectColumns.isNotEmpty()) {
-            for (selectColumn in selectColumns) {
-                selectColumnStringBuilder.append(selectColumn + Constants.Symbol.COMMA)
-            }
-            selectColumnStringBuilder = selectColumnStringBuilder.delete(selectColumnStringBuilder.length - 1, selectColumnStringBuilder.length)
+            selectColumnStringBuilder.append(selectColumns.joinToString(Constants.Symbol.COMMA))
         } else {
             selectColumnStringBuilder.append(Constants.Symbol.WILDCARD)
         }
