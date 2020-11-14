@@ -14,15 +14,15 @@ import java.util.zip.GZIPInputStream
 
 object CollectUtil {
     private val logger = LoggerManager.getLogger(CollectUtil::class)
+
     /**
      * collect from http
-     *
      * @param httpUrl
      * @param httpHeaderList
      * @param advancedOption
      * @return ByteArrayOutputStream
      */
-    fun collectFromHttp(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), advancedOption: AdvancedOption? = null): ByteArrayOutputStream {
+    fun collectFromHttp(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), advancedOption: AdvancedOption? = null): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
         HttpUtil.sendRequestGet(httpUrl = httpUrl, httpHeaderList = httpHeaderList, advancedOption = advancedOption, callback = object : Callback {
             @Throws(Exception::class)
@@ -44,34 +44,32 @@ object CollectUtil {
 
             @Throws(Exception::class)
             override fun httpNotOkCallback(responseCode: Int, headerFieldMap: Map<String, List<String>>, errorInputStream: InputStream?) {
-                logger.error(String.format("response not ok, http:%s, response code:%s", httpUrl, responseCode))
+                logger.error("Response not ok, http:%s, response code:%s", httpUrl, responseCode)
             }
         })
-        return byteArrayOutputStream
+        return byteArrayOutputStream.toByteArray()
     }
 
     /**
      * collect from http with cache
-     *
      * @param httpUrl
      * @param httpHeaderList
      * @param cacheDirectory
      * @return ByteArrayOutputStream
      */
-    fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), cacheDirectory: String): ByteArrayOutputStream {
-        val byteArrayOutputStream: ByteArrayOutputStream
+    fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), cacheDirectory: String): ByteArray {
+        val byteArray: ByteArray
         val filename = httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, "#")
         val fullFilename = cacheDirectory + Constants.Symbol.SLASH_LEFT + filename + Constants.File.TXT
         if (FileUtil.exists(fullFilename)) {
-            byteArrayOutputStream = collectFromLocal(fullFilename)
+            byteArray = collectFromLocal(fullFilename)
         } else {
-            byteArrayOutputStream = collectFromHttp(httpUrl, httpHeaderList)
-            val byteArray = byteArrayOutputStream.toByteArray()
+            byteArray = collectFromHttp(httpUrl, httpHeaderList)
             if (byteArray.isNotEmpty()) {
                 FileUtil.writeFile(fullFilename, byteArray)
             }
         }
-        return byteArrayOutputStream
+        return byteArray
     }
 
     /**
@@ -80,31 +78,25 @@ object CollectUtil {
      * @param fullFilename
      * @return ByteArrayOutputStream
      */
-    fun collectFromLocal(fullFilename: String): ByteArrayOutputStream {
+    fun collectFromLocal(fullFilename: String): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
         var fileInputStream: FileInputStream? = null
         try {
             fileInputStream = FileInputStream(fullFilename)
-            val buffer = ByteArray(Constants.Capacity.BYTES_PER_KB)
-            var dataLength = fileInputStream.read(buffer, 0, buffer.size)
-            while (dataLength != -1) {
-                byteArrayOutputStream.write(buffer, 0, dataLength)
-                byteArrayOutputStream.flush()
-                dataLength = fileInputStream.read(buffer, 0, buffer.size)
+            fileInputStream.use {
+                it.copyTo(byteArrayOutputStream)
             }
         } catch (e: Exception) {
             throw CollectUtilException(fullFilename, e)
         } finally {
             try {
-                if (fileInputStream != null) {
-                    fileInputStream.close()
-                }
+                fileInputStream?.close()
                 byteArrayOutputStream.close()
             } catch (e: Exception) {
                 throw CollectUtilException(fullFilename, e)
             }
         }
-        return byteArrayOutputStream
+        return byteArrayOutputStream.toByteArray()
     }
 
     class CollectUtilException : RuntimeException {
