@@ -27,12 +27,9 @@ object CollectUtil {
         HttpUtil.sendRequestGet(httpUrl = httpUrl, httpHeaderList = httpHeaderList, advancedOption = advancedOption, callback = object : Callback {
             @Throws(Exception::class)
             override fun httpOkCallback(headerFieldMap: Map<String, List<String>>, inputStream: InputStream, contentLength: Int) {
-                var needToUnzip = false
-                if (headerFieldMap.containsKey(Constants.Http.HeaderKey.CONTENT_ENCODING)) {
-                    needToUnzip = headerFieldMap[Constants.Http.HeaderKey.CONTENT_ENCODING]?.contains(Constants.CompressType.GZIP) ?: false
-                }
+                val needToUnGzip = headerFieldMap[Constants.Http.HeaderKey.CONTENT_ENCODING]?.contains(Constants.CompressType.GZIP) ?: false
                 var newInputStream = inputStream
-                if (needToUnzip) {
+                if (needToUnGzip) {
                     newInputStream = GZIPInputStream(inputStream)
                 }
                 byteArrayOutputStream.use {
@@ -64,7 +61,7 @@ object CollectUtil {
     fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), cacheDirectory: String): ByteArrayOutputStream {
         val byteArrayOutputStream: ByteArrayOutputStream
         val filename = httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, "#")
-        val fullFilename = cacheDirectory + "/" + filename + Constants.File.TXT
+        val fullFilename = cacheDirectory + Constants.Symbol.SLASH_LEFT + filename + Constants.File.TXT
         if (FileUtil.exists(fullFilename)) {
             byteArrayOutputStream = collectFromLocal(fullFilename)
         } else {
