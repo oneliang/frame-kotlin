@@ -153,7 +153,7 @@ object ActionUtil {
         var result = false
         try {
             val byteArrayOutputStream = includeJsp(jspUriPath, servletRequest, servletResponse)
-            FileUtil.createFile(saveFullFilename)
+            FileUtil.createFileIncludeDirectory(saveFullFilename)
             val fileOutputStream = FileOutputStream(saveFullFilename)
             val bufferedWriter = BufferedWriter(OutputStreamWriter(fileOutputStream, Constants.Encoding.UTF8))
             bufferedWriter.write(String(byteArrayOutputStream.toByteArray()))

@@ -93,7 +93,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
     override fun <T : Any> saveToCache(key: Any, value: T) {
         val valueKClass = value::class
         val cacheFullFilename = this.cacheDirectory + generateCacheRelativeFilename(key, valueKClass)
-        FileUtil.createFile(cacheFullFilename)
+        FileUtil.createFileIncludeDirectory(cacheFullFilename)
         when (valueKClass) {
             String::class -> {
                 try {
