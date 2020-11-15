@@ -36,7 +36,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             error("parameter(cacheDirectory) can not be exists file, only can be directory or exists directory.")
         }
         this.cacheDirectory = cacheDirectoryFile.absolutePath
-        logger.info(String.format("Cache directory:%s", this.cacheDirectory))
+        logger.info("Cache directory:%s", this.cacheDirectory)
     }
 
     /**
@@ -80,7 +80,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             ByteArray::class -> {
                 return FileUtil.readFile(cacheFullFilename) as T
             }
-            else -> logger.error(String.format("get from cache unsupport the class:%s", cacheType))
+            else -> logger.error("get from cache unsupport the class:%s", cacheType)
         }
         return null
     }
@@ -105,7 +105,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             ByteArray::class -> {
                 FileUtil.writeFile(cacheFullFilename, value as ByteArray)
             }
-            else -> logger.error(String.format("save to cache unsupport the class:%s", valueKClass))
+            else -> logger.error("save to cache unsupport the class:%s", valueKClass)
         }
     }
 

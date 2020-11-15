@@ -1,14 +1,13 @@
 package com.oneliang.ktx.frame.collector
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.file.FileUtil
+import com.oneliang.ktx.frame.cache.FileCacheManager
 import com.oneliang.ktx.util.http.HttpUtil
 import com.oneliang.ktx.util.http.HttpUtil.AdvancedOption
 import com.oneliang.ktx.util.http.HttpUtil.Callback
 import com.oneliang.ktx.util.http.HttpUtil.HttpNameValue
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.ByteArrayOutputStream
-import java.io.FileInputStream
 import java.io.InputStream
 import java.util.zip.GZIPInputStream
 
@@ -54,49 +53,19 @@ object CollectUtil {
      * collect from http with cache
      * @param httpUrl
      * @param httpHeaderList
-     * @param cacheDirectory
+     * @param fileCacheManager
      * @return ByteArrayOutputStream
      */
-    fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), cacheDirectory: String): ByteArray {
-        val byteArray: ByteArray
+    fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), fileCacheManager: FileCacheManager): ByteArray {
         val filename = httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, Constants.Symbol.POUND_KEY)
-        val fullFilename = cacheDirectory + Constants.Symbol.SLASH_LEFT + filename + Constants.Symbol.DOT + Constants.File.TXT
-        if (FileUtil.exists(fullFilename)) {
-            byteArray = collectFromLocal(fullFilename)
-        } else {
+        var byteArray = fileCacheManager.getFromCache(filename, ByteArray::class)
+        if (byteArray == null) {
             byteArray = collectFromHttp(httpUrl, httpHeaderList)
             if (byteArray.isNotEmpty()) {
-                FileUtil.writeFile(fullFilename, byteArray)
+                fileCacheManager.saveToCache(filename, byteArray)
             }
         }
         return byteArray
-    }
-
-    /**
-     * collect from local
-     *
-     * @param fullFilename
-     * @return ByteArrayOutputStream
-     */
-    fun collectFromLocal(fullFilename: String): ByteArray {
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        var fileInputStream: FileInputStream? = null
-        try {
-            fileInputStream = FileInputStream(fullFilename)
-            fileInputStream.use {
-                it.copyTo(byteArrayOutputStream)
-            }
-        } catch (e: Exception) {
-            throw CollectUtilException(fullFilename, e)
-        } finally {
-            try {
-                fileInputStream?.close()
-                byteArrayOutputStream.close()
-            } catch (e: Exception) {
-                throw CollectUtilException(fullFilename, e)
-            }
-        }
-        return byteArrayOutputStream.toByteArray()
     }
 
     class CollectUtilException : RuntimeException {
