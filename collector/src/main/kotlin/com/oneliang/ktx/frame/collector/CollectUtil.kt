@@ -59,8 +59,8 @@ object CollectUtil {
      */
     fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), cacheDirectory: String): ByteArray {
         val byteArray: ByteArray
-        val filename = httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, "#")
-        val fullFilename = cacheDirectory + Constants.Symbol.SLASH_LEFT + filename + Constants.File.TXT
+        val filename = httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, Constants.Symbol.POUND_KEY)
+        val fullFilename = cacheDirectory + Constants.Symbol.SLASH_LEFT + filename + Constants.Symbol.DOT + Constants.File.TXT
         if (FileUtil.exists(fullFilename)) {
             byteArray = collectFromLocal(fullFilename)
         } else {
