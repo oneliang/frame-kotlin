@@ -2,7 +2,8 @@ package com.oneliang.ktx.frame.collector
 
 import com.oneliang.ktx.Constants
 
-abstract class HttpCollector<T> : Collector<String, T> {
+abstract class HttpCollector<FROM,DATA> : Collector<FROM, DATA> {
+
     /**
      * replace all blank
      *

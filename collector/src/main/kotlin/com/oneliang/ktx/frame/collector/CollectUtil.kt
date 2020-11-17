@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.collector
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.cache.FileCacheManager
+import com.oneliang.ktx.util.common.parseRegexGroup
 import com.oneliang.ktx.util.http.HttpUtil
 import com.oneliang.ktx.util.http.HttpUtil.AdvancedOption
 import com.oneliang.ktx.util.http.HttpUtil.Callback
@@ -56,16 +57,85 @@ object CollectUtil {
      * @param fileCacheManager
      * @return ByteArrayOutputStream
      */
-    fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), fileCacheManager: FileCacheManager): ByteArray {
+    fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), fileCacheManager: FileCacheManager? = null): ByteArray {
         val filename = httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, Constants.Symbol.POUND_KEY)
-        var byteArray = fileCacheManager.getFromCache(filename, ByteArray::class)
+        var byteArray = fileCacheManager?.getFromCache(filename, ByteArray::class)
         if (byteArray == null) {
+            logger.debug("collect from http:%s", httpUrl)
             byteArray = collectFromHttp(httpUrl, httpHeaderList)
             if (byteArray.isNotEmpty()) {
-                fileCacheManager.saveToCache(filename, byteArray)
+                fileCacheManager?.saveToCache(filename, byteArray)
             }
+        } else {
+            logger.debug("collect from cache, filename:%s", filename)
         }
         return byteArray
+    }
+
+    /**
+     * collect from http with cache
+     * use for collect rule
+     * @return List<CollectData>
+     */
+    fun collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), fileCacheManager: FileCacheManager? = null, collectRuleList: List<CollectRule> = emptyList()): List<CollectData> {
+        return this.collectFromHttpWithCache(httpUrl, httpHeaderList, fileCacheManager, collectRuleList, object : CollectDataTransformer<List<CollectData>> {
+            override fun transform(collectDataList: List<CollectData>): List<CollectData> {
+                return collectDataList
+            }
+        })
+    }
+
+    /**
+     * collect from http with cache
+     * use for collect rule
+     * @return T
+     */
+    fun <T> collectFromHttpWithCache(httpUrl: String, httpHeaderList: List<HttpNameValue> = emptyList(), fileCacheManager: FileCacheManager? = null, collectRuleList: List<CollectRule> = emptyList(), collectDataTransformer: CollectDataTransformer<T>): T {
+        logger.info("collecting http url:%s", httpUrl)
+        val byteArray = collectFromHttpWithCache(httpUrl, httpHeaderList, fileCacheManager)
+        val responseString = String(byteArray)
+        val collectDataList = mutableListOf<CollectData>()
+        for (collectRule in collectRuleList) {
+            val collectData = CollectData()
+            collectByCollectRule(responseString, collectRule, collectData)
+            collectDataList += collectData
+        }
+        return collectDataTransformer.transform(collectDataList)
+    }
+
+    private fun collectByCollectRule(content: String, collectRule: CollectRule, collectData: CollectData) {
+        if (collectRule.includeOriginalData) {
+            collectData.originalData = content
+        }
+        val list = when (collectRule.type) {
+            CollectRule.Type.REGEX.value -> {
+                parseByRegex(content, collectRule.rule)
+            }
+            CollectRule.Type.XPATH.value -> {
+                parseByXPath(content)
+            }
+            else -> {
+                emptyList()
+            }
+        }
+        collectData.resultList = list
+        collectData.resultInstance = collectRule.resultTransformer?.transform(collectData.resultList)
+        val innerCollectRule = collectRule.innerCollectRule
+        if (innerCollectRule != null) {
+            list.forEach {
+                val resultCollectData = CollectData()
+                collectData.resultCollectDataList += resultCollectData
+                collectByCollectRule(it, innerCollectRule, resultCollectData)
+            }
+        }
+    }
+
+    private fun parseByRegex(content: String, regex: String): List<String> {
+        return content.parseRegexGroup(regex)
+    }
+
+    private fun parseByXPath(content: String): List<String> {
+        return emptyList()
     }
 
     class CollectUtilException : RuntimeException {
@@ -73,4 +143,31 @@ object CollectUtil {
         constructor(cause: Throwable) : super(cause)
         constructor(message: String, cause: Throwable) : super(message, cause)
     }
+
+    class CollectRule(val type: Int = Type.REGEX.value) {
+        enum class Type(val value: Int) {
+            REGEX(0), XPATH(1)
+        }
+
+        var rule = Constants.String.BLANK
+        var includeOriginalData = true
+        var innerCollectRule: CollectRule? = null
+        var resultTransformer: ResultTransformer<*>? = null
+    }
+
+    class CollectData {
+        var originalData = Constants.String.BLANK
+        var resultList = emptyList<String>()
+        var resultInstance: Any? = null
+        val resultCollectDataList = mutableListOf<CollectData>()
+    }
+
+    interface ResultTransformer<T> {
+        fun transform(resultList: List<String>): T
+    }
+
+    interface CollectDataTransformer<T> {
+        fun transform(collectDataList: List<CollectData>): T
+    }
 }
+
