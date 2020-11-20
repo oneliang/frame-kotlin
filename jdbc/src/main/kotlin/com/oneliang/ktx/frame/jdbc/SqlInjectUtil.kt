@@ -42,9 +42,9 @@ object SqlInjectUtil {
                 values.append(Constants.Symbol.QUESTION_MARK + Constants.Symbol.COMMA)
                 parameterList.add(value)
             }
-            val tempTable = SqlUtil.fixTable(table, mappingBean)
+            val fixTable = SqlUtil.fixTable(table, mappingBean)
             sql.append("INSERT INTO ")
-            sql.append(tempTable)
+            sql.append(fixTable)
             sql.append("(" + columnNameStringBuilder.substring(0, columnNameStringBuilder.length - 1) + ")")
             sql.append(" VALUES (" + values.substring(0, values.length - 1) + ")")
         } catch (e: Throwable) {
@@ -81,9 +81,9 @@ object SqlInjectUtil {
             valueStringBuilder.append(Constants.Symbol.QUESTION_MARK + Constants.Symbol.COMMA)
             fieldNameList.add(fieldName)
         }
-        val tempTable = SqlUtil.fixTable(table, mappingBean)
+        val fixTable = SqlUtil.fixTable(table, mappingBean)
         sql.append("INSERT INTO ")
-        sql.append(tempTable)
+        sql.append(fixTable)
         sql.append("(" + columnNameStringBuilder.substring(0, columnNameStringBuilder.length - 1) + ")")
         sql.append(" VALUES (" + valueStringBuilder.substring(0, valueStringBuilder.length - 1) + ")")
         return sql.toString() to fieldNameList
@@ -143,9 +143,9 @@ object SqlInjectUtil {
                     }
                 }
             }
-            val tempTable = SqlUtil.fixTable(table, mappingBean)
+            val fixTable = SqlUtil.fixTable(table, mappingBean)
             sql.append("UPDATE ")
-            sql.append(tempTable)
+            sql.append(fixTable)
             sql.append(" SET " + columnsAndValues.substring(0, columnsAndValues.length - 1))
             sql.append(" WHERE 1=1 $condition $otherCondition")
             parameterList.addAll(valueList)
@@ -196,9 +196,9 @@ object SqlInjectUtil {
                 columnsAndValues.append(result)
             }
         }
-        val tempTable = SqlUtil.fixTable(table, mappingBean)
+        val fixTable = SqlUtil.fixTable(table, mappingBean)
         sql.append("UPDATE ")
-        sql.append(tempTable)
+        sql.append(fixTable)
         sql.append(" SET " + columnsAndValues.substring(0, columnsAndValues.length - 1))
         sql.append(" WHERE 1=1 $condition $otherCondition")
         fieldNameList.addAll(valueList)
@@ -246,8 +246,8 @@ object SqlInjectUtil {
                     }
                 }
             }
-            val tempTable = SqlUtil.fixTable(table, mappingBean)
-            sql = SqlUtil.deleteSql(tempTable, "$condition $otherCondition")
+            val fixTable = SqlUtil.fixTable(table, mappingBean)
+            sql = SqlUtil.deleteSql(fixTable, "$condition $otherCondition")
         } catch (e: Exception) {
             throw SqlInjectUtilException(e)
         }
@@ -285,8 +285,8 @@ object SqlInjectUtil {
                 fieldNameList.add(fieldName)
             }
         }
-        val tempTable = SqlUtil.fixTable(table, mappingBean)
-        val sql = SqlUtil.deleteSql(tempTable, "$condition $otherCondition")
+        val fixTable = SqlUtil.fixTable(table, mappingBean)
+        val sql = SqlUtil.deleteSql(fixTable, "$condition $otherCondition")
         return sql to fieldNameList
     }
 
