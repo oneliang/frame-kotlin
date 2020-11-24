@@ -1,9 +1,10 @@
 package com.oneliang.ktx.frame.cache
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.common.MD5String
-import com.oneliang.ktx.util.common.toFormatString
+import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.file.FileUtil
+import com.oneliang.ktx.util.file.createFileIncludeDirectory
+import com.oneliang.ktx.util.file.write
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.io.UnsupportedEncodingException
@@ -19,12 +20,21 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
      * get format time
      * @return String
      */
-    private val formatTime: String
+    private val formatTime: Pair<String, String>
         get() {
             if (this.cacheRefreshCycle == CacheRefreshCycle.NONE) {
-                return this.cacheRefreshCycle.timeFormat
+                return this.cacheRefreshCycle.timeFormat to this.cacheRefreshCycle.timeFormat
+            } else if (this.cacheRefreshCycle == CacheRefreshCycle.DAY) {
+                val currentDate = Date()
+                val previousDateString = currentDate.getDayZeroTimePrevious(1).toUtilDate().toFormatString(this.cacheRefreshCycle.timeFormat)
+                val currentDateString = currentDate.toFormatString(this.cacheRefreshCycle.timeFormat)
+                return previousDateString to currentDateString
+            } else {//hour
+                val currentDate = Date()
+                val previousDateString = currentDate.getHourZeroTimePrevious(1).toUtilDate().toFormatString(this.cacheRefreshCycle.timeFormat)
+                val currentDateString = currentDate.toFormatString(this.cacheRefreshCycle.timeFormat)
+                return previousDateString to currentDateString
             }
-            return Date().toFormatString(this.cacheRefreshCycle.timeFormat)
         }
 
     init {
@@ -42,7 +52,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
     /**
      * generate cache relative filename
      */
-    private fun <T : Any> generateCacheRelativeFilename(key: Any, cacheType: KClass<T>): String {
+    private fun <T : Any> generateCacheRelativeFilename(key: Any, cacheType: KClass<T>): Pair<String, String> {
         val keyString = key.toString()
         val keyMd5 = key.toString().MD5String()
         val relativePath = StringBuilder()
@@ -52,8 +62,12 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
                 relativePath.append(Constants.Symbol.SLASH_LEFT + keyMd5.substring(i * interval, (i + 1) * interval))
             }
         }
-        val cacheName = keyString + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
-        return relativePath.toString() + Constants.Symbol.SLASH_LEFT + cacheName
+
+        val oldCacheName = keyString + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime.first + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
+        val newCacheName = keyString + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime.second + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
+        val oldRelativeCacheName = relativePath.toString() + Constants.Symbol.SLASH_LEFT + oldCacheName
+        val newRelativeCacheName = relativePath.toString() + Constants.Symbol.SLASH_LEFT + newCacheName
+        return oldRelativeCacheName to newRelativeCacheName
     }
 
     /**
@@ -64,21 +78,26 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
      */
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> getFromCache(key: Any, cacheType: KClass<T>): T? {
-        val cacheFullFilename = this.cacheDirectory + generateCacheRelativeFilename(key, cacheType)
-        val cacheFile = File(cacheFullFilename)
-        if (!cacheFile.exists() || cacheFile.length() == 0L) {
+        val relativeCacheName = generateCacheRelativeFilename(key, cacheType)
+        val oldCacheFullFilename = this.cacheDirectory + relativeCacheName.first
+        val newCacheFullFilename = this.cacheDirectory + relativeCacheName.second
+        val newCacheFile = File(newCacheFullFilename)
+        if (!newCacheFile.exists() || newCacheFile.length() == 0L) {
+            //try to delete old cache when new cache does not exist
+            val oldCacheFile = File(oldCacheFullFilename)
+            oldCacheFile.delete()
             return null
         }
         when (cacheType) {
             String::class -> {
                 try {
-                    return String(FileUtil.readFile(cacheFullFilename), Charsets.UTF_8) as T
+                    return String(FileUtil.readFile(newCacheFullFilename), Charsets.UTF_8) as T
                 } catch (e: UnsupportedEncodingException) {
                     logger.error(Constants.Base.EXCEPTION, e)
                 }
             }
             ByteArray::class -> {
-                return FileUtil.readFile(cacheFullFilename) as T
+                return FileUtil.readFile(newCacheFullFilename) as T
             }
             else -> logger.error("get from cache unsupport the class:%s", cacheType)
         }
@@ -91,21 +110,23 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
      * @param value
      */
     override fun <T : Any> saveToCache(key: Any, value: T) {
-        val valueKClass = value::class
-        val cacheFullFilename = this.cacheDirectory + generateCacheRelativeFilename(key, valueKClass)
-        FileUtil.createFileIncludeDirectory(cacheFullFilename)
-        when (valueKClass) {
+        val cacheType = value::class
+        val relativeCacheName = generateCacheRelativeFilename(key, cacheType)
+        val newCacheFullFilename = this.cacheDirectory + relativeCacheName.second
+        val newCacheFile = newCacheFullFilename.toFile()
+        newCacheFile.createFileIncludeDirectory()
+        when (cacheType) {
             String::class -> {
                 try {
-                    FileUtil.writeFile(cacheFullFilename, (value as String).toByteArray(Charsets.UTF_8))
+                    newCacheFile.write((value as String).toByteArray())
                 } catch (e: UnsupportedEncodingException) {
                     logger.error(Constants.Base.EXCEPTION, e)
                 }
             }
             ByteArray::class -> {
-                FileUtil.writeFile(cacheFullFilename, value as ByteArray)
+                newCacheFile.write(value as ByteArray)
             }
-            else -> logger.error("save to cache unsupport the class:%s", valueKClass)
+            else -> logger.error("save to cache unsupport the class:%s", cacheType)
         }
     }
 
