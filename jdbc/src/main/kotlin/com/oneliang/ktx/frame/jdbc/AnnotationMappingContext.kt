@@ -18,7 +18,7 @@ class AnnotationMappingContext : MappingContext() {
         try {
             val classList = AnnotationContextUtil.parseAnnotationContextParameterAndSearchClass(fixParameters, classLoader, classesRealPath, jarClassLoader, Table::class)
             for (kClass in classList) {
-                logger.info("Annotation table mapping class:%s", kClass.toString())
+                logger.debug("Annotation table mapping class:%s", kClass)
                 val className = kClass.java.name
                 val classSimpleName = kClass.java.simpleName
                 val tableAnnotation = kClass.java.getAnnotation(Table::class.java)

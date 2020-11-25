@@ -19,7 +19,7 @@ class AnnotationInterceptorContext : InterceptorContext() {
         try {
             val kClassList = AnnotationContextUtil.parseAnnotationContextParameterAndSearchClass(fixParameters, classLoader, classesRealPath, jarClassLoader, Interceptor::class)
             for (kClass in kClassList) {
-                logger.info("Annotation interceptor class:%s", kClass.toString())
+                logger.debug("Annotation interceptor class:%s", kClass)
                 if (!ObjectUtil.isInheritanceOrInterfaceImplement(kClass.java, InterceptorInterface::class.java)) {
                     logger.error("Annotation interceptor:%s, is not InterceptorInterface")
                     continue

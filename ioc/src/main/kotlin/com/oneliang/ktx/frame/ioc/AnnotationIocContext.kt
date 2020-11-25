@@ -18,7 +18,7 @@ class AnnotationIocContext : IocContext() {
         try {
             val kClassList = AnnotationContextUtil.parseAnnotationContextParameterAndSearchClass(fixParameters, classLoader, classesRealPath, jarClassLoader, Ioc::class)
             for (kClass in kClassList) {
-                logger.debug("found class:$kClass")
+                logger.debug("Annotation ioc class:%s", kClass)
                 val iocAnnotation = kClass.java.getAnnotation(Ioc::class.java)
                 val iocBean = IocBean()
                 var id = iocAnnotation.id

@@ -19,6 +19,7 @@ class AnnotationActionContext : ActionContext() {
         try {
             val kClassList = AnnotationContextUtil.parseAnnotationContextParameterAndSearchClass(fixParameters, classLoader, classesRealPath, jarClassLoader, Action::class)
             for (kClass in kClassList) {
+                logger.debug("Annotation action class:%s", kClass)
                 val classId = kClass.java.name
                 val actionInstance: Any
                 if (!objectMap.containsKey(classId)) {
