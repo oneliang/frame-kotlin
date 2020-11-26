@@ -33,6 +33,10 @@ open class InterceptorContext : AbstractContext() {
                     val globalInterceptorBean = GlobalInterceptorBean()
                     val attributeMap = globalInterceptorElement.attributes
                     JavaXmlUtil.initializeFromAttributeMap(globalInterceptorBean, attributeMap)
+                    if (objectMap.containsKey(globalInterceptorBean.id)) {
+                        logger.warning("Global interceptor class has been instantiated, type:%s, id:%s", globalInterceptorBean.type, globalInterceptorBean.id)
+                        continue
+                    }
                     val interceptorInstance: InterceptorInterface = this.classLoader.loadClass(globalInterceptorBean.type).newInstance() as InterceptorInterface
                     globalInterceptorBean.interceptorInstance = interceptorInstance
                     globalInterceptorBeanMap[globalInterceptorBean.id] = globalInterceptorBean
@@ -54,6 +58,10 @@ open class InterceptorContext : AbstractContext() {
                     val interceptor = InterceptorBean()
                     val attributeMap = interceptorElement.attributes
                     JavaXmlUtil.initializeFromAttributeMap(interceptor, attributeMap)
+                    if (objectMap.containsKey(interceptor.id)) {
+                        logger.warning("Interceptor class has been instantiated, type:%s, id:%s", interceptor.type, interceptor.id)
+                        continue
+                    }
                     val interceptorInstance = this.classLoader.loadClass(interceptor.type).newInstance() as InterceptorInterface
                     interceptor.interceptorInstance = interceptorInstance
                     interceptorBeanMap[interceptor.id] = interceptor

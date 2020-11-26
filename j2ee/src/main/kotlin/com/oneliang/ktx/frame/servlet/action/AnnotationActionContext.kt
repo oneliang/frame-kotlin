@@ -26,6 +26,7 @@ class AnnotationActionContext : ActionContext() {
                     actionInstance = kClass.java.newInstance()
                     objectMap[classId] = actionInstance
                 } else {
+                    logger.warning("Annotation action class has been instantiated, class:%s, id:%s", kClass, classId)
                     actionInstance = objectMap[classId]!!
                 }
                 val methods = kClass.java.methods

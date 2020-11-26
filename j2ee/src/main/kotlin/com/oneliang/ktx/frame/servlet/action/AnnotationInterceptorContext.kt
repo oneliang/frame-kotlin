@@ -21,7 +21,7 @@ class AnnotationInterceptorContext : InterceptorContext() {
             for (kClass in kClassList) {
                 logger.debug("Annotation interceptor class:%s", kClass)
                 if (!ObjectUtil.isInheritanceOrInterfaceImplement(kClass.java, InterceptorInterface::class.java)) {
-                    logger.error("Annotation interceptor:%s, is not InterceptorInterface")
+                    logger.error("Annotation interceptor class is not InterceptorInterface, class:%s", kClass)
                     continue
                 }
                 val interceptorAnnotation = kClass.java.getAnnotation(Interceptor::class.java)
@@ -30,6 +30,10 @@ class AnnotationInterceptorContext : InterceptorContext() {
                 if (id.isBlank()) {
                     id = kClass.java.simpleName
                     id = id.substring(0, 1).toLowerCase() + id.substring(1)
+                }
+                if (objectMap.containsKey(id)) {
+                    logger.warning("Annotation interceptor class has been instantiated, class:%s, id:%s", kClass, id)
+                    continue
                 }
                 val interceptorInstance = kClass.java.newInstance() as InterceptorInterface
                 when (interceptorMode) {
