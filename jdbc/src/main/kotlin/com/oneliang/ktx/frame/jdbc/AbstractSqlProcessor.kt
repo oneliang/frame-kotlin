@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.jdbc
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.KotlinClassUtil
 import com.oneliang.ktx.util.logging.LoggerManager
+import java.math.BigDecimal
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
@@ -34,6 +35,7 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
                         KotlinClassUtil.ClassType.KOTLIN_DOUBLE -> preparedStatement.setDouble(index, java.lang.Double.parseDouble(value))
                         KotlinClassUtil.ClassType.KOTLIN_BOOLEAN -> preparedStatement.setBoolean(index, java.lang.Boolean.parseBoolean(value))
                         KotlinClassUtil.ClassType.JAVA_UTIL_DATE -> preparedStatement.setTimestamp(index, Timestamp((parameter as Date).time))
+                        KotlinClassUtil.ClassType.JAVA_MATH_BIG_DECIMAL -> preparedStatement.setBigDecimal(index, BigDecimal(value))
                         else -> preparedStatement.setObject(index, parameter)
                     }
                 } else {
@@ -98,6 +100,12 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
                         value = Date(value.time)
                     } else if (!this.nullable) {
                         value = Date(0)
+                    }
+                }
+                KotlinClassUtil.ClassType.JAVA_MATH_BIG_DECIMAL -> {
+                    value = resultSet.getBigDecimal(columnName)
+                    if (!this.nullable) {
+                        value = value ?: BigDecimal(Constants.String.ZERO)
                     }
                 }
                 else -> {
