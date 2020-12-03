@@ -53,7 +53,7 @@ object CollectUtil {
     /**
      * collect from http with cache
      * @param httpUrl
-     * @param cacheKey
+     * @param cacheKey keep the same cache key can delete old cache
      * @param httpHeaderList
      * @param fileCacheManager
      * @return ByteArrayOutputStream
