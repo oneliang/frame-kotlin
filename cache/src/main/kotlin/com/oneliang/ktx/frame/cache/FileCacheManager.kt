@@ -11,7 +11,7 @@ import java.io.File
 import java.io.UnsupportedEncodingException
 import kotlin.reflect.KClass
 
-class FileCacheManager constructor(private var cacheDirectory: String, private val depth: Int = 0, private var cacheRefreshCycle: CacheRefreshCycle = CacheRefreshCycle.NONE) : CacheManager {
+class FileCacheManager constructor(private var cacheDirectory: String, private val depth: Int = 0, private val cacheRefreshCycle: CacheRefreshCycle = CacheRefreshCycle.NONE) : CacheManager {
     companion object {
         private val logger = LoggerManager.getLogger(FileCacheManager::class)
     }
