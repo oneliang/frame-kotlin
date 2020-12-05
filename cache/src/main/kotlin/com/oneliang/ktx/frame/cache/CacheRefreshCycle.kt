@@ -1,14 +1,11 @@
 package com.oneliang.ktx.frame.cache
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.common.getDayZeroTimePrevious
-import com.oneliang.ktx.util.common.getHourZeroTimePrevious
-import com.oneliang.ktx.util.common.toFormatString
-import com.oneliang.ktx.util.common.toUtilDate
+import com.oneliang.ktx.util.common.*
 import java.util.*
 
 enum class CacheRefreshCycle(val timeFormat: String) {
-    NONE(Constants.String.ZERO), DAY("yyyyMMdd"), HOUR("yyyyMMddHH");
+    NONE(Constants.String.ZERO), DAY("yyyyMMdd"), HOUR("yyyyMMddHH"), MINUTE("yyyyMMddHHmm");
 
     companion object {
         /**
@@ -17,23 +14,26 @@ enum class CacheRefreshCycle(val timeFormat: String) {
          */
         fun formatTime(cacheRefreshCycle: CacheRefreshCycle): Pair<String, String> {
             return when (cacheRefreshCycle) {
-                NONE -> {
+                DAY, HOUR, MINUTE -> {
+                    val currentDate = Date()
+                    val previousDateString = when (cacheRefreshCycle) {
+                        DAY -> {
+                            currentDate.getDayZeroTimePrevious(1).toUtilDate().toFormatString(cacheRefreshCycle.timeFormat)
+                        }
+                        HOUR -> {
+                            currentDate.getHourZeroTimePrevious(1).toUtilDate().toFormatString(cacheRefreshCycle.timeFormat)
+                        }
+                        else -> {
+                            currentDate.getMinuteZeroTimePrevious(1).toUtilDate().toFormatString(cacheRefreshCycle.timeFormat)
+                        }
+                    }
+                    val currentDateString = currentDate.toFormatString(cacheRefreshCycle.timeFormat)
+                    previousDateString to currentDateString
+                }
+                else -> {
                     cacheRefreshCycle.timeFormat to cacheRefreshCycle.timeFormat
-                }
-                DAY -> {
-                    val currentDate = Date()
-                    val previousDateString = currentDate.getDayZeroTimePrevious(1).toUtilDate().toFormatString(cacheRefreshCycle.timeFormat)
-                    val currentDateString = currentDate.toFormatString(cacheRefreshCycle.timeFormat)
-                    previousDateString to currentDateString
-                }
-                else -> {//hour
-                    val currentDate = Date()
-                    val previousDateString = currentDate.getHourZeroTimePrevious(1).toUtilDate().toFormatString(cacheRefreshCycle.timeFormat)
-                    val currentDateString = currentDate.toFormatString(cacheRefreshCycle.timeFormat)
-                    previousDateString to currentDateString
                 }
             }
         }
     }
-
 }
