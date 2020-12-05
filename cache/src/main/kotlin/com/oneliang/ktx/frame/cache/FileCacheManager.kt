@@ -9,12 +9,15 @@ import com.oneliang.ktx.util.file.write
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.io.UnsupportedEncodingException
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 class FileCacheManager constructor(private var cacheDirectory: String, private val depth: Int = 0, private val cacheRefreshCycle: CacheRefreshCycle = CacheRefreshCycle.NONE) : CacheManager {
     companion object {
         private val logger = LoggerManager.getLogger(FileCacheManager::class)
     }
+
+    private val oldCacheFullFilenameMap = ConcurrentHashMap<Any, String>()
 
     init {
         if (cacheDirectory.isBlank()) {
@@ -31,7 +34,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
     /**
      * generate cache relative filename
      */
-    private fun <T : Any> generateCacheRelativeFilename(key: Any, cacheType: KClass<T>): Pair<String, String> {
+    private fun <T : Any> generateCacheRelativeFilename(key: Any, cacheType: KClass<T>): String {
         val keyString = key.toString()
         val keyMd5 = key.toString().MD5String()
         val relativePath = StringBuilder()
@@ -42,11 +45,8 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             }
         }
         val formatTime = CacheRefreshCycle.formatTime(this.cacheRefreshCycle)
-        val oldCacheName = keyString + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime.first + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
-        val newCacheName = keyString + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime.second + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
-        val oldRelativeCacheName = relativePath.toString() + Constants.Symbol.SLASH_LEFT + oldCacheName
-        val newRelativeCacheName = relativePath.toString() + Constants.Symbol.SLASH_LEFT + newCacheName
-        return oldRelativeCacheName to newRelativeCacheName
+        val cacheName = keyString + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
+        return relativePath.toString() + Constants.Symbol.SLASH_LEFT + cacheName
     }
 
     /**
@@ -58,25 +58,21 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> getFromCache(key: Any, cacheType: KClass<T>): T? {
         val relativeCacheName = generateCacheRelativeFilename(key, cacheType)
-        val oldCacheFullFilename = this.cacheDirectory + relativeCacheName.first
-        val newCacheFullFilename = this.cacheDirectory + relativeCacheName.second
-        val newCacheFile = File(newCacheFullFilename)
-        if (!newCacheFile.exists() || newCacheFile.length() == 0L) {
-            //try to delete old cache when new cache does not exist
-            val oldCacheFile = File(oldCacheFullFilename)
-            oldCacheFile.delete()
+        val cacheFullFilename = this.cacheDirectory + relativeCacheName
+        val cacheFile = File(cacheFullFilename)
+        if (!cacheFile.exists() || cacheFile.length() == 0L) {
             return null
         }
         when (cacheType) {
             String::class -> {
                 try {
-                    return String(FileUtil.readFile(newCacheFullFilename), Charsets.UTF_8) as T
+                    return String(FileUtil.readFile(cacheFullFilename), Charsets.UTF_8) as T
                 } catch (e: UnsupportedEncodingException) {
                     logger.error(Constants.Base.EXCEPTION, e)
                 }
             }
             ByteArray::class -> {
-                return FileUtil.readFile(newCacheFullFilename) as T
+                return FileUtil.readFile(cacheFullFilename) as T
             }
             else -> logger.error("get from cache unsupport the class:%s", cacheType)
         }
@@ -91,21 +87,29 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
     override fun <T : Any> saveToCache(key: Any, value: T) {
         val cacheType = value::class
         val relativeCacheName = generateCacheRelativeFilename(key, cacheType)
-        val newCacheFullFilename = this.cacheDirectory + relativeCacheName.second
-        val newCacheFile = newCacheFullFilename.toFile()
-        newCacheFile.createFileIncludeDirectory()
+        val cacheFullFilename = this.cacheDirectory + relativeCacheName
+        val cacheFile = cacheFullFilename.toFile()
+        cacheFile.createFileIncludeDirectory()
         when (cacheType) {
             String::class -> {
                 try {
-                    newCacheFile.write((value as String).toByteArray())
+                    cacheFile.write((value as String).toByteArray())
                 } catch (e: UnsupportedEncodingException) {
                     logger.error(Constants.Base.EXCEPTION, e)
                 }
             }
             ByteArray::class -> {
-                newCacheFile.write(value as ByteArray)
+                cacheFile.write(value as ByteArray)
             }
             else -> logger.error("save to cache unsupport the class:%s", cacheType)
         }
+        //try to delete old cache when new cache does not exist
+        val oldCacheFullFilename = this.oldCacheFullFilenameMap[key]
+        if (oldCacheFullFilename != null) {
+            this.oldCacheFullFilenameMap.remove(key)
+            val oldCacheFile = File(oldCacheFullFilename)
+            oldCacheFile.delete()
+        }
+        this.oldCacheFullFilenameMap[key] = cacheFullFilename
     }
 }

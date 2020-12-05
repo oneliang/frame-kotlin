@@ -10,28 +10,17 @@ enum class CacheRefreshCycle(val timeFormat: String) {
     companion object {
         /**
          * get format time
-         * @return Pair<String, String>
+         * @return String
          */
-        fun formatTime(cacheRefreshCycle: CacheRefreshCycle): Pair<String, String> {
+        fun formatTime(cacheRefreshCycle: CacheRefreshCycle): String {
             return when (cacheRefreshCycle) {
                 DAY, HOUR, MINUTE -> {
                     val currentDate = Date()
-                    val previousDateString = when (cacheRefreshCycle) {
-                        DAY -> {
-                            currentDate.getDayZeroTimePrevious(1).toUtilDate().toFormatString(cacheRefreshCycle.timeFormat)
-                        }
-                        HOUR -> {
-                            currentDate.getHourZeroTimePrevious(1).toUtilDate().toFormatString(cacheRefreshCycle.timeFormat)
-                        }
-                        else -> {
-                            currentDate.getMinuteZeroTimePrevious(1).toUtilDate().toFormatString(cacheRefreshCycle.timeFormat)
-                        }
-                    }
                     val currentDateString = currentDate.toFormatString(cacheRefreshCycle.timeFormat)
-                    previousDateString to currentDateString
+                    currentDateString
                 }
                 else -> {
-                    cacheRefreshCycle.timeFormat to cacheRefreshCycle.timeFormat
+                    cacheRefreshCycle.timeFormat
                 }
             }
         }
