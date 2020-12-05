@@ -1,8 +1,7 @@
 package com.oneliang.ktx.frame.cache
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.common.MD5String
-import com.oneliang.ktx.util.common.toFile
+import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.file.FileUtil
 import com.oneliang.ktx.util.file.createFileIncludeDirectory
 import com.oneliang.ktx.util.file.write
@@ -12,7 +11,7 @@ import java.io.UnsupportedEncodingException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
-class FileCacheManager constructor(private var cacheDirectory: String, private val depth: Int = 0, private val cacheRefreshCycle: CacheRefreshCycle = CacheRefreshCycle.NONE) : CacheManager {
+class FileCacheManager constructor(private var cacheDirectory: String, private val depth: Int = 0, private val cacheRefreshTime: Long = 0L) : CacheManager {
     companion object {
         private val logger = LoggerManager.getLogger(FileCacheManager::class)
     }
@@ -44,7 +43,12 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
                 relativePath.append(Constants.Symbol.SLASH_LEFT + keyMd5.substring(i * interval, (i + 1) * interval))
             }
         }
-        val formatTime = CacheRefreshCycle.formatTime(this.cacheRefreshCycle)
+        val formatTime = if (this.cacheRefreshTime <= 0) {
+            Constants.String.ZERO
+        } else {
+            val time = System.currentTimeMillis()
+            time.getZeroTime(this.cacheRefreshTime).toUtilDate().toFormatString(Constants.Time.UNION_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+        }
         val cacheName = keyString + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
         return relativePath.toString() + Constants.Symbol.SLASH_LEFT + cacheName
     }

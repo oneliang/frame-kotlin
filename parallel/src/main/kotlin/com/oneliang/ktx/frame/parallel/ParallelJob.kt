@@ -48,7 +48,7 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
                     error(it)
                 }
             }
-            this.cacheManager = FileCacheManager(this.parallelJobConfiguration.cacheDirectory, cacheRefreshCycle = CacheRefreshCycle.NONE)
+            this.cacheManager = FileCacheManager(this.parallelJobConfiguration.cacheDirectory)
         }
         logInfo("execute")
         this.countDownLatch = CountDownLatch(this.parallelSourceProcessorSet.size)
