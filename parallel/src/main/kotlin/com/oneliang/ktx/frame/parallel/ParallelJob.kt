@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.parallel
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.cache.CacheManager
+import com.oneliang.ktx.frame.cache.CacheRefreshCycle
 import com.oneliang.ktx.frame.cache.FileCacheManager
 import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.frame.parallel.cache.*
@@ -47,7 +48,7 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
                     error(it)
                 }
             }
-            this.cacheManager = FileCacheManager(this.parallelJobConfiguration.cacheDirectory, cacheRefreshCycle = FileCacheManager.CacheRefreshCycle.NONE)
+            this.cacheManager = FileCacheManager(this.parallelJobConfiguration.cacheDirectory, cacheRefreshCycle = CacheRefreshCycle.NONE)
         }
         logInfo("execute")
         this.countDownLatch = CountDownLatch(this.parallelSourceProcessorSet.size)
