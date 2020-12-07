@@ -95,6 +95,15 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
      * @param cacheRefreshTime
      */
     override fun <T : Any> saveToCache(key: Any, value: T, cacheRefreshTime: Long) {
+        //first try to delete old cache, maybe old and new cache file is the same
+        val keyString = key.toString()
+        val oldCacheFullFilename = this.cacheProperties.getProperty(keyString)
+        if (!oldCacheFullFilename.isNullOrBlank()) {
+            this.cacheProperties.remove(keyString)
+            val oldCacheFile = File(oldCacheFullFilename)
+            oldCacheFile.delete()
+        }
+        //save new cache
         val cacheType = value::class
         val relativeCacheName = generateCacheRelativeFilename(key, cacheType, cacheRefreshTime)
         val cacheFullFilename = this.cacheDirectory + relativeCacheName
@@ -113,14 +122,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             }
             else -> logger.error("save to cache unsupport the class:%s", cacheType)
         }
-        //try to delete old cache when new cache does not exist
-        val keyString = key.toString()
-        val oldCacheFullFilename = this.cacheProperties.getProperty(keyString)
-        if (oldCacheFullFilename != null) {
-            this.cacheProperties.remove(keyString)
-            val oldCacheFile = File(oldCacheFullFilename)
-            oldCacheFile.delete()
-        }
+        //update new cache
         this.cacheProperties.setProperty(keyString, cacheFullFilename)
         this.cacheProperties.saveTo(this.cachePropertiesFile)
     }

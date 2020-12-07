@@ -40,13 +40,13 @@ class MemoryCache(private val maxSize: Int) {
         val cacheData = this.cacheMap[cacheKey]
         return if (cacheData == null) {
             val data = noCacheBlock()
-            this.cacheMap[cacheKey] = data
-            //try to delete old cache when new cache does not exist
+            //first try to delete old cache when new cache does not exist
             val oldCacheKey = this.oldCacheKeyMap[key]
             if (oldCacheKey != null) {
                 this.oldCacheKeyMap.remove(key)
                 this.cacheMap.remove(oldCacheKey)
             }
+            this.cacheMap[cacheKey] = data
             this.oldCacheKeyMap[key] = cacheKey
             data
         } else {
