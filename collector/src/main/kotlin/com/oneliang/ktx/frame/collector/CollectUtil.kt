@@ -68,14 +68,19 @@ object CollectUtil {
      * @return ByteArrayOutputStream
      */
     fun collectFromHttpWithCache(httpUrl: String, method: String = Constants.Http.RequestMethod.GET.value, cacheKey: String = Constants.String.BLANK, httpHeaderList: List<HttpNameValue> = emptyList(), requestByteArray: ByteArray = ByteArray(0), fileCacheManager: FileCacheManager? = null, cacheRefreshTime: Long = -1L): ByteArray {
-        val filename = httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, Constants.Symbol.POUND_KEY)
-        val newCacheKey = if (cacheKey.isBlank()) filename else cacheKey
+        val newCacheKey = if (cacheKey.isBlank()) {
+            httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, Constants.Symbol.POUND_KEY)
+        } else cacheKey
         var cacheByteArray = fileCacheManager?.getFromCache(newCacheKey, ByteArray::class, cacheRefreshTime)
         if (cacheByteArray == null) {
             logger.debug("collect from http:%s", httpUrl)
             cacheByteArray = collectFromHttp(httpUrl, method, httpHeaderList, requestByteArray)
             if (cacheByteArray.isNotEmpty()) {
-                fileCacheManager?.saveToCache(newCacheKey, cacheByteArray, cacheRefreshTime)
+                try {
+                    fileCacheManager?.saveToCache(newCacheKey, cacheByteArray, cacheRefreshTime)
+                } catch (throwable: Throwable) {
+                    logger.error("save cache error, cache key:%s", throwable, newCacheKey)
+                }
             }
         } else {
             logger.debug("collect from cache, cache key:%s", newCacheKey)
