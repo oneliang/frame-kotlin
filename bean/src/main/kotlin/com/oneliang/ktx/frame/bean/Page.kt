@@ -47,13 +47,6 @@ class Page {
      */
     var rowsPerPage = DEFAULT_ROWS//view use
     /**
-     * @return the start
-     */
-    /**
-     * @param start the start to set
-     */
-    var start = 0//ext use
-    /**
      * goto page
      * @return page*sizePerPage
      */
