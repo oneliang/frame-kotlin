@@ -5,6 +5,7 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
 
+@Deprecated("use MethodCacheInvokeProcessor instead")
 class DataCacheInvokeProcessor : InvokeProcessor {
 
     companion object {
