@@ -77,8 +77,8 @@ object SqlInjectUtil {
             if (columnName.isBlank()) {
                 continue
             }
-            columnNameList += Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + Constants.Symbol.COMMA
-            valueList += Constants.Symbol.QUESTION_MARK + Constants.Symbol.COMMA
+            columnNameList += Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT
+            valueList += Constants.Symbol.QUESTION_MARK
             fieldNameList.add(fieldName)
         }
         val fixTable = SqlUtil.fixTable(table, mappingBean)
