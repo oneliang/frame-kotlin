@@ -282,13 +282,20 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param <T>
      * @param kClass
      * @param id
+     * @param useStable
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType): T? {
-        return useStableConnection {
-            this.executeQueryById(it, kClass, id)
+    override fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType, useStable: Boolean): T? {
+        return if (useStable) {
+            useStableConnection {
+                this.executeQueryById(it, kClass, id)
+            }
+        } else {
+            useConnection {
+                this.executeQueryById(it, kClass, id)
+            }
         }
     }
 
@@ -297,13 +304,20 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param <T>
      * @param kClass
      * @param ids
+     * @param useStable
      * @return List<T>
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>): List<T> {
-        return useStableConnection {
-            this.executeQueryByIds(it, kClass, ids)
+    override fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>, useStable: Boolean): List<T> {
+        return if (useStable) {
+            useStableConnection {
+                this.executeQueryByIds(it, kClass, ids)
+            }
+        } else {
+            useConnection {
+                this.executeQueryByIds(it, kClass, ids)
+            }
         }
     }
 
@@ -315,12 +329,13 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return T or null
      * @throws QueryException
     </T></T> */
-    override fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, parameters: Array<*>): T? {
-        val list = this.selectObjectList(kClass, selectColumns, table, condition, parameters)
+    override fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>): T? {
+        val list = this.selectObjectList(kClass, selectColumns, table, condition, useStable, parameters)
         return if (list.isNotEmpty()) {
             list[0]
         } else {
@@ -335,14 +350,21 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, parameters: Array<*>): List<T> {
-        return useStableConnection {
-            this.executeQuery(it, kClass, selectColumns, table, condition, parameters)
+    override fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>): List<T> {
+        return if (useStable) {
+            useStableConnection {
+                this.executeQuery(it, kClass, selectColumns, table, condition, parameters)
+            }
+        } else {
+            useConnection {
+                this.executeQuery(it, kClass, selectColumns, table, condition, parameters)
+            }
         }
     }
 
@@ -351,14 +373,21 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param <T>
      * @param kClass
      * @param sql
+     * @param useStable
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectListBySql(kClass: KClass<T>, sql: String, parameters: Array<*>): List<T> {
-        return useStableConnection {
-            this.executeQueryBySql(it, kClass, sql, parameters)
+    override fun <T : Any> selectObjectListBySql(kClass: KClass<T>, sql: String, useStable: Boolean, parameters: Array<*>): List<T> {
+        return if (useStable) {
+            useStableConnection {
+                this.executeQueryBySql(it, kClass, sql, parameters)
+            }
+        } else {
+            useConnection {
+                this.executeQueryBySql(it, kClass, sql, parameters)
+            }
         }
     }
 
@@ -370,21 +399,22 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, parameters: Array<*>): List<T> {
-        val totalRows = this.totalRows(kClass, countColumn, table, condition, parameters)
+    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>): List<T> {
+        val totalRows = this.totalRows(kClass, countColumn, table, condition, useStable, parameters)
         val rowsPerPage = page.rowsPerPage
         page.initialize(totalRows, rowsPerPage)
         val startRow = page.pageFirstRow
         val sqlConditions = StringBuilder()
         sqlConditions.append(condition)
-        sqlConditions.append(" " + Constants.Database.MySql.PAGINATION + " ")
+        sqlConditions.append(Constants.String.SPACE + Constants.Database.MySql.PAGINATION + Constants.String.SPACE)
         sqlConditions.append(startRow.toString() + Constants.Symbol.COMMA + rowsPerPage)
-        return this.selectObjectList(kClass, selectColumns, table, sqlConditions.toString(), parameters)
+        return this.selectObjectList(kClass, selectColumns, table, sqlConditions.toString(), useStable, parameters)
     }
 
     /**
@@ -403,14 +433,21 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     /**
      * Method: execute query by sql statement,use caution,must close the statement
      * @param sql
+     * @param useStable
      * @param parameters
      * @return ResultSet
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    override fun executeQueryBySql(sql: String, parameters: Array<*>): ResultSet {
-        return useStableConnection {
-            this.executeQueryBySql(it, sql, parameters)
+    override fun executeQueryBySql(sql: String, useStable: Boolean, parameters: Array<*>): ResultSet {
+        return if (useStable) {
+            useStableConnection {
+                this.executeQueryBySql(it, sql, parameters)
+            }
+        } else {
+            useConnection {
+                this.executeQueryBySql(it, sql, parameters)
+            }
         }
     }
 
@@ -419,13 +456,20 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param sql
      * @param columnDataKeyMap
      * @param columnClassMapping
+     * @param useStable
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
-    override fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>> {
-        return useStableConnection {
-            this.executeQueryBySqlForMap(it, sql, columnDataKeyMap, columnClassMapping, parameters)
+    override fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, useStable: Boolean, parameters: Array<*>): List<Map<String, *>> {
+        return if (useStable) {
+            useStableConnection {
+                this.executeQueryBySqlForMap(it, sql, columnDataKeyMap, columnClassMapping, parameters)
+            }
+        } else {
+            useConnection {
+                this.executeQueryBySqlForMap(it, sql, columnDataKeyMap, columnClassMapping, parameters)
+            }
         }
     }
 
@@ -552,13 +596,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param <T>
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any> totalRows(countColumn: String, table: String, condition: String, parameters: Array<*>): Int {
-        return this.totalRows<Any>(null, countColumn, table, condition, parameters)
+    override fun <T : Any> totalRows(countColumn: String, table: String, condition: String, useStable: Boolean, parameters: Array<*>): Int {
+        return this.totalRows<Any>(null, countColumn, table, condition, useStable, parameters)
     }
 
     /**
@@ -567,12 +612,13 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param kClass
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any> totalRows(kClass: KClass<T>?, countColumn: String, table: String, condition: String, parameters: Array<*>): Int {
+    override fun <T : Any> totalRows(kClass: KClass<T>?, countColumn: String, table: String, condition: String, useStable: Boolean, parameters: Array<*>): Int {
         val innerCountColumn = if (countColumn.isBlank()) {
             Constants.String.ZERO
         } else {
@@ -584,7 +630,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
         } else {
             SqlUtil.selectSql(arrayOf("COUNT(${innerCountColumn}) AS " + Constants.Database.COLUMN_NAME_TOTAL), table, condition, null)
         }
-        val totalList = this.selectObjectListBySql(Total::class, sql, parameters)
+        val totalList = this.selectObjectListBySql(Total::class, sql, useStable, parameters)
         return if (totalList.isNotEmpty()) {
             totalList[0].total
         } else {

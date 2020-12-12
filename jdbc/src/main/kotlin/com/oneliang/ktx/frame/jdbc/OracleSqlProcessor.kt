@@ -24,7 +24,7 @@ class OracleSqlProcessor : AbstractSqlProcessor() {
             }
         } else {
             if (value != null) {
-                "'" + value.toString() + "'"
+                "'$value'"
             } else {
                 Constants.String.NULL
             }

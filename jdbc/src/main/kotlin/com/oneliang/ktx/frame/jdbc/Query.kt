@@ -206,22 +206,24 @@ interface Query : BaseQuery {
      * @param <T>
      * @param kClass
      * @param id
+     * @param useStable
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType): T?
+    fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType, useStable: Boolean = true): T?
 
     /**
      * Method: select object list by ids, only for single id column
      * @param <T>
      * @param kClass
      * @param ids
+     * @param useStable
      * @return List<T>
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>): List<T>
+    fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>, useStable: Boolean = true): List<T>
 
     /**
      * Method: select object, by column, table, condition, parameters,it is sql binding
@@ -231,12 +233,13 @@ interface Query : BaseQuery {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return T or null
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>()): T?
+    fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): T?
 
     /**
      * Method: select object list,by column,table,condition,parameters,it is sql binding
@@ -245,24 +248,26 @@ interface Query : BaseQuery {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>()): List<T>
+    fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<T>
 
     /**
      * Method: select object list by sql,it is sql binding
      * @param <T>
      * @param kClass
      * @param sql
+     * @param useStable
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObjectListBySql(kClass: KClass<T>, sql: String, parameters: Array<*> = emptyArray<Any>()): List<T>
+    fun <T : Any> selectObjectListBySql(kClass: KClass<T>, sql: String, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<T>
 
     /**
      * Method: select object pagination list,has implement,it is sql binding
@@ -273,12 +278,13 @@ interface Query : BaseQuery {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String = Constants.String.BLANK, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>()): List<T>
+    fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String = Constants.String.BLANK, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<T>
 
     /**
      * Method: execute by sql ,for all sql,sql binding
@@ -292,24 +298,26 @@ interface Query : BaseQuery {
     /**
      * Method: execute query by sql statement,use caution,must close the statement
      * @param sql
+     * @param useStable
      * @param parameters
      * @return ResultSet
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeQueryBySql(sql: String, parameters: Array<*> = emptyArray<Any>()): ResultSet
+    fun executeQueryBySql(sql: String, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): ResultSet
 
     /**
      * Method: execute query by sql statement for map data
      * @param sql
      * @param columnDataKeyMap
      * @param columnClassMapping
+     * @param useStable
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>>
+    fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, useStable: Boolean = true, parameters: Array<*>): List<Map<String, *>>
 
     /**
      * Method: execute update
@@ -367,12 +375,13 @@ interface Query : BaseQuery {
      * @param countColumn
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any> totalRows(countColumn: String = Constants.String.BLANK, table: String, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>()): Int
+    fun <T : Any> totalRows(countColumn: String = Constants.String.BLANK, table: String, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): Int
 
     /**
      * Method: get the total size, it is sql binding
@@ -381,12 +390,13 @@ interface Query : BaseQuery {
      * @param countColumn
      * @param table
      * @param condition
+     * @param useStable
      * @param parameters
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any> totalRows(kClass: KClass<T>? = null, countColumn: String = Constants.String.BLANK, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>()): Int
+    fun <T : Any> totalRows(kClass: KClass<T>? = null, countColumn: String = Constants.String.BLANK, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): Int
 
     /**
      * execute transaction, if you need to stop transaction, you can throw exception
