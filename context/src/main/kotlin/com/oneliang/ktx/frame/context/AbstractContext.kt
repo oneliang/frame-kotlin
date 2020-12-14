@@ -5,6 +5,7 @@ import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.replaceAllLines
 import com.oneliang.ktx.util.common.replaceAllSpace
 import com.oneliang.ktx.util.jar.JarClassLoader
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class AbstractContext : Context {
@@ -19,10 +20,10 @@ abstract class AbstractContext : Context {
             classesRealPath = field.getResource(Constants.String.BLANK)?.path.nullToBlank()
         }
 
-    var classesRealPath: String = this.classLoader.getResource(Constants.String.BLANK)?.path.nullToBlank()
+    var classesRealPath: String = File(this.classLoader.getResource(Constants.String.BLANK)?.path.nullToBlank()).absolutePath
         set(value) {
             if (value.isNotBlank()) {
-                field = value
+                field = File(value).absolutePath
             } else {
                 throw RuntimeException("classesRealPath can not be blank.")
             }

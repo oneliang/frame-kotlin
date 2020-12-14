@@ -33,9 +33,6 @@ abstract class AbstractServletContextListener : ServletContextListener {
         if (configFile.isNotBlank()) {
             try {
                 val configurationContext = ConfigurationContainer.rootConfigurationContext
-                var classesRealPath = Thread.currentThread().contextClassLoader.getResource(Constants.String.BLANK)?.path.nullToBlank()
-                classesRealPath = File(classesRealPath).absolutePath
-                configurationContext.classesRealPath = classesRealPath
                 projectRealPath = File(projectRealPath).absolutePath
                 configurationContext.projectRealPath = projectRealPath
                 configurationContext.initialize(configFile)

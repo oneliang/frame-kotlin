@@ -25,5 +25,6 @@ val dependencies by extra {
             "kotlinx-coroutines-core" to "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Constants.kotlinxCoroutinesVersion}",
             "jexcelapi-jxl" to "net.sourceforge.jexcelapi:jxl:2.6.10",
             "jcraft-jsch" to "com.jcraft:jsch:0.1.54",
-            "jcraft-jzlib" to "com.jcraft:jzlib:1.1.3")
+            "jcraft-jzlib" to "com.jcraft:jzlib:1.1.3",
+            "org-fusesource-mqtt-client" to "org.fusesource.mqtt-client:mqtt-client:1.16")
 }
