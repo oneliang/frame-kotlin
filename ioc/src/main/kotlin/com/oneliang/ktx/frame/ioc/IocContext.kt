@@ -21,7 +21,6 @@ open class IocContext : AbstractContext() {
         private val logger = LoggerManager.getLogger(IocContext::class)
         internal val iocConfigurationBean = IocConfigurationBean()
         internal val iocBeanMap = ConcurrentHashMap<String, IocBean>()
-        internal val iocAllowExplicitInvokeBeanMap = ConcurrentHashMap<String, IocAllowExplicitInvokeBean>()
     }
 
     /**
@@ -232,23 +231,7 @@ open class IocContext : AbstractContext() {
     }
 
     @Throws(Exception::class)
-    private fun afterInstantiate(iocBean: IocBean) {
-        val methods = iocBean.beanInstance?.javaClass?.methods ?: emptyArray()
-        for (method in methods) {
-            if (method.isAnnotationPresent(Ioc.AllowExplicitInvoke::class.java)) {
-                val methodInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitInvoke::class.java)
-                val methodId = methodInvokeAnnotation.id
-                if (!iocAllowExplicitInvokeBeanMap.containsKey(methodId)) {
-                    val iocInvokedBean = IocAllowExplicitInvokeBean()
-                    iocInvokedBean.id = methodId
-                    iocInvokedBean.proxyInstance = iocBean.proxyInstance
-                    iocInvokedBean.proxyMethod = iocBean.proxyInstance?.javaClass?.getMethod(method.name, *method.parameterTypes)
-                    iocAllowExplicitInvokeBeanMap[methodId] = iocInvokedBean
-                } else {
-                    logger.error("ioc context initialize error, duplicate ioc invoked bean id:%s", methodId)
-                }
-            }
-        }
+    open fun afterInstantiate(iocBean: IocBean) {
     }
 
     /**
@@ -435,18 +418,6 @@ open class IocContext : AbstractContext() {
 //                    throw e
                 }
             }
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    @Throws(Exception::class)
-    fun <T> explicitInvoke(methodId: String, vararg args: Any?): T? {
-        val iocInvokedBean = iocAllowExplicitInvokeBeanMap[methodId]
-        return if (iocInvokedBean != null) {
-            iocInvokedBean.proxyMethod?.invoke(iocInvokedBean.proxyInstance, *args) as T?
-        } else {
-            logger.warning("ioc invoked method is not found, method id:%s", methodId)
-            null
         }
     }
 

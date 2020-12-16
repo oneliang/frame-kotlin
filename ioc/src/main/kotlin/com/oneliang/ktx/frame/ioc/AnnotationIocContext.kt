@@ -3,11 +3,13 @@ package com.oneliang.ktx.frame.ioc
 import com.oneliang.ktx.exception.InitializeException
 import com.oneliang.ktx.frame.context.AnnotationContextUtil
 import com.oneliang.ktx.util.logging.LoggerManager
+import java.util.concurrent.ConcurrentHashMap
 
 class AnnotationIocContext : IocContext() {
 
     companion object {
         private val logger = LoggerManager.getLogger(AnnotationIocContext::class)
+        internal val iocAllowExplicitInvokeBeanMap = ConcurrentHashMap<String, IocAllowExplicitInvokeBean>()
     }
 
     /**
@@ -54,6 +56,37 @@ class AnnotationIocContext : IocContext() {
         } catch (e: Throwable) {
             logger.error("parameter:%s", e, fixParameters)
             throw InitializeException(fixParameters, e)
+        }
+    }
+
+    override fun afterInstantiate(iocBean: IocBean) {
+        val methods = iocBean.beanInstance?.javaClass?.methods ?: emptyArray()
+        for (method in methods) {
+            if (method.isAnnotationPresent(Ioc.AllowExplicitInvoke::class.java)) {
+                val methodInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitInvoke::class.java)
+                val methodId = methodInvokeAnnotation.id
+                if (!iocAllowExplicitInvokeBeanMap.containsKey(methodId)) {
+                    val iocInvokedBean = IocAllowExplicitInvokeBean()
+                    iocInvokedBean.id = methodId
+                    iocInvokedBean.proxyInstance = iocBean.proxyInstance
+                    iocInvokedBean.proxyMethod = iocBean.proxyInstance?.javaClass?.getMethod(method.name, *method.parameterTypes)
+                    iocAllowExplicitInvokeBeanMap[methodId] = iocInvokedBean
+                } else {
+                    logger.error("ioc context initialize error, duplicate ioc invoked bean id:%s", methodId)
+                }
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    @Throws(Exception::class)
+    fun <T> explicitInvoke(methodId: String, vararg args: Any?): T? {
+        val iocInvokedBean = iocAllowExplicitInvokeBeanMap[methodId]
+        return if (iocInvokedBean != null) {
+            iocInvokedBean.proxyMethod?.invoke(iocInvokedBean.proxyInstance, *args) as T?
+        } else {
+            logger.warning("ioc invoked method is not found, method id:%s", methodId)
+            null
         }
     }
 }
