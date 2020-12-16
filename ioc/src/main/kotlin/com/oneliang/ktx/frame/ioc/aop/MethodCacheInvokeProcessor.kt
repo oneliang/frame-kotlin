@@ -16,7 +16,7 @@ open class MethodCacheInvokeProcessor(memoryCacheSize: Int) : DefaultInvokeProce
     private val memoryCache = MemoryCache(memoryCacheSize)
 
     @Throws(Throwable::class)
-    override fun invoke(instance: Any, method: Method, args: Array<Any>): Any? {
+    override fun invoke(instance: Any, method: Method, args: Array<Any?>): Any? {
         val instanceMethod = instance::class.java.getMethod(method.name, *method.parameterTypes)
         if (!instanceMethod.isAnnotationPresent(MethodCache::class.java)) {
             return super.invoke(instance, method, args)

@@ -21,6 +21,7 @@ open class IocContext : AbstractContext() {
         private val logger = LoggerManager.getLogger(IocContext::class)
         internal val iocConfigurationBean = IocConfigurationBean()
         internal val iocBeanMap = ConcurrentHashMap<String, IocBean>()
+        internal val iocAllowExplicitInvokeBeanMap = ConcurrentHashMap<String, IocAllowExplicitInvokeBean>()
     }
 
     /**
@@ -54,8 +55,7 @@ open class IocContext : AbstractContext() {
                 val childNodeLength = childNodeList.length
                 for (childNodeIndex in 0 until childNodeLength) {
                     val childNode = childNodeList.item(childNodeIndex)
-                    val nodeName = childNode.nodeName
-                    when (nodeName) {
+                    when (childNode.nodeName) {
                         IocConstructorBean.TAG_CONSTRUCTOR -> {
                             val iocConstructorBean = IocConstructorBean()
                             val iocConstructorAttributeMap = childNode.attributes
@@ -110,6 +110,7 @@ open class IocContext : AbstractContext() {
                 } else {
                     instantiateIocBeanObjectByDefaultConstructor(iocBean)
                 }
+                afterInstantiate(iocBean)
             } catch (e: Throwable) {
                 logger.error("instantiate ioc bean object error, id:${iocBean.id}, type:${iocBean.type}, value:${iocBean.value}", e)
                 throw e
@@ -227,6 +228,26 @@ open class IocContext : AbstractContext() {
                 }
             }
             logger.info("Instantiating, " + iocBean.type + "<->id:" + iocBeanId + "<->proxy:" + iocBean.proxy + "<->proxyInstance:" + iocBean.proxyInstance + "<->instance:" + iocBean.beanInstance)
+        }
+    }
+
+    @Throws(Exception::class)
+    private fun afterInstantiate(iocBean: IocBean) {
+        val methods = iocBean.beanInstance?.javaClass?.methods ?: emptyArray()
+        for (method in methods) {
+            if (method.isAnnotationPresent(Ioc.AllowExplicitInvoke::class.java)) {
+                val methodInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitInvoke::class.java)
+                val methodId = methodInvokeAnnotation.id
+                if (!iocAllowExplicitInvokeBeanMap.containsKey(methodId)) {
+                    val iocInvokedBean = IocAllowExplicitInvokeBean()
+                    iocInvokedBean.id = methodId
+                    iocInvokedBean.proxyInstance = iocBean.proxyInstance
+                    iocInvokedBean.proxyMethod = iocBean.proxyInstance?.javaClass?.getMethod(method.name, *method.parameterTypes)
+                    iocAllowExplicitInvokeBeanMap[methodId] = iocInvokedBean
+                } else {
+                    logger.error("ioc context initialize error, duplicate ioc invoked bean id:%s", methodId)
+                }
+            }
         }
     }
 
@@ -414,6 +435,18 @@ open class IocContext : AbstractContext() {
 //                    throw e
                 }
             }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    @Throws(Exception::class)
+    fun <T> explicitInvoke(methodId: String, vararg args: Any?): T? {
+        val iocInvokedBean = iocAllowExplicitInvokeBeanMap[methodId]
+        return if (iocInvokedBean != null) {
+            iocInvokedBean.proxyMethod?.invoke(iocInvokedBean.proxyInstance, *args) as T?
+        } else {
+            logger.warning("ioc invoked method is not found, method id:%s", methodId)
+            null
         }
     }
 

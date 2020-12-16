@@ -12,5 +12,5 @@ interface InvokeProcessor {
      * @return Object
      */
     @Throws(Throwable::class)
-    operator fun invoke(instance: Any, method: Method, args: Array<Any>): Any?
+    operator fun invoke(instance: Any, method: Method, args: Array<Any?>): Any?
 }

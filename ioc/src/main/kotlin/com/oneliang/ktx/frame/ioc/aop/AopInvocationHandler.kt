@@ -10,7 +10,7 @@ class AopInvocationHandler<T : Any>(private val interfaceImpl: T) : InvocationHa
      * proxy method invoke
      */
     @Throws(Throwable::class)
-    override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
+    override fun invoke(proxy: Any, method: Method, args: Array<Any?>?): Any? {
         //		logger.log("proxy invocation:"+interfaceImpl.getClass().getName()+"--"+method.getName())
         val instance: Any?
         for (beforeInvokeProcessor in beforeInvokeProcessorList) {

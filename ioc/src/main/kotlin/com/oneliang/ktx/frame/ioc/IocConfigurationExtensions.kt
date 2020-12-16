@@ -92,3 +92,12 @@ fun <T : Any> T.autoInjectById() {
 fun <T : Any> T.autoInjectByType() {
     ConfigurationContainer.rootConfigurationContext.autoInjectObjectByType(this::class.java.name, this)
 }
+
+/**
+ * auto inject by type
+ */
+@Throws(Exception::class)
+fun <T> ConfigurationContext.explicitInvoke(methodId: String, vararg args: Any?): T? {
+    val iocContext = this.findContext(IocContext::class)
+    return iocContext?.explicitInvoke(methodId, *args)
+}

@@ -11,5 +11,5 @@ interface AfterThrowingProcessor {
      * @param args
      * @param throwable
      */
-    fun afterThrowing(instance: Any, method: Method, args: Array<Any>, throwable: Throwable)
+    fun afterThrowing(instance: Any, method: Method, args: Array<Any?>, throwable: Throwable)
 }

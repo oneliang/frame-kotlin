@@ -13,5 +13,5 @@ interface AfterReturningProcessor {
      * @throws Throwable
      */
     @Throws(Throwable::class)
-    fun afterReturning(instance: Any, method: Method, args: Array<Any>, returnValue: Any?)
+    fun afterReturning(instance: Any, method: Method, args: Array<Any?>, returnValue: Any?)
 }

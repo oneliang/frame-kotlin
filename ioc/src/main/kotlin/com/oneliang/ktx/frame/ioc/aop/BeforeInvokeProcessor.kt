@@ -12,5 +12,5 @@ interface BeforeInvokeProcessor {
      * @throws Throwable
      */
     @Throws(Throwable::class)
-    fun beforeInvoke(instance: Any, method: Method, args: Array<Any>)
+    fun beforeInvoke(instance: Any, method: Method, args: Array<Any?>)
 }

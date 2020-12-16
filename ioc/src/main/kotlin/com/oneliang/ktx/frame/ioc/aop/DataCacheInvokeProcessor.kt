@@ -15,7 +15,7 @@ class DataCacheInvokeProcessor : InvokeProcessor {
     }
 
     @Throws(Throwable::class)
-    override fun invoke(instance: Any, method: Method, args: Array<Any>): Any? {
+    override fun invoke(instance: Any, method: Method, args: Array<Any?>): Any? {
         var returnValue: Any?
         val objectMethod = instance.javaClass.getMethod(method.name, *method.parameterTypes)
         if (objectMethod.isAnnotationPresent(DataCache::class.java) && args.isEmpty()) {

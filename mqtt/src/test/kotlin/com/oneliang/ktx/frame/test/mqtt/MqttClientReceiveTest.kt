@@ -14,12 +14,17 @@ fun main() {
         connection.subscribe(topics)
         println("Subscribed to topics.")
         println("Receiving messages.")
-        val message1 = connection.receive(5, TimeUnit.SECONDS)
-        println(String(message1.payload))
-        val message2 = connection.receive(5, TimeUnit.SECONDS)
-        println(String(message2.payload))
-        val message3 = connection.receive(5, TimeUnit.SECONDS)
-        println(String(message3.payload))
+        while (true) {
+            val message = connection.receive()
+            println(String(message.payload))
+            Thread.sleep(5000)
+        }
+//        val message1 = connection.receive(5, TimeUnit.SECONDS)
+//        println(String(message1.payload))
+//        val message2 = connection.receive(5, TimeUnit.SECONDS)
+//        println(String(message2.payload))
+//        val message3 = connection.receive(5, TimeUnit.SECONDS)
+//        println(String(message3.payload))
         println("Received messages.")
     }
 }
