@@ -21,6 +21,7 @@ class IocBean {
     var iocConstructorBean: IocConstructorBean? = null
     val iocPropertyBeanList = mutableListOf<IocPropertyBean>()
     val iocAfterInjectBeanList = mutableListOf<IocAfterInjectBean>()
+    var afterInstantiate: ((iocBean: IocBean) -> Unit)? = null
 
     /**
      * @param iocPropertyBean

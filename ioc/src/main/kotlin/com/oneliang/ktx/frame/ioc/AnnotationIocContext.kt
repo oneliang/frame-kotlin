@@ -10,6 +10,29 @@ class AnnotationIocContext : IocContext() {
     companion object {
         private val logger = LoggerManager.getLogger(AnnotationIocContext::class)
         internal val iocAllowExplicitInvokeBeanMap = ConcurrentHashMap<String, IocAllowExplicitInvokeBean>()
+        internal val afterInstantiate: ((iocBean: IocBean) -> Unit) = { iocBean ->
+            val methods = iocBean.beanInstance?.javaClass?.methods ?: emptyArray()
+            for (method in methods) {
+                //after inject
+                if (method.isAnnotationPresent(Ioc.AfterInject::class.java)) {
+                    val iocAfterInjectBean = IocAfterInjectBean()
+                    iocAfterInjectBean.method = method.name
+                    iocBean.addIocAfterInjectBean(iocAfterInjectBean)
+                } else if (method.isAnnotationPresent(Ioc.AllowExplicitInvoke::class.java)) {
+                    val methodInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitInvoke::class.java)
+                    val methodId = methodInvokeAnnotation.id
+                    if (!iocAllowExplicitInvokeBeanMap.containsKey(methodId)) {
+                        val iocInvokedBean = IocAllowExplicitInvokeBean()
+                        iocInvokedBean.id = methodId
+                        iocInvokedBean.proxyInstance = iocBean.proxyInstance
+                        iocInvokedBean.proxyMethod = iocBean.proxyInstance?.javaClass?.getMethod(method.name, *method.parameterTypes)
+                        iocAllowExplicitInvokeBeanMap[methodId] = iocInvokedBean
+                    } else {
+                        logger.error("ioc context initialize error, duplicate ioc invoked bean id:%s", methodId)
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -38,15 +61,7 @@ class AnnotationIocContext : IocContext() {
                 iocBean.injectType = iocAnnotation.injectType
                 iocBean.proxy = iocAnnotation.proxy
                 iocBean.beanClass = kClass.java
-                //after inject
-                val methods = kClass.java.methods
-                for (method in methods) {
-                    if (method.isAnnotationPresent(Ioc.AfterInject::class.java)) {
-                        val iocAfterInjectBean = IocAfterInjectBean()
-                        iocAfterInjectBean.method = method.name
-                        iocBean.addIocAfterInjectBean(iocAfterInjectBean)
-                    }
-                }
+                iocBean.afterInstantiate = afterInstantiate
                 if (!iocBeanMap.containsKey(iocBean.id)) {
                     iocBeanMap[iocBean.id] = iocBean
                 } else {
@@ -56,25 +71,6 @@ class AnnotationIocContext : IocContext() {
         } catch (e: Throwable) {
             logger.error("parameter:%s", e, fixParameters)
             throw InitializeException(fixParameters, e)
-        }
-    }
-
-    override fun afterInstantiate(iocBean: IocBean) {
-        val methods = iocBean.beanInstance?.javaClass?.methods ?: emptyArray()
-        for (method in methods) {
-            if (method.isAnnotationPresent(Ioc.AllowExplicitInvoke::class.java)) {
-                val methodInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitInvoke::class.java)
-                val methodId = methodInvokeAnnotation.id
-                if (!iocAllowExplicitInvokeBeanMap.containsKey(methodId)) {
-                    val iocInvokedBean = IocAllowExplicitInvokeBean()
-                    iocInvokedBean.id = methodId
-                    iocInvokedBean.proxyInstance = iocBean.proxyInstance
-                    iocInvokedBean.proxyMethod = iocBean.proxyInstance?.javaClass?.getMethod(method.name, *method.parameterTypes)
-                    iocAllowExplicitInvokeBeanMap[methodId] = iocInvokedBean
-                } else {
-                    logger.error("ioc context initialize error, duplicate ioc invoked bean id:%s", methodId)
-                }
-            }
         }
     }
 

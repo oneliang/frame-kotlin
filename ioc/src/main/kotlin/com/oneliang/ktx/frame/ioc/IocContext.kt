@@ -101,7 +101,7 @@ open class IocContext : AbstractContext() {
      * @throws Exception
      */
     @Throws(Exception::class)
-    open fun instantiateIocBeanObject() {
+    fun instantiateIocBeanObject() {
         iocBeanMap.forEach { (_, iocBean) ->
             try {
                 if (iocBean.iocConstructorBean != null) {
@@ -109,7 +109,7 @@ open class IocContext : AbstractContext() {
                 } else {
                     instantiateIocBeanObjectByDefaultConstructor(iocBean)
                 }
-                afterInstantiate(iocBean)
+                iocBean.afterInstantiate?.invoke(iocBean)
             } catch (e: Throwable) {
                 logger.error("instantiate ioc bean object error, id:${iocBean.id}, type:${iocBean.type}, value:${iocBean.value}", e)
                 throw e
@@ -228,10 +228,6 @@ open class IocContext : AbstractContext() {
             }
             logger.info("Instantiating, " + iocBean.type + "<->id:" + iocBeanId + "<->proxy:" + iocBean.proxy + "<->proxyInstance:" + iocBean.proxyInstance + "<->instance:" + iocBean.beanInstance)
         }
-    }
-
-    @Throws(Exception::class)
-    open fun afterInstantiate(iocBean: IocBean) {
     }
 
     /**
