@@ -16,8 +16,8 @@ fun main() {
         println("Receiving messages.")
         while (true) {
             val message = connection.receive()
-            println(String(message.payload))
-            Thread.sleep(5000)
+            println(message.topic + "," + String(message.payload))
+            message.ack()
         }
 //        val message1 = connection.receive(5, TimeUnit.SECONDS)
 //        println(String(message1.payload))
