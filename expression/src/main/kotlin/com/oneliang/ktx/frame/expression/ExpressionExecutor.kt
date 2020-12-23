@@ -13,14 +13,14 @@ object ExpressionExecutor {
     private val logger = LoggerManager.getLogger(ExpressionExecutor::class)
     private const val REGEX_KEYWORD = "\\{([\\w]+?)\\}"
 
-    fun execute(inputMap: Map<String, String>, expressionGroupList: List<ExpressionGroup>): List<ExpressionResult> {
+    fun execute(inputMap: Map<String, String>, expressionGroupList: List<ExpressionGroup>, useIgnoreResult: Boolean = false): List<ExpressionResult> {
         val sortedExpressionGroupList = expressionGroupList.sortedBy { it.order }
         val priorityInputMap = mutableMapOf<String, String>()
         val expressionResultList = mutableListOf<ExpressionResult>()
         sortedExpressionGroupList.forEach {
             val expressionResult = execute(inputMap, it, priorityInputMap)
             priorityInputMap[it.resultCode] = expressionResult.value.toString()
-            if (!it.ignoreResult) {
+            if (useIgnoreResult && !it.ignoreResult) {
                 expressionResultList += expressionResult
             }
         }
