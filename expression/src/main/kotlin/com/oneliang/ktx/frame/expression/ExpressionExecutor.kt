@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.expression
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.util.common.mapWithFilter
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.parseRegexGroup
 import com.oneliang.ktx.util.common.toMap
@@ -15,11 +16,15 @@ object ExpressionExecutor {
     fun execute(inputMap: Map<String, String>, expressionGroupList: List<ExpressionGroup>): List<ExpressionResult> {
         val sortedExpressionGroupList = expressionGroupList.sortedBy { it.order }
         val priorityInputMap = mutableMapOf<String, String>()
-        return sortedExpressionGroupList.map {
+        val expressionResultList = mutableListOf<ExpressionResult>()
+        sortedExpressionGroupList.forEach {
             val expressionResult = execute(inputMap, it, priorityInputMap)
             priorityInputMap[it.resultCode] = expressionResult.value.toString()
-            expressionResult
+            if (!it.ignoreResult) {
+                expressionResultList += expressionResult
+            }
         }
+        return expressionResultList
     }
 
     fun execute(inputMap: Map<String, String>, expressionGroup: ExpressionGroup, priorityInputMap: Map<String, String> = emptyMap()): ExpressionResult {
