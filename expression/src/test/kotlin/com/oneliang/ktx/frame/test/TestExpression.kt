@@ -1,15 +1,14 @@
 package com.oneliang.ktx.frame.test
 
 import com.oneliang.ktx.frame.expression.*
-import com.oneliang.ktx.util.common.parseRegexGroup
 
 fun main() {
-    val expressionModelList = listOf(
+    val expressionItemList = listOf(
             ExpressionItem().apply {
                 this.id = 1
                 this.leftId = 2
                 this.rightId = 3
-                this.expression = "{a}>4"
+                this.expression = " \"{STEEL_P_IF_CUSTOM_SPECIFICATION}\" != \"是\""
                 this.resultCode = "1_RESULT"
                 this.type = ExpressionItem.Type.START.value
                 this.calculateType = ExpressionItem.CalculateType.BOOLEAN.value
@@ -18,7 +17,7 @@ fun main() {
                 this.id = 2
                 this.leftId = 0
                 this.rightId = 0
-                this.expression = "7.75"
+                this.expression = "{STEEL_P_ORDER_WIDTH}"
                 this.resultCode = "2_RESULT"
                 this.type = ExpressionItem.Type.END.value
                 this.calculateType = ExpressionItem.CalculateType.CONSTANT.value
@@ -27,14 +26,20 @@ fun main() {
                 this.id = 3
                 this.leftId = 0
                 this.rightId = 0
-                this.expression = "7.93"
+                this.expression = "1219"
                 this.resultCode = "3_RESULT"
                 this.type = ExpressionItem.Type.END.value
                 this.calculateType = ExpressionItem.CalculateType.CONSTANT.value
             }
     )
     val begin = System.currentTimeMillis()
-    val result = ExpressionExecutor.execute(mapOf("a" to "5"), emptyMap(), expressionModelList)
+    val expressionGroupList = listOf(ExpressionGroup(expressionItemList, 1, "A"))
+    val result = ExpressionExecutor.execute(mapOf(
+            "STEEL_P_IF_CUSTOM_SPECIFICATION" to "否",
+            "STEEL_P_ORDER_WIDTH" to "1500"), expressionGroupList)
+    result.forEach {
+        println(it.value)
+    }
     println("cost:" + (System.currentTimeMillis() - begin) + "," + result)
     return
     println("true".eval())

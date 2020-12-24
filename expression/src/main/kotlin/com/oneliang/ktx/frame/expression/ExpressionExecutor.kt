@@ -20,9 +20,10 @@ object ExpressionExecutor {
         sortedExpressionGroupList.forEach {
             val expressionResult = execute(inputMap, it, priorityInputMap)
             priorityInputMap[it.resultCode] = expressionResult.value.toString()
-            if (useIgnoreResult && !it.ignoreResult) {
-                expressionResultList += expressionResult
+            if (useIgnoreResult && it.ignoreResult) {
+                return@forEach//continue
             }
+            expressionResultList += expressionResult
         }
         return expressionResultList
     }
