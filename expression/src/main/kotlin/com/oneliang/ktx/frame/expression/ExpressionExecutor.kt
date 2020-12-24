@@ -18,8 +18,10 @@ object ExpressionExecutor {
         val priorityInputMap = mutableMapOf<String, String>()
         val expressionResultList = mutableListOf<ExpressionResult>()
         sortedExpressionGroupList.forEach {
+//            logger.debug("order:%s, result type:%s, input map:%s", it.order, it.resultType, inputMap)
             val expressionResult = execute(inputMap, it, priorityInputMap)
             priorityInputMap[it.resultCode] = expressionResult.value.toString()
+//            logger.debug("order:%s, priority input map:%s", it.order, priorityInputMap)
             if (useIgnoreResult && it.ignoreResult) {
                 return@forEach//continue
             }
@@ -66,7 +68,9 @@ object ExpressionExecutor {
         while (currentExpressionItem != null) {
             val resultCode = currentExpressionItem.resultCode
             val expressionItemType = currentExpressionItem.type
+//            logger.debug("expression:%s, result map:%s", currentExpressionItem.expression, resultMap)
             currentExpressionItem = executeExpressionItemAndFindNext(inputMap, priorityInputMap, expressionItemMap, currentExpressionItem, resultMap)
+//            logger.debug("result map:%s, expression item type:%s", resultMap, expressionItemType)
             if (expressionItemType == ExpressionItem.Type.END.value) {
                 return resultMap[resultCode] ?: Expression.INVALID_EVAL_RESULT
             }
@@ -74,7 +78,13 @@ object ExpressionExecutor {
         return Expression.INVALID_EVAL_RESULT
     }
 
-    private fun executeExpressionItemAndFindNext(inputMap: Map<String, String>, priorityInputMap: Map<String, String>, expressionItemMap: Map<Int, ExpressionItem>, expressionItem: ExpressionItem, resultMap: MutableMap<String, Any>): ExpressionItem? {
+    private fun executeExpressionItemAndFindNext(
+        inputMap: Map<String, String>,
+        priorityInputMap: Map<String, String>,
+        expressionItemMap: Map<Int, ExpressionItem>,
+        expressionItem: ExpressionItem,
+        resultMap: MutableMap<String, Any>
+    ): ExpressionItem? {
         val resultCode = expressionItem.resultCode
         val calculateType = expressionItem.calculateType
         val parameterList = expressionItem.expression.parseRegexGroup(REGEX_KEYWORD)
@@ -116,6 +126,7 @@ object ExpressionExecutor {
                 return null
             }
         }
+//        logger.debug("replace expression:%s, calculate type:%s, result code:%s, result:%s", expression, calculateType, resultCode, result)
         if (resultCode.isNotBlank()) {
             resultMap[resultCode] = result
         }
