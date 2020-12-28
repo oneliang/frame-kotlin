@@ -1,3 +1,3 @@
 package com.oneliang.ktx.frame.expression
 
-class ExpressionResult(val value: Any)
+class ExpressionResult(val code: String, val value: Any)

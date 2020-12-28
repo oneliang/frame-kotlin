@@ -31,22 +31,23 @@ object ExpressionExecutor {
     }
 
     fun execute(inputMap: Map<String, String>, expressionGroup: ExpressionGroup, priorityInputMap: Map<String, String> = emptyMap()): ExpressionResult {
+        val code = expressionGroup.resultCode
         val value = execute(inputMap, priorityInputMap, expressionGroup.expressionItemList)
         return when (expressionGroup.resultType) {
             ExpressionGroup.ResultType.NUMBER_ROUND_HALF_UP.value -> {
                 val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.HALF_UP }
-                ExpressionResult(decimalFormat.format(value.toString().toDouble()))
+                ExpressionResult(code, decimalFormat.format(value.toString().toDouble()))
             }
             ExpressionGroup.ResultType.NUMBER_ROUND_CEILING.value -> {
                 val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.CEILING }
-                ExpressionResult(decimalFormat.format(value.toString().toDouble()))
+                ExpressionResult(code, decimalFormat.format(value.toString().toDouble()))
             }
             ExpressionGroup.ResultType.NUMBER_ROUND_FLOOR.value -> {
                 val decimalFormat = DecimalFormat(expressionGroup.format).apply { this.roundingMode = RoundingMode.FLOOR }
-                ExpressionResult(decimalFormat.format(value.toString().toDouble()))
+                ExpressionResult(code, decimalFormat.format(value.toString().toDouble()))
             }
             else -> {
-                ExpressionResult(value)
+                ExpressionResult(code, value)
             }
         }
     }
