@@ -1,7 +1,6 @@
 package com.oneliang.ktx.frame.expression
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.common.mapWithFilter
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.parseRegexGroup
 import com.oneliang.ktx.util.common.toMap
@@ -52,9 +51,12 @@ object ExpressionExecutor {
         }
     }
 
-    fun execute(inputMap: Map<String, String>, priorityInputMap: Map<String, String> = emptyMap(), expressionItem: List<ExpressionItem>): Any {
+    fun execute(inputMap: Map<String, String>, priorityInputMap: Map<String, String> = emptyMap(), expressionItemList: List<ExpressionItem>): Any {
+        if (expressionItemList.isEmpty()) {
+            return Expression.INVALID_EVAL_RESULT
+        }
         var startExpressionItem: ExpressionItem? = null
-        val expressionItemMap = expressionItem.toMap {
+        val expressionItemMap = expressionItemList.toMap {
             if (it.type == ExpressionItem.Type.START.value) {
                 if (startExpressionItem == null) {
                     startExpressionItem = it
@@ -64,8 +66,13 @@ object ExpressionExecutor {
             }
             it.id to it
         }
+        //single expression item, only support end
+        var currentExpressionItem = if (expressionItemList.size == 1) {
+            expressionItemList[0]
+        } else {
+            startExpressionItem
+        }
         val resultMap = mutableMapOf<String, Any>()
-        var currentExpressionItem = startExpressionItem
         while (currentExpressionItem != null) {
             val resultCode = currentExpressionItem.resultCode
             val expressionItemType = currentExpressionItem.type
