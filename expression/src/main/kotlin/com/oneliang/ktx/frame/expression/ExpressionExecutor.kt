@@ -68,7 +68,11 @@ object ExpressionExecutor {
         }
         //single expression item, only support end
         var currentExpressionItem = if (expressionItemList.size == 1) {
-            expressionItemList[0]
+            val expressionItem = expressionItemList[0]
+            if (expressionItem.type != ExpressionItem.Type.END.value) {
+                error("single expression item is only support expression item type named [END]")
+            }
+            expressionItem
         } else {
             startExpressionItem
         }
