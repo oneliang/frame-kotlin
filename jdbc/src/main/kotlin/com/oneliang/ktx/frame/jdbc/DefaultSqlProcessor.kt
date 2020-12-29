@@ -41,9 +41,9 @@ class DefaultSqlProcessor : AbstractSqlProcessor() {
         } else {
             if (value != null) {
                 when (kClass) {
-                    Boolean::class -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=$value,"
-                    Date::class -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='" + (value as Date).toFormatString() + "',"
-                    else -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value',"
+                    Boolean::class -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=$value"
+                    Date::class -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='" + (value as Date).toFormatString() + "'"
+                    else -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'"
                 }
             } else {
                 Constants.String.BLANK

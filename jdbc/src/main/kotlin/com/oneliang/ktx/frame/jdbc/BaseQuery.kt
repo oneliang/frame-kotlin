@@ -255,6 +255,16 @@ interface BaseQuery {
     /**
      * Method: execute batch by connection,transaction
      * @param connection
+     * @param sqlList
+     * @return int[]
+     * @throws QueryException
+     */
+    @Throws(QueryException::class)
+    fun executeBatch(connection: Connection, sqlList: List<String>): IntArray
+
+    /**
+     * Method: execute batch by connection,transaction
+     * @param connection
      * @param sql include insert update delete sql only the same sql many data
      * @param parametersList
      * @return int[]

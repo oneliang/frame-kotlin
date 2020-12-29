@@ -689,7 +689,19 @@ open class BaseQueryImpl : BaseQuery {
      */
     @Throws(QueryException::class)
     override fun executeBatch(connection: Connection, sqls: Array<String>): IntArray {
-        if (sqls.isEmpty()) {
+        return executeBatch(connection, sqls.toList())
+    }
+
+    /**
+     * Method: execute batch by connection,transaction
+     * @param connection
+     * @param sqlList
+     * @return int[]
+     * @throws QueryException
+     */
+    @Throws(QueryException::class)
+    override fun executeBatch(connection: Connection, sqlList: List<String>): IntArray {
+        if (sqlList.isEmpty()) {
             return IntArray(0)
         }
         return useBatch(connection) {
@@ -697,7 +709,7 @@ open class BaseQueryImpl : BaseQuery {
             var statement: Statement? = null
             try {
                 statement = connection.createStatement()
-                for (sql in sqls) {
+                for (sql in sqlList) {
                     val parsedSql = DatabaseMappingUtil.parseSql(sql)
                     logger.info(parsedSql)
                     statement.addBatch(parsedSql)

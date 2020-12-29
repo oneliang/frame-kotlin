@@ -132,6 +132,22 @@ object SqlUtil {
     }
 
     /**
+     * update sql
+     * @param table can not be null
+     * @param columnsAndValueList
+     * @param condition
+     * @return String
+     */
+    fun updateSql(table: String, columnsAndValueList: List<String>, condition: String): String {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("UPDATE ")
+        stringBuilder.append(table)
+        stringBuilder.append(" SET " + columnsAndValueList.joinToString())
+        stringBuilder.append(" WHERE 1=1 $condition")
+        return stringBuilder.toString()
+    }
+
+    /**
      * delete sql
      * @param table can not be null
      * @param condition
@@ -392,7 +408,7 @@ object SqlUtil {
         val sql: String
         try {
             val methods = instance.javaClass.methods
-            val columnsAndValues = StringBuilder()
+            val columnsAndValueList = mutableListOf<String>()
             val condition = StringBuilder()
             for (method in methods) {
                 val methodName = method.name
@@ -408,7 +424,7 @@ object SqlUtil {
                 val type = method.returnType
                 val value = method.invoke(instance)
                 val result = sqlProcessor?.beforeUpdateProcess(type.kotlin, isId, columnName, value) ?: if (value != null) {
-                    Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value',"
+                    Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'"
                 } else {
                     Constants.String.BLANK
                 }
@@ -417,16 +433,13 @@ object SqlUtil {
                         condition.append(result)
                     }
                 } else {
-                    columnsAndValues.append(result)
+                    if (result.isNotBlank()) {
+                        columnsAndValueList += result
+                    }
                 }
             }
             val tempTable = fixTable(table, mappingBean)
-            val stringBuilder = StringBuilder()
-            stringBuilder.append("UPDATE ")
-            stringBuilder.append(tempTable)
-            stringBuilder.append(" SET " + columnsAndValues.substring(0, columnsAndValues.length - 1))
-            stringBuilder.append(" WHERE 1=1 $condition $otherCondition")
-            sql = stringBuilder.toString()
+            sql = updateSql(tempTable, columnsAndValueList, "$condition $otherCondition")
         } catch (e: Throwable) {
             throw SqlUtilException(e)
         }

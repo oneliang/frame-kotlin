@@ -100,13 +100,12 @@ object SqlInjectUtil {
      * @return Pair<String, List<Any>>
     </T> */
     fun <T : Any> objectToUpdateSql(instance: T, updateFields: Array<String> = emptyArray(), table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean): Pair<String, List<Any>> {
-        val sql = StringBuilder()
-        val idList = mutableListOf<Any>()
-        val valueList = mutableListOf<Any>()
-        val parameterList = mutableListOf<Any>()
         try {
+            val idList = mutableListOf<Any>()
+            val valueList = mutableListOf<Any>()
+            val parameterList = mutableListOf<Any>()
             val methods = instance.javaClass.methods
-            val columnsAndValues = StringBuilder()
+            val columnsAndValueList = mutableListOf<String>()
             val condition = StringBuilder()
             val updateFieldSet = updateFields.toHashSet()
             val allColumn = updateFieldSet.isEmpty()
@@ -137,23 +136,20 @@ object SqlInjectUtil {
                     }
                 } else {
                     if (value != null) {
-                        val result = Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?,"
+                        val result = Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
                         valueList.add(value)
-                        columnsAndValues.append(result)
+                        columnsAndValueList += result
                     }
                 }
             }
             val fixTable = SqlUtil.fixTable(table, mappingBean)
-            sql.append("UPDATE ")
-            sql.append(fixTable)
-            sql.append(" SET " + columnsAndValues.substring(0, columnsAndValues.length - 1))
-            sql.append(" WHERE 1=1 $condition $otherCondition")
+            val sql = SqlUtil.updateSql(fixTable, columnsAndValueList, "$condition $otherCondition")
             parameterList.addAll(valueList)
             parameterList.addAll(idList)
+            return sql to parameterList
         } catch (e: Exception) {
             throw SqlInjectUtilException(e)
         }
-        return sql.toString() to parameterList
     }
 
     /**
@@ -167,7 +163,6 @@ object SqlInjectUtil {
      * @return Pair<String, List<String>>
     </T> */
     fun <T : Any> classToUpdateSql(kClass: KClass<T>, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean): Pair<String, List<String>> {
-        val sql = StringBuilder()
         val fieldNameList = mutableListOf<String>()
         val idList = ArrayList<String>()
         val valueList = ArrayList<String>()
@@ -185,25 +180,21 @@ object SqlInjectUtil {
                 continue
             }
             val isId = mappingBean.isId(fieldName)
-            val result: String
             if (byId && isId) {
-                result = " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
+                val result = " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
                 idList.add(fieldName)
                 condition.append(result)
             } else {
-                result = Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
+                val result = Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
                 valueList.add(fieldName)
                 columnsAndValueList += result
             }
         }
         val fixTable = SqlUtil.fixTable(table, mappingBean)
-        sql.append("UPDATE ")
-        sql.append(fixTable)
-        sql.append(" SET " + columnsAndValueList.joinToString())
-        sql.append(" WHERE 1=1 $condition $otherCondition")
+        val sql = SqlUtil.updateSql(fixTable, columnsAndValueList, "$condition $otherCondition")
         fieldNameList.addAll(valueList)
         fieldNameList.addAll(idList)
-        return sql.toString() to fieldNameList
+        return sql to fieldNameList
     }
 
     /**
