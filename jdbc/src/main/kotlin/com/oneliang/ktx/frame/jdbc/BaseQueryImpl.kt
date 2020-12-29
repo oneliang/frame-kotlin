@@ -501,7 +501,6 @@ open class BaseQueryImpl : BaseQuery {
      */
     @Throws(QueryException::class)
     protected fun <T : Any> executeUpdate(connection: Connection, instance: T, table: String, updateFields: Array<String> = emptyArray(), condition: String, executeType: BaseQuery.ExecuteType): Int {
-        val rows: Int
         try {
             val kClass = instance::class
             val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
@@ -512,12 +511,10 @@ open class BaseQueryImpl : BaseQuery {
                 BaseQuery.ExecuteType.DELETE_BY_ID -> SqlInjectUtil.objectToDeleteSql(instance, table, condition, true, mappingBean)
                 BaseQuery.ExecuteType.DELETE_NOT_BY_ID -> SqlInjectUtil.objectToDeleteSql(instance, table, condition, false, mappingBean)
             }
-            rows = this.executeUpdateBySql(connection, sql, parameterList.toTypedArray())
+            return this.executeUpdateBySql(connection, sql, parameterList.toTypedArray())
         } catch (e: Throwable) {
             throw QueryException(e)
         }
-
-        return rows
     }
 
     /**
@@ -532,27 +529,26 @@ open class BaseQueryImpl : BaseQuery {
     </T> */
     @Throws(QueryException::class)
     protected fun <T : Any> executeUpdate(connection: Connection, collection: Collection<T>, table: String, executeType: BaseQuery.ExecuteType): IntArray {
-        var rows = IntArray(0)
-        if (collection.isNotEmpty()) {
-            try {
-                val sqls = Array(collection.size) { Constants.String.BLANK }
-                for ((i, instance) in collection.withIndex()) {
-                    val kClass = instance::class
-                    val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
-                    when (executeType) {
-                        BaseQuery.ExecuteType.INSERT -> sqls[i] = SqlUtil.objectToInsertSql(instance, table, mappingBean, this.sqlProcessor)
-                        BaseQuery.ExecuteType.UPDATE_BY_ID -> sqls[i] = SqlUtil.objectToUpdateSql(instance, table, Constants.String.BLANK, true, mappingBean, this.sqlProcessor)
-                        BaseQuery.ExecuteType.UPDATE_NOT_BY_ID -> sqls[i] = SqlUtil.objectToUpdateSql(instance, table, Constants.String.BLANK, false, mappingBean, this.sqlProcessor)
-                        BaseQuery.ExecuteType.DELETE_BY_ID -> sqls[i] = SqlUtil.objectToDeleteSql(instance, table, Constants.String.BLANK, true, mappingBean, this.sqlProcessor)
-                        BaseQuery.ExecuteType.DELETE_NOT_BY_ID -> sqls[i] = SqlUtil.objectToDeleteSql(instance, table, Constants.String.BLANK, false, mappingBean, this.sqlProcessor)
-                    }
-                }
-                rows = this.executeBatch(connection, sqls)
-            } catch (e: Throwable) {
-                throw QueryException(e)
-            }
+        if (collection.isEmpty()) {
+            return IntArray(0)
         }
-        return rows
+        try {
+            val sqlList = mutableListOf<String>()
+            for (instance in collection) {
+                val kClass = instance::class
+                val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
+                sqlList += when (executeType) {
+                    BaseQuery.ExecuteType.INSERT -> SqlUtil.objectToInsertSql(instance, table, mappingBean, this.sqlProcessor)
+                    BaseQuery.ExecuteType.UPDATE_BY_ID -> SqlUtil.objectToUpdateSql(instance, table, Constants.String.BLANK, true, mappingBean, this.sqlProcessor)
+                    BaseQuery.ExecuteType.UPDATE_NOT_BY_ID -> SqlUtil.objectToUpdateSql(instance, table, Constants.String.BLANK, false, mappingBean, this.sqlProcessor)
+                    BaseQuery.ExecuteType.DELETE_BY_ID -> SqlUtil.objectToDeleteSql(instance, table, Constants.String.BLANK, true, mappingBean, this.sqlProcessor)
+                    BaseQuery.ExecuteType.DELETE_NOT_BY_ID -> SqlUtil.objectToDeleteSql(instance, table, Constants.String.BLANK, false, mappingBean, this.sqlProcessor)
+                }
+            }
+            return this.executeBatch(connection, sqlList)
+        } catch (e: Throwable) {
+            throw QueryException(e)
+        }
     }
 
     /**
@@ -607,7 +603,7 @@ open class BaseQueryImpl : BaseQuery {
             return IntArray(0)
         }
         return useBatch(connection) {
-            val rows: IntArray
+            val results: IntArray
             var preparedStatement: PreparedStatement? = null
             try {
                 val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
@@ -631,10 +627,10 @@ open class BaseQueryImpl : BaseQuery {
                     preparedStatement.addBatch()
                 }
                 val begin = System.currentTimeMillis()
-                rows = preparedStatement.executeBatch()
+                results = preparedStatement.executeBatch()
                 preparedStatement.clearBatch()
-                logger.info("execute cost:%s, sql execute batch result:%s, sql:%s", (System.currentTimeMillis() - begin), rows.size, parsedSql)
-                rows
+                logger.info("execute cost:%s, sql execute batch result:%s, sql:%s", (System.currentTimeMillis() - begin), results.size, parsedSql)
+                results
             } finally {
                 preparedStatement?.close()
             }
@@ -776,28 +772,26 @@ open class BaseQueryImpl : BaseQuery {
         if (batchObjectCollection.isEmpty()) {
             return IntArray(0)
         }
-        val results: IntArray
         try {
-            val sqls = Array(batchObjectCollection.size) { Constants.String.BLANK }
-            for ((i, batchObject) in batchObjectCollection.withIndex()) {
+            val sqlList = mutableListOf<String>()
+            for (batchObject in batchObjectCollection) {
                 val instance = batchObject.instance
                 val executeType = batchObject.executeType
                 val condition = batchObject.condition
                 val kClass = instance.javaClass
                 val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass.kotlin) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
-                when (executeType) {
-                    BaseQuery.ExecuteType.INSERT -> sqls[i] = SqlUtil.objectToInsertSql(instance, Constants.String.BLANK, mappingBean, this.sqlProcessor)
-                    BaseQuery.ExecuteType.UPDATE_BY_ID -> sqls[i] = SqlUtil.objectToUpdateSql(instance, Constants.String.BLANK, condition, true, mappingBean, this.sqlProcessor)
-                    BaseQuery.ExecuteType.UPDATE_NOT_BY_ID -> sqls[i] = SqlUtil.objectToUpdateSql(instance, Constants.String.BLANK, condition, false, mappingBean, this.sqlProcessor)
-                    BaseQuery.ExecuteType.DELETE_BY_ID -> sqls[i] = SqlUtil.objectToDeleteSql(instance, Constants.String.BLANK, condition, true, mappingBean, this.sqlProcessor)
-                    BaseQuery.ExecuteType.DELETE_NOT_BY_ID -> sqls[i] = SqlUtil.objectToDeleteSql(instance, Constants.String.BLANK, condition, false, mappingBean, this.sqlProcessor)
+                sqlList += when (executeType) {
+                    BaseQuery.ExecuteType.INSERT -> SqlUtil.objectToInsertSql(instance, Constants.String.BLANK, mappingBean, this.sqlProcessor)
+                    BaseQuery.ExecuteType.UPDATE_BY_ID -> SqlUtil.objectToUpdateSql(instance, Constants.String.BLANK, condition, true, mappingBean, this.sqlProcessor)
+                    BaseQuery.ExecuteType.UPDATE_NOT_BY_ID -> SqlUtil.objectToUpdateSql(instance, Constants.String.BLANK, condition, false, mappingBean, this.sqlProcessor)
+                    BaseQuery.ExecuteType.DELETE_BY_ID -> SqlUtil.objectToDeleteSql(instance, Constants.String.BLANK, condition, true, mappingBean, this.sqlProcessor)
+                    BaseQuery.ExecuteType.DELETE_NOT_BY_ID -> SqlUtil.objectToDeleteSql(instance, Constants.String.BLANK, condition, false, mappingBean, this.sqlProcessor)
                 }
             }
-            results = this.executeBatch(connection, sqls)
+            return this.executeBatch(connection, sqlList)
         } catch (e: Throwable) {
             throw QueryException(e)
         }
-        return results
     }
 
     /**

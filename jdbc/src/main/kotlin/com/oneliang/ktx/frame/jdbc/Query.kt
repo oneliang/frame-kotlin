@@ -284,7 +284,16 @@ interface Query : BaseQuery {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String = Constants.String.BLANK, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<T>
+    fun <T : Any> selectObjectPaginationList(
+        kClass: KClass<T>,
+        page: Page,
+        countColumn: String = Constants.String.BLANK,
+        selectColumns: Array<String> = emptyArray(),
+        table: String = Constants.String.BLANK,
+        condition: String = Constants.String.BLANK,
+        useStable: Boolean = true,
+        parameters: Array<*> = emptyArray<Any>()
+    ): List<T>
 
     /**
      * Method: execute by sql ,for all sql,sql binding
@@ -349,6 +358,15 @@ interface Query : BaseQuery {
      */
     @Throws(QueryException::class)
     fun executeBatch(sqls: Array<String>): IntArray
+
+    /**
+     * Method: execute batch
+     * @param sqlList
+     * @return int[]
+     * @throws QueryException
+     */
+    @Throws(QueryException::class)
+    fun executeBatch(sqlList: List<String>): IntArray
 
     /**
      * Method: execute batch,transaction

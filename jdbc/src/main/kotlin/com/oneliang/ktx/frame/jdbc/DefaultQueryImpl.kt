@@ -565,6 +565,19 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     }
 
     /**
+     * Method: execute batch
+     * @param sqlList
+     * @return int[]
+     * @throws QueryException
+     */
+    @Throws(QueryException::class)
+    override fun executeBatch(sqlList: List<String>): IntArray {
+        return useConnection {
+            this.executeBatch(it, sqlList)
+        }
+    }
+
+    /**
      * Method: execute batch,transaction
      * @param sql include insert update delete sql only the same sql many data
      * @param parametersList
