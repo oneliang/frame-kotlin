@@ -10,19 +10,19 @@ fun main() {
     val sendMailInformation = SendMailInformation()
     sendMailInformation.host = "smtp.exmail.qq.com"
     sendMailInformation.port = 465
-    sendMailInformation.user = "liangwenxiang@findsteel.cn"
+    sendMailInformation.user = "server@findsteel.cn"
     sendMailInformation.password = "owabHiQvxCCk4yDg"
     sendMailInformation.ssl = true
     sendMailInformation.subject = "test"
     sendMailInformation.content = "test"
-    sendMailInformation.fromAddress = "liangwenxiang@findsteel.cn"
+    sendMailInformation.fromAddress = "server@findsteel.cn"
     sendMailInformation.toAddressList = listOf(ToAddress(address = "582199098@qq.com"))
     Mail.send(sendMailInformation)
     //receive
     val receiveMailInformation = ReceiveMailInformation()
     receiveMailInformation.host = "imap.exmail.qq.com"
     receiveMailInformation.port = 993
-    receiveMailInformation.user = "liangwenxiang@findsteel.cn"
+    receiveMailInformation.user = "server@findsteel.cn"
     receiveMailInformation.password = "owabHiQvxCCk4yDg"
     receiveMailInformation.ssl = true
     receiveMailInformation.protocol = Mail.IMAP
