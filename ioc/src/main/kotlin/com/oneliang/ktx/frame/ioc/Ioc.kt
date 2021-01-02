@@ -15,5 +15,5 @@ annotation class Ioc(val id: String = Constants.String.BLANK, val proxy: Boolean
     @MustBeDocumented
     @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class AllowExplicitInvoke(val id: String)
+    annotation class AllowExplicitlyInvoke(val id: String)
 }

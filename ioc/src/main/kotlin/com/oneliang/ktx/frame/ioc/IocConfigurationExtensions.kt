@@ -97,7 +97,7 @@ fun <T : Any> T.autoInjectByType() {
  * auto inject by type
  */
 @Throws(Exception::class)
-fun <T> ConfigurationContext.explicitInvoke(methodId: String, vararg args: Any?): T? {
+fun <T> ConfigurationContext.explicitlyInvoke(methodId: String, vararg args: Any?): T? {
     val annotationIocContext = this.findContext(AnnotationIocContext::class)
-    return annotationIocContext?.explicitInvoke(methodId, *args)
+    return annotationIocContext?.explicitlyInvoke(methodId, *args)
 }

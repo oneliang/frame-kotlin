@@ -9,7 +9,7 @@ class AnnotationIocContext : IocContext() {
 
     companion object {
         private val logger = LoggerManager.getLogger(AnnotationIocContext::class)
-        internal val iocAllowExplicitInvokeBeanMap = ConcurrentHashMap<String, IocAllowExplicitInvokeBean>()
+        internal val iocAllowExplicitlyInvokeBeanMap = ConcurrentHashMap<String, IocAllowExplicitlyInvokeBean>()
         internal val afterInstantiate: ((iocBean: IocBean) -> Unit) = { iocBean ->
             val methods = iocBean.beanInstance?.javaClass?.methods ?: emptyArray()
             for (method in methods) {
@@ -18,15 +18,15 @@ class AnnotationIocContext : IocContext() {
                     val iocAfterInjectBean = IocAfterInjectBean()
                     iocAfterInjectBean.method = method.name
                     iocBean.addIocAfterInjectBean(iocAfterInjectBean)
-                } else if (method.isAnnotationPresent(Ioc.AllowExplicitInvoke::class.java)) {
-                    val methodInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitInvoke::class.java)
+                } else if (method.isAnnotationPresent(Ioc.AllowExplicitlyInvoke::class.java)) {
+                    val methodInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitlyInvoke::class.java)
                     val methodId = methodInvokeAnnotation.id
-                    if (!iocAllowExplicitInvokeBeanMap.containsKey(methodId)) {
-                        val iocInvokedBean = IocAllowExplicitInvokeBean()
+                    if (!iocAllowExplicitlyInvokeBeanMap.containsKey(methodId)) {
+                        val iocInvokedBean = IocAllowExplicitlyInvokeBean()
                         iocInvokedBean.id = methodId
                         iocInvokedBean.proxyInstance = iocBean.proxyInstance
                         iocInvokedBean.proxyMethod = iocBean.proxyInstance?.javaClass?.getMethod(method.name, *method.parameterTypes)
-                        iocAllowExplicitInvokeBeanMap[methodId] = iocInvokedBean
+                        iocAllowExplicitlyInvokeBeanMap[methodId] = iocInvokedBean
                     } else {
                         logger.error("ioc context initialize error, duplicate ioc invoked bean id:%s", methodId)
                     }
@@ -48,7 +48,7 @@ class AnnotationIocContext : IocContext() {
                 val iocBean = IocBean()
                 var id = iocAnnotation.id
                 if (id.isBlank()) {
-                    val classes = kClass.java.interfaces
+                    val classes: Array<Class<*>>? = kClass.java.interfaces
                     id = if (classes != null && classes.isNotEmpty()) {
                         classes[0].simpleName
                     } else {
@@ -76,8 +76,8 @@ class AnnotationIocContext : IocContext() {
 
     @Suppress("UNCHECKED_CAST")
     @Throws(Exception::class)
-    fun <T> explicitInvoke(methodId: String, vararg args: Any?): T? {
-        val iocInvokedBean = iocAllowExplicitInvokeBeanMap[methodId]
+    fun <T> explicitlyInvoke(methodId: String, vararg args: Any?): T? {
+        val iocInvokedBean = iocAllowExplicitlyInvokeBeanMap[methodId]
         return if (iocInvokedBean != null) {
             iocInvokedBean.proxyMethod?.invoke(iocInvokedBean.proxyInstance, *args) as T?
         } else {
