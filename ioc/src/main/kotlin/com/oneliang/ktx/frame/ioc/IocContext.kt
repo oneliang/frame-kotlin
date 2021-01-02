@@ -292,7 +292,7 @@ open class IocContext : AbstractContext() {
                     logger.info("Auto injecting by type, instance id:%s, %s <- %s", id, instance.javaClass.name, beanInstance.javaClass.name)
                     method.invoke(instance, proxyInstance)
                 } else {
-                    val interfaces = beanInstance.javaClass.interfaces
+                    val interfaces: Array<Class<*>>? = beanInstance.javaClass.interfaces
                     if (interfaces != null) {
                         for (interfaceClass in interfaces) {
                             val beanInstanceClassInterfaceName = interfaceClass.name
