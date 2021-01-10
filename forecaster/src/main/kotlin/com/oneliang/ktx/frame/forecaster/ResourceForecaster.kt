@@ -55,64 +55,67 @@ object ResourceForecaster {
         val resourceInputItemListGroupMap = resourceInputItemList.groupBy { it.amountTime.toFormatString(Constants.Time.YEAR_MONTH_DAY) }
         (0..timeInterval).forEach {
             val currentDateKey = tempBeginTime.getDayZeroTimeDateNext(it).toFormatString(Constants.Time.YEAR_MONTH_DAY)
-            val resourceInputItemListGroup = resourceInputItemListGroupMap[currentDateKey] ?: return@forEach//continue
-            resourceInputItemListGroup.forEach { resourceInputItem ->
-                val amount = resourceInputItem.amount
-                val amountTime = resourceInputItem.amountTime
-                val dateKey = amountTime.toFormatString(Constants.Time.YEAR_MONTH_DAY)
-                val resourceOutputItem = resultTreeMap.getOrPut(dateKey) {
-                    ResourceOutputItem()
-                }
-                when (resourceInputItem.type) {
-                    ResourceInputItem.Type.ACTUAL.value -> {//实
-                        when (resourceInputItem.direction) {
-                            ResourceInputItem.Direction.IN.value -> {//实收
-                                resourceOutputItem.actualReceive += amount
-                                totalActualReceive += amount
-                                total += amount
+            val resourceOutputItem = resultTreeMap.getOrPut(currentDateKey) {
+                ResourceOutputItem()
+            }
+            val resourceInputItemListGroup = resourceInputItemListGroupMap[currentDateKey] ?: emptyList()
+            if (resourceInputItemListGroup.isNotEmpty()) {
+                resourceInputItemListGroup.forEach { resourceInputItem ->
+                    val amount = resourceInputItem.amount
+                    val amountTime = resourceInputItem.amountTime
+                    val dateKey = amountTime.toFormatString(Constants.Time.YEAR_MONTH_DAY)
+                    val currentResourceOutputItem = resultTreeMap[dateKey] ?: error("dateKey:${dateKey} does not exist, it maybe has a bug")
+                    when (resourceInputItem.type) {
+                        ResourceInputItem.Type.ACTUAL.value -> {//实
+                            when (resourceInputItem.direction) {
+                                ResourceInputItem.Direction.IN.value -> {//实收
+                                    currentResourceOutputItem.actualReceive += amount
+                                    totalActualReceive += amount
+                                    total += amount
+                                }
+                                else -> {//实付
+                                    currentResourceOutputItem.actualPay += amount
+                                    totalActualPay += amount
+                                    total -= amount
+                                }
                             }
-                            else -> {//实付
-                                resourceOutputItem.actualPay += amount
-                                totalActualPay += amount
-                                total -= amount
+                        }
+                        ResourceInputItem.Type.ACTUAL_SHOULD.value -> {//用于实际应收
+                            when (resourceInputItem.direction) {
+                                ResourceInputItem.Direction.IN.value -> {//实际应收
+                                    currentResourceOutputItem.actualShouldReceive += amount
+                                    totalActualShouldReceive += amount
+                                }
+                                else -> {//实际应付
+                                    currentResourceOutputItem.actualShouldPay += amount
+                                    totalActualShouldPay += amount
+                                }
+                            }
+                        }
+                        else -> {//应plan
+                            when (resourceInputItem.direction) {
+                                ResourceInputItem.Direction.IN.value -> {//应收
+                                    currentResourceOutputItem.planShouldReceive += amount
+                                    totalPlanShouldReceive += amount
+                                }
+                                else -> {//应付
+                                    currentResourceOutputItem.planShouldPay += amount
+                                    totalPlanShouldPay += amount
+                                }
                             }
                         }
                     }
-                    ResourceInputItem.Type.ACTUAL_SHOULD.value -> {//用于实际应收
-                        when (resourceInputItem.direction) {
-                            ResourceInputItem.Direction.IN.value -> {//实际应收
-                                resourceOutputItem.actualShouldReceive += amount
-                                totalActualShouldReceive += amount
-                            }
-                            else -> {//实际应付
-                                resourceOutputItem.actualShouldPay += amount
-                                totalActualShouldPay += amount
-                            }
-                        }
-                    }
-                    else -> {//应plan
-                        when (resourceInputItem.direction) {
-                            ResourceInputItem.Direction.IN.value -> {//应收
-                                resourceOutputItem.planShouldReceive += amount
-                                totalPlanShouldReceive += amount
-                            }
-                            else -> {//应付
-                                resourceOutputItem.planShouldPay += amount
-                                totalPlanShouldPay += amount
-                            }
-                        }
-                    }
                 }
-                resourceOutputItem.apply {
-                    this.time = dateKey.toUtilDate(Constants.Time.YEAR_MONTH_DAY)
-                    this.totalPlanShouldReceive = totalPlanShouldReceive
-                    this.totalPlanShouldPay = totalPlanShouldPay
-                    this.totalActualShouldReceive = totalActualShouldReceive
-                    this.totalActualShouldPay = totalActualShouldPay
-                    this.totalActualReceive = totalActualReceive
-                    this.totalActualPay = totalActualPay
-                    this.total = total
-                }
+            }
+            resourceOutputItem.apply {
+                this.time = currentDateKey.toUtilDate(Constants.Time.YEAR_MONTH_DAY)
+                this.totalPlanShouldReceive = totalPlanShouldReceive
+                this.totalPlanShouldPay = totalPlanShouldPay
+                this.totalActualShouldReceive = totalActualShouldReceive
+                this.totalActualShouldPay = totalActualShouldPay
+                this.totalActualReceive = totalActualReceive
+                this.totalActualPay = totalActualPay
+                this.total = total
             }
         }
         return resultTreeMap.toList { _, value -> value }
