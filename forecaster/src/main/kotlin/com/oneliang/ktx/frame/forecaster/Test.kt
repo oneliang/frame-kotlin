@@ -9,25 +9,36 @@ fun main() {
     val resourceInputItem1 = ResourceInputItem(
         100.0.toBigDecimal(),
         ResourceInputItem.Direction.IN.value,
-        ResourceInputItem.Type.PLAN_SHOULD.value
+        ResourceInputItem.Type.PLAN_SHOULD.value,
+        "2021-01-01".toUtilDate(Constants.Time.YEAR_MONTH_DAY)
     ).apply {
         this.amountTime = "2021-01-01".toUtilDate(Constants.Time.YEAR_MONTH_DAY).getDayZeroTimeDateNext(DELIVERY_DATE_45)
     }
     val resourceInputItem1_deposit = ResourceInputItem(
         resourceInputItem1.amount.multiplyByBigDecimal(RECEIVABLE_PROPORTION),
         ResourceInputItem.Direction.IN.value,
-        ResourceInputItem.Type.ACTUAL.value
+        ResourceInputItem.Type.ACTUAL.value,
+        "2021-01-02".toUtilDate(Constants.Time.YEAR_MONTH_DAY)
     ).apply {
         this.amountTime = "2021-01-02".toUtilDate(Constants.Time.YEAR_MONTH_DAY)
     }
     val resourceInputItem2 = ResourceInputItem(
         30.0.toBigDecimal(),
         ResourceInputItem.Direction.OUT.value,
-        ResourceInputItem.Type.ACTUAL.value
+        ResourceInputItem.Type.ACTUAL.value,
+        "2021-01-02".toUtilDate(Constants.Time.YEAR_MONTH_DAY)
     ).apply {
         this.amountTime = "2021-01-02".toUtilDate(Constants.Time.YEAR_MONTH_DAY)
     }
-    val resourceInputItemList = listOf(resourceInputItem1, resourceInputItem1_deposit, resourceInputItem2)
+    val resourceInputItem3 = ResourceInputItem(
+        80.0.toBigDecimal(),
+        ResourceInputItem.Direction.IN.value,
+        ResourceInputItem.Type.ACTUAL.value,
+        "2021-01-01".toUtilDate(Constants.Time.YEAR_MONTH_DAY)
+    ).apply {
+        this.amountTime = "2021-01-01".toUtilDate(Constants.Time.YEAR_MONTH_DAY).getDayZeroTimeDateNext(DELIVERY_DATE_45)
+    }
+    val resourceInputItemList = listOf(resourceInputItem1, resourceInputItem1_deposit, resourceInputItem2, resourceInputItem3)
     val resourceOutputItemList = ResourceForecaster.forecast(0.0, resourceInputItemList)
     resourceOutputItemList.forEach {
         println(it)

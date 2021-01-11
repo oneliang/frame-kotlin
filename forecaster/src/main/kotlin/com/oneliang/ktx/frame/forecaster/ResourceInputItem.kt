@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.forecaster
 
+import com.oneliang.ktx.util.common.getDayZeroTime
 import com.oneliang.ktx.util.json.toJson
 import java.math.BigDecimal
 import java.util.*
@@ -7,9 +8,10 @@ import java.util.*
 class ResourceInputItem(
     var amount: BigDecimal = BigDecimal(0),
     var direction: Int = Direction.IN.value,
-    var type: Int = Type.PLAN_SHOULD.value
+    var type: Int = Type.PLAN_SHOULD.value,
+    var time: Date = Date()//数据输入时间,用于totalXxxShould等数据计算
 ) {
-    var amountTime = Date()//时间
+    var amountTime = Date()//对应amount时发生的时间
 
     enum class Direction(val value: Int) {
         IN(0), OUT(1)
@@ -21,37 +23,15 @@ class ResourceInputItem(
         ACTUAL(2)//实际,实际收付
     }
 
-//    fun calculateMinAndMaxTime(): Pair<Date?, Date?> {
-//        val receivableTimeLong = this.receivableTime?.getDayZeroTime()
-//        val payableTimeLong = this.paidTime?.getDayZeroTime()
-//        var calculateBeginTime: Date? = null
-//        var calculateEndTime: Date? = null
-//        if (receivableTimeLong != null) {
-//            calculateBeginTime = this.receivableTime
-//            calculateEndTime = this.receivableTime
-//        }
-//        //calculate begin
-//        if (calculateBeginTime == null) {
-//            calculateBeginTime = this.paidTime
-//        } else {
-//            if (payableTimeLong != null) {
-//                if (calculateBeginTime.getDayZeroTime() > payableTimeLong) {
-//                    calculateBeginTime = this.paidTime
-//                }
-//            }
-//        }
-//        //calculate end
-//        if (calculateEndTime == null) {
-//            calculateEndTime = this.paidTime
-//        } else {
-//            if (payableTimeLong != null) {
-//                if (calculateEndTime.getDayZeroTime() < payableTimeLong) {
-//                    calculateEndTime = this.paidTime
-//                }
-//            }
-//        }
-//        return calculateBeginTime to calculateEndTime
-//    }
+    fun calculateMinAndMaxTime(): Pair<Date, Date> {
+        val timeLong = this.time.getDayZeroTime()
+        val amountTimeLong = this.amountTime.getDayZeroTime()
+        return if (timeLong > amountTimeLong) {
+            this.amountTime to this.time
+        } else {
+            this.time to this.amountTime
+        }
+    }
 
     override fun toString(): String {
         return this.toJson()

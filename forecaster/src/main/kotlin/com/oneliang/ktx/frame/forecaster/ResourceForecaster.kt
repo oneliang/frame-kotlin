@@ -13,8 +13,9 @@ object ResourceForecaster {
         var beginTime: Date? = null
         var endTime: Date? = null
         resourceInputItemList.forEach {
-            val calculateBeginTime = it.amountTime
-            val calculateEndTime = it.amountTime
+            val (minTime, maxTime) = it.calculateMinAndMaxTime()
+            val calculateBeginTime = minTime
+            val calculateEndTime = maxTime
             //begin time
             val tempBeginTime = beginTime
             if (tempBeginTime == null) {
@@ -52,15 +53,49 @@ object ResourceForecaster {
         var totalActualPay: BigDecimal = BigDecimal(0)//总实付
         var total = BigDecimal(initializeAmount)//总剩余
         val resultTreeMap = TreeMap<String, ResourceOutputItem>()
-        val resourceInputItemListGroupMap = resourceInputItemList.groupBy { it.amountTime.toFormatString(Constants.Time.YEAR_MONTH_DAY) }
+        val groupByArray = resourceInputItemList.groupByMultiKeySelector(
+            arrayOf({ it.time.toFormatString(Constants.Time.YEAR_MONTH_DAY) },
+                { it.amountTime.toFormatString(Constants.Time.YEAR_MONTH_DAY) })
+        )
+        val groupByTime = groupByArray[0]
+        val groupByAmountTime = groupByArray[1]
         (0..timeInterval).forEach {
             val currentDateKey = tempBeginTime.getDayZeroTimeDateNext(it).toFormatString(Constants.Time.YEAR_MONTH_DAY)
             val resourceOutputItem = resultTreeMap.getOrPut(currentDateKey) {
                 ResourceOutputItem()
             }
-            val resourceInputItemListGroup = resourceInputItemListGroupMap[currentDateKey] ?: emptyList()
-            if (resourceInputItemListGroup.isNotEmpty()) {
-                resourceInputItemListGroup.forEach { resourceInputItem ->
+            val resourceInputItemListForTime = groupByTime[currentDateKey] ?: emptyList()
+            //用于计算总实应收/总实应付/总计划应收/总计划应付
+            if (resourceInputItemListForTime.isNotEmpty()) {
+                resourceInputItemListForTime.forEach { resourceInputItem ->
+                    val amount = resourceInputItem.amount
+                    when (resourceInputItem.type) {
+                        ResourceInputItem.Type.ACTUAL_SHOULD.value -> {//用于实际应收
+                            when (resourceInputItem.direction) {
+                                ResourceInputItem.Direction.IN.value -> {//实际应收
+                                    totalActualShouldReceive += amount
+                                }
+                                else -> {//实际应付
+                                    totalActualShouldPay += amount
+                                }
+                            }
+                        }
+                        ResourceInputItem.Type.PLAN_SHOULD.value -> {//计划应收
+                            when (resourceInputItem.direction) {
+                                ResourceInputItem.Direction.IN.value -> {//应收
+                                    totalPlanShouldReceive += amount
+                                }
+                                else -> {//应付
+                                    totalPlanShouldPay += amount
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            val resourceInputItemListForAmountTime = groupByAmountTime[currentDateKey] ?: emptyList()
+            if (resourceInputItemListForAmountTime.isNotEmpty()) {
+                resourceInputItemListForAmountTime.forEach { resourceInputItem ->
                     val amount = resourceInputItem.amount
                     val amountTime = resourceInputItem.amountTime
                     val dateKey = amountTime.toFormatString(Constants.Time.YEAR_MONTH_DAY)
@@ -84,23 +119,19 @@ object ResourceForecaster {
                             when (resourceInputItem.direction) {
                                 ResourceInputItem.Direction.IN.value -> {//实际应收
                                     currentResourceOutputItem.actualShouldReceive += amount
-                                    totalActualShouldReceive += amount
                                 }
                                 else -> {//实际应付
                                     currentResourceOutputItem.actualShouldPay += amount
-                                    totalActualShouldPay += amount
                                 }
                             }
                         }
-                        else -> {//应plan
+                        else -> {//计划应该
                             when (resourceInputItem.direction) {
                                 ResourceInputItem.Direction.IN.value -> {//应收
                                     currentResourceOutputItem.planShouldReceive += amount
-                                    totalPlanShouldReceive += amount
                                 }
                                 else -> {//应付
                                     currentResourceOutputItem.planShouldPay += amount
-                                    totalPlanShouldPay += amount
                                 }
                             }
                         }
