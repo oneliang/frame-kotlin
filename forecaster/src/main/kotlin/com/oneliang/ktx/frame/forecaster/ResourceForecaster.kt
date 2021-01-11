@@ -9,7 +9,7 @@ import java.util.*
 object ResourceForecaster {
     private val logger = LoggerManager.getLogger(ResourceForecaster::class)
 
-    fun forecast(initializeAmount: Double, resourceInputItemList: List<ResourceInputItem>): List<ResourceOutputItem> {
+    fun forecast(initializeResourceTotalItem: ResourceTotalItem, resourceInputItemList: List<ResourceInputItem>): List<ResourceOutputItem> {
         var beginTime: Date? = null
         var endTime: Date? = null
         resourceInputItemList.forEach {
@@ -45,13 +45,13 @@ object ResourceForecaster {
         val beginTimeLong = tempBeginTime.getDayZeroTime()
         val endTimeLong = tempEndTime.getDayZeroTime()
         val timeInterval = ((endTimeLong - beginTimeLong) / Constants.Time.MILLISECONDS_OF_DAY).toInt()
-        var totalPlanShouldReceive = BigDecimal(0)//总应收
-        var totalPlanShouldPay: BigDecimal = BigDecimal(0)//总应付
-        var totalActualShouldReceive = BigDecimal(0)//总实际应收
-        var totalActualShouldPay: BigDecimal = BigDecimal(0)//总实际应付
-        var totalActualReceive = BigDecimal(0)//总实收
-        var totalActualPay: BigDecimal = BigDecimal(0)//总实付
-        var total = BigDecimal(initializeAmount)//总剩余
+        var totalPlanShouldReceive = BigDecimal(initializeResourceTotalItem.totalPlanShouldReceive.toString())//总应收
+        var totalPlanShouldPay = BigDecimal(initializeResourceTotalItem.totalPlanShouldPay.toString())//总应付
+        var totalActualShouldReceive = BigDecimal(initializeResourceTotalItem.totalActualShouldReceive.toString())//总实际应收
+        var totalActualShouldPay = BigDecimal(initializeResourceTotalItem.totalActualShouldPay.toString())//总实际应付
+        var totalActualReceive = BigDecimal(initializeResourceTotalItem.totalActualReceive.toString())//总实收
+        var totalActualPay = BigDecimal(initializeResourceTotalItem.totalActualPay.toString())//总实付
+        var total = BigDecimal(initializeResourceTotalItem.total.toString())//总剩余
         val resultTreeMap = TreeMap<String, ResourceOutputItem>()
         val groupByArray = resourceInputItemList.groupByMultiKeySelector(
             arrayOf({ it.time.toFormatString(Constants.Time.YEAR_MONTH_DAY) },

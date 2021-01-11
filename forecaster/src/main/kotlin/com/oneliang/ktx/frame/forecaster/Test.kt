@@ -39,7 +39,7 @@ fun main() {
         this.amountTime = "2021-01-01".toUtilDate(Constants.Time.YEAR_MONTH_DAY).getDayZeroTimeDateNext(DELIVERY_DATE_45)
     }
     val resourceInputItemList = listOf(resourceInputItem1, resourceInputItem1_deposit, resourceInputItem2, resourceInputItem3)
-    val resourceOutputItemList = ResourceForecaster.forecast(0.0, resourceInputItemList)
+    val resourceOutputItemList = ResourceForecaster.forecast(ResourceTotalItem(), resourceInputItemList)
     resourceOutputItemList.forEach {
         println(it)
     }
