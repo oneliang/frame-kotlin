@@ -25,7 +25,7 @@ open class ResourceTotalItem {
             this.totalActualShouldDifferent = field - this.totalActualShouldPay
         }
     var totalActualShouldPay: BigDecimal = BigDecimal(0)
-        //总计划应付
+        //总实际应付
         set(value) {
             field = value
             this.totalActualShouldDifferent = this.totalActualShouldReceive - field
@@ -42,7 +42,7 @@ open class ResourceTotalItem {
             field = value
             this.totalActualDifferent = this.totalActualReceive - field
         }
-    var totalPlanShouldDifferent: BigDecimal = BigDecimal(0)//总应收差异
+    var totalPlanShouldDifferent: BigDecimal = BigDecimal(0)//总计划应收差异
     var totalActualShouldDifferent: BigDecimal = BigDecimal(0)//总实际应收差异
     var totalActualDifferent: BigDecimal = BigDecimal(0)//总实收差异
     var total: BigDecimal = BigDecimal(0)//总剩余
