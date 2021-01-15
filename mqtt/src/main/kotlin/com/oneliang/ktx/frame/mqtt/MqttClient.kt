@@ -8,7 +8,7 @@ import org.fusesource.mqtt.client.MQTT
 object MqttClient {
     private val logger = LoggerManager.getLogger(MqttClient::class)
 
-    fun connect(host: String, username: String = Constants.String.BLANK, password: String = Constants.String.BLANK, afterConnected: (blockingConnection: BlockingConnection) -> Unit) {
+    fun connect(host: String, username: String = Constants.String.BLANK, password: String = Constants.String.BLANK, afterConnected: (blockingConnection: BlockingConnection) -> Unit): BlockingConnection {
         val mqtt = MQTT()
         mqtt.setHost(host)
         if (username.isNotBlank()) {
@@ -20,5 +20,6 @@ object MqttClient {
         val connection = mqtt.blockingConnection()
         connection.connect()
         afterConnected(connection)
+        return connection
     }
 }

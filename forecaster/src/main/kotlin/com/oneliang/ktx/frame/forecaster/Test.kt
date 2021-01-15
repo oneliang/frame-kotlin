@@ -5,6 +5,70 @@ import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.jxl.readSimpleExcel
 import com.oneliang.ktx.util.jxl.writeSimpleExcel
 
+private fun readExcel2(): List<ResourceInputItem> {
+    val resourceInputItemList = mutableListOf<ResourceInputItem>()
+    val readResult = "C:/Users/Administrator/Desktop/in_out.xls".toFile().readSimpleExcel(headerRowIndex = 0)
+    readResult.dataList.forEachIndexed { index, it ->
+        val time = it["time"].nullToBlank()
+        val inPlanShould = it["in_plan_should"].nullToBlank()
+        val inPlanShouldTime = it["in_plan_should_time"].nullToBlank()
+        resourceInputItemList += ResourceInputItem(
+            inPlanShould.toBigDecimal(),
+            ResourceInputItem.Direction.IN.value,
+            ResourceInputItem.Type.PLAN_SHOULD.value,
+            time.toUtilDate().getDayZeroTimeDate()
+        ).apply {
+            this.amountTime = inPlanShouldTime.toUtilDate().getDayZeroTimeDate()
+        }
+        //in actual should
+        for (i in 1..20) {
+            val inActualShould = it["in_actual_should_$i"].nullToBlank()
+            val inActualShouldTime = it["in_actual_should_time_$i"].nullToBlank()
+            if (inActualShould.isNotBlank() && inActualShouldTime.isNotBlank()) {
+                resourceInputItemList += ResourceInputItem(
+                    inActualShould.toBigDecimal(),
+                    ResourceInputItem.Direction.IN.value,
+                    ResourceInputItem.Type.ACTUAL_SHOULD.value,
+                    time.toUtilDate().getDayZeroTimeDate()
+                ).apply {
+                    this.amountTime = inActualShouldTime.toUtilDate().getDayZeroTimeDate()
+                }
+            }
+        }
+        //in actual
+        for (i in 1..20) {
+            val inActual = it["in_actual_$i"].nullToBlank()
+            val inActualTime = it["in_actual_time_$i"].nullToBlank()
+            if (inActual.isNotBlank() && inActualTime.isNotBlank()) {
+                resourceInputItemList += ResourceInputItem(
+                    inActual.toBigDecimal(),
+                    ResourceInputItem.Direction.IN.value,
+                    ResourceInputItem.Type.ACTUAL.value,
+                    time.toUtilDate().getDayZeroTimeDate()
+                ).apply {
+                    this.amountTime = inActualTime.toUtilDate().getDayZeroTimeDate()
+                }
+            }
+        }
+        //out actual
+        for (i in 1..20) {
+            val outActualShould = it["out_actual_should_$i"].nullToBlank()
+            val outActualShouldTime = it["out_actual_should_time_$i"].nullToBlank()
+            if (outActualShould.isNotBlank() && outActualShouldTime.isNotBlank()) {
+                resourceInputItemList += ResourceInputItem(
+                    outActualShould.toBigDecimal(),
+                    ResourceInputItem.Direction.OUT.value,
+                    ResourceInputItem.Type.ACTUAL_SHOULD.value,
+                    time.toUtilDate().getDayZeroTimeDate()
+                ).apply {
+                    this.amountTime = outActualShouldTime.toUtilDate().getDayZeroTimeDate()
+                }
+            }
+        }
+    }
+    return resourceInputItemList
+}
+
 private fun readExcel(): List<ResourceInputItem> {
     val resourceInputItemList = mutableListOf<ResourceInputItem>()
     val readResult = "C:/Users/Administrator/Desktop/test.xls".toFile().readSimpleExcel(headerRowIndex = 0)
@@ -141,7 +205,7 @@ fun main() {
     ).apply {
         this.amountTime = "2021-01-01".toUtilDate(Constants.Time.YEAR_MONTH_DAY).getDayZeroTimeDateNext(DELIVERY_DATE_45)
     }
-    val resourceInputItemList = readExcel()//listOf(resourceInputItem1, resourceInputItem1_deposit, resourceInputItem2, resourceInputItem3)
+    val resourceInputItemList = readExcel2()//listOf(resourceInputItem1, resourceInputItem1_deposit, resourceInputItem2, resourceInputItem3)
     val resourceOutputItemList = ResourceForecaster.forecast(ResourceTotalItem(), resourceInputItemList)
     resourceOutputItemList.forEach {
         println(it)
