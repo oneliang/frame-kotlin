@@ -18,6 +18,13 @@ class MemoryCache(private val maxSize: Int) {
     private val lock = ReentrantLock()
 
     fun getOrSave(key: String, cacheRefreshTime: Long, noCacheBlock: () -> Any?): Any? {
+        return getOrSave(key, cacheRefreshTime, noCacheBlock, null)
+    }
+
+    fun getOrSave(key: String, cacheRefreshTime: Long, noCacheBlock: () -> Any?, deleteOldCacheCallback: ((oldCache: Any?) -> Unit)? = null): Any? {
+        getOrSave(key, cacheRefreshTime) {
+
+        }
         //check cache size
         if (this.cacheMap.size >= maxSize) {
             try {
@@ -44,7 +51,8 @@ class MemoryCache(private val maxSize: Int) {
             val oldCacheKey = this.oldCacheKeyMap[key]
             if (oldCacheKey != null) {
                 this.oldCacheKeyMap.remove(key)
-                this.cacheMap.remove(oldCacheKey)
+                val oldCacheData = this.cacheMap.remove(oldCacheKey)
+                deleteOldCacheCallback?.invoke(oldCacheData)
             }
             this.cacheMap[cacheKey] = data
             this.oldCacheKeyMap[key] = cacheKey
