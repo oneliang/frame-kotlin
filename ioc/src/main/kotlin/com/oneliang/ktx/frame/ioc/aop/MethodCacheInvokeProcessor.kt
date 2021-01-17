@@ -10,7 +10,6 @@ import java.lang.reflect.Method
 open class MethodCacheInvokeProcessor(memoryCacheSize: Int) : DefaultInvokeProcessor() {
     companion object {
         private val logger = LoggerManager.getLogger(MethodCacheInvokeProcessor::class)
-        //        private val fileCacheManager: FileCacheManager = FileCacheManager("methodCache")
     }
 
     private val memoryCache = MemoryCache(memoryCacheSize)
@@ -28,28 +27,4 @@ open class MethodCacheInvokeProcessor(memoryCacheSize: Int) : DefaultInvokeProce
             super.invoke(instance, method, args)
         }
     }
-
-//    private fun a(){
-//        val cacheDataKey = parameterJson.MD5String()
-//        logger.info("parameter json:%s, cache data key:%s", parameterJson, cacheDataKey)
-//        val cacheData = fileCacheManager.getFromCache(cacheDataKey, String::class)
-//        return if (cacheData == null || cacheData.isBlank()) {
-//            val data = super.invoke(instance, method, args)
-//            fileCacheManager.saveToCache(cacheDataKey, data?.toJson() ?: Constants.String)
-//            data
-//        } else {
-//            val methodCacheAnnotation = instanceMethod.getAnnotation(MethodCache::class.java)
-//            val listFieldMap = methodCacheAnnotation.listFields.toMap { it.field to it }
-//            cacheData.jsonToObject(method.returnType.kotlin, object : DefaultKotlinClassProcessor() {
-//                override fun <T : Any> changeClassProcess(kClass: KClass<T>, values: Array<String>, fieldName: String): Any? {
-//                    val listField = listFieldMap[fieldName]
-//                    if (listField != null && values[0].isNotEmpty()) {
-//                        return values[0].jsonToObject(listField.kClass)
-//                    } else {
-//                        return super.changeClassProcess(kClass, values, fieldName)
-//                    }
-//                }
-//            })
-//        }
-//    }
 }
