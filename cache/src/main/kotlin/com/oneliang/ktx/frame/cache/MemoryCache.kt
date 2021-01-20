@@ -22,21 +22,6 @@ class MemoryCache(private val maxSize: Int) {
     }
 
     fun getOrSave(key: String, cacheRefreshTime: Long, noCacheBlock: () -> Any?, deleteOldCacheCallback: ((oldCache: Any?) -> Unit)? = null): Any? {
-        getOrSave(key, cacheRefreshTime) {
-
-        }
-        //check cache size
-        if (this.cacheMap.size >= maxSize) {
-            try {
-                this.lock.lock()
-                if (this.cacheMap.size >= maxSize) {
-                    logger.info("before clear cache, cache size:%s", this.cacheMap.size)
-                    this.cacheMap.clear()
-                }
-            } finally {
-                this.lock.unlock()
-            }
-        }
         val formatTime = if (cacheRefreshTime <= 0) {
             Constants.String.ZERO
         } else {
@@ -53,6 +38,18 @@ class MemoryCache(private val maxSize: Int) {
                 this.oldCacheKeyMap.remove(key)
                 val oldCacheData = this.cacheMap.remove(oldCacheKey)
                 deleteOldCacheCallback?.invoke(oldCacheData)
+            }
+            //check cache size before save cache
+            if (this.cacheMap.size >= maxSize) {
+                try {
+                    this.lock.lock()
+                    if (this.cacheMap.size >= maxSize) {
+                        logger.info("before clear cache, cache size:%s", this.cacheMap.size)
+                        this.cacheMap.clear()
+                    }
+                } finally {
+                    this.lock.unlock()
+                }
             }
             this.cacheMap[cacheKey] = data
             this.oldCacheKeyMap[key] = cacheKey
