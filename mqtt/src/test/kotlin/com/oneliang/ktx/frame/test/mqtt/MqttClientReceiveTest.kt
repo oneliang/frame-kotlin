@@ -17,14 +17,15 @@ fun main() {
             println("Subscribed to topics.")
             println("Receiving messages.")
         }
-    }) { connection ->
-        val message = connection.receive()
-        message.ack()
-        val task:(BlockingConnection)->Unit ={
-            println(message.topic + "," + String(message.payload))
+    }, object : ReceiveHandler.LoopingProcessor<BlockingConnection> {
+        override fun process(resource: BlockingConnection): (BlockingConnection) -> Unit {
+            val message = resource.receive()
+            message.ack()
+            return {
+                println(message.topic + "," + String(message.payload))
+            }
         }
-        task
-    }
+    })
     receiveHandler.start()
 //        val message1 = connection.receive(5, TimeUnit.SECONDS)
 //        println(String(message1.payload))

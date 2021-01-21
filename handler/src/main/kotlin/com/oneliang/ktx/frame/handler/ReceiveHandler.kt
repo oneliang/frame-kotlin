@@ -8,7 +8,7 @@ import com.oneliang.ktx.util.logging.LoggerManager
 class ReceiveHandler<T : Any>(
     private val threadCount: Int = 1,
     private val initialize: () -> T,
-    private val loopingProcess: (T) -> ((T) -> Unit)
+    private val loopingProcessor: LoopingProcessor<T>
 ) : LoopThread() {
     companion object {
         private val logger = LoggerManager.getLogger(ReceiveHandler::class)
@@ -29,7 +29,7 @@ class ReceiveHandler<T : Any>(
     }
 
     override fun looping() {
-        val task = this.loopingProcess(this.resource)
+        val task = this.loopingProcessor.process(this.resource)
         execute(task)
     }
 
@@ -45,5 +45,9 @@ class ReceiveHandler<T : Any>(
     override fun interrupt() {
         this.threadPool.interrupt()
         super.interrupt()
+    }
+
+    interface LoopingProcessor<T : Any> {
+        fun process(resource: T): (T) -> Unit
     }
 }
