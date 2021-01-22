@@ -278,8 +278,8 @@ open class IocContext : AbstractContext() {
             if (!methodName.startsWith(Constants.Method.PREFIX_SET)) {
                 continue
             }
-            val types = method.parameterTypes
-            if (types == null || types.size != 1) {
+            val types = method.parameterTypes ?: emptyArray()
+            if (types.size != 1) {
                 continue
             }
             val parameterClass = types[0]
@@ -319,8 +319,8 @@ open class IocContext : AbstractContext() {
             if (!methodName.startsWith(Constants.Method.PREFIX_SET)) {
                 continue
             }
-            val types = method.parameterTypes
-            if (types == null || types.size != 1) {
+            val types = method.parameterTypes ?: emptyArray()
+            if (types.size != 1) {
                 continue
             }
             val fieldName = ObjectUtil.methodNameToFieldName(Constants.Method.PREFIX_SET, methodName)
@@ -368,8 +368,8 @@ open class IocContext : AbstractContext() {
                 if (propertyName != fieldName) {
                     continue
                 }
-                val types = method.parameterTypes
-                if (types == null || types.size != 1) {
+                val types = method.parameterTypes ?: emptyArray()
+                if (types.size != 1) {
                     continue
                 }
                 val referenceIocBean = iocBeanMap[referenceBeanId]
@@ -399,17 +399,17 @@ open class IocContext : AbstractContext() {
         iocBeanMap.forEach { (id, iocBean) ->
             val iocAfterInjectBeanList = iocBean.iocAfterInjectBeanList
             for (iocAfterInjectBean in iocAfterInjectBeanList) {
-                val proxyInstance = iocBean.proxyInstance
-                if (proxyInstance == null) {
-                    logger.error("After inject, proxy instance is null, instance id:%s", id)
+                val beanInstance = iocBean.beanInstance
+                if (beanInstance == null) {
+                    logger.error("After inject, bean instance is null, instance id:%s", id)
                     continue
                 }
-                val method = proxyInstance.javaClass.getMethod(iocAfterInjectBean.method)
-                logger.info("After inject, instance id:%s, proxyInstance:%s, method:%s", id, proxyInstance, iocAfterInjectBean.method)
+                val method = beanInstance.javaClass.getMethod(iocAfterInjectBean.method)
+                logger.info("After inject, instance id:%s, bean instance:%s, method:%s", id, beanInstance, iocAfterInjectBean.method)
                 try {
-                    method.invoke(proxyInstance)
+                    method.invoke(beanInstance)
                 } catch (e: Throwable) {
-                    logger.error("After inject error, instance id:%s, proxyInstance:%s, method:%s", e, id, proxyInstance, iocAfterInjectBean.method)
+                    logger.error("After inject error, instance id:%s, bean instance:%s, method:%s", e, id, beanInstance, iocAfterInjectBean.method)
                     //no need to throw exception, it will break the main thread
 //                    throw e
                 }
