@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.ioc.aop
 
+import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.cache.MemoryCache
 import com.oneliang.ktx.frame.ioc.Ioc
 import com.oneliang.ktx.util.common.MD5String
@@ -22,8 +23,9 @@ open class MethodCacheInvokeProcessor(memoryCacheSize: Int) : DefaultInvokeProce
         }
         val methodCacheAnnotation = instanceMethod.getAnnotation(MethodCache::class.java)
         val parameterJson = args.toJson()
-        logger.info("need to cache, method:%s, parameter json:%s", instanceMethod, parameterJson)
-        return this.memoryCache.getOrSave(parameterJson.MD5String(), methodCacheAnnotation.cacheRefreshTime) {
+        val cacheKey = instance::class.java.name + Constants.Symbol.AT + method.name + Constants.Symbol.AT + parameterJson
+        logger.info("need to cache, method:%s, cache key:%s", instanceMethod, cacheKey)
+        return this.memoryCache.getOrSave(cacheKey.MD5String(), methodCacheAnnotation.cacheRefreshTime) {
             super.invoke(instance, method, args)
         }
     }
