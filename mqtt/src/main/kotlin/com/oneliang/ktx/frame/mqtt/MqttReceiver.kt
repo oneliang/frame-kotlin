@@ -20,6 +20,7 @@ class MqttReceiver(host: String, username: String, password: String, threadCount
     }, this)
 
     init {
+        logger.info("receive handler starting")
         this.receiveHandler.start()
     }
 
