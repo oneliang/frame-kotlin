@@ -326,7 +326,7 @@ interface Query : BaseQuery {
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, useStable: Boolean = true, parameters: Array<*>): List<Map<String, *>>
+    fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<Map<String, *>>
 
     /**
      * Method: execute update
