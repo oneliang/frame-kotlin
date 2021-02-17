@@ -53,7 +53,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             val time = System.currentTimeMillis()
             time.getZeroTime(fixCacheRefreshTime).toUtilDate().toFormatString(Constants.Time.UNION_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
         }
-        val cacheName = keyString + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
+        val cacheName = keyString.toBriefString(80) + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
         return relativePath.toString() + Constants.Symbol.SLASH_LEFT + cacheName
     }
 
