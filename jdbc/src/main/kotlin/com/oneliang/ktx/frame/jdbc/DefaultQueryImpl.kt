@@ -616,7 +616,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T> */
     @Throws(QueryException::class)
     override fun <T : Any> totalRows(countColumn: String, table: String, condition: String, useStable: Boolean, parameters: Array<*>): Int {
-        return this.totalRows<Any>(null, countColumn, table, condition, useStable, parameters)
+        return this.totalRows<T>(null, countColumn, table, condition, useStable, parameters)
     }
 
     /**
