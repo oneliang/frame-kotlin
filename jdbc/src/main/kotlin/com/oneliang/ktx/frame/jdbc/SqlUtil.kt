@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.jdbc
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.exception.MappingNotFoundException
 import com.oneliang.ktx.util.common.ObjectUtil
+import com.oneliang.ktx.util.common.transform
 import com.oneliang.ktx.util.json.toJson
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -118,8 +119,8 @@ object SqlUtil {
         return selectSql(selectColumns, tempTable, condition)
     }
 
-    fun insertSql(table: String, columnNameArray: Array<String>, valueArray: Array<String>): String {
-        return insertSql(table, columnNameArray.joinToString(), valueArray.joinToString(separator = Constants.Symbol.SINGLE_QUOTE + Constants.Symbol.COMMA + Constants.Symbol.SINGLE_QUOTE, prefix = Constants.Symbol.SINGLE_QUOTE, postfix = Constants.Symbol.SINGLE_QUOTE))
+    fun insertSql(table: String, columnNameArray: Array<String>, valueArray: Array<Any>): String {
+        return insertSql(table, columnNameArray.joinToString(), valueArray.joinToString(separator = Constants.Symbol.SINGLE_QUOTE + Constants.Symbol.COMMA + Constants.Symbol.SINGLE_QUOTE, prefix = Constants.Symbol.SINGLE_QUOTE, postfix = Constants.Symbol.SINGLE_QUOTE) { it.toString() })
     }
 
     private fun insertSql(table: String, columnNames: String, values: String): String {
