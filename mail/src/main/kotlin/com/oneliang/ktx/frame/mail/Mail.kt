@@ -39,15 +39,15 @@ object Mail {
 
     /**
      * send mail
-     * @param sendMailOption
+     * @param sendMailConfiguration
      * @throws Exception
      */
     @Throws(Exception::class)
-    fun send(sendMailOption: SendMailOption, sendMailMessageList: List<SendMailMessage>, sessionPropertyMap: Map<String, Any> = emptyMap()) {
-        val user = sendMailOption.user
-        val host = sendMailOption.host
-        val port = sendMailOption.port
-        val protocol = sendMailOption.protocol
+    fun send(sendMailConfiguration: SendMailConfiguration, sendMailMessageList: List<SendMailMessage>, sessionPropertyMap: Map<String, Any> = emptyMap()) {
+        val user = sendMailConfiguration.user
+        val host = sendMailConfiguration.host
+        val port = sendMailConfiguration.port
+        val protocol = sendMailConfiguration.protocol
         val properties = Properties()
         // set host
         properties[MAIL_PROTOCOL_HOST.format(protocol)] = host
@@ -55,7 +55,7 @@ object Mail {
         properties[MAIL_PROTOCOL_PORT.format(protocol)] = port
         // set authenticator true
         properties[MAIL_PROTOCOL_AUTH.format(protocol)] = true
-        if (sendMailOption.ssl) {
+        if (sendMailConfiguration.ssl) {
             properties[MAIL_PROTOCOL_SOCKETFACTORY_CLASS.format(protocol)] = SSL_SOCKETFACTORY_CLASS
         }
         sessionPropertyMap.forEach { (key, value) ->
@@ -111,7 +111,7 @@ object Mail {
         // get transport
         val transport: Transport = session.getTransport(protocol)
         // connection
-        transport.connect(host, port, user, sendMailOption.password)
+        transport.connect(host, port, user, sendMailConfiguration.password)
         // send mail
         val commandMap = CommandMap.getDefaultCommandMap() as MailcapCommandMap
         commandMap.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html")
@@ -163,7 +163,7 @@ object Mail {
         return mailMessageList
     }
 
-    class SendMailOption {
+    class SendMailConfiguration {
         var host = Constants.String.BLANK
         var port = 25
         var user = Constants.String.BLANK

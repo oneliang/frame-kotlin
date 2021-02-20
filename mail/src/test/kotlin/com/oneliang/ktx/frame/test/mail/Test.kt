@@ -7,18 +7,18 @@ import com.oneliang.ktx.frame.mail.ToAddress
 import com.oneliang.ktx.util.file.FileUtil
 
 fun main() {
-    val sendMailOption = Mail.SendMailOption()
-    sendMailOption.host = "smtp.exmail.qq.com"
-    sendMailOption.port = 465
-    sendMailOption.user = "server@findsteel.cn"
-    sendMailOption.password = "owabHiQvxCCk4yDg"
-    sendMailOption.ssl = true
+    val sendMailConfiguration = Mail.SendMailConfiguration()
+    sendMailConfiguration.host = "smtp.exmail.qq.com"
+    sendMailConfiguration.port = 465
+    sendMailConfiguration.user = "server@findsteel.cn"
+    sendMailConfiguration.password = "owabHiQvxCCk4yDg"
+    sendMailConfiguration.ssl = true
     val sendMailMessage = SendMailMessage()
     sendMailMessage.subject = "test"
     sendMailMessage.content = "test"
     sendMailMessage.fromAddress = "server@findsteel.cn"
     sendMailMessage.toAddressList = listOf(ToAddress("582199098@qq.com"))
-    Mail.send(sendMailOption, listOf(sendMailMessage))
+    Mail.send(sendMailConfiguration, listOf(sendMailMessage))
     //receive
     val receiveMailInformation = ReceiveMailInformation()
     receiveMailInformation.host = "imap.exmail.qq.com"
