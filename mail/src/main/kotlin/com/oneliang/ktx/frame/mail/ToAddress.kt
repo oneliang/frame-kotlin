@@ -1,8 +1,6 @@
 package com.oneliang.ktx.frame.mail
 
-import com.oneliang.ktx.Constants
-
-class ToAddress(var type: Type = Type.TO, var address: String = Constants.String.BLANK) {
+class ToAddress(var address: String, var type: Type = Type.TO) {
 
     enum class Type {
         TO, BCC, CC

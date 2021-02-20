@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.mail
 
+import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.*
 import javax.activation.*
@@ -11,7 +12,6 @@ import javax.mail.Session
 import javax.mail.Store
 import javax.mail.Transport
 import javax.mail.URLName
-import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
@@ -37,22 +37,17 @@ object Mail {
      */
     var DEBUG = false
 
-    private fun a() {
-
-    }
-
     /**
      * send mail
-     * @param sendMailInformation
+     * @param sendMailOption
      * @throws Exception
      */
     @Throws(Exception::class)
-    fun send(sendMailInformation: SendMailInformation, sessionPropertyMap: Map<String, Any> = emptyMap()) {
-        val from = sendMailInformation.fromAddress
-        val user = sendMailInformation.user
-        val host = sendMailInformation.host
-        val port = sendMailInformation.port
-        val protocol = sendMailInformation.protocol
+    fun send(sendMailOption: SendMailOption, sendMailMessageList: List<SendMailMessage>, sessionPropertyMap: Map<String, Any> = emptyMap()) {
+        val user = sendMailOption.user
+        val host = sendMailOption.host
+        val port = sendMailOption.port
+        val protocol = sendMailOption.protocol
         val properties = Properties()
         // set host
         properties[MAIL_PROTOCOL_HOST.format(protocol)] = host
@@ -60,56 +55,63 @@ object Mail {
         properties[MAIL_PROTOCOL_PORT.format(protocol)] = port
         // set authenticator true
         properties[MAIL_PROTOCOL_AUTH.format(protocol)] = true
-        if (sendMailInformation.ssl) {
+        if (sendMailOption.ssl) {
             properties[MAIL_PROTOCOL_SOCKETFACTORY_CLASS.format(protocol)] = SSL_SOCKETFACTORY_CLASS
         }
         sessionPropertyMap.forEach { (key, value) ->
             properties[key] = value
         }
         logger.info("send mail, session properties:%s", properties)
+        val messageList = mutableListOf<MimeMessage>()
         val session: Session = Session.getInstance(properties)
         // debug mode
         session.debug = DEBUG
-        // 向multipart对象中添加邮件的各个部分内容，包括文本内容和附件
-        val multipart: Multipart = MimeMultipart()
-        // set text content
-        val bodyPart: BodyPart = MimeBodyPart()
-        //		bodyPart.setText(sendMailInformation.getText());
-        bodyPart.setContent(sendMailInformation.content, "text/html;charset=UTF-8")
-        multipart.addBodyPart(bodyPart)
-        val accessoryPathList = sendMailInformation.accessoryPathList
-        for (accessoryPath in accessoryPathList) {
-            if (accessoryPath.isNotBlank()) { // add body part
-                val messageBodyPart: BodyPart = MimeBodyPart()
-                val source: DataSource = FileDataSource(accessoryPath)
-                // set accessories file
-                messageBodyPart.dataHandler = DataHandler(source)
-                // set accessories name
-                messageBodyPart.fileName = MimeUtility.encodeText(source.name)
-                multipart.addBodyPart(messageBodyPart)
+        sendMailMessageList.forEach { sendMailMessage ->
+            // 向multipart对象中添加邮件的各个部分内容，包括文本内容和附件
+            val multipart: Multipart = MimeMultipart()
+            // set text content
+            val bodyPart: BodyPart = MimeBodyPart()
+            //		bodyPart.setText(sendMailInformation.getText());
+            bodyPart.setContent(sendMailMessage.content, "text/html;charset=UTF-8")
+            multipart.addBodyPart(bodyPart)
+            val accessoryPathList = sendMailMessage.accessoryPathList
+            for (accessoryPath in accessoryPathList) {
+                if (accessoryPath.isNotBlank()) { // add body part
+                    val messageBodyPart: BodyPart = MimeBodyPart()
+                    val source: DataSource = FileDataSource(accessoryPath)
+                    // set accessories file
+                    messageBodyPart.dataHandler = DataHandler(source)
+                    // set accessories name
+                    messageBodyPart.fileName = MimeUtility.encodeText(source.name)
+                    multipart.addBodyPart(messageBodyPart)
+                }
             }
-        }
-        val messageList = mutableListOf<MimeMessage>()
-        val sentDate = Date()
-        if (sendMailInformation.separateToAddress) {
-            val toAddressList = sendMailInformation.toAddressList
-            toAddressList.forEach { toAddress ->
+            val sentDate = Date()
+            if (sendMailMessage.separateToAddress) {
+                val toAddressList = sendMailMessage.toAddressList
+                toAddressList.forEach { toAddress ->
+                    val message = MimeMessage(session)
+                    message.setData(sendMailMessage.fromAddress, listOf(toAddress), sendMailMessage.subject, multipart, sentDate)
+                    // save mail
+                    message.saveChanges()
+                    messageList += message
+                }
+            } else {
                 val message = MimeMessage(session)
-                message.setData(from, listOf(toAddress), sendMailInformation.subject, multipart, sentDate)
+                message.setData(sendMailMessage.fromAddress, sendMailMessage.toAddressList, sendMailMessage.subject, multipart, sentDate)
                 // save mail
                 message.saveChanges()
                 messageList += message
             }
-        } else {
-            val message = MimeMessage(session)
-            message.setData(from, sendMailInformation.toAddressList, sendMailInformation.subject, multipart, sentDate)
-            // save mail
-            message.saveChanges()
+        }
+        if (messageList.isEmpty()) {
+            logger.warning("mail message list is empty, please check it.")
+            return
         }
         // get transport
         val transport: Transport = session.getTransport(protocol)
         // connection
-        transport.connect(host, port, user, sendMailInformation.password)
+        transport.connect(host, port, user, sendMailOption.password)
         // send mail
         val commandMap = CommandMap.getDefaultCommandMap() as MailcapCommandMap
         commandMap.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html")
@@ -159,5 +161,14 @@ object Mail {
             mailMessageList.add(MailMessage(message))
         }
         return mailMessageList
+    }
+
+    class SendMailOption {
+        var host = Constants.String.BLANK
+        var port = 25
+        var user = Constants.String.BLANK
+        var password = Constants.String.BLANK
+        var ssl = false
+        var protocol = SMTP
     }
 }
