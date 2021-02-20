@@ -31,10 +31,15 @@ object Mail {
     const val POP3 = "pop3"
     const val IMAP = "imap"
     private const val FOLDER_INBOX = "INBOX"
+
     /**
      * debug mode
      */
     var DEBUG = false
+
+    private fun a() {
+
+    }
 
     /**
      * send mail
@@ -65,24 +70,6 @@ object Mail {
         val session: Session = Session.getInstance(properties)
         // debug mode
         session.debug = DEBUG
-        val message = MimeMessage(session)
-        // from address
-        message.setFrom(InternetAddress(from))
-        // to address
-        val toAddressList = sendMailInformation.toAddressList
-        for (to in toAddressList) {
-            val type = to.type
-            val address = InternetAddress(to.address)
-            when (type) {
-                ToAddress.Type.TO -> message.addRecipient(Message.RecipientType.TO, address)
-                ToAddress.Type.BCC -> message.addRecipient(Message.RecipientType.BCC, address)
-                ToAddress.Type.CC -> message.addRecipient(Message.RecipientType.CC, address)
-            }
-        }
-        // set subject
-        message.subject = sendMailInformation.subject
-        // send date
-        message.sentDate = Date()
         // 向multipart对象中添加邮件的各个部分内容，包括文本内容和附件
         val multipart: Multipart = MimeMultipart()
         // set text content
@@ -102,10 +89,23 @@ object Mail {
                 multipart.addBodyPart(messageBodyPart)
             }
         }
-        // set content
-        message.setContent(multipart)
-        // save mail
-        message.saveChanges()
+        val messageList = mutableListOf<MimeMessage>()
+        val sentDate = Date()
+        if (sendMailInformation.separateToAddress) {
+            val toAddressList = sendMailInformation.toAddressList
+            toAddressList.forEach { toAddress ->
+                val message = MimeMessage(session)
+                message.setData(from, listOf(toAddress), sendMailInformation.subject, multipart, sentDate)
+                // save mail
+                message.saveChanges()
+                messageList += message
+            }
+        } else {
+            val message = MimeMessage(session)
+            message.setData(from, sendMailInformation.toAddressList, sendMailInformation.subject, multipart, sentDate)
+            // save mail
+            message.saveChanges()
+        }
         // get transport
         val transport: Transport = session.getTransport(protocol)
         // connection
@@ -118,7 +118,9 @@ object Mail {
         commandMap.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed")
         commandMap.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822")
         CommandMap.setDefaultCommandMap(commandMap)
-        transport.sendMessage(message, message.allRecipients)
+        messageList.forEach { mimeMessage ->
+            transport.sendMessage(mimeMessage, mimeMessage.allRecipients)
+        }
         transport.close()
     }
 
