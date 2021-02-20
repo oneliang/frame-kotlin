@@ -119,8 +119,8 @@ object SqlUtil {
         return selectSql(selectColumns, tempTable, condition)
     }
 
-    fun insertSql(table: String, columnNameArray: Array<String>, valueArray: Array<Any>): String {
-        return insertSql(table, columnNameArray.joinToString(), valueArray.joinToString(separator = Constants.Symbol.SINGLE_QUOTE + Constants.Symbol.COMMA + Constants.Symbol.SINGLE_QUOTE, prefix = Constants.Symbol.SINGLE_QUOTE, postfix = Constants.Symbol.SINGLE_QUOTE) { it.toString() })
+    fun insertSql(table: String, columnNameArray: Array<String>, valueArray: Array<String>): String {
+        return insertSql(table, columnNameArray.joinToString(), valueArray.joinToString(separator = Constants.Symbol.SINGLE_QUOTE + Constants.Symbol.COMMA + Constants.Symbol.SINGLE_QUOTE, prefix = Constants.Symbol.SINGLE_QUOTE, postfix = Constants.Symbol.SINGLE_QUOTE))
     }
 
     private fun insertSql(table: String, columnNames: String, values: String): String {
