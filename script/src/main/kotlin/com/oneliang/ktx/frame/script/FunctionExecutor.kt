@@ -40,15 +40,17 @@ class FunctionExecutor(private val code: String) {
         })
     }
 
-    fun execute(inputMap: Map<String, String>,
-                stableValueInputMap: Map<String, String> = emptyMap(),
-                totalResultCode: String = Constants.String.BLANK,//no total result
-                functionItemCodeMapping: Map<String, String> = emptyMap(),
-                stableValueCodeType: String = CODE_TYPE_STABLE,
-                functionResultCode: String = CODE_TYPE_FUNCTION,
-                checkFunctionResultItem: Boolean = false,
-                originalFunctionResultMap: Map<String, String> = emptyMap(),
-                optimizeResultProcessor: (result: Double) -> String = { it.toString() }): FunctionResult {
+    fun execute(
+        inputMap: Map<String, String>,
+        stableValueInputMap: Map<String, String> = emptyMap(),
+        totalResultCode: String = Constants.String.BLANK,//no total result
+        functionItemCodeMapping: Map<String, String> = emptyMap(),
+        stableValueCodeType: String = CODE_TYPE_STABLE,
+        functionResultCode: String = CODE_TYPE_FUNCTION,
+        checkFunctionResultItem: Boolean = false,
+        originalFunctionResultMap: Map<String, String> = emptyMap(),
+        optimizeResultProcessor: (result: Double) -> String = { it.toString() }
+    ): FunctionResult {
         if (!allFunctionItemMap.containsKey(code)) {
             logger.error("Please update function item list first, map not contains cache data, product type code:%s", code)
             return FunctionResult(false, emptyMap(), emptyMap())
@@ -81,7 +83,7 @@ class FunctionExecutor(private val code: String) {
                     return FunctionResult(false, emptyMap(), functionResultItemMap)
                 }
             }
-            logger.info("Addition:$returnCode, result:$result")
+            logger.info("Stable:%s, result:%s", returnCode, result)
             stableValue += result.toFloatSafely()
             val functionResultItem = FunctionResultItem(returnCode, returnCode, value = result, codeType = stableValueCodeType)
             functionResultItemMap[returnCode] = functionResultItem
@@ -204,7 +206,7 @@ class FunctionExecutor(private val code: String) {
         val result = stableValue + totalValue
         val fixResult = if (result.isNaN()) 0.0 else result
         val optimizeResult = optimizeResultProcessor(fixResult)
-        logger.info("Addition:$stableValue, total value:$totalValue")
+        logger.info("Stable value:%s, total value:", stableValue, totalValue)
         val match = abs(fixResult - originalResult) < 10
         logger.info("Result:%.2f, fix result:%s, optimize result:%s, original result:%s, match:%s".format(result, fixResult, optimizeResult, originalResult, match))
         val totalFunctionResultItem = FunctionResultItem(totalResultCode, totalResultCode, value = optimizeResult, codeType = functionResultCode)
