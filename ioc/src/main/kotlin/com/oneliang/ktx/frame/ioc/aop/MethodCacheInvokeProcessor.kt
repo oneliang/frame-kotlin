@@ -24,8 +24,8 @@ open class MethodCacheInvokeProcessor(memoryCacheSize: Int) : DefaultInvokeProce
         val methodCacheAnnotation = instanceMethod.getAnnotation(MethodCache::class.java)
         val parameterJson = args.toJson()
         val cacheKey = instance::class.java.name + Constants.Symbol.AT + method.name + Constants.Symbol.AT + parameterJson
-        logger.info("need to cache, method:%s, cache key:%s", instanceMethod, cacheKey)
         return this.memoryCache.getOrSave(cacheKey.MD5String(), methodCacheAnnotation.cacheRefreshTime) {
+            logger.info("need to save cache, method:%s, cache key:%s", instanceMethod, cacheKey)
             super.invoke(instance, method, args)
         }
     }
