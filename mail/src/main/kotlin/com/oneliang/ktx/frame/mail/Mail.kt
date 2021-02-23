@@ -90,11 +90,13 @@ object Mail {
             if (sendMailMessage.separateToAddress) {
                 val toAddressList = sendMailMessage.toAddressList
                 toAddressList.forEach { toAddress ->
-                    val message = MimeMessage(session)
-                    message.setData(sendMailMessage.fromAddress, listOf(toAddress), sendMailMessage.subject, multipart, sentDate)
-                    // save mail
-                    message.saveChanges()
-                    messageList += message
+                    if (toAddress.address.isNotBlank()) {
+                        val message = MimeMessage(session)
+                        message.setData(sendMailMessage.fromAddress, listOf(toAddress), sendMailMessage.subject, multipart, sentDate)
+                        // save mail
+                        message.saveChanges()
+                        messageList += message
+                    }
                 }
             } else {
                 val message = MimeMessage(session)
