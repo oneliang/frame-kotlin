@@ -2,7 +2,6 @@ package com.oneliang.ktx.frame.script
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.nullToBlank
-import com.oneliang.ktx.util.common.perform
 import com.oneliang.ktx.util.common.toDoubleSafely
 import com.oneliang.ktx.util.common.toFloatSafely
 import com.oneliang.ktx.util.json.toJson
@@ -29,15 +28,15 @@ class FunctionExecutor(private val code: String) {
 
     fun updateFunctionItemListOfEngine(functionItemList: List<FunctionItem>) {
         this.updateLock.lock()
-        perform({
+        try {
             val sortedFunctionItemList = functionItemList.sortedBy { it.order }
             this.allFunctionItemMap[this.code] = sortedFunctionItemList
             sortedFunctionItemList.forEach { functionItem ->
                 this.engine.eval(functionItem.javaScriptFunction)
             }
-        }, finally = {
+        } finally {
             this.updateLock.unlock()
-        })
+        }
     }
 
     fun execute(

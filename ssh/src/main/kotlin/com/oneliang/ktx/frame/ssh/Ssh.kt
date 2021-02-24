@@ -23,12 +23,12 @@ object Ssh {
         configurationMap.forEach { (key, value) ->
             session.setConfig(key, value)
         }
-        perform({
+        try {
             session.connect(connectTimeout)
             afterSessionConnect(session)
-        }, failure = {
-            logger.error(Constants.Base.EXCEPTION, it)
-        })
+        } catch (e: Throwable) {
+            logger.error(Constants.Base.EXCEPTION, e)
+        }
         return session
     }
 
@@ -47,10 +47,10 @@ object Ssh {
         (channelExec as ChannelExec).setCommand(command)
         channelExec.setInputStream(null)
         channelExec.setErrStream(System.err)
-        perform({
+        try {
             channelExec.connect()
             afterChannelConnect(channelExec)
-        }, failure = { e ->
+        } catch (e: Throwable) {
             channelExec.inputStream?.also {
                 logger.error(decodeInputStream(it), e)
             }
@@ -60,24 +60,24 @@ object Ssh {
             channelExec.extInputStream?.also {
                 logger.info(decodeInputStream(it), e)
             }
-        })
+        }
         channelExec.disconnect()
     }
 
     fun sftp(session: Session, afterChannelConnect: (channelSftp: ChannelSftp) -> Unit = {}) {
         val channelSftp = session.openChannel("sftp")
         channelSftp as ChannelSftp
-        perform({
+        try {
             channelSftp.connect()
             afterChannelConnect(channelSftp)
-        }, failure = { e ->
+        } catch (e: Throwable) {
             channelSftp.inputStream?.also {
                 logger.error(decodeInputStream(it), e)
             }
             channelSftp.extInputStream?.also {
                 logger.info(decodeInputStream(it), e)
             }
-        })
+        }
         channelSftp.disconnect()
     }
 

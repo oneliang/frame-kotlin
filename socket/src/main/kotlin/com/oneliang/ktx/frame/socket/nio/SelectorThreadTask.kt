@@ -30,18 +30,18 @@ open class SelectorThreadTask(val selector: Selector) : ThreadTask {
                         val socketChannel = key.channel() as SocketChannel
                         val address = socketChannel.remoteAddress as InetSocketAddress
                         logger.debug("connected, time:%s, host:%s, port:%s", Date(), address.hostString, address.port)
-                        perform({
+                        try {
                             val byteArray = socketChannel.readByteArray()
                             val responseByteArray = this.selectorProcessor.process(byteArray)
                             socketChannel.write(ByteBuffer.wrap(responseByteArray))
                             logger.debug("byte array md5:%s, byte array size:%s", byteArray.MD5String(), byteArray.size)
 //                            this.selector.wakeup()
 //                            socketChannel.register(this.selector, SelectionKey.OP_READ)
-                        }, failure = {
-                            logger.error("disconnect", it)
+                        } catch (e: Throwable) {
+                            logger.error("disconnect", e)
                             key.cancel()
                             socketChannel.close()
-                        })
+                        }
                     }
                 }
             }

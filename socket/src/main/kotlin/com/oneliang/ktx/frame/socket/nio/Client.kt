@@ -35,7 +35,7 @@ class Client(private val host: String, private val port: Int, private val select
         socketChannel.configureBlocking(false)
         socketChannel.register(this.selector, SelectionKey.OP_CONNECT)
         socketChannel.connect(InetSocketAddress(this.host, this.port))
-        perform({
+        try {
             while (true) {
                 logger.debug("client, is open:%s", socketChannel.isOpen)
                 if (socketChannel.isOpen) {
@@ -52,15 +52,15 @@ class Client(private val host: String, private val port: Int, private val select
                                 socketChannel.register(this.selector, SelectionKey.OP_READ)
                             }
                             key.isReadable -> {
-                                perform({
+                                try {
                                     val byteArray = socketChannel.readByteArray()
                                     this.readProcessor(byteArray)
                                     this.selector.wakeup()
                                     socketChannel.register(this.selector, SelectionKey.OP_READ)
                                     this.selector.wakeup()
                                     logger.debug("byte array md5:%s, byte array size:%s", byteArray.MD5String(), byteArray.size)
-                                }) {
-                                    logger.debug("server error.")
+                                } catch (e: Throwable) {
+                                    logger.error("server error.", e)
                                     key.cancel()
                                     socketChannel.close()
                                 }
@@ -71,8 +71,8 @@ class Client(private val host: String, private val port: Int, private val select
                     break
                 }
             }
-        }, failure = {
-            logger.error("client exception, please restart", it)
-        })
+        } catch (e: Throwable) {
+            logger.error("client exception, please restart", e)
+        }
     }
 }

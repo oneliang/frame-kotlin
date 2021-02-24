@@ -43,12 +43,12 @@ fun main() {
     val updaterExecutor = UpdaterExecutor()
     val countDownLatch = CountDownLatch(configurationList.size)
     configurationList.forEach {
-        it.password = perform({
+        it.password = try {
             JOptionPane.showInputDialog("(${it.host}) Please Enter password")
-        }, failure = { e ->
+        } catch (e: Throwable) {
             e.printStackTrace()
             it.password
-        })
+        }
         val tomcatAutoUpdater = TomcatAutoUpdater(it)
         updaterExecutor.addTomcatAutoUpdater(tomcatAutoUpdater) {
             countDownLatch.countDown()

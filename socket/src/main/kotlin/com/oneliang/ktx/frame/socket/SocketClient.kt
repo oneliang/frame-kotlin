@@ -20,17 +20,17 @@ class SocketClient(private val host: String, private val port: Int) {
      */
     fun send(tcpPacket: TcpPacket): TcpPacket {
         this.lock.lock()
-        return perform({
+        return try {
             val outputStream = this.socket.getOutputStream()
             val inputStream = this.socket.getInputStream()
             this.tcpPacketProcessor.sendTcpPacket(outputStream, tcpPacket)
             this.tcpPacketProcessor.receiveTcpPacket(inputStream)
-        }, failure = {
-            logger.error("send tcp package exception", it)
+        } catch (e: Throwable) {
+            logger.error("send tcp package exception", e)
             TcpPacket()
-        }, finally = {
+        } finally {
             this.lock.unlock()
-        })
+        }
     }
 
     fun close() {

@@ -22,16 +22,16 @@ class Server(private val host: String, private val port: Int) : LoopThread() {
     private var serverSocketChannel: ServerSocketChannel? = null
 
     override fun run() {
-        perform({
+        try {
             this.serverSocketChannel = ServerSocketChannel.open()
             this.serverSocketChannel?.configureBlocking(false)
             this.serverSocketChannel?.bind(InetSocketAddress(host, port))
             this.serverSocketChannel?.register(this.acceptSelector, SelectionKey.OP_ACCEPT)
             logger.debug("server start")
             super.run()
-        }, failure = {
-            logger.error("server exception，shutdown", it)
-        })
+        } catch (e: Throwable) {
+            logger.error("server exception，shutdown", e)
+        }
     }
 
     @Throws(Throwable::class)

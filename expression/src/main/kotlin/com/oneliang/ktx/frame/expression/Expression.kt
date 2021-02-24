@@ -9,6 +9,7 @@ import kotlin.math.pow
 object Expression {
     private val INVALID_DATA = Any()
     val INVALID_EVAL_RESULT = INVALID_DATA
+
     /**
      * 将算术表达式转换为逆波兰表达式
      * @param expression 要计算的表达式,如"1+2+3+4"
@@ -28,8 +29,9 @@ object Expression {
         var requireOperand = false
         while (success) {
             if (currentExpressionNode.type == ExpressionNode.Type.NUMBER
-                    || currentExpressionNode.type == ExpressionNode.Type.STRING
-                    || currentExpressionNode.type == ExpressionNode.Type.DATE) { // 操作数， 直接加入后缀表达式中
+                || currentExpressionNode.type == ExpressionNode.Type.STRING
+                || currentExpressionNode.type == ExpressionNode.Type.DATE
+            ) { // 操作数， 直接加入后缀表达式中
                 if (unitaryNode != null) { // 设置一元操作符节点
                     currentExpressionNode.unitaryNode = unitaryNode
                     unitaryNode = null
@@ -72,7 +74,8 @@ object Expression {
                             beforeExpNode = stackOperator.peek()
                             // 如果前一个操作符优先级较高，则将前一个操作符加入后缀表达式中
                             if (beforeExpNode.type != ExpressionNode.Type.BRACKET_LEFT
-                                    && beforeExpNode.priority - currentExpressionNode.priority >= 0) {
+                                && beforeExpNode.priority - currentExpressionNode.priority >= 0
+                            ) {
                                 listOperator.add(stackOperator.pop())
                             } else {
                                 break
@@ -339,11 +342,11 @@ object Expression {
     }
 
     fun eval(expression: String): Any {
-        val value = perform({
+        val value = try {
             evalExpression(parseExpression(expression))
-        }, failure = {
+        } catch (e: Throwable) {
             INVALID_EVAL_RESULT
-        })
+        }
         return if (value != INVALID_EVAL_RESULT) {
             value
         } else {
@@ -351,38 +354,38 @@ object Expression {
         }
     }
 
-    fun evalBoolean(expression: String): Boolean = perform({
+    fun evalBoolean(expression: String): Boolean = try {
         val result = eval(expression)
         if (result is Boolean) {
             result
         } else {
             false
         }
-    }, failure = {
+    } catch (e: Throwable) {
         false
-    })
+    }
 
-    fun evalNumber(expression: String): Double = perform({
+    fun evalNumber(expression: String): Double = try {
         val result = eval(expression)
         if (result is Double) {
             result
         } else {
             0.0
         }
-    }, failure = {
+    } catch (e: Throwable) {
         0.0
-    })
+    }
 
-    fun evalString(expression: String) = perform({
+    fun evalString(expression: String) = try {
         val result = eval(expression)
         if (result is String) {
             result
         } else {
             Constants.String.BLANK
         }
-    }, failure = {
+    } catch (e: Throwable) {
         Constants.String.BLANK
-    })
+    }
 
     fun evalThreeOperand(expression: String): Any? {
         var index = expression.indexOf("?")

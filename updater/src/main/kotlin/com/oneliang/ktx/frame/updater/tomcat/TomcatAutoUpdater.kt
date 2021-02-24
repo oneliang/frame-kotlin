@@ -66,9 +66,9 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
             }
             Ssh.sftp(session) { channelSftp ->
                 val webAppDirectory = war.remoteTomcatWebAppDirectory
-                perform({
+                try {
                     channelSftp.cd(webAppDirectory)
-                }, failure = { e ->
+                } catch (e: Throwable) {
                     channelSftp.inputStream?.also {
                         logger.error(Ssh.decodeInputStream(it), e)
                     }
@@ -76,7 +76,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                         logger.info(Ssh.decodeInputStream(it), e)
                     }
                     channelSftp.mkdir(webAppDirectory)
-                })
+                }
                 channelSftp.put(war.localWarFullFilename, war.remoteWarFullFilename)
             }
             val remoteFileMd5 = execRemoteFileMd5(session, war.remoteWarFullFilename)
@@ -166,27 +166,27 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
     fun update() {
         val begin = System.currentTimeMillis()
         Ssh.connect(host = this.configuration.host,
-                user = this.configuration.user,
-                port = this.configuration.port,
-                password = this.configuration.password,
-                configurationMap = mapOf(Ssh.Configuration.USERAUTH_GSSAPI_WITH_MIC to "no", Ssh.Configuration.STRICT_HOST_KEY_CHECKING to "no"), afterSessionConnect = { session ->
-            this.configuration.warArray.forEach {
-                val tomcatPidList = findTomcatProcessPid(session, it)
-                killTomcatProcess(session, it, tomcatPidList)
-                val uploadResult = uploadWarForRetry(session, it)
-                if (uploadResult) {
-                    removeWarDirectory(session, it)
-                    removeTomcatLogDirectory(session, it)
+            user = this.configuration.user,
+            port = this.configuration.port,
+            password = this.configuration.password,
+            configurationMap = mapOf(Ssh.Configuration.USERAUTH_GSSAPI_WITH_MIC to "no", Ssh.Configuration.STRICT_HOST_KEY_CHECKING to "no"), afterSessionConnect = { session ->
+                this.configuration.warArray.forEach {
+                    val tomcatPidList = findTomcatProcessPid(session, it)
+                    killTomcatProcess(session, it, tomcatPidList)
+                    val uploadResult = uploadWarForRetry(session, it)
+                    if (uploadResult) {
+                        removeWarDirectory(session, it)
+                        removeTomcatLogDirectory(session, it)
 //                unzipWar(session, it)
-                    startupTomcat(session, it)
-                    val tomcatPidListAfterStartup = findTomcatProcessPid(session, it)
-                    logger.info("after tomcat start up, tomcat pid list size:%s, tomcat:[%s]", tomcatPidListAfterStartup.size, it.remoteTomcatDirectory)
-                } else {
-                    return@forEach
+                        startupTomcat(session, it)
+                        val tomcatPidListAfterStartup = findTomcatProcessPid(session, it)
+                        logger.info("after tomcat start up, tomcat pid list size:%s, tomcat:[%s]", tomcatPidListAfterStartup.size, it.remoteTomcatDirectory)
+                    } else {
+                        return@forEach
+                    }
                 }
-            }
-            session.disconnect()
-        })
+                session.disconnect()
+            })
         logger.info("update cost:%s", (System.currentTimeMillis() - begin))
     }
 }

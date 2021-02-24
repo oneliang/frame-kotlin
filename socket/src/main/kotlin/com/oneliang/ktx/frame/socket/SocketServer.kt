@@ -30,15 +30,15 @@ class SocketServer(private val port: Int, private val longLink: Boolean = true) 
         this.threadPool.addThreadTask {
             val inputStream = socket.getInputStream()
             val outputStream = socket.getOutputStream()
-            perform({
+            try {
                 do {
                     logger.info("socket:%s ,processing...", socket)
                     this.streamProcessor.process(inputStream, outputStream)
                 } while (this.longLink)
-            }, failure = { it ->
-                logger.error("socket processor exception", it)
-                throw it
-            }, finally = {
+            } catch (e: Throwable) {
+                logger.error("socket processor exception", e)
+                throw e
+            } finally {
                 if (!this.longLink) {
                     socket.close()
                 }
@@ -46,7 +46,7 @@ class SocketServer(private val port: Int, private val longLink: Boolean = true) 
                     this.longLinkCount.decrementAndGet()
                 }
                 logger.info("long link task finished. long link count:%s", this.longLinkCount.get())
-            })
+            }
         }
         if (this.longLink) {
             this.longLinkCount.getAndIncrement()
