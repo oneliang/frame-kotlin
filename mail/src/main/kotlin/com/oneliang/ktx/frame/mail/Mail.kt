@@ -66,6 +66,7 @@ object Mail {
         val session: Session = Session.getInstance(properties)
         // debug mode
         session.debug = DEBUG
+        System.setProperty("mail.mime.splitlongparameters", "false")
         sendMailMessageList.forEach { sendMailMessage ->
             // 向multipart对象中添加邮件的各个部分内容，包括文本内容和附件
             val multipart: Multipart = MimeMultipart()
@@ -77,12 +78,12 @@ object Mail {
             val accessoryPathList = sendMailMessage.accessoryPathList
             for (accessoryPath in accessoryPathList) {
                 if (accessoryPath.isNotBlank()) { // add body part
-                    val messageBodyPart: BodyPart = MimeBodyPart()
+                    val messageBodyPart = MimeBodyPart()
                     val source: DataSource = FileDataSource(accessoryPath)
                     // set accessories file
                     messageBodyPart.dataHandler = DataHandler(source)
                     // set accessories name
-                    messageBodyPart.fileName = MimeUtility.encodeText(source.name)
+                    messageBodyPart.fileName = MimeUtility.encodeWord(source.name)
                     multipart.addBodyPart(messageBodyPart)
                 }
             }
