@@ -46,6 +46,7 @@ class Page {
      * @param rowsPerPage the rowsPerPage to set
      */
     var rowsPerPage = DEFAULT_ROWS//view use
+
     /**
      * goto page
      * @return page*sizePerPage
@@ -65,5 +66,15 @@ class Page {
         this.totalRows = totalRows
         this.rowsPerPage = rowsPerPage
         this.totalPages = this.totalRows.calculatePiece(this.rowsPerPage)
+    }
+
+    fun calculateIndex(currentPage: Int): Pair<Int, Int> {
+        val fromIndex = (currentPage - 1) * this.rowsPerPage
+        val toIndex = if (currentPage * this.rowsPerPage >= this.totalRows) {
+            this.totalRows
+        } else {
+            currentPage * this.rowsPerPage
+        }
+        return fromIndex to toIndex
     }
 }
