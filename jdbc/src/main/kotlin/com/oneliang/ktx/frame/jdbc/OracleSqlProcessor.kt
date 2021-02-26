@@ -45,9 +45,9 @@ class OracleSqlProcessor : AbstractSqlProcessor() {
         if (isId) {
             result = "AND $columnName='$value'"
         } else {
-            result = if (kClass == java.util.Date::class) {
+            result = if (kClass == Date::class) {
                 if (value != null) {
-                    columnName + "=to_date('" + (value as java.util.Date).toFormatString() + "','yyyy-mm-dd hh24:mi:ss'),"
+                    columnName + "=to_date('" + (value as Date).toFormatString() + "','yyyy-mm-dd hh24:mi:ss'),"
                 } else {
                     Constants.String.BLANK
                 }
@@ -76,9 +76,9 @@ class OracleSqlProcessor : AbstractSqlProcessor() {
         if (isId) {
             result = "AND $columnName='$value'"
         } else {
-            result = if (kClass == java.util.Date::class) {
+            result = if (kClass == Date::class) {
                 if (value != null) {
-                    " AND " + columnName + "=to_date('" + (value as java.util.Date).toFormatString() + "','yyyy-mm-dd hh24:mi:ss')"
+                    " AND " + columnName + "=to_date('" + (value as Date).toFormatString() + "','yyyy-mm-dd hh24:mi:ss')"
                 } else {
                     Constants.String.BLANK
                 }
