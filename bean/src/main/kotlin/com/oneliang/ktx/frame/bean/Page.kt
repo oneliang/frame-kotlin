@@ -67,14 +67,4 @@ class Page {
         this.rowsPerPage = rowsPerPage
         this.totalPages = this.totalRows.calculatePiece(this.rowsPerPage)
     }
-
-    fun calculateIndex(currentPage: Int): Pair<Int, Int> {
-        val fromIndex = (currentPage - 1) * this.rowsPerPage
-        val toIndex = if (currentPage * this.rowsPerPage >= this.totalRows) {
-            this.totalRows
-        } else {
-            currentPage * this.rowsPerPage
-        }
-        return fromIndex to toIndex
-    }
 }
