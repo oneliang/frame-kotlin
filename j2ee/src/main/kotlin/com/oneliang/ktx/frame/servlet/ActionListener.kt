@@ -227,7 +227,7 @@ class ActionListener : HttpServlet() {
 
         val front = httpServletRequest.contextPath.length
         uri = uri.substring(front, uri.length)
-        logger.info("The request name is:$uri")
+        logger.info("The request name is:%s", uri)
 
         httpServletRequest.setAttribute(ConstantsAction.RequestKey.KEY_STRING_CURRENT_REQUEST_URI, uri)
 
@@ -323,7 +323,7 @@ class ActionListener : HttpServlet() {
     private fun doAction(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
         val actionBeanList = ConfigurationContainer.rootConfigurationContext.findActionBeanList(uri)
         if (actionBeanList.isNullOrEmpty()) {
-            logger.info("The request name:$uri. It does not exist, please config the name and entity class")
+            logger.info("The request name:%s. It does not exist, please config the name and entity class", uri)
             httpServletResponse.status = Constants.Http.StatusCode.NOT_FOUND
             return false
         }
@@ -352,10 +352,10 @@ class ActionListener : HttpServlet() {
             }
         } catch (e: Throwable) {
             logger.error(Constants.Base.EXCEPTION, e)
-            logger.info("The request name:$uri. Action or page does not exist")
+            logger.info("The request name:%s. Action or page does not exist", uri)
             val exceptionPath = ConfigurationContainer.rootConfigurationContext.globalExceptionForwardPath.nullToBlank()
             if (exceptionPath.isNotBlank()) {
-                logger.info("Forward to exception path:$exceptionPath")
+                logger.info("Forward to exception path:%s", exceptionPath)
                 httpServletRequest.setAttribute(Constants.Base.EXCEPTION, e)
                 val requestDispatcher = httpServletRequest.getRequestDispatcher(exceptionPath)
                 requestDispatcher.forward(httpServletRequest, httpServletResponse)
@@ -392,11 +392,11 @@ class ActionListener : HttpServlet() {
             if (normalExecute) {
                 logger.info("Normal executing")
             } else if (needToStaticExecute) {
-                logger.info("Need to static execute,first time executing original action")
+                logger.info("Need to static execute, first time executing original action")
             }
             actionInstance.execute(httpServletRequest, httpServletResponse)
         } else {
-            logger.info("Static execute,not the first time execute")
+            logger.info("Static execute, not the first time execute")
             actionForwardBean!!.name
         }
         val afterActionInterceptorResult = this.doAfterActionInterceptor(actionBean, httpServletRequest, httpServletResponse)
@@ -419,7 +419,7 @@ class ActionListener : HttpServlet() {
             }
             this.doForward(normalExecute, needToStaticExecute, actionForwardBean, path, httpServletRequest, httpServletResponse, false)
         } else {
-            logger.info("The forward name:%s does not exist,may be ajax use if not please config the name and entity page or class", forward)
+            logger.info("The forward name:%s does not exist, may be ajax use if not please config the name and entity page or class", forward)
         }
         return true
     }
@@ -489,7 +489,7 @@ class ActionListener : HttpServlet() {
     @Throws(IllegalArgumentException::class, InstantiationException::class, IllegalAccessException::class, InvocationTargetException::class, ServletException::class, IOException::class)
     private fun doAnnotationAction(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
         if (actionBean !is AnnotationActionBean) {
-            logger.error("It is not AnnotationActionBean, actionBean:$actionBean, it is impossible")
+            logger.error("It is not AnnotationActionBean, actionBean:%s, it is impossible", actionBean)
             return false
         }
         val actionInstance = actionBean.actionInstance
@@ -501,17 +501,17 @@ class ActionListener : HttpServlet() {
             if (normalExecute) {
                 logger.info("Common bean action (%s) is executing.", actionInstance ?: Constants.String.NULL)
             } else if (needToStaticExecute) {
-                logger.info("Need to static execute,first time executing original action")
+                logger.info("Need to static execute, first time executing original action")
             }
             val parameterValues = this.annotationActionMethodParameterValues(actionBean, httpServletRequest, httpServletResponse)
             val methodInvokeValue = actionBean.method?.invoke(actionInstance, *parameterValues)
             if (methodInvokeValue != null && methodInvokeValue is String) {
                 path = methodInvokeValue.toString()
             } else {
-                logger.error("Common bean action $actionInstance is execute error, method is null or method return value is not String")
+                logger.error("Common bean action (%s) is execute error, method is null or method return value is not String", actionInstance)
             }
         } else {
-            logger.info("Static execute,not the first time execute")
+            logger.info("Static execute, not the first time execute")
         }
         val afterActionInterceptorResult = this.doAfterActionInterceptor(actionBean, httpServletRequest, httpServletResponse)
         if (!afterActionInterceptorResult) {
