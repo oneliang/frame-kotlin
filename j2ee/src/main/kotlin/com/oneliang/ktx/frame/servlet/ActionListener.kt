@@ -75,7 +75,7 @@ class ActionListener : HttpServlet() {
     }
 
     @Throws(ServletException::class, IOException::class)
-    override fun service(request: HttpServletRequest, response: HttpServletResponse) {
+    override fun service(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
         //servlet bean
         var servletBean = ActionUtil.servletBean
         if (servletBean == null) {
@@ -83,22 +83,22 @@ class ActionListener : HttpServlet() {
             ActionUtil.servletBean = servletBean
         }
         servletBean.servletContext = this.servletContext
-        servletBean.servletRequest = request
-        servletBean.servletResponse = response
+        servletBean.servletRequest = httpServletRequest
+        servletBean.servletResponse = httpServletResponse
         //execute default service method,distribute doGet or doPost or other http method
-        super.service(request, response)
+        super.service(httpServletRequest, httpServletResponse)
         //servlet bean request and response set null
         servletBean.servletRequest = null
         servletBean.servletResponse = null
     }
 
-    override fun getLastModified(request: HttpServletRequest): Long {
+    override fun getLastModified(httpServletRequest: HttpServletRequest): Long {
         //uri
         //		String uri=request.getRequestURI()
         //		int front=request.getContextPath().length()
         //		uri=uri.substring(front,uri.length())
         //		return 1368624759725l
-        return super.getLastModified(request)
+        return super.getLastModified(httpServletRequest)
     }
 
     /**
@@ -113,31 +113,29 @@ class ActionListener : HttpServlet() {
     /**
      * The doHead method of the servlet. <br></br>
      * This method is called when a HTTP head request is received.
-     * @param request the request send by the client to the server
-     * @param response the response send by the server to the client
+     * @param httpServletRequest the request send by the client to the server
+     * @param httpServletResponse the response send by the server to the client
      * @throws ServletException if an error occurred
      * @throws IOException if an error occurred
      */
     @Throws(ServletException::class, IOException::class)
-    override fun doHead(request: HttpServletRequest, response: HttpServletResponse) {
-        super.doHead(request, response)
-        logRequestForOtherCase(request, response, ActionInterface.HttpRequestMethod.HEAD)
+    override fun doHead(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
+        super.doHead(httpServletRequest, httpServletResponse)
+        logRequestForOtherCase(httpServletRequest, httpServletResponse, ActionInterface.HttpRequestMethod.HEAD)
     }
 
     /**
      * The doTrace method of the servlet. <br></br>
-     *
      * This method is called when a HTTP trace request is received.
-     *
-     * @param request the request send by the client to the server
-     * @param response the response send by the server to the client
+     * @param httpServletRequest the request send by the client to the server
+     * @param httpServletResponse the response send by the server to the client
      * @throws ServletException if an error occurred
      * @throws IOException if an error occurred
      */
     @Throws(ServletException::class, IOException::class)
-    override fun doTrace(request: HttpServletRequest, response: HttpServletResponse) {
-        super.doTrace(request, response)
-        logRequestForOtherCase(request, response, ActionInterface.HttpRequestMethod.TRACE)
+    override fun doTrace(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
+        super.doTrace(httpServletRequest, httpServletResponse)
+        logRequestForOtherCase(httpServletRequest, httpServletResponse, ActionInterface.HttpRequestMethod.TRACE)
     }
 
     /**
@@ -155,106 +153,106 @@ class ActionListener : HttpServlet() {
     }
 
     @Throws(ServletException::class, IOException::class)
-    private fun logRequestForOtherCase(request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
-        val uri = request.requestURI
+    private fun logRequestForOtherCase(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
+        val uri = httpServletRequest.requestURI
         logger.info("It is requesting uri:%s, http method:%s", uri, httpRequestMethod.name)
     }
 
     /**
      * The doDelete method of the servlet. <br></br>
      * This method is called when a HTTP delete request is received.
-     * @param request the request send by the client to the server
-     * @param response the response send by the server to the client
+     * @param httpServletRequest the request send by the client to the server
+     * @param httpServletResponse the response send by the server to the client
      * @throws ServletException if an error occurred
      * @throws IOException if an error occurred
      */
     @Throws(ServletException::class, IOException::class)
-    override fun doDelete(request: HttpServletRequest, response: HttpServletResponse) {
-        dispatch(request, response, ActionInterface.HttpRequestMethod.DELETE)
+    override fun doDelete(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
+        dispatch(httpServletRequest, httpServletResponse, ActionInterface.HttpRequestMethod.DELETE)
     }
 
     /**
      * The doGet method of the servlet. <br></br>
      * This method is called when a form has its tag value method equals to get.
-     * @param request the request send by the client to the server
-     * @param response the response send by the server to the client
+     * @param httpServletRequest the request send by the client to the server
+     * @param httpServletResponse the response send by the server to the client
      * @throws ServletException if an error occurred
      * @throws IOException if an error occurred
      */
     @Throws(ServletException::class, IOException::class)
-    override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
-        dispatch(request, response, ActionInterface.HttpRequestMethod.GET)
+    override fun doGet(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
+        dispatch(httpServletRequest, httpServletResponse, ActionInterface.HttpRequestMethod.GET)
     }
 
     /**
      * The doPost method of the servlet. <br></br>
      * This method is called when a form has its tag value method equals to post.
-     * @param request the request send by the client to the server
-     * @param response the response send by the server to the client
+     * @param httpServletRequest the request send by the client to the server
+     * @param httpServletResponse the response send by the server to the client
      * @throws ServletException if an error occurred
      * @throws IOException if an error occurred
      */
     @Throws(ServletException::class, IOException::class)
-    override fun doPost(request: HttpServletRequest, response: HttpServletResponse) {
-        dispatch(request, response, ActionInterface.HttpRequestMethod.POST)
+    override fun doPost(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
+        dispatch(httpServletRequest, httpServletResponse, ActionInterface.HttpRequestMethod.POST)
     }
 
 
     /**
      * The doPut method of the servlet. <br></br>
      * This method is called when a HTTP put request is received.
-     * @param request the request send by the client to the server
-     * @param response the response send by the server to the client
+     * @param httpServletRequest the request send by the client to the server
+     * @param httpServletResponse the response send by the server to the client
      * @throws ServletException if an error occurred
      * @throws IOException if an error occurred
      */
     @Throws(ServletException::class, IOException::class)
-    override fun doPut(request: HttpServletRequest, response: HttpServletResponse) {
-        dispatch(request, response, ActionInterface.HttpRequestMethod.PUT)
+    override fun doPut(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
+        dispatch(httpServletRequest, httpServletResponse, ActionInterface.HttpRequestMethod.PUT)
     }
 
     /**
      * dispatch http request
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @param httpRequestMethod
      * @throws ServletException
      * @throws IOException
      */
     @Throws(ServletException::class, IOException::class)
-    private fun dispatch(request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
+    private fun dispatch(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
         //uri
-        var uri = request.requestURI
+        var uri = httpServletRequest.requestURI
         logger.info("It is requesting uri:%s, http method:%s", uri, httpRequestMethod.name)
 
-        val front = request.contextPath.length
+        val front = httpServletRequest.contextPath.length
         uri = uri.substring(front, uri.length)
         logger.info("The request name is:$uri")
 
-        request.setAttribute(ConstantsAction.RequestKey.KEY_STRING_CURRENT_REQUEST_URI, uri)
+        httpServletRequest.setAttribute(ConstantsAction.RequestKey.KEY_STRING_CURRENT_REQUEST_URI, uri)
 
-        this.lifecycle?.onRequest(uri, request, response, httpRequestMethod)
+        this.lifecycle?.onRequest(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
 
-        this.dispatchToDoAction(uri, request, response, httpRequestMethod)
+        this.dispatchToDoAction(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
 
-        this.lifecycle?.onResponse(uri, request, response, httpRequestMethod)
+        this.lifecycle?.onResponse(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
     }
 
     /**
      * dispatch http request
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @param httpRequestMethod
      * @throws ServletException
      * @throws IOException
      */
     @Throws(ServletException::class, IOException::class)
-    private fun dispatchToDoAction(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
-        val beforeGlobalInterceptorResult = this.doBeforeGlobalInterceptor(uri, request, response)
+    private fun dispatchToDoAction(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
+        val beforeGlobalInterceptorResult = this.doBeforeGlobalInterceptor(uri, httpServletRequest, httpServletResponse)
         if (!beforeGlobalInterceptorResult) {
             return
         }
-        val actionResult = doAction(uri, request, response, httpRequestMethod)
+        val actionResult = doAction(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
         if (!actionResult) {
             return
         }
@@ -263,20 +261,20 @@ class ActionListener : HttpServlet() {
     /**
      * do before global interceptor
      * @param uri
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @return boolean
      */
-    private fun doBeforeGlobalInterceptor(uri: String, request: HttpServletRequest, response: HttpServletResponse): Boolean {
+    private fun doBeforeGlobalInterceptor(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
         //global interceptor doIntercept
         val beforeGlobalInterceptorList = ConfigurationContainer.rootConfigurationContext.beforeGlobalInterceptorList
-        val beforeGlobalInterceptorResult = doGlobalInterceptorList(beforeGlobalInterceptorList, request, response)
+        val beforeGlobalInterceptorResult = doGlobalInterceptorList(beforeGlobalInterceptorList, httpServletRequest, httpServletResponse)
 
         //through the interceptor
         if (beforeGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("The request name:%s. Can not through the before global interceptors", uri)
-            response.status = Constants.Http.StatusCode.FORBIDDEN
-            response.outputStream.write(beforeGlobalInterceptorResult.message)
+            httpServletResponse.status = Constants.Http.StatusCode.FORBIDDEN
+            httpServletResponse.outputStream.write(beforeGlobalInterceptorResult.message)
             return false
         } else if (beforeGlobalInterceptorResult.type == InterceptorInterface.Result.Type.CUSTOM) {
             logger.info("The request name:%s. Use CUSTOM to through the before global interceptors", uri)
@@ -290,18 +288,18 @@ class ActionListener : HttpServlet() {
      * do before action interceptor
      * @param uri
      * @param actionBean
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @return boolean
      */
-    private fun doBeforeActionInterceptor(uri: String, actionBean: ActionBean, request: HttpServletRequest, response: HttpServletResponse): Boolean {
+    private fun doBeforeActionInterceptor(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
         //action interceptor doIntercept
         val beforeActionBeanInterceptorList = actionBean.beforeActionInterceptorBeanList
-        val beforeActionInterceptorResult = doActionInterceptorBeanList(beforeActionBeanInterceptorList, request, response)
+        val beforeActionInterceptorResult = doActionInterceptorBeanList(beforeActionBeanInterceptorList, httpServletRequest, httpServletResponse)
         if (beforeActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("The request name:%s. Can not through the before action interceptors", uri)
-            response.status = Constants.Http.StatusCode.FORBIDDEN
-            response.outputStream.write(beforeActionInterceptorResult.message)
+            httpServletResponse.status = Constants.Http.StatusCode.FORBIDDEN
+            httpServletResponse.outputStream.write(beforeActionInterceptorResult.message)
             return false
         } else if (beforeActionInterceptorResult.type == InterceptorInterface.Result.Type.CUSTOM) {
             logger.info("The request name:%s. Use CUSTOM to through the before action interceptors", uri)
@@ -314,19 +312,19 @@ class ActionListener : HttpServlet() {
     /**
      * do action
      * @param uri
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @return boolean
      * @throws IOException
      * @throws ServletException
      * @throws ActionExecuteException
      */
     @Throws(ActionExecuteException::class, ServletException::class, IOException::class)
-    private fun doAction(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
+    private fun doAction(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
         val actionBeanList = ConfigurationContainer.rootConfigurationContext.findActionBeanList(uri)
         if (actionBeanList.isNullOrEmpty()) {
             logger.info("The request name:$uri. It does not exist, please config the name and entity class")
-            response.status = Constants.Http.StatusCode.NOT_FOUND
+            httpServletResponse.status = Constants.Http.StatusCode.NOT_FOUND
             return false
         }
         var actionBean: ActionBean? = null
@@ -337,20 +335,20 @@ class ActionListener : HttpServlet() {
             }
         }
         if (actionBean == null) {
-            logger.info("The request name:$uri. Method not allowed, http request method:$httpRequestMethod")
-            response.status = Constants.Http.StatusCode.METHOD_NOT_ALLOWED
+            logger.info("The request name:%s. Method not allowed, http request method::%s", uri, httpRequestMethod)
+            httpServletResponse.status = Constants.Http.StatusCode.METHOD_NOT_ALLOWED
             return false
         }
-        val beforeActionInterceptorResult = this.doBeforeActionInterceptor(uri, actionBean, request, response)
+        val beforeActionInterceptorResult = this.doBeforeActionInterceptor(uri, actionBean, httpServletRequest, httpServletResponse)
         if (!beforeActionInterceptorResult) {
             return false
         }
         val actionInstance = actionBean.actionInstance
         return try {
             if (actionInstance is ActionInterface) {
-                doAction(uri, actionBean, request, response, httpRequestMethod)
+                doAction(uri, actionBean, httpServletRequest, httpServletResponse, httpRequestMethod)
             } else {
-                doAnnotationAction(uri, actionBean, request, response, httpRequestMethod)
+                doAnnotationAction(uri, actionBean, httpServletRequest, httpServletResponse, httpRequestMethod)
             }
         } catch (e: Throwable) {
             logger.error(Constants.Base.EXCEPTION, e)
@@ -358,12 +356,12 @@ class ActionListener : HttpServlet() {
             val exceptionPath = ConfigurationContainer.rootConfigurationContext.globalExceptionForwardPath.nullToBlank()
             if (exceptionPath.isNotBlank()) {
                 logger.info("Forward to exception path:$exceptionPath")
-                request.setAttribute(Constants.Base.EXCEPTION, e)
-                val requestDispatcher = request.getRequestDispatcher(exceptionPath)
-                requestDispatcher.forward(request, response)
+                httpServletRequest.setAttribute(Constants.Base.EXCEPTION, e)
+                val requestDispatcher = httpServletRequest.getRequestDispatcher(exceptionPath)
+                requestDispatcher.forward(httpServletRequest, httpServletResponse)
             } else {
                 logger.info("System can not find the exception path.Please config the global exception forward path.")
-                response.status = Constants.Http.StatusCode.INTERNAL_SERVER_ERROR
+                httpServletResponse.status = Constants.Http.StatusCode.INTERNAL_SERVER_ERROR
             }
             false
         }
@@ -373,20 +371,21 @@ class ActionListener : HttpServlet() {
      * do action
      * @param uri
      * @param actionBean
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
+     * @param httpRequestMethod
      * @return boolean
      */
     @Throws(ActionExecuteException::class, ServletException::class, IOException::class)
-    private fun doAction(uri: String, actionBean: ActionBean, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
+    private fun doAction(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
         val actionInstance = actionBean.actionInstance
         if (actionInstance !is ActionInterface) {
-            logger.error("It is not ActionInterface, actionBean:$actionBean, it is impossible")
+            logger.error("It is not ActionInterface, actionBean:%s, it is impossible", actionBean)
             return false
         }
-        logger.info("Action implements ($actionInstance) is executing")
+        logger.info("Action implements (%s) is executing", actionInstance)
         //judge is it contain static file page
-        val parameterMap = request.parameterMap as Map<String, Array<String>>
+        val parameterMap = httpServletRequest.parameterMap as Map<String, Array<String>>
         val actionForwardBean = actionBean.findActionForwardBeanByStaticParameter(parameterMap)
         val (normalExecute, needToStaticExecute) = this.getExecuteType(actionForwardBean)
         val forward = if (normalExecute || needToStaticExecute) {
@@ -395,17 +394,17 @@ class ActionListener : HttpServlet() {
             } else if (needToStaticExecute) {
                 logger.info("Need to static execute,first time executing original action")
             }
-            actionInstance.execute(request, response)
+            actionInstance.execute(httpServletRequest, httpServletResponse)
         } else {
             logger.info("Static execute,not the first time execute")
             actionForwardBean!!.name
         }
-        val afterActionInterceptorResult = this.doAfterActionInterceptor(actionBean, request, response)
+        val afterActionInterceptorResult = this.doAfterActionInterceptor(actionBean, httpServletRequest, httpServletResponse)
         if (!afterActionInterceptorResult) {
             return false
         }
 
-        val afterGlobalInterceptorResult = this.doAfterGlobalInterceptor(uri, request, response)
+        val afterGlobalInterceptorResult = this.doAfterGlobalInterceptor(uri, httpServletRequest, httpServletResponse)
         if (!afterGlobalInterceptorResult) {
             return false
         }
@@ -413,22 +412,22 @@ class ActionListener : HttpServlet() {
         if (forward.isNotBlank()) {
             var path = actionBean.findForwardPath(forward)
             if (path.isNotBlank()) {
-                logger.info("The forward name in configFile is--:actionPath:" + actionBean.path + "--forward:" + forward + "--path:" + path)
+                logger.info("The forward name in configFile is actionPath:%s, forward:%s, path:%s", actionBean.path, forward, path)
             } else {
                 path = ConfigurationContainer.rootConfigurationContext.findGlobalForwardPath(forward)
-                logger.info("The forward name in global forward configFile is--:forward:$forward--path:$path")
+                logger.info("The forward name in global forward configFile is forward:%s, path:%s", forward, path)
             }
-            this.doForward(normalExecute, needToStaticExecute, actionForwardBean, path, request, response, false)
+            this.doForward(normalExecute, needToStaticExecute, actionForwardBean, path, httpServletRequest, httpServletResponse, false)
         } else {
-            logger.info("The forward name--:$forward does not exist,may be ajax use if not please config the name and entity page or class")
+            logger.info("The forward name:%s does not exist,may be ajax use if not please config the name and entity page or class", forward)
         }
         return true
     }
 
     /**
      * @param annotationActionBean
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @return Object[]
      * @throws InvocationTargetException
      * @throws IllegalAccessException
@@ -436,7 +435,7 @@ class ActionListener : HttpServlet() {
      * @throws IllegalArgumentException
      */
     @Throws(IllegalArgumentException::class, InstantiationException::class, IllegalAccessException::class, InvocationTargetException::class)
-    private fun annotationActionMethodParameterValues(annotationActionBean: AnnotationActionBean, request: HttpServletRequest, response: HttpServletResponse): Array<Any?> {
+    private fun annotationActionMethodParameterValues(annotationActionBean: AnnotationActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Array<Any?> {
         val annotationActionBeanMethod = annotationActionBean.method!!
         val classes = annotationActionBeanMethod.parameterTypes
         val parameterValues = arrayOfNulls<Any>(classes.size)
@@ -444,26 +443,28 @@ class ActionListener : HttpServlet() {
         for (i in annotations.indices) {
             if (annotations[i].isNotEmpty() && annotations[i][0] is Action.RequestMapping.RequestParameter) {
                 val requestParameterAnnotation = annotations[i][0] as Action.RequestMapping.RequestParameter
-                parameterValues[i] = KotlinClassUtil.changeType(classes[i].kotlin, request.getParameterValues(requestParameterAnnotation.value)
-                        ?: emptyArray(), Constants.String.BLANK, this.classProcessor)
-            } else if (ObjectUtil.isEntity(request, classes[i])) {
-                parameterValues[i] = request
-            } else if (ObjectUtil.isEntity(response, classes[i])) {
-                parameterValues[i] = response
+                parameterValues[i] = KotlinClassUtil.changeType(
+                    classes[i].kotlin, httpServletRequest.getParameterValues(requestParameterAnnotation.value)
+                        ?: emptyArray(), Constants.String.BLANK, this.classProcessor
+                )
+            } else if (ObjectUtil.isEntity(httpServletRequest, classes[i])) {
+                parameterValues[i] = httpServletRequest
+            } else if (ObjectUtil.isEntity(httpServletResponse, classes[i])) {
+                parameterValues[i] = httpServletResponse
             } else {
                 if (KotlinClassUtil.isBaseArray(classes[i].kotlin) || KotlinClassUtil.isSimpleClass(classes[i].kotlin) || KotlinClassUtil.isSimpleArray(classes[i].kotlin)) {
                     parameterValues[i] = KotlinClassUtil.changeType(classes[i].kotlin, emptyArray(), Constants.String.BLANK, this.classProcessor)
                 } else if (classes[i].isArray) {
                     val clazz = classes[i].componentType
                     val kClass = clazz.kotlin
-                    val objectList = request.parameterMap.toObjectList(kClass, this.classProcessor)
+                    val objectList = httpServletRequest.parameterMap.toObjectList(kClass, this.classProcessor)
                     if (objectList.isNotEmpty()) {
                         val objectArray = objectList.toArray(kClass)
                         parameterValues[i] = objectArray
                     }
                 } else {
                     val instance = classes[i].newInstance()
-                    request.parameterMap.toObject(instance, this.classProcessor)
+                    httpServletRequest.parameterMap.toObject(instance, this.classProcessor)
                     parameterValues[i] = instance
                 }
             }
@@ -475,8 +476,9 @@ class ActionListener : HttpServlet() {
      * do annotation bean
      * @param uri
      * @param actionBean
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
+     * @param httpRequestMethod
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      * @throws InstantiationException
@@ -485,13 +487,13 @@ class ActionListener : HttpServlet() {
      * @throws ServletException
      */
     @Throws(IllegalArgumentException::class, InstantiationException::class, IllegalAccessException::class, InvocationTargetException::class, ServletException::class, IOException::class)
-    private fun doAnnotationAction(uri: String, actionBean: ActionBean, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
+    private fun doAnnotationAction(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
         if (actionBean !is AnnotationActionBean) {
             logger.error("It is not AnnotationActionBean, actionBean:$actionBean, it is impossible")
             return false
         }
         val actionInstance = actionBean.actionInstance
-        val parameterMap = request.parameterMap as Map<String, Array<String>>
+        val parameterMap = httpServletRequest.parameterMap as Map<String, Array<String>>
         val actionForwardBean = actionBean.findActionForwardBeanByStaticParameter(parameterMap)
         val (normalExecute, needToStaticExecute) = this.getExecuteType(actionForwardBean)
         var path: String = Constants.String.BLANK
@@ -501,7 +503,7 @@ class ActionListener : HttpServlet() {
             } else if (needToStaticExecute) {
                 logger.info("Need to static execute,first time executing original action")
             }
-            val parameterValues = this.annotationActionMethodParameterValues(actionBean, request, response)
+            val parameterValues = this.annotationActionMethodParameterValues(actionBean, httpServletRequest, httpServletResponse)
             val methodInvokeValue = actionBean.method?.invoke(actionInstance, *parameterValues)
             if (methodInvokeValue != null && methodInvokeValue is String) {
                 path = methodInvokeValue.toString()
@@ -511,30 +513,30 @@ class ActionListener : HttpServlet() {
         } else {
             logger.info("Static execute,not the first time execute")
         }
-        val afterActionInterceptorResult = this.doAfterActionInterceptor(actionBean, request, response)
+        val afterActionInterceptorResult = this.doAfterActionInterceptor(actionBean, httpServletRequest, httpServletResponse)
         if (!afterActionInterceptorResult) {
             return false
         }
 
-        val afterGlobalInterceptorResult = this.doAfterGlobalInterceptor(uri, request, response)
+        val afterGlobalInterceptorResult = this.doAfterGlobalInterceptor(uri, httpServletRequest, httpServletResponse)
         if (!afterGlobalInterceptorResult) {
             return false
         }
 
-        this.doForward(normalExecute, needToStaticExecute, actionForwardBean, path, request, response, true)
+        this.doForward(normalExecute, needToStaticExecute, actionForwardBean, path, httpServletRequest, httpServletResponse, true)
         return true
     }
 
     /**
      * do after action interceptor
      * @param actionBean
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @return boolean
      */
-    private fun doAfterActionInterceptor(actionBean: ActionBean, request: HttpServletRequest, response: HttpServletResponse): Boolean {
+    private fun doAfterActionInterceptor(actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
         val afterActionBeanInterceptorList = actionBean.afterActionInterceptorBeanList
-        val afterActionInterceptorResult = doActionInterceptorBeanList(afterActionBeanInterceptorList, request, response)
+        val afterActionInterceptorResult = doActionInterceptorBeanList(afterActionBeanInterceptorList, httpServletRequest, httpServletResponse)
         if (afterActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("Can not through the after action interceptors")
             return false
@@ -549,13 +551,13 @@ class ActionListener : HttpServlet() {
     /**
      * do after global interceptor
      * @param uri
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @return boolean
      */
-    private fun doAfterGlobalInterceptor(uri: String, request: HttpServletRequest, response: HttpServletResponse): Boolean {
+    private fun doAfterGlobalInterceptor(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
         val afterGlobalInterceptorList = ConfigurationContainer.rootConfigurationContext.afterGlobalInterceptorList
-        val afterGlobalInterceptorResult = doGlobalInterceptorList(afterGlobalInterceptorList, request, response)
+        val afterGlobalInterceptorResult = doGlobalInterceptorList(afterGlobalInterceptorList, httpServletRequest, httpServletResponse)
         if (afterGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("The request name:%s. Can not through the after global interceptors", uri)
             return false
@@ -591,48 +593,48 @@ class ActionListener : HttpServlet() {
      * @param needToStaticExecute
      * @param actionForwardBean
      * @param path
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @param annotationBeanExecute
      * @throws IOException
      * @throws ServletException
      */
     @Throws(ServletException::class, IOException::class)
-    private fun doForward(normalExecute: Boolean, needToStaticExecute: Boolean, actionForwardBean: ActionForwardBean?, path: String, request: HttpServletRequest, response: HttpServletResponse, annotationBeanExecute: Boolean) {
+    private fun doForward(normalExecute: Boolean, needToStaticExecute: Boolean, actionForwardBean: ActionForwardBean?, path: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, annotationBeanExecute: Boolean) {
         var realPath = path
         if (!normalExecute && !needToStaticExecute) {
             val staticFilePath = actionForwardBean!!.staticFilePath
-            logger.info("Send redirect to static file path:$staticFilePath")
-            val requestDispatcher = request.getRequestDispatcher(staticFilePath)
-            requestDispatcher.forward(request, response)
+            logger.info("Send redirect to static file path:%s", staticFilePath)
+            val requestDispatcher = httpServletRequest.getRequestDispatcher(staticFilePath)
+            requestDispatcher.forward(httpServletRequest, httpServletResponse)
         } else {
             if (realPath.isNotBlank()) {
                 realPath = ActionUtil.parsePath(realPath)
                 if (normalExecute) {
                     if (annotationBeanExecute) {
-                        logger.info("Annotation bean action executed forward path:$realPath")
+                        logger.info("Annotation bean action executed forward path:%s", realPath)
                     } else {
-                        logger.info("Normal executed forward path:$realPath")
+                        logger.info("Normal executed forward path:%s", realPath)
                     }
-                    val requestDispatcher = request.getRequestDispatcher(realPath)
-                    requestDispatcher.forward(request, response)
+                    val requestDispatcher = httpServletRequest.getRequestDispatcher(realPath)
+                    requestDispatcher.forward(httpServletRequest, httpServletResponse)
                 } else if (needToStaticExecute) {
                     val staticFilePath = actionForwardBean!!.staticFilePath
                     val configurationContext = ConfigurationContainer.rootConfigurationContext
-                    if (StaticFilePathUtil.staticize(realPath, configurationContext.projectRealPath + staticFilePath, request, response)) {
-                        logger.info("Static executed success,redirect static file:$staticFilePath")
-                        val requestDispatcher = request.getRequestDispatcher(staticFilePath)
-                        requestDispatcher.forward(request, response)
+                    if (StaticFilePathUtil.staticize(realPath, configurationContext.projectRealPath + staticFilePath, httpServletRequest, httpServletResponse)) {
+                        logger.info("Static executed success, redirect static file:%s", staticFilePath)
+                        val requestDispatcher = httpServletRequest.getRequestDispatcher(staticFilePath)
+                        requestDispatcher.forward(httpServletRequest, httpServletResponse)
                         StaticFilePathUtil.addStaticFilePath(staticFilePath, staticFilePath)
                     } else {
-                        logger.info("Static executed failure,file:$staticFilePath")
+                        logger.info("Static executed failure, file:%s", staticFilePath)
                     }
                 }
             } else {
                 if (annotationBeanExecute) {
                     logger.info("May be ajax use if not please config the entity page with String type.")
                 } else {
-                    logger.info("System can not find the path:$realPath")
+                    logger.info("System can not find the path:%s", realPath)
                 }
             }
         }
@@ -641,14 +643,14 @@ class ActionListener : HttpServlet() {
     /**
      * do global interceptor list,include global(before,after)
      * @param interceptorList
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @return InterceptorInterface.Result
      */
-    private fun doGlobalInterceptorList(interceptorList: List<InterceptorInterface>, request: HttpServletRequest, response: HttpServletResponse): InterceptorInterface.Result {
+    private fun doGlobalInterceptorList(interceptorList: List<InterceptorInterface>, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): InterceptorInterface.Result {
         try {
             for (globalInterceptor in interceptorList) {
-                val result = globalInterceptor.intercept(request, response)
+                val result = globalInterceptor.intercept(httpServletRequest, httpServletResponse)
                 val sign = result.type
                 logger.info("Global interceptor, through:%s, interceptor:%s", sign, globalInterceptor)
                 if (sign != InterceptorInterface.Result.Type.NEXT) {
@@ -665,15 +667,15 @@ class ActionListener : HttpServlet() {
     /**
      * do action bean interceptor list,include action(before,action)
      * @param actionInterceptorBeanList
-     * @param request
-     * @param response
+     * @param httpServletRequest
+     * @param httpServletResponse
      * @return InterceptorInterface.Result
      */
-    private fun doActionInterceptorBeanList(actionInterceptorBeanList: List<ActionInterceptorBean>, request: HttpServletRequest, response: HttpServletResponse): InterceptorInterface.Result {
+    private fun doActionInterceptorBeanList(actionInterceptorBeanList: List<ActionInterceptorBean>, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): InterceptorInterface.Result {
         try {
             for (actionInterceptorBean in actionInterceptorBeanList) {
                 val actionInterceptor = actionInterceptorBean.interceptorInstance
-                val result = actionInterceptor.intercept(request, response)
+                val result = actionInterceptor.intercept(httpServletRequest, httpServletResponse)
                 val sign = result.type
                 logger.info("Action interceptor, through:%s, interceptor:%s", sign, actionInterceptor)
                 if (sign != InterceptorInterface.Result.Type.NEXT) {
@@ -691,11 +693,11 @@ class ActionListener : HttpServlet() {
         /**
          * on request
          */
-        fun onRequest(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod)
+        fun onRequest(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod)
 
         /**
          * on response
          */
-        fun onResponse(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod)
+        fun onResponse(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod)
     }
 }

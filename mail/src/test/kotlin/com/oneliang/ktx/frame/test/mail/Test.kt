@@ -11,14 +11,16 @@ fun main() {
     sendMailConfiguration.host = "smtp.exmail.qq.com"
     sendMailConfiguration.port = 465
     sendMailConfiguration.user = "server@findsteel.cn"
-    sendMailConfiguration.password = "owabHiQvxCCk4yDg"
+    sendMailConfiguration.password = "********"
     sendMailConfiguration.ssl = true
     val sendMailMessage = SendMailMessage()
     sendMailMessage.subject = "test"
     sendMailMessage.content = "test"
     sendMailMessage.fromAddress = "server@findsteel.cn"
-    sendMailMessage.toAddressList = listOf(ToAddress("582199098@qq.com"))
+    sendMailMessage.toAddressList = listOf(ToAddress("********@qq.com"))
+    sendMailMessage.accessoryPathList = listOf("C:\\Users\\Administrator\\Desktop\\微钢云最新库存通知_20210301.xlsx")
     Mail.send(sendMailConfiguration, listOf(sendMailMessage))
+    return
     //receive
     val receiveMailInformation = ReceiveMailInformation()
     receiveMailInformation.host = "imap.exmail.qq.com"

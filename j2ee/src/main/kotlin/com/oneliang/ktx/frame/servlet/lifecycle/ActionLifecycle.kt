@@ -20,17 +20,17 @@ class ActionLifecycle : ActionListener.Lifecycle {
         }
     }
 
-    override fun onRequest(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
+    override fun onRequest(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
         logger.info("Action lifecycle on request, uri:%s", uri)
         for (lifecycle in lifecycleList) {
-            lifecycle.onRequest(uri, request, response, httpRequestMethod)
+            lifecycle.onRequest(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
         }
     }
 
-    override fun onResponse(uri: String, request: HttpServletRequest, response: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
+    override fun onResponse(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod) {
         logger.info("Action lifecycle on response, uri:%s", uri)
         for (lifecycle in lifecycleList) {
-            lifecycle.onResponse(uri, request, response, httpRequestMethod)
+            lifecycle.onResponse(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
         }
     }
 }
