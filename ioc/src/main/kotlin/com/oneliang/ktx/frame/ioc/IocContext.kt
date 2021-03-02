@@ -164,7 +164,7 @@ open class IocContext : AbstractContext() {
             } else {
                 beanClass.classLoader
             }
-            val proxyInstance = ProxyUtil.newProxyInstance(classLoader, beanInstance, AopInvocationHandler<Any>(beanInstance))
+            val proxyInstance = ProxyUtil.newProxyInstance(classLoader, beanInstance, AopInvocationHandler(beanInstance))
             iocBean.proxyInstance = proxyInstance
         } else {
             iocBean.proxyInstance = beanInstance

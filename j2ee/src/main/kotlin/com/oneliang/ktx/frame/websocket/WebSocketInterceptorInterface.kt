@@ -1,19 +1,18 @@
-package com.oneliang.ktx.frame.servlet.action
+package com.oneliang.ktx.frame.websocket
 
-import com.oneliang.ktx.Constants
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
+import javax.websocket.HandshakeResponse
+import javax.websocket.server.HandshakeRequest
 
-interface InterceptorInterface {
+interface WebSocketInterceptorInterface {
     /**
      * through intercept return true,else return false
-     * @param request
-     * @param response
+     * @param handshakeRequest
+     * @param handshakeResponse
      * @return boolean
      * @exception InterceptException
      */
-    @Throws(InterceptException::class)
-    fun intercept(request: ServletRequest, response: ServletResponse): Result
+    @Throws(WebSocketInterceptorInterface.InterceptException::class)
+    fun intercept(handshakeRequest: HandshakeRequest, handshakeResponse: HandshakeResponse): Result
 
     class Result(val type: Type = Type.NEXT, val message: ByteArray = ByteArray(0)) {
         enum class Type {

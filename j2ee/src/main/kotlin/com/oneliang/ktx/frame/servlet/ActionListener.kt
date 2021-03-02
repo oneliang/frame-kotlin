@@ -276,9 +276,6 @@ class ActionListener : HttpServlet() {
             httpServletResponse.status = Constants.Http.StatusCode.FORBIDDEN
             httpServletResponse.outputStream.write(beforeGlobalInterceptorResult.message)
             return false
-        } else if (beforeGlobalInterceptorResult.type == InterceptorInterface.Result.Type.CUSTOM) {
-            logger.info("The request name:%s. Use CUSTOM to through the before global interceptors", uri)
-            return false
         }
         logger.info("Through the before global interceptors!")
         return true
@@ -300,9 +297,6 @@ class ActionListener : HttpServlet() {
             logger.error("The request name:%s. Can not through the before action interceptors", uri)
             httpServletResponse.status = Constants.Http.StatusCode.FORBIDDEN
             httpServletResponse.outputStream.write(beforeActionInterceptorResult.message)
-            return false
-        } else if (beforeActionInterceptorResult.type == InterceptorInterface.Result.Type.CUSTOM) {
-            logger.info("The request name:%s. Use CUSTOM to through the before action interceptors", uri)
             return false
         }
         logger.info("Through the before action interceptors!")
@@ -540,9 +534,6 @@ class ActionListener : HttpServlet() {
         if (afterActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("Can not through the after action interceptors")
             return false
-        } else if (afterActionInterceptorResult.type == InterceptorInterface.Result.Type.CUSTOM) {
-            logger.error("Can not through the after action interceptors, not support for CUSTOM yet")
-            return false
         }
         logger.info("Through the after action interceptors!")
         return true
@@ -560,9 +551,6 @@ class ActionListener : HttpServlet() {
         val afterGlobalInterceptorResult = doGlobalInterceptorList(afterGlobalInterceptorList, httpServletRequest, httpServletResponse)
         if (afterGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("The request name:%s. Can not through the after global interceptors", uri)
-            return false
-        } else if (afterGlobalInterceptorResult.type == InterceptorInterface.Result.Type.CUSTOM) {
-            logger.error("The request name:%s. Can not through the after global interceptors, not support for CUSTOM yet", uri)
             return false
         }
         logger.info("Through the after global interceptors!")
