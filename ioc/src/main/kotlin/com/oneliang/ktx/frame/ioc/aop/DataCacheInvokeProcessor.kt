@@ -70,7 +70,7 @@ class DataCacheInvokeProcessor : InvokeProcessor {
                         this.dataCache = this.method!!.invoke(this.interfaceImpl)
                     }
                 } catch (e: Exception) {
-                    logger.error(Constants.Base.EXCEPTION, e)
+                    logger.error(Constants.String.EXCEPTION, e)
                 }
             }
         }

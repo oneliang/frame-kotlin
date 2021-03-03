@@ -19,7 +19,7 @@ class RemoteHostTag : BodyTagSupport() {
         try {
             pageContext.out.print(remoteHost)
         } catch (e: Exception) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         }
 
         return EVAL_PAGE

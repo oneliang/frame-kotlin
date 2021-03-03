@@ -30,7 +30,7 @@ internal object ServerEndpointConfigurator {
                 }
             }
         } catch (e: Throwable) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
             return WebSocketInterceptorInterface.Result(WebSocketInterceptorInterface.Result.Type.ERROR)
         }
         return WebSocketInterceptorInterface.Result()

@@ -33,7 +33,7 @@ class TimeMillisToDateTag : BodyTagSupport() {
                 val dateString = Date(this.value.toLong()).toFormatString(this.format)
                 this.pageContext.out.print(dateString)
             } catch (e: Exception) {
-                logger.error(Constants.Base.EXCEPTION, e)
+                logger.error(Constants.String.EXCEPTION, e)
             }
         }
         return EVAL_PAGE

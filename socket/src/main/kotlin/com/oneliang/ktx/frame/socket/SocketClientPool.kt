@@ -21,7 +21,7 @@ class SocketClientPool : ResourcePool<SocketClient>() {
             this.releaseStableResource(socketClient)
             result
         } catch (e: Throwable) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
             this.releaseStableResource(socketClient, true)
             null
         }

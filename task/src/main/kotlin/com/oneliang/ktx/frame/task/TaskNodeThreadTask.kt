@@ -23,7 +23,7 @@ class TaskNodeThreadTask(private val taskEngine: TaskEngine, private val taskNod
                 runnable.run()
             }
         } catch (e: Exception) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
             this.taskEngine.successful = false
         } finally {
             this.taskNode.finished = true

@@ -45,7 +45,7 @@ class ActionListener : HttpServlet() {
                     this.classProcessor = clazz.newInstance() as KotlinClassUtil.KotlinClassProcessor
                 }
             } catch (e: Throwable) {
-                logger.error(Constants.Base.EXCEPTION, e)
+                logger.error(Constants.String.EXCEPTION, e)
             }
             logger.info("Class processor is initial, class name:%s", fixClassProcessorClassName)
         }
@@ -58,7 +58,7 @@ class ActionListener : HttpServlet() {
                     this.lifecycle = clazz.newInstance() as Lifecycle
                 }
             } catch (e: Throwable) {
-                logger.error(Constants.Base.EXCEPTION, e)
+                logger.error(Constants.String.EXCEPTION, e)
             }
             logger.info("Lifecycle is initial, class name:%s", fixLifecycleClassName)
         }
@@ -345,12 +345,12 @@ class ActionListener : HttpServlet() {
                 doAnnotationAction(uri, actionBean, httpServletRequest, httpServletResponse, httpRequestMethod)
             }
         } catch (e: Throwable) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
             logger.info("The request name:%s. Action or page does not exist", uri)
             val exceptionPath = ConfigurationContainer.rootConfigurationContext.globalExceptionForwardPath.nullToBlank()
             if (exceptionPath.isNotBlank()) {
                 logger.info("Forward to exception path:%s", exceptionPath)
-                httpServletRequest.setAttribute(Constants.Base.EXCEPTION, e)
+                httpServletRequest.setAttribute(Constants.String.EXCEPTION, e)
                 val requestDispatcher = httpServletRequest.getRequestDispatcher(exceptionPath)
                 requestDispatcher.forward(httpServletRequest, httpServletResponse)
             } else {
@@ -646,7 +646,7 @@ class ActionListener : HttpServlet() {
                 }
             }
         } catch (e: Throwable) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
             return InterceptorInterface.Result(InterceptorInterface.Result.Type.ERROR)
         }
         return InterceptorInterface.Result()
@@ -671,7 +671,7 @@ class ActionListener : HttpServlet() {
                 }
             }
         } catch (e: Throwable) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
             return InterceptorInterface.Result(InterceptorInterface.Result.Type.ERROR)
         }
         return InterceptorInterface.Result()

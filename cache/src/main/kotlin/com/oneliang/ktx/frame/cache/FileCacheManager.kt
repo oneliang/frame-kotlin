@@ -77,7 +77,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
                 try {
                     return String(FileUtil.readFile(cacheFullFilename), Charsets.UTF_8) as T
                 } catch (e: UnsupportedEncodingException) {
-                    logger.error(Constants.Base.EXCEPTION, e)
+                    logger.error(Constants.String.EXCEPTION, e)
                 }
             }
             ByteArray::class -> {
@@ -114,7 +114,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
                 try {
                     cacheFile.write((value as String).toByteArray())
                 } catch (e: UnsupportedEncodingException) {
-                    logger.error(Constants.Base.EXCEPTION, e)
+                    logger.error(Constants.String.EXCEPTION, e)
                 }
             }
             ByteArray::class -> {

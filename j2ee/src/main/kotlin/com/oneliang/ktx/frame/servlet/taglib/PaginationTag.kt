@@ -142,7 +142,7 @@ class PaginationTag : BodyTagSupport() {
             try {
                 this.pageContext.out.println(paginationHtml.toString())
             } catch (e: Exception) {
-                logger.error(Constants.Base.EXCEPTION, e)
+                logger.error(Constants.String.EXCEPTION, e)
             }
 
         }

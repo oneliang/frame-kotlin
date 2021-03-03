@@ -21,7 +21,7 @@ class ProjectPathTag : BodyTagSupport() {
         try {
             pageContext.out.print(path)
         } catch (e: Exception) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         }
         return EVAL_PAGE
     }

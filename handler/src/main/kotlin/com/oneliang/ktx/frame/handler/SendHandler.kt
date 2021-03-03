@@ -29,7 +29,7 @@ class SendHandler<T : Any>(
         this.threadPool.addThreadTask({
             handle(this.resource)
         }, failure = {
-            logger.error(Constants.Base.EXCEPTION, it)
+            logger.error(Constants.String.EXCEPTION, it)
         })
     }
 

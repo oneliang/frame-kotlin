@@ -105,7 +105,7 @@ class TaskNode {
         try {
             this.runCondition.await()
         } catch (e: InterruptedException) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         } finally {
             this.lock.unlock()
         }
@@ -119,7 +119,7 @@ class TaskNode {
         try {
             this.runCondition.signal()
         } catch (e: InterruptedException) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         } finally {
             this.lock.unlock()
         }

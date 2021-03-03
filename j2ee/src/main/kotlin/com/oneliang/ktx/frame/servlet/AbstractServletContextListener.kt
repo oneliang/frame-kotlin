@@ -39,7 +39,7 @@ abstract class AbstractServletContextListener : ServletContextListener {
                 afterConfigurationInitialize(configurationContext)
             } catch (e: Throwable) {
                 e.printStackTrace()
-                logger.error(Constants.Base.EXCEPTION, e)
+                logger.error(Constants.String.EXCEPTION, e)
             }
         } else {
             logger.error("config file is not found,please initial the config file")

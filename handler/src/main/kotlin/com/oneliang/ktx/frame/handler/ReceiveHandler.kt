@@ -37,7 +37,7 @@ class ReceiveHandler<T : Any>(
         this.threadPool.addThreadTask({
             task.invoke(this.resource)
         }, failure = {
-            logger.error(Constants.Base.EXCEPTION, it)
+            logger.error(Constants.String.EXCEPTION, it)
         })
     }
 

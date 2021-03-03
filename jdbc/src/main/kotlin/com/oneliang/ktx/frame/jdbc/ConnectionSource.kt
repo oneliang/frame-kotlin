@@ -38,7 +38,7 @@ open class ConnectionSource : ResourceSource<Connection>() {
                 try {
                     Thread.currentThread().contextClassLoader.loadClass(this.driver).newInstance()
                 } catch (e: Exception) {
-                    logger.error(Constants.Base.EXCEPTION, e)
+                    logger.error(Constants.String.EXCEPTION, e)
                 }
             }
         }
@@ -71,7 +71,7 @@ open class ConnectionSource : ResourceSource<Connection>() {
         try {
             connection = DriverManager.getConnection(url, user, password)
         } catch (e: Exception) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         }
         if (connection == null) {
             throw NullPointerException("connection can not be null")

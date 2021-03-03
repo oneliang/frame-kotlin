@@ -163,7 +163,7 @@ class TaskEngine(private val mode: Mode, minThreads: Int, maxThreads: Int) {
                 try {
                     this.runCondition.await()
                 } catch (e: InterruptedException) {
-                    logger.error(Constants.Base.EXCEPTION, e)
+                    logger.error(Constants.String.EXCEPTION, e)
                 } finally {
                     this.lock.unlock()
                 }
@@ -181,7 +181,7 @@ class TaskEngine(private val mode: Mode, minThreads: Int, maxThreads: Int) {
         try {
             this.runCondition.signal()
         } catch (e: InterruptedException) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         } finally {
             this.lock.unlock()
         }

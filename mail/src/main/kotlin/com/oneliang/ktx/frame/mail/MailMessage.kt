@@ -257,7 +257,7 @@ class MailMessage(private val part: Part) {
                     bufferedOutputStream.flush()
                 }
             } catch (e: Exception) {
-                logger.error(Constants.Base.EXCEPTION, e)
+                logger.error(Constants.String.EXCEPTION, e)
             } finally {
                 bufferedInputStream?.close()
                 bufferedOutputStream?.close()

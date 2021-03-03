@@ -23,7 +23,7 @@ class BasePathTag : BodyTagSupport() {
         try {
             pageContext.out.print(basePath)
         } catch (e: Exception) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         }
 
         return EVAL_PAGE

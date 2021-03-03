@@ -161,7 +161,7 @@ object ActionUtil {
             bufferedWriter.close()
             result = true
         } catch (e: Exception) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         }
 
         return result

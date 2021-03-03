@@ -27,7 +27,7 @@ object Ssh {
             session.connect(connectTimeout)
             afterSessionConnect(session)
         } catch (e: Throwable) {
-            logger.error(Constants.Base.EXCEPTION, e)
+            logger.error(Constants.String.EXCEPTION, e)
         }
         return session
     }
