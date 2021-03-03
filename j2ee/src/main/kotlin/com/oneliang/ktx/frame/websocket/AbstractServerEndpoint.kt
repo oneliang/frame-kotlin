@@ -23,7 +23,7 @@ abstract class AbstractServerEndpoint {
     @Throws(Throwable::class)
     open fun onClose(session: Session, closeReason: CloseReason?) {
         logger.debug("session id:%s, close code:%s, reason:%s", session.id, closeReason?.closeCode, closeReason?.reasonPhrase)
-        session.close()
+//        session.close()
     }
 
     fun send(session: Session, byteArray: ByteArray) {
