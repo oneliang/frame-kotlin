@@ -33,12 +33,12 @@ class HeaderFilter : Filter {
      */
     @Throws(ServletException::class)
     override fun init(filterConfig: FilterConfig) {
-        logger.info("initialize filter:${this::class}")
+        logger.info("initialize filter:%s", this::class)
         val responseHeaderJson = filterConfig.getInitParameter(RESPONSE_HEADER_JSON).nullToBlank()
         if (responseHeaderJson.isNotBlank()) {
             val fixResponseHeaderJson = responseHeaderJson.replaceAllLines().replaceAllSpace()
             try {
-                logger.info("response header json:$fixResponseHeaderJson")
+                logger.info("response header json:%s", fixResponseHeaderJson)
                 if (fixResponseHeaderJson.isNotBlank()) {
                     val headerJsonArray = JsonArray(fixResponseHeaderJson)
                     for (i in 0 until headerJsonArray.length()) {
@@ -81,7 +81,7 @@ class HeaderFilter : Filter {
             if (httpHeaderOrigin.isNotBlank() && accessControlSet.contains(httpHeaderOrigin)) {
                 httpServletResponse.setHeader(Constants.Http.HeaderKey.ACCESS_CONTROL_ALLOW_ORIGIN, httpHeaderOrigin)
             } else {
-                logger.error("header[Origin] is not support for ${if (httpHeaderOrigin.isBlank()) "blank" else httpHeaderOrigin}")
+                logger.error("header[Origin] is not support for %s", if (httpHeaderOrigin.isBlank()) "blank" else httpHeaderOrigin)
             }
         }
         filterChain.doFilter(servletRequest, servletResponse)

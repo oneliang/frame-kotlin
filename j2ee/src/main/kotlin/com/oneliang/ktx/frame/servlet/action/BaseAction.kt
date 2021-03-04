@@ -7,6 +7,7 @@ import com.oneliang.ktx.frame.i18n.MessageContext
 import com.oneliang.ktx.frame.servlet.ActionUtil
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.file.FileUtil
+import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.upload.FileUpload
 import com.oneliang.ktx.util.upload.FileUploadResult
 import java.io.ByteArrayOutputStream
@@ -15,10 +16,14 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.*
+import javax.servlet.ServletRequest
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 open class BaseAction {
+    companion object {
+        private val logger = LoggerManager.getLogger(BaseAction::class)
+    }
 
     protected val projectRealPath = ConfigurationContainer.rootConfigurationContext.projectRealPath
 
@@ -70,36 +75,37 @@ open class BaseAction {
         }
 
     /**
-     * get byte array from input stream most use for protobuf
+     * get byte array from input stream
+     */
+    protected fun getByteArrayFromInputStream(checkContentType: Boolean = true): ByteArray {
+        val copyBlock: (servletRequest: ServletRequest, byteArrayOutputStream: ByteArrayOutputStream) -> Unit = { servletRequest, byteArrayOutputStream ->
+            try {
+                val inputStream = servletRequest.inputStream
+                inputStream.copyTo(byteArrayOutputStream)
+                byteArrayOutputStream.close()
+            } catch (e: Throwable) {
+                logger.error(Constants.String.EXCEPTION, e)
+            }
+        }
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        val servletRequest = ActionUtil.servletRequest
+        val contentType = servletRequest.contentType
+        if (checkContentType && !contentType.isNullOrBlank()) {
+            if (contentType.indexOf(Constants.Http.ContentType.APPLICATION_OCTET_STREAM) >= 0 || contentType.indexOf(Constants.Http.ContentType.BINARY_OCTET_STREAM) >= 0) {
+                copyBlock(servletRequest, byteArrayOutputStream)
+            }
+        } else {
+            copyBlock(servletRequest, byteArrayOutputStream)
+        }
+        return byteArrayOutputStream.toByteArray()
+    }
+
+    /**
+     * get byte array from input stream most use for binary stream
      */
     protected val byteArrayFromInputStream: ByteArray
         @Throws(Exception::class)
-        get() {
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            val servletRequest = ActionUtil.servletRequest
-            val contentType = servletRequest.contentType
-            if (contentType != null) {
-                if (contentType.indexOf(Constants.Http.ContentType.APPLICATION_OCTET_STREAM) >= 0 || contentType.indexOf(Constants.Http.ContentType.BINARY_OCTET_STREAM) >= 0) {
-                    try {
-                        val buffer = ByteArray(Constants.Capacity.BYTES_PER_KB)
-                        val inputStream = servletRequest.inputStream
-                        var length = inputStream.read(buffer, 0, buffer.size)
-                        while (length != -1) {
-                            byteArrayOutputStream.write(buffer, 0, length)
-                            byteArrayOutputStream.flush()
-                            length = inputStream.read(buffer, 0, buffer.size)
-                        }
-                        byteArrayOutputStream.close()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-
-                }
-            }
-            //            val baseRequestWrapper = BaseRequestWrapper()
-//            baseRequestWrapper.parseFrom(byteArray)
-            return byteArrayOutputStream.toByteArray()
-        }
+        get() = getByteArrayFromInputStream(true)
 
     /**
      * Method: set the instance object to the request
