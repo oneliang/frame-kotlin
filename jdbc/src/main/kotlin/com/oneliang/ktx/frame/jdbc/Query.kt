@@ -318,15 +318,14 @@ interface Query : BaseQuery {
     /**
      * Method: execute query by sql statement for map data
      * @param sql
-     * @param columnDataKeyMap
-     * @param columnClassMapping
+     * @param columnDataCollection
      * @param useStable
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<Map<String, *>>
+    fun executeQueryBySqlForMap(sql: String, columnDataCollection: Collection<BaseQuery.ColumnData>, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<Map<String, *>>
 
     /**
      * Method: execute update
@@ -371,12 +370,12 @@ interface Query : BaseQuery {
     /**
      * Method: execute batch,transaction
      * @param sql include insert update delete sql only the same sql many data
-     * @param parametersList
+     * @param parametersCollection
      * @return int[]
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeBatch(sql: String, parametersList: List<Array<*>>): IntArray
+    fun executeBatch(sql: String, parametersCollection: Collection<Array<*>>): IntArray
 
     /**
      * Method: execute batch

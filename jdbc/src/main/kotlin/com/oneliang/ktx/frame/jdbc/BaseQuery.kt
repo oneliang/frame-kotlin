@@ -90,14 +90,13 @@ interface BaseQuery {
      * Method: execute query base on the connection and sql command for map data
      * @param connection
      * @param sql
-     * @param columnDataKeyMap
-     * @param columnClassMapping
+     * @param columnDataCollection
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeQueryBySqlForMap(connection: Connection, sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>>
+    fun executeQueryBySqlForMap(connection: Connection, sql: String, columnDataCollection: Collection<ColumnData>, parameters: Array<*>): List<Map<String, *>>
 
     /**
      * Method: execute insert
@@ -266,12 +265,12 @@ interface BaseQuery {
      * Method: execute batch by connection,transaction
      * @param connection
      * @param sql include insert update delete sql only the same sql many data
-     * @param parametersList
+     * @param parametersCollection
      * @return int[]
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    fun executeBatch(connection: Connection, sql: String, parametersList: List<Array<*>>): IntArray
+    fun executeBatch(connection: Connection, sql: String, parametersCollection: Collection<Array<*>>): IntArray
 
     /**
      * Method: execute batch by connection,transaction
@@ -288,4 +287,6 @@ interface BaseQuery {
     }
 
     class BatchObject(val instance: Any, val condition: String = Constants.String.BLANK, val executeType: ExecuteType)
+
+    class ColumnData(val columnName: String, val dataKey: String, val kClass: KClass<*> = String::class)
 }

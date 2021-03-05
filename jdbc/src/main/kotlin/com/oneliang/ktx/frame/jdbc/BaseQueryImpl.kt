@@ -241,22 +241,21 @@ open class BaseQueryImpl : BaseQuery {
      * Method: execute query base on the connection and sql command for map data
      * @param connection
      * @param sql
-     * @param columnDataKeyMap
-     * @param columnClassMapping
+     * @param columnDataCollection
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    override fun executeQueryBySqlForMap(connection: Connection, sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, parameters: Array<*>): List<Map<String, *>> {
+    override fun executeQueryBySqlForMap(connection: Connection, sql: String, columnDataCollection: Collection<BaseQuery.ColumnData>, parameters: Array<*>): List<Map<String, *>> {
         val list = mutableListOf<Map<String, *>>()
         val resultSet = this.executeQueryBySql(connection, sql, parameters)
         resultSet.use {
             while (resultSet.next()) {
                 val map = mutableMapOf<String, Any?>()
-                columnDataKeyMap.forEach { (columnName, dataKey) ->
-                    val kClass = columnClassMapping[columnName] ?: String::class
-                    map[dataKey] = sqlProcessor.afterSelectProcess(kClass, it, columnName)
+                columnDataCollection.forEach { columnData ->
+                    val kClass = columnData.kClass
+                    map[columnData.dataKey] = sqlProcessor.afterSelectProcess(kClass, it, columnData.columnName)
                 }
                 list += map
             }
@@ -725,13 +724,13 @@ open class BaseQueryImpl : BaseQuery {
      * Method: execute batch by connection,transaction
      * @param connection
      * @param sql include insert update delete sql only the same sql many data
-     * @param parametersList
+     * @param parametersCollection
      * @return int[]
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    override fun executeBatch(connection: Connection, sql: String, parametersList: List<Array<*>>): IntArray {
-        if (parametersList.isEmpty()) {
+    override fun executeBatch(connection: Connection, sql: String, parametersCollection: Collection<Array<*>>): IntArray {
+        if (parametersCollection.isEmpty()) {
             return IntArray(0)
         }
         return useBatch(connection) {
@@ -741,7 +740,7 @@ open class BaseQueryImpl : BaseQuery {
                 val parsedSql = DatabaseMappingUtil.parseSql(sql)
                 logger.info(parsedSql)
                 preparedStatement = connection.prepareStatement(parsedSql)
-                for (parameters in parametersList) {
+                for (parameters in parametersCollection) {
                     var index = 1
                     for (parameter in parameters) {
                         this.sqlProcessor.statementProcess(preparedStatement, index, parameter)

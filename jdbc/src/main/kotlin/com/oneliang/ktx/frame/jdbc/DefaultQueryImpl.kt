@@ -454,21 +454,20 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     /**
      * Method: execute query by sql statement for map data
      * @param sql
-     * @param columnDataKeyMap
-     * @param columnClassMapping
+     * @param columnDataCollection
      * @param useStable
      * @param parameters
      * @return List<Map<String, *>>
      * @throws QueryException
      */
-    override fun executeQueryBySqlForMap(sql: String, columnDataKeyMap: Map<String, String>, columnClassMapping: Map<String, KClass<*>>, useStable: Boolean, parameters: Array<*>): List<Map<String, *>> {
+    override fun executeQueryBySqlForMap(sql: String, columnDataCollection: Collection<BaseQuery.ColumnData>, useStable: Boolean, parameters: Array<*>): List<Map<String, *>> {
         return if (useStable) {
             useStableConnection {
-                this.executeQueryBySqlForMap(it, sql, columnDataKeyMap, columnClassMapping, parameters)
+                this.executeQueryBySqlForMap(it, sql, columnDataCollection, parameters)
             }
         } else {
             useConnection {
-                this.executeQueryBySqlForMap(it, sql, columnDataKeyMap, columnClassMapping, parameters)
+                this.executeQueryBySqlForMap(it, sql, columnDataCollection, parameters)
             }
         }
     }
@@ -580,14 +579,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     /**
      * Method: execute batch,transaction
      * @param sql include insert update delete sql only the same sql many data
-     * @param parametersList
+     * @param parametersCollection
      * @return int[]
      * @throws QueryException
      */
     @Throws(QueryException::class)
-    override fun executeBatch(sql: String, parametersList: List<Array<*>>): IntArray {
+    override fun executeBatch(sql: String, parametersCollection: Collection<Array<*>>): IntArray {
         return useConnection {
-            this.executeBatch(it, sql, parametersList)
+            this.executeBatch(it, sql, parametersCollection)
         }
     }
 
