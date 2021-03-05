@@ -88,7 +88,7 @@ object SqlUtil {
      * @return String
      */
     fun selectSql(selectColumns: Array<String> = emptyArray(), table: String, condition: String = Constants.String.BLANK): String {
-        var selectColumnStringBuilder = StringBuilder()
+        val selectColumnStringBuilder = StringBuilder()
         if (selectColumns.isNotEmpty()) {
             selectColumnStringBuilder.append(selectColumns.joinToString(Constants.Symbol.COMMA))
         } else {

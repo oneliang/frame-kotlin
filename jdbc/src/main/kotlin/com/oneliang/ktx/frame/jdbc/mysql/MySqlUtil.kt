@@ -5,8 +5,8 @@ import com.oneliang.ktx.frame.bean.Page
 import com.oneliang.ktx.frame.jdbc.SqlUtil
 
 object MySqlUtil {
-    fun selectPaginationSql(table: String, condition: String = Constants.String.BLANK, sequenceKey: String, startSequence: String, orderBy: String, rowPerPage: Int = Page.DEFAULT_ROWS): String {
+    fun selectPaginationSql(selectColumns: Array<String> = emptyArray(), table: String, condition: String = Constants.String.BLANK, sequenceKey: String, startSequence: String, orderBy: String, rowPerPage: Int = Page.DEFAULT_ROWS): String {
         val paginationCondition = "$condition AND $sequenceKey > $startSequence $orderBy ${Constants.Database.MySql.PAGINATION} 0,$rowPerPage"
-        return SqlUtil.selectSql(table = table, condition = paginationCondition)
+        return SqlUtil.selectSql(selectColumns, table, paginationCondition)
     }
 }
