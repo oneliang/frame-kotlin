@@ -93,6 +93,8 @@ open class BaseAction {
         if (checkContentType && !contentType.isNullOrBlank()) {
             if (contentType.indexOf(Constants.Http.ContentType.APPLICATION_OCTET_STREAM) >= 0 || contentType.indexOf(Constants.Http.ContentType.BINARY_OCTET_STREAM) >= 0) {
                 copyBlock(servletRequest, byteArrayOutputStream)
+            } else {
+                //nothing to do, byteArrayOutputStream will empty
             }
         } else {
             copyBlock(servletRequest, byteArrayOutputStream)
