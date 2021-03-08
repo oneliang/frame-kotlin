@@ -2,7 +2,7 @@ package com.oneliang.ktx.frame.planner
 
 import com.oneliang.ktx.util.common.sumByLong
 import com.oneliang.ktx.util.logging.LoggerManager
-import com.oneliang.ktx.util.math.Segmenter
+import com.oneliang.ktx.util.math.segment.Segmenter
 
 class PlanLine(val name: String) {
     companion object {
