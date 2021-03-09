@@ -27,7 +27,9 @@ abstract class AbstractServerEndpoint {
     }
 
     fun send(session: Session, byteArray: ByteArray) {
-        session.basicRemote.sendStream.write(byteArray)
+        val sendStream = session.basicRemote.sendStream ?: return
+        sendStream.write(byteArray)
+        sendStream.close()
     }
 
     fun send(session: Session, message: String) {
