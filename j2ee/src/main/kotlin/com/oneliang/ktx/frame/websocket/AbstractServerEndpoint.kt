@@ -26,23 +26,13 @@ abstract class AbstractServerEndpoint {
 //        session.close()
     }
 
-    fun send(session: Session, byteArray: ByteArray) {
-        val sendStream = session.basicRemote.sendStream ?: return
-        sendStream.write(byteArray)
-        sendStream.close()
+    fun sendText(session: Session, message: String) {
+        session.basicRemote.sendText(message)
     }
 
-    fun send(session: Session, message: String) {
-        send(session, message.toByteArray())
-    }
-
-    fun handle(session: Session, requestString: String, block: (requestString: String) -> String) {
+    fun handleText(session: Session, requestString: String, block: (requestString: String) -> String) {
         val responseString = block(requestString)
-        send(session, responseString)
+        sendText(session, responseString)
     }
 
-    fun handle(session: Session, requestByteArray: ByteArray, block: (requestByteArray: ByteArray) -> ByteArray) {
-        val responseByteArray = block(requestByteArray)
-        send(session, responseByteArray)
-    }
 }
