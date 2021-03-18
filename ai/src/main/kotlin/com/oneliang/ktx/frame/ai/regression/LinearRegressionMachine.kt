@@ -1,7 +1,8 @@
 package com.oneliang.ktx.frame.ai.regression
 
 import com.oneliang.ktx.frame.ai.base.Batching
-import com.oneliang.ktx.frame.ai.base.OlsLossFunction
+import com.oneliang.ktx.frame.ai.base.ordinaryLeastSquares
+import com.oneliang.ktx.frame.ai.base.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.logging.LoggerManager
 
 object LinearRegressionMachine {
@@ -31,11 +32,12 @@ object LinearRegressionMachine {
                     val calculateY = LinearRegression.linear(xArray, newWeightArray)
                     totalCalculateY += calculateY
                     totalY += y
-                    //derived
+                    val currentLoss = ordinaryLeastSquares(calculateY, y)
+                    //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
                     xArray.forEachIndexed { index, x ->
-                        weightGrad[index] = weightGrad[index] + (calculateY - y) * x
+                        weightGrad[index] = weightGrad[index] + ordinaryLeastSquaresDerived(x, calculateY, y)
                     }
-                    OlsLossFunction.loss(calculateY, y)
+                    currentLoss
                 }
             }
             //update all weight
