@@ -1,6 +1,6 @@
 package com.oneliang.ktx.frame.test.ai
 
-import com.oneliang.ktx.frame.ai.regression.LinearRegressionMachine
+import com.oneliang.ktx.frame.ai.regression.LinearMachine
 
 fun main() {
 //    val weightArray = Array(3) { 0.0 }
@@ -10,7 +10,7 @@ fun main() {
     val times = 500000
     val batching = TestTrendBatching(100)
 //    val batching = TestStableDataBatching(100)
-    val newWeightArray = LinearRegressionMachine.study(batching, weightArray, learningRate, times, 1000)
+    val newWeightArray = LinearMachine.study(batching, weightArray, learningRate, times, 1000)
     batching.reset()
-    LinearRegressionMachine.test(batching, newWeightArray)
+    LinearMachine.test(batching, newWeightArray)
 }

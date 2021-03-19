@@ -1,4 +1,4 @@
-package com.oneliang.ktx.frame.ai.base
+package com.oneliang.ktx.frame.ai.activation
 
 import kotlin.math.exp
 
