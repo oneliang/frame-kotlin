@@ -6,12 +6,13 @@ import java.io.File
 
 class TestSoftmaxRegressionBatching(override val batchSize: Int) : Batching(batchSize) {
 
-    private var reader = File("/C:/Users/Administrator/Desktop/temp/softmax_regression.csv").bufferedReader()
+    private val fullFilename = "/C:/Users/Administrator/Desktop/temp/softmax_regression.csv"
+    private var reader = File(fullFilename).bufferedReader()
 
     private var lineCount = 0
     override fun reset() {
         this.lineCount = 0
-        this.reader = File("/C:/Users/Administrator/Desktop/temp/softmax_regression.csv").bufferedReader()
+        this.reader = File(fullFilename).bufferedReader()
     }
 
     private fun parseLine(line: String): Pair<Double, Array<Double>> {
