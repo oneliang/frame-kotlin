@@ -16,7 +16,8 @@ object LinearMachine {
         times: Int,
         printPeriod: Int = 500,
         activationFunction: (calculateY: Double) -> Double = { it },
-        lossFunction: (calculateY: Double, y: Double) -> Double = { calculateY, y -> ordinaryLeastSquares(calculateY, y) }
+        lossFunction: (calculateY: Double, y: Double) -> Double = { calculateY, y -> ordinaryLeastSquares(calculateY, y) },
+        gradientFunction: (x: Double, calculateY: Double, y: Double) -> Double = { x, calculateY, y -> ordinaryLeastSquaresDerived(x, calculateY, y) }
     ): Array<Double> {
         if (weightArray.isEmpty()) {
             error("weight array is empty")
@@ -24,8 +25,6 @@ object LinearMachine {
         val newWeightArray = weightArray.copyOf()
         for (count in 1..times) {
             var totalDataSize = 0L
-            var totalCalculateY = 0.0
-            var totalY = 0.0
             val weightGrad = Array(newWeightArray.size) { 0.0 }
             var totalLoss = 0.0
             while (true) {
@@ -39,17 +38,15 @@ object LinearMachine {
                 totalLoss += inputDataList.sumByDouble { item ->
                     val (y, xArray) = item
                     val calculateY = activationFunction(linear(xArray, newWeightArray))
-                    totalCalculateY += calculateY
-                    totalY += y
                     val currentLoss = lossFunction(calculateY, y)
                     //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
                     xArray.forEachIndexed { index, x ->
-                        weightGrad[index] = weightGrad[index] + ordinaryLeastSquaresDerived(x, calculateY, y)
+                        weightGrad[index] += gradientFunction(x, calculateY, y)
                     }
                     currentLoss
                 }
             }
-            //update all weight
+            //update all weight, gradient descent
             newWeightArray.forEachIndexed { index, weight ->
                 newWeightArray[index] = weight - (learningRate * weightGrad[index]) / totalDataSize
             }

@@ -6,6 +6,6 @@ fun ordinaryLeastSquares(calculateY: Double, realY: Double): Double {
     return (calculateY - realY).pow(2)
 }
 
-fun ordinaryLeastSquaresDerived(x: Double, calculateY: Double, y: Double): Double {
-    return (calculateY - y) * x
+fun ordinaryLeastSquaresDerived(x: Double, calculateY: Double, realY: Double): Double {
+    return (calculateY - realY) * x
 }
