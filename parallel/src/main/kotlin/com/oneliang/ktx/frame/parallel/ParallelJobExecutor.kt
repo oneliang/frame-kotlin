@@ -2,7 +2,7 @@ package com.oneliang.ktx.frame.parallel
 
 import com.oneliang.ktx.util.logging.LoggerManager
 
-class ParallelJobExecutor() {
+class ParallelJobExecutor {
 
     companion object {
         private val logger = LoggerManager.getLogger(ParallelJobExecutor::class)
