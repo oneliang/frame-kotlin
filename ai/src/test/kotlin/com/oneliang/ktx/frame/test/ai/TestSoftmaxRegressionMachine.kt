@@ -7,7 +7,7 @@ import com.oneliang.ktx.frame.ai.regression.LinearMachine
 import com.oneliang.ktx.util.json.toJson
 
 fun main() {
-    val weightArray = Array(3) { Array(2) { 1.0 } }
+    val weightArray = Array(3) { Array(4) { 1.0 } }
     val learningRate = 0.04
     val times = 10000
     val batching = TestSoftmaxRegressionBatching(100)

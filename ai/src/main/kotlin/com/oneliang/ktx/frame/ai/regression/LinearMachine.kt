@@ -49,12 +49,15 @@ object LinearMachine {
                     currentLoss
                 }
             }
+            println(weightGrad.toJson())
             //update all weight, gradient descent
             newWeightArray.forEachIndexed { index, weight ->
                 for (type in weight.indices) {
+                    println(weight[type].toString() + "," + (learningRate * weightGrad[index][type]))
                     newWeightArray[index][type] = weight[type] - (learningRate * weightGrad[index][type]) / totalDataSize
                 }
             }
+            println(newWeightArray.toJson())
             if (count % printPeriod == 0) {
                 logger.debug("times:%s, total loss:%s, average loss:%s, weight array:%s", count, totalLoss, totalLoss / totalDataSize, newWeightArray.toJson())
             }

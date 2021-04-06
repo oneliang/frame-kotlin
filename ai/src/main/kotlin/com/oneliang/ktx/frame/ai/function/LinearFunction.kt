@@ -38,5 +38,5 @@ fun linear(xArray: Array<Double>, weightArray: Array<Array<Double>>): Array<Doub
             error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xArray.size, weightArray.size))
         }
     }
-    return xArray.multiply(weightArray)
+    return xArray.multiply(fixWeightArray)
 }
