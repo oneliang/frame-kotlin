@@ -1,13 +1,6 @@
 package com.oneliang.ktx.frame.ai.dnn.layer
 
-abstract class Layer<IN : Any, OUT : Any>(
-    var depth: Int,
-    var neuronCount: Int
-) {
-
-    constructor() : this(0, 0)
-
-    var loss: Array<Array<Double>> = Array(depth) { Array(neuronCount) { 0.0 } }
+abstract class Layer<IN : Any, OUT : Any> {
 
     open lateinit var inputNeuron: IN
 
