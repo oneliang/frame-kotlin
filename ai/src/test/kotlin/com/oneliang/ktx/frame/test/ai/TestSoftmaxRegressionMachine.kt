@@ -33,6 +33,6 @@ fun main() {
     LinearMachine.test(batching, newWeightArray, activationFunction = activationFunction, loggerMessageFunction = { calculateY, y ->
         val correctY = y.toInt()
         val calculateProbability = calculateY[correctY]
-        "calculate probability:%s, real probability:%s, real y:%s, :%s".format(calculateProbability, correctProbability[correctY][correctY], y, calculateY.toJson())
+        "calculate probability:%s, real probability:%s, real y:%s, calculate:%s".format(calculateProbability, correctProbability[correctY][correctY], y, calculateY.toJson())
     })
 }

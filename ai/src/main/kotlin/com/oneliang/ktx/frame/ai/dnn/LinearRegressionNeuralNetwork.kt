@@ -23,9 +23,8 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                 val loss = (layer.nextLayer!! as LinearRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
                 layer.inputNeuron.forEachIndexed { xIndex, x ->
-                    layer.loss[xIndex] += ordinaryLeastSquaresDerived(x, loss[0])//because next layer only one loss value
+                    layer.loss[xIndex] += ordinaryLeastSquaresDerived(x, loss)//because next layer only one loss value
                 }
-                layer.sumLoss += ordinaryLeastSquares(loss[0])
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 //update all weight, gradient descent
@@ -33,12 +32,10 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                     layer.weights[index] = weight - (learningRate * layer.loss[index]) / totalDataSize
                 }
                 if (epoch % printPeriod == 0) {
-                    val totalLoss = layer.sumLoss
-                    logger.debug("epoch:%s, total loss:%s, average loss:%s, weight array:%s", epoch, totalLoss, totalLoss / totalDataSize, layer.weights.toJson())
+                    logger.debug("epoch:%s, weight array:%s", epoch, layer.weights.toJson())
                 }
                 //reset after update
                 layer.loss.reset(0.0)
-                layer.sumLoss = 0.0
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
                 val weightsData = map["weights"]?.jsonToArrayDouble()
@@ -50,7 +47,7 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                 map["weights"] = layer.weights
                 map.toJson()
             })
-        val outputLayer = LinearRegressionOutputLayer<Double, Double>(1,
+        val outputLayer = LinearRegressionOutputLayer<Double, Double>(
             forwardImpl = { _, inputNeuron: Double, y: Double, training: Boolean ->
                 if (!training) {//test
                     logger.info("calculate y:%s, real y:%s", inputNeuron, y)
@@ -58,9 +55,17 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                 inputNeuron
             },
             backwardImpl = { layer, inputNeuron: Double, y: Double ->
-                singleIteration(layer.neuronCount) { neuronIndex ->
-                    layer.loss[neuronIndex] = (inputNeuron - y)
+                layer.loss = (inputNeuron - y)
+                layer.sumLoss += ordinaryLeastSquares(layer.loss)
+            },
+            updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
+                if (epoch % printPeriod == 0) {
+                    val totalLoss = layer.sumLoss
+                    logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
                 }
+                //reset after update
+                layer.loss = 0.0
+                layer.sumLoss = 0.0
             })
         return listOf(
             inputLayer,

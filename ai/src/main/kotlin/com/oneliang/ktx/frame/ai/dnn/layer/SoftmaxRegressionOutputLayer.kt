@@ -12,6 +12,7 @@ class SoftmaxRegressionOutputLayer<IN : Any, OUT : Any>(
 ) : Layer<IN, OUT>() {
 
     var loss: Array<Double> = Array(this.typeCount) { 0.0 }
+    var sumLoss: Double = 0.0
 
     override fun forwardImpl(inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, inputNeuron, y, training) ?: outputNullError()

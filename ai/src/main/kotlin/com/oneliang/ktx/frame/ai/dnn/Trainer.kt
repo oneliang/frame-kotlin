@@ -131,15 +131,14 @@ object Trainer {
         neuralNetwork: NeuralNetwork,
         modelFullFilename: String = Constants.String.BLANK,
     ) {
+        val layerList = neuralNetwork.getLayerList()
+        val (inputLayer, _) = getInputAndOutputLayer(layerList, modelFullFilename)
         while (true) {
             val result = batching.fetch()
             if (result.finished) {
                 logger.warning("Data is empty. Batch may be finished")
                 break
             }
-            val layerList = neuralNetwork.getLayerList()
-            val (inputLayer, _) = getInputAndOutputLayer(layerList, modelFullFilename)
-
             val inputDataList = result.dataList
 
             inputDataList.forEach { item ->

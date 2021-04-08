@@ -5,7 +5,6 @@ import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 import com.oneliang.ktx.frame.ai.dnn.layer.SoftmaxRegressionLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.SoftmaxRegressionOutputLayer
 import com.oneliang.ktx.frame.ai.loss.likelihood
-import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquares
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.common.reset
 import com.oneliang.ktx.util.common.singleIteration
@@ -34,13 +33,6 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                         layer.loss[xIndex][typeIndex] += ordinaryLeastSquaresDerived(x, loss[typeIndex])
                     }
                 }
-//                singleIteration(layer.typeCount) { typeIndex ->
-//                    val correctYType = y.toInt()
-//                    val calculateYProbability = calculateY[correctYType]
-//                    likelihood(calculateYProbability)
-//
-//                    layer.sumLoss += likelihood(calculateYProbability)(loss[typeIndex])
-//                }
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 //update all weight, gradient descent
@@ -50,12 +42,10 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                     }
                 }
                 if (epoch % printPeriod == 0) {
-                    val totalLoss = layer.sumLoss
-                    logger.debug("epoch:%s, total loss:%s, average loss:%s, weight array:%s", epoch, totalLoss, totalLoss / totalDataSize, layer.weights.toJson())
+                    logger.debug("epoch:%s, weight array:%s", epoch, layer.weights.toJson())
                 }
                 //reset after update
                 layer.loss.reset(0.0)
-                layer.sumLoss = 0.0
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
                 val weightsData = map["weights"]?.jsonToObjectList(Array<Double>::class)?.toTypedArray()
@@ -79,6 +69,17 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                 singleIteration(layer.typeCount) { typeIndex ->
                     layer.loss[typeIndex] = inputNeuron[typeIndex] - correctProbability[correctYType][typeIndex]
                 }
+                val calculateYProbability = inputNeuron[correctYType]
+                layer.sumLoss += likelihood(calculateYProbability)
+            },
+            updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
+                if (epoch % printPeriod == 0) {
+                    val totalLoss = layer.sumLoss
+                    logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
+                }
+                //reset after update
+                layer.loss.reset(0.0)
+                layer.sumLoss = 0.0
             })
         return listOf(
             inputLayer,

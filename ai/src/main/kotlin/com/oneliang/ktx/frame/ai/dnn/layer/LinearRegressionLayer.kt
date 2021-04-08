@@ -13,7 +13,6 @@ class LinearRegressionLayer<IN : Any, OUT : Any>(
 
     var loss: Array<Double> = Array(this.neuronCount) { 0.0 }
     var weights: Array<Double> = Array(this.neuronCount) { 0.0 }
-    var sumLoss: Double = 0.0
 
     override fun forwardImpl(inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, inputNeuron, y, training) ?: outputNullError()
