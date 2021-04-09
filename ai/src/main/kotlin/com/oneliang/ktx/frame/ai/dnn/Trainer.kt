@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.ai.dnn
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
 import com.oneliang.ktx.frame.ai.dnn.layer.Layer
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.util.common.toFile
 import com.oneliang.ktx.util.common.toMap
 import com.oneliang.ktx.util.file.fileExists
@@ -11,9 +12,11 @@ import com.oneliang.ktx.util.file.write
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
+import kotlinx.coroutines.Job
 
-object Trainer {
+class Trainer {
     private val logger = LoggerManager.getLogger(Trainer::class)
+    private val coroutine = Coroutine()
 
     fun train(
         batching: Batching,
@@ -26,6 +29,7 @@ object Trainer {
         val layerList = neuralNetwork.getLayerList()
         val (inputLayer, outputLayer, model) = getInputAndOutputLayer(layerList, modelFullFilename)
         for (epoch in 1..epochs) {
+            var dataId = 0L
             var totalDataSize = 0L
             while (true) {
                 val result = batching.fetch()
@@ -36,10 +40,11 @@ object Trainer {
                 val inputDataList = result.dataList
                 totalDataSize += inputDataList.size
                 inputDataList.forEach {
+                    dataId++
                     val (y, xArray) = it
                     //forward include backward(backPropagation)
-                    forward(inputLayer, xArray, y, true)
-                    backward(outputLayer, y)
+                    forward(inputLayer, dataId, xArray, y, true)
+                    backward(outputLayer, dataId, y)
                 }
             }
             //update all weight, gradient descent
@@ -94,13 +99,13 @@ object Trainer {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun forward(inputLayer: Layer<Any, Any>, xArray: Array<Double>, y: Double, training: Boolean) {
-        inputLayer.doForward(xArray, y, training)
+    private fun forward(inputLayer: Layer<Any, Any>, dataId: Long, xArray: Array<Double>, y: Double, training: Boolean) {
+        inputLayer.doForward(dataId, xArray, y, training)
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun backward(outputLayer: Layer<Any, Any>, y: Double) {
-        outputLayer.doBackward(y)
+    private fun backward(outputLayer: Layer<Any, Any>, dataId: Long, y: Double) {
+        outputLayer.doBackward(dataId, y)
     }
 
     private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
@@ -133,6 +138,7 @@ object Trainer {
     ) {
         val layerList = neuralNetwork.getLayerList()
         val (inputLayer, _) = getInputAndOutputLayer(layerList, modelFullFilename)
+        var dataId = 0L
         while (true) {
             val result = batching.fetch()
             if (result.finished) {
@@ -142,8 +148,9 @@ object Trainer {
             val inputDataList = result.dataList
 
             inputDataList.forEach { item ->
+                dataId++
                 val (y, xArray) = item
-                forward(inputLayer, xArray, y, false)
+                forward(inputLayer, dataId, xArray, y, false)
             }
         }
     }

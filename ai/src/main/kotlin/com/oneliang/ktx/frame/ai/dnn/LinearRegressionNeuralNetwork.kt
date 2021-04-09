@@ -1,13 +1,14 @@
 package com.oneliang.ktx.frame.ai.dnn
 
-import com.oneliang.ktx.frame.ai.dnn.layer.LinearRegressionLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.Layer
+import com.oneliang.ktx.frame.ai.dnn.layer.LinearRegressionLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.LinearRegressionOutputLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquares
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.common.reset
-import com.oneliang.ktx.util.common.singleIteration
-import com.oneliang.ktx.util.json.*
+import com.oneliang.ktx.util.json.jsonToArrayDouble
+import com.oneliang.ktx.util.json.jsonToMap
+import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.math.matrix.innerProduct
 
@@ -16,10 +17,10 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
 
     override fun getLayerList(): List<Layer<*, *>> {
         @Suppress("UNCHECKED_CAST") val inputLayer = LinearRegressionLayer<Array<Double>, Double>(2,
-            forwardImpl = { layer, inputNeuron: Array<Double>, y: Double, _: Boolean ->
+            forwardImpl = { layer, dataId, inputNeuron: Array<Double>, y: Double, _: Boolean ->
                 inputNeuron.innerProduct(layer.weights)
             },
-            backwardImpl = { layer: LinearRegressionLayer<Array<Double>, Double>, inputNeuron: Array<Double>, y: Double ->
+            backwardImpl = { layer: LinearRegressionLayer<Array<Double>, Double>, dataId, inputNeuron: Array<Double>, y: Double ->
                 val loss = (layer.nextLayer!! as LinearRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
                 layer.inputNeuron.forEachIndexed { xIndex, x ->
@@ -48,13 +49,13 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                 map.toJson()
             })
         val outputLayer = LinearRegressionOutputLayer<Double, Double>(
-            forwardImpl = { _, inputNeuron: Double, y: Double, training: Boolean ->
+            forwardImpl = { _, dataId, inputNeuron: Double, y: Double, training: Boolean ->
                 if (!training) {//test
                     logger.info("calculate y:%s, real y:%s", inputNeuron, y)
                 }
                 inputNeuron
             },
-            backwardImpl = { layer, inputNeuron: Double, y: Double ->
+            backwardImpl = { layer, dataId, inputNeuron: Double, y: Double ->
                 layer.loss = (inputNeuron - y)
                 layer.sumLoss += ordinaryLeastSquares(layer.loss)
             },

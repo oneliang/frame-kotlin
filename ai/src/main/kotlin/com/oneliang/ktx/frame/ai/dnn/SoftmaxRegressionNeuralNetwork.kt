@@ -22,10 +22,10 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
             correctProbability[type][type] = 1.0
         }
         @Suppress("UNCHECKED_CAST") val inputLayer = SoftmaxRegressionLayer<Array<Double>, Array<Double>>(3, typeCount,
-            forwardImpl = { layer, inputNeuron: Array<Double>, y: Double, _: Boolean ->
+            forwardImpl = { layer, dataId, inputNeuron: Array<Double>, y: Double, _: Boolean ->
                 softmax(inputNeuron, layer.weights)
             },
-            backwardImpl = { layer: SoftmaxRegressionLayer<Array<Double>, Array<Double>>, inputNeuron: Array<Double>, y: Double ->
+            backwardImpl = { layer: SoftmaxRegressionLayer<Array<Double>, Array<Double>>, dataId, inputNeuron: Array<Double>, y: Double ->
                 val loss = (layer.nextLayer!! as SoftmaxRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
                 inputNeuron.forEachIndexed { xIndex, x ->
@@ -58,13 +58,14 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                 map.toJson()
             })
         val outputLayer = SoftmaxRegressionOutputLayer<Array<Double>, Array<Double>>(typeCount,
-            forwardImpl = { _, inputNeuron: Array<Double>, y: Double, training: Boolean ->
+            forwardImpl = { _, dataId, inputNeuron: Array<Double>, y: Double, training: Boolean ->
                 if (!training) {//test
-                    logger.info("calculate y:%s, real y:%s", inputNeuron.toJson(), y)
+                    val correctYType = y.toInt()
+                    logger.info("calculate y:%s, real y:%s, calculate probability:%s", inputNeuron[correctYType], y, inputNeuron.toJson())
                 }
                 inputNeuron
             },
-            backwardImpl = { layer, inputNeuron: Array<Double>, y: Double ->
+            backwardImpl = { layer, dataId, inputNeuron: Array<Double>, y: Double ->
                 val correctYType = y.toInt()
                 singleIteration(layer.typeCount) { typeIndex ->
                     layer.loss[typeIndex] = inputNeuron[typeIndex] - correctProbability[correctYType][typeIndex]

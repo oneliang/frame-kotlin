@@ -24,21 +24,21 @@ abstract class Layer<IN : Any, OUT : Any> {
             }
         }
 
-    fun doForward(inputNeuron: IN, y: Double, training: Boolean) {
+    fun doForward(dataId: Long, inputNeuron: IN, y: Double, training: Boolean) {
         this.inputNeuron = inputNeuron
-        val outputNeuron = forwardImpl(inputNeuron, y, training)
+        val outputNeuron = forwardImpl(dataId, inputNeuron, y, training)
         val nextLayer = this.nextLayer
-        nextLayer?.doForward(outputNeuron, y, training)
+        nextLayer?.doForward(dataId, outputNeuron, y, training)
     }
 
-    protected abstract fun forwardImpl(inputNeuron: IN, y: Double, training: Boolean): OUT
+    protected abstract fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT
 
-    fun doBackward(y: Double) {
-        backwardImpl(this.inputNeuron, y)
-        this.previousLayer?.doBackward(y)
+    fun doBackward(dataId: Long, y: Double) {
+        backwardImpl(dataId, this.inputNeuron, y)
+        this.previousLayer?.doBackward(dataId, y)
     }
 
-    protected abstract fun backwardImpl(inputNeuron: IN, y: Double)
+    protected abstract fun backwardImpl(dataId: Long, inputNeuron: IN, y: Double)
 
     fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
         updateImpl(epoch, printPeriod, totalDataSize, learningRate)
