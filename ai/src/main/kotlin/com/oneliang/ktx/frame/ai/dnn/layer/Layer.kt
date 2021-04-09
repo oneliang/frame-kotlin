@@ -46,6 +46,14 @@ abstract class Layer<IN : Any, OUT : Any> {
 
     protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double)
 
+    fun doForwardRest(dataId: Long) {
+        forwardResetImpl(dataId)
+        val nextLayer = this.nextLayer
+        nextLayer?.doForwardRest(dataId)
+    }
+
+    protected abstract fun forwardResetImpl(dataId: Long)
+
     fun getLayerModelData(): String {
         return saveLayerModelDataImpl()
     }

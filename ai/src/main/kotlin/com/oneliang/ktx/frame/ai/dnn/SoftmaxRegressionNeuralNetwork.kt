@@ -6,8 +6,9 @@ import com.oneliang.ktx.frame.ai.dnn.layer.SoftmaxRegressionLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.SoftmaxRegressionOutputLayer
 import com.oneliang.ktx.frame.ai.loss.likelihood
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
-import com.oneliang.ktx.util.common.reset
+import com.oneliang.ktx.pojo.DoubleWrapper
 import com.oneliang.ktx.util.common.singleIteration
+import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
@@ -26,26 +27,44 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                 softmax(inputNeuron, layer.weights)
             },
             backwardImpl = { layer: SoftmaxRegressionLayer<Array<Double>, Array<Double>>, dataId, inputNeuron: Array<Double>, y: Double ->
-                val loss = (layer.nextLayer!! as SoftmaxRegressionOutputLayer<Array<Double>, Double>).loss
+                val nextLayerLoss = (layer.nextLayer!! as SoftmaxRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
-                inputNeuron.forEachIndexed { xIndex, x ->
-                    for (typeIndex in layer.loss[xIndex].indices) {
-                        layer.loss[xIndex][typeIndex] += ordinaryLeastSquaresDerived(x, loss[typeIndex])
+                layer.loss.operate("loss", create = {
+                    Array(layer.neuronCount) { xIndex ->
+                        val x = inputNeuron[xIndex]
+                        Array(layer.typeCount) { typeIndex ->
+                            ordinaryLeastSquaresDerived(x, nextLayerLoss[dataId]!![typeIndex])
+                        }
                     }
-                }
+                }, update = {
+                    Array(layer.neuronCount) { xIndex ->
+                        val x = inputNeuron[xIndex]
+                        Array(layer.typeCount) { typeIndex ->
+                            it[xIndex][typeIndex] + ordinaryLeastSquaresDerived(x, nextLayerLoss[dataId]!![typeIndex])
+                        }
+                    }
+                })
+
+//                inputNeuron.forEachIndexed { xIndex, x ->
+//                    for (typeIndex in layer.loss[xIndex].indices) {
+//                        layer.loss[xIndex][typeIndex] += ordinaryLeastSquaresDerived(x, nextLayerLoss[typeIndex])
+//                    }
+//                }
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 //update all weight, gradient descent
+                val loss = layer.loss["loss"] ?: emptyArray()
                 layer.weights.forEachIndexed { index, weight ->
                     for (position in weight.indices) {
-                        layer.weights[index][position] = weight[position] - (learningRate * layer.loss[index][position]) / totalDataSize
+                        layer.weights[index][position] = weight[position] - (learningRate * loss[index][position]) / totalDataSize
                     }
                 }
                 if (epoch % printPeriod == 0) {
                     logger.debug("epoch:%s, weight array:%s", epoch, layer.weights.toJson())
                 }
                 //reset after update
-                layer.loss.reset(0.0)
+//                layer.loss.reset(0.0)
+                layer.loss = AtomicMap()//reset after update per one time
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
                 val weightsData = map["weights"]?.jsonToObjectList(Array<Double>::class)?.toTypedArray()
@@ -66,21 +85,30 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                 inputNeuron
             },
             backwardImpl = { layer, dataId, inputNeuron: Array<Double>, y: Double ->
+                val loss = layer.loss.getOrPut(dataId) { Array(layer.typeCount) { 0.0 } }
                 val correctYType = y.toInt()
                 singleIteration(layer.typeCount) { typeIndex ->
-                    layer.loss[typeIndex] = inputNeuron[typeIndex] - correctProbability[correctYType][typeIndex]
+                    loss[typeIndex] = inputNeuron[typeIndex] - correctProbability[correctYType][typeIndex]
                 }
                 val calculateYProbability = inputNeuron[correctYType]
-                layer.sumLoss += likelihood(calculateYProbability)
+                layer.sumLoss.operate("sum", create = {
+                    DoubleWrapper(likelihood(calculateYProbability))
+                }, update = {
+                    DoubleWrapper(it.value + likelihood(calculateYProbability))
+                })
+            },
+            forwardResetImpl = { layer, dataId ->
+                layer.loss.remove(dataId)//remove per one data
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 if (epoch % printPeriod == 0) {
-                    val totalLoss = layer.sumLoss
+                    val totalLoss = layer.sumLoss["sum"]?.value ?: 0.0
                     logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
                 }
                 //reset after update
-                layer.loss.reset(0.0)
-                layer.sumLoss = 0.0
+//                layer.loss.reset(0.0)
+//                layer.sumLoss = 0.0
+                layer.sumLoss.remove("sum")//reset after update per one time
             })
         return listOf(
             inputLayer,

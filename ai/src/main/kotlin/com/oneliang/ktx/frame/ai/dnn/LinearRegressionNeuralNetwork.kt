@@ -5,7 +5,8 @@ import com.oneliang.ktx.frame.ai.dnn.layer.LinearRegressionLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.LinearRegressionOutputLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquares
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
-import com.oneliang.ktx.util.common.reset
+import com.oneliang.ktx.pojo.DoubleWrapper
+import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.jsonToArrayDouble
 import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.toJson
@@ -21,22 +22,36 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                 inputNeuron.innerProduct(layer.weights)
             },
             backwardImpl = { layer: LinearRegressionLayer<Array<Double>, Double>, dataId, inputNeuron: Array<Double>, y: Double ->
-                val loss = (layer.nextLayer!! as LinearRegressionOutputLayer<Array<Double>, Double>).loss
+                val nextLayerLoss = (layer.nextLayer!! as LinearRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
-                layer.inputNeuron.forEachIndexed { xIndex, x ->
-                    layer.loss[xIndex] += ordinaryLeastSquaresDerived(x, loss)//because next layer only one loss value
-                }
+                layer.loss.operate("loss", create = {
+                    Array(layer.neuronCount) { xIndex ->
+                        val x = inputNeuron[xIndex]
+                        ordinaryLeastSquaresDerived(x, nextLayerLoss[dataId]!!)
+                    }
+                }, update = {
+                    Array(layer.neuronCount) { xIndex ->
+                        val x = inputNeuron[xIndex]
+                        it[xIndex] + ordinaryLeastSquaresDerived(x, nextLayerLoss[dataId]!!)
+                    }
+                })
+//                layer.inputNeuron.forEachIndexed { xIndex, x ->
+//                    val loss = layer.loss.getOrPut(dataId) { Array(layer.neuronCount) { 0.0 } }
+//                    loss[xIndex] += ordinaryLeastSquaresDerived(x, nextLayerLoss[dataId]!!)//because next layer only one loss value
+//                }
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 //update all weight, gradient descent
+                val loss = layer.loss["loss"] ?: emptyArray()
                 layer.weights.forEachIndexed { index, weight ->
-                    layer.weights[index] = weight - (learningRate * layer.loss[index]) / totalDataSize
+                    layer.weights[index] = weight - (learningRate * loss[index]) / totalDataSize
                 }
                 if (epoch % printPeriod == 0) {
                     logger.debug("epoch:%s, weight array:%s", epoch, layer.weights.toJson())
                 }
                 //reset after update
-                layer.loss.reset(0.0)
+//                layer.loss.reset(0.0)
+                layer.loss = AtomicMap()//reset after update per one time
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
                 val weightsData = map["weights"]?.jsonToArrayDouble()
@@ -56,17 +71,25 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                 inputNeuron
             },
             backwardImpl = { layer, dataId, inputNeuron: Double, y: Double ->
-                layer.loss = (inputNeuron - y)
-                layer.sumLoss += ordinaryLeastSquares(layer.loss)
+                val loss = layer.loss.getOrPut(dataId) { inputNeuron - y }
+                layer.sumLoss.operate("sum", create = {
+                    DoubleWrapper(ordinaryLeastSquares(loss))
+                }, update = {
+                    DoubleWrapper(it.value + ordinaryLeastSquares(loss))
+                })
+            },
+            forwardResetImpl = { layer, dataId ->
+                layer.loss.remove(dataId)//remove per one data
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 if (epoch % printPeriod == 0) {
-                    val totalLoss = layer.sumLoss
+                    val totalLoss = layer.sumLoss["sum"]?.value ?: 0.0
                     logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
                 }
                 //reset after update
-                layer.loss = 0.0
-                layer.sumLoss = 0.0
+//                layer.loss = 0.0
+//                layer.sumLoss = 0.0
+                layer.sumLoss.remove("sum")//reset after update per one time
             })
         return listOf(
             inputLayer,

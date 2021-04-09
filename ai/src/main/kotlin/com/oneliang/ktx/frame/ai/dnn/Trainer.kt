@@ -31,22 +31,30 @@ class Trainer {
         for (epoch in 1..epochs) {
             var dataId = 0L
             var totalDataSize = 0L
-            while (true) {
-                val result = batching.fetch()
-                if (result.finished) {
-                    batching.reset()
-                    break
+            val jobList = mutableListOf<Job>()
+            this.coroutine.runBlocking {
+                while (true) {
+                    val result = batching.fetch()
+                    if (result.finished) {
+                        batching.reset()
+                        break
+                    }
+                    val inputDataList = result.dataList
+                    totalDataSize += inputDataList.size
+                    inputDataList.forEach {
+                        val currentDataId = ++dataId
+                        val (y, xArray) = it
+                        jobList += this.coroutine.launch {
+                            //forward include backward(backPropagation)
+                            forward(inputLayer, currentDataId, xArray, y, true)
+                            backward(outputLayer, currentDataId, y)
+                            forwardReset(inputLayer, currentDataId)
+                        }
+                    }
                 }
-                val inputDataList = result.dataList
-                totalDataSize += inputDataList.size
-                inputDataList.forEach {
-                    dataId++
-                    val (y, xArray) = it
-                    //forward include backward(backPropagation)
-                    forward(inputLayer, dataId, xArray, y, true)
-                    backward(outputLayer, dataId, y)
-                }
+                jobList.forEach { it.join() }
             }
+
             //update all weight, gradient descent
             update(layerList, epoch, printPeriod, totalDataSize, learningRate)
             if (epoch % printPeriod == 0) {
@@ -106,6 +114,11 @@ class Trainer {
     @Suppress("UNCHECKED_CAST")
     private fun backward(outputLayer: Layer<Any, Any>, dataId: Long, y: Double) {
         outputLayer.doBackward(dataId, y)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun forwardReset(inputLayer: Layer<Any, Any>, dataId: Long) {
+        inputLayer.doForwardRest(dataId)
     }
 
     private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
