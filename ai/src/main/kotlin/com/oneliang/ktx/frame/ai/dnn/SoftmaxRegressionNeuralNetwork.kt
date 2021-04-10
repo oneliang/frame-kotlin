@@ -17,6 +17,10 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
     private val logger = LoggerManager.getLogger((SoftmaxRegressionNeuralNetwork::class))
+    private const val LOSS_KEY = "loss"
+    private const val WEIGHTS_KEY = "weights"
+    private const val SUM_KEY = "sum"
+
     override fun getLayerList(): List<Layer<*, *>> {
         val typeCount = 4
         val correctProbability = Array(typeCount) { Array(typeCount) { 0.0 } }
@@ -30,7 +34,7 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
             backwardImpl = { layer: SoftmaxRegressionLayer<Array<Double>, Array<Double>>, dataId, inputNeuron: Array<Double>, y: Double ->
                 val nextLayerLoss = (layer.nextLayer!! as SoftmaxRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
-                layer.loss.operate("loss", create = {
+                layer.loss.operate(LOSS_KEY, create = {
                     Array(layer.neuronCount) { xIndex ->
                         val x = inputNeuron[xIndex]
                         Array(layer.typeCount) { typeIndex ->
@@ -54,7 +58,7 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 //update all weight, gradient descent
-                val loss = layer.loss["loss"] ?: emptyArray()
+                val loss = layer.loss[LOSS_KEY] ?: emptyArray()
                 layer.weights.forEachIndexed { index, weight ->
                     for (position in weight.indices) {
                         layer.weights[index][position] = weight[position] - (learningRate * loss[index][position]) / totalDataSize
@@ -68,13 +72,13 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                 layer.loss = AtomicMap()//reset after update per one time
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
-                val weightsData = map["weights"]?.jsonToObjectList(Array<Double>::class)?.toTypedArray()
+                val weightsData = map[WEIGHTS_KEY]?.jsonToObjectList(Array<Double>::class)?.toTypedArray()
                 if (weightsData != null) {
                     layer.weights = weightsData
                 }
             }, saveLayerModelDataImpl = { layer ->
                 val map = mutableMapOf<String, Array<Array<Double>>>()
-                map["weights"] = layer.weights
+                map[WEIGHTS_KEY] = layer.weights
                 map.toJson()
             })
         val outputLayer = SoftmaxRegressionOutputLayer<Array<Double>, Array<Double>>(typeCount,
@@ -92,7 +96,7 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                     loss[typeIndex] = inputNeuron[typeIndex] - correctProbability[correctYType][typeIndex]
                 }
                 val calculateYProbability = inputNeuron[correctYType]
-                layer.sumLoss.operate("sum", create = {
+                layer.sumLoss.operate(SUM_KEY, create = {
                     DoubleWrapper(likelihood(calculateYProbability))
                 }, update = {
                     DoubleWrapper(it.value + likelihood(calculateYProbability))
@@ -103,13 +107,13 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 if (epoch % printPeriod == 0) {
-                    val totalLoss = layer.sumLoss["sum"]?.value ?: 0.0
+                    val totalLoss = layer.sumLoss[SUM_KEY]?.value ?: 0.0
                     logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
                 }
                 //reset after update
 //                layer.loss.reset(0.0)
 //                layer.sumLoss = 0.0
-                layer.sumLoss.remove("sum")//reset after update per one time
+                layer.sumLoss.remove(SUM_KEY)//reset after update per one time
             })
         return listOf(
             inputLayer,

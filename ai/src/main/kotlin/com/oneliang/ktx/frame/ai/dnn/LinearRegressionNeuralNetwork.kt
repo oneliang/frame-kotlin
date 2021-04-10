@@ -15,6 +15,9 @@ import com.oneliang.ktx.util.math.matrix.innerProduct
 
 object LinearRegressionNeuralNetwork : NeuralNetwork {
     private val logger = LoggerManager.getLogger((LinearRegressionNeuralNetwork::class))
+    private const val LOSS_KEY = "loss"
+    private const val WEIGHTS_KEY = "weights"
+    private const val SUM_KEY = "sum"
 
     override fun getLayerList(): List<Layer<*, *>> {
         @Suppress("UNCHECKED_CAST") val inputLayer = LinearRegressionLayer<Array<Double>, Double>(2,
@@ -24,7 +27,7 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
             backwardImpl = { layer: LinearRegressionLayer<Array<Double>, Double>, dataId, inputNeuron: Array<Double>, y: Double ->
                 val nextLayerLoss = (layer.nextLayer!! as LinearRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
-                layer.loss.operate("loss", create = {
+                layer.loss.operate(LOSS_KEY, create = {
                     Array(layer.neuronCount) { xIndex ->
                         val x = inputNeuron[xIndex]
                         ordinaryLeastSquaresDerived(x, nextLayerLoss[dataId]!!)
@@ -42,7 +45,7 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 //update all weight, gradient descent
-                val loss = layer.loss["loss"] ?: emptyArray()
+                val loss = layer.loss[LOSS_KEY] ?: emptyArray()
                 layer.weights.forEachIndexed { index, weight ->
                     layer.weights[index] = weight - (learningRate * loss[index]) / totalDataSize
                 }
@@ -54,13 +57,13 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                 layer.loss = AtomicMap()//reset after update per one time
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
-                val weightsData = map["weights"]?.jsonToArrayDouble()
+                val weightsData = map[WEIGHTS_KEY]?.jsonToArrayDouble()
                 if (weightsData != null) {
                     layer.weights = weightsData
                 }
             }, saveLayerModelDataImpl = { layer ->
                 val map = mutableMapOf<String, Array<Double>>()
-                map["weights"] = layer.weights
+                map[WEIGHTS_KEY] = layer.weights
                 map.toJson()
             })
         val outputLayer = LinearRegressionOutputLayer<Double, Double>(
@@ -72,7 +75,7 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
             },
             backwardImpl = { layer, dataId, inputNeuron: Double, y: Double ->
                 val loss = layer.loss.getOrPut(dataId) { inputNeuron - y }
-                layer.sumLoss.operate("sum", create = {
+                layer.sumLoss.operate(SUM_KEY, create = {
                     DoubleWrapper(ordinaryLeastSquares(loss))
                 }, update = {
                     DoubleWrapper(it.value + ordinaryLeastSquares(loss))
@@ -83,13 +86,13 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 if (epoch % printPeriod == 0) {
-                    val totalLoss = layer.sumLoss["sum"]?.value ?: 0.0
+                    val totalLoss = layer.sumLoss[SUM_KEY]?.value ?: 0.0
                     logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
                 }
                 //reset after update
 //                layer.loss = 0.0
 //                layer.sumLoss = 0.0
-                layer.sumLoss.remove("sum")//reset after update per one time
+                layer.sumLoss.remove(SUM_KEY)//reset after update per one time
             })
         return listOf(
             inputLayer,
