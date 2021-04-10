@@ -1,8 +1,10 @@
 package com.oneliang.ktx.frame.ai.dnn.layer
 
+import java.util.concurrent.ConcurrentHashMap
+
 abstract class Layer<IN : Any, OUT : Any> {
 
-    open lateinit var inputNeuron: IN
+    open var inputNeuronMap = ConcurrentHashMap<Long, IN>()
 
     @Suppress("UNCHECKED_CAST")
     var nextLayer: Layer<Any, Any>? = null
@@ -24,8 +26,12 @@ abstract class Layer<IN : Any, OUT : Any> {
             }
         }
 
+    /**
+     * do forward
+     * invoke per input data
+     */
     fun doForward(dataId: Long, inputNeuron: IN, y: Double, training: Boolean) {
-        this.inputNeuron = inputNeuron
+        this.inputNeuronMap[dataId] = inputNeuron
         val outputNeuron = forwardImpl(dataId, inputNeuron, y, training)
         val nextLayer = this.nextLayer
         nextLayer?.doForward(dataId, outputNeuron, y, training)
@@ -33,26 +39,38 @@ abstract class Layer<IN : Any, OUT : Any> {
 
     protected abstract fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT
 
+    /**
+     * do backward
+     * invoke per input data
+     */
     fun doBackward(dataId: Long, y: Double) {
-        backwardImpl(dataId, this.inputNeuron, y)
+        backwardImpl(dataId, this.inputNeuronMap[dataId]!!, y)
         this.previousLayer?.doBackward(dataId, y)
     }
 
     protected abstract fun backwardImpl(dataId: Long, inputNeuron: IN, y: Double)
 
-    fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
-        updateImpl(epoch, printPeriod, totalDataSize, learningRate)
-    }
-
-    protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double)
-
+    /**
+     * do forward reset
+     * invoke per input data
+     */
     fun doForwardRest(dataId: Long) {
         forwardResetImpl(dataId)
+        this.inputNeuronMap.remove(dataId)
         val nextLayer = this.nextLayer
         nextLayer?.doForwardRest(dataId)
     }
 
     protected abstract fun forwardResetImpl(dataId: Long)
+
+    /**
+     * invoke one time
+     */
+    fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+        updateImpl(epoch, printPeriod, totalDataSize, learningRate)
+    }
+
+    protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double)
 
     fun getLayerModelData(): String {
         return saveLayerModelDataImpl()

@@ -13,6 +13,7 @@ import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
+import java.util.concurrent.CopyOnWriteArrayList
 
 object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
     private val logger = LoggerManager.getLogger((SoftmaxRegressionNeuralNetwork::class))

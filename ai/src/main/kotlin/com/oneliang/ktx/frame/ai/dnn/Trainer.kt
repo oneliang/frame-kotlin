@@ -24,7 +24,8 @@ class Trainer {
         learningRate: Double,
         epochs: Int,
         printPeriod: Int = 500,
-        modelFullFilename: String = Constants.String.BLANK
+        modelFullFilename: String = Constants.String.BLANK,
+        parallel: Boolean = false
     ) {
         val layerList = neuralNetwork.getLayerList()
         val (inputLayer, outputLayer, model) = getInputAndOutputLayer(layerList, modelFullFilename)
@@ -44,12 +45,20 @@ class Trainer {
                     inputDataList.forEach {
                         val currentDataId = ++dataId
                         val (y, xArray) = it
-                        jobList += this.coroutine.launch {
+                        if (parallel) {
+                            jobList += this.coroutine.launch {
+                                //forward include backward(backPropagation)
+                                forward(inputLayer, currentDataId, xArray, y, true)
+                                backward(outputLayer, currentDataId, y)
+                                forwardReset(inputLayer, currentDataId)
+                            }
+                        } else {
                             //forward include backward(backPropagation)
                             forward(inputLayer, currentDataId, xArray, y, true)
                             backward(outputLayer, currentDataId, y)
                             forwardReset(inputLayer, currentDataId)
                         }
+
                     }
                 }
                 jobList.forEach { it.join() }
