@@ -1,10 +1,10 @@
 package com.oneliang.ktx.frame.ai.base
 
-abstract class Batching(open val batchSize: Int) {
+abstract class Batching<OUT : Any>(open val batchSize: Int) {
 
     abstract fun reset()
 
-    abstract fun fetch(): Result
+    abstract fun fetch(): Result<OUT>
 
-    class Result(var finished: Boolean = false, var dataList: List<Pair<Double, Array<Double>>> = emptyList())
+    class Result<DATA : Any>(var finished: Boolean = false, var dataList: List<DATA> = emptyList())
 }

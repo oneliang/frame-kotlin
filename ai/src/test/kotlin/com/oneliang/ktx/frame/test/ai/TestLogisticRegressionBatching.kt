@@ -4,7 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
 import java.io.File
 
-class TestLogisticRegressionBatching(override val batchSize: Int) : Batching(batchSize) {
+class TestLogisticRegressionBatching(override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
 
     private var reader = File("/C:/Users/Administrator/Desktop/temp/logistic_regression.csv").bufferedReader()
 
@@ -19,7 +19,7 @@ class TestLogisticRegressionBatching(override val batchSize: Int) : Batching(bat
         return rowDataList[0].toDouble() to arrayOf(rowDataList[1].toDouble(), rowDataList[2].toDouble())
     }
 
-    override fun fetch(): Result {
+    override fun fetch(): Result<Pair<Double, Array<Double>>> {
         var currentLineCount = 0
         var line = reader.readLine() ?: null
         val dataList = mutableListOf<Pair<Double, Array<Double>>>()

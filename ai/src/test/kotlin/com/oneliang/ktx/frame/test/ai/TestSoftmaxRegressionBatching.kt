@@ -4,7 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
 import java.io.File
 
-class TestSoftmaxRegressionBatching(override val batchSize: Int) : Batching(batchSize) {
+class TestSoftmaxRegressionBatching(override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
 
     private val fullFilename = "/C:/Users/Administrator/Desktop/temp/softmax_regression.csv"
     private var reader = File(fullFilename).bufferedReader()
@@ -20,7 +20,7 @@ class TestSoftmaxRegressionBatching(override val batchSize: Int) : Batching(batc
         return rowDataList[0].toDouble() to arrayOf(rowDataList[1].toDouble(), rowDataList[2].toDouble(), 1.0)
     }
 
-    override fun fetch(): Result {
+    override fun fetch(): Result<Pair<Double, Array<Double>>> {
         var currentLineCount = 0
         var line = reader.readLine() ?: null
         val dataList = mutableListOf<Pair<Double, Array<Double>>>()

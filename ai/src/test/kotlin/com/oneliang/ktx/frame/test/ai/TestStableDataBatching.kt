@@ -2,7 +2,7 @@ package com.oneliang.ktx.frame.test.ai
 
 import com.oneliang.ktx.frame.ai.base.Batching
 
-class TestStableDataBatching(override val batchSize: Int) : Batching(batchSize) {
+class TestStableDataBatching(override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
 
     private val dataList: List<Pair<Double, Array<Double>>>
     private var fetchTimes = 0
@@ -20,7 +20,7 @@ class TestStableDataBatching(override val batchSize: Int) : Batching(batchSize) 
         this.fetchTimes = 0
     }
 
-    override fun fetch(): Result {
+    override fun fetch(): Result<Pair<Double, Array<Double>>> {
         return if (this.fetchTimes == 0) {
             this.fetchTimes++
             Result(false, dataList)

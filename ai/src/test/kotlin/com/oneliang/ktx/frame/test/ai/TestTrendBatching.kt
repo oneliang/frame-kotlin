@@ -4,7 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
 import java.io.File
 
-class TestTrendBatching(override val batchSize: Int) : Batching(batchSize) {
+class TestTrendBatching(override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
 
     private val fullFilename = "/C:/Users/Administrator/Desktop/input.csv"
     private var reader = File(this.fullFilename).bufferedReader()
@@ -41,7 +41,7 @@ class TestTrendBatching(override val batchSize: Int) : Batching(batchSize) {
         return result to dataArray
     }
 
-    override fun fetch(): Result {
+    override fun fetch(): Result<Pair<Double, Array<Double>>> {
         var currentLineCount = 0
         var line = this.reader.readLine() ?: null
         val dataList = mutableListOf<Pair<Double, Array<Double>>>()

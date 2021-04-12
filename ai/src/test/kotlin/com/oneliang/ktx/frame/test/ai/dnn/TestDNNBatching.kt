@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.ai.base.Batching
 import com.oneliang.ktx.util.common.toArray
 import java.io.File
 
-class TestDNNBatching(private val fullFilename: String, override val batchSize: Int) : Batching(batchSize) {
+class TestDNNBatching(private val fullFilename: String, override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
 
     private var reader = File(fullFilename).bufferedReader()
 
@@ -20,7 +20,7 @@ class TestDNNBatching(private val fullFilename: String, override val batchSize: 
         return rowDataList[0].toDouble() to rowDataList.subList(1, rowDataList.size).toArray { it.toDouble() }
     }
 
-    override fun fetch(): Result {
+    override fun fetch(): Result<Pair<Double, Array<Double>>> {
         var currentLineCount = 0
         var line = reader.readLine() ?: null
         val dataList = mutableListOf<Pair<Double, Array<Double>>>()
