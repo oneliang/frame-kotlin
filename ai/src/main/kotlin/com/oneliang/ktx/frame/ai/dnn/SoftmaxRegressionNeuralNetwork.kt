@@ -13,11 +13,10 @@ import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
-import java.util.concurrent.CopyOnWriteArrayList
 
 object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
     private val logger = LoggerManager.getLogger((SoftmaxRegressionNeuralNetwork::class))
-    private const val LOSS_KEY = "loss"
+    private const val DERIVED_WEIGHTS_KEY = "loss"
     private const val WEIGHTS_KEY = "weights"
     private const val SUM_KEY = "sum"
 
@@ -34,7 +33,7 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
             backwardImpl = { layer: SoftmaxRegressionLayer<Array<Double>, Array<Double>>, dataId, inputNeuron: Array<Double>, y: Double ->
                 val nextLayerLoss = (layer.nextLayer!! as SoftmaxRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
-                layer.loss.operate(LOSS_KEY, create = {
+                layer.derivedWeights.operate(DERIVED_WEIGHTS_KEY, create = {
                     Array(layer.neuronCount) { xIndex ->
                         val x = inputNeuron[xIndex]
                         Array(layer.typeCount) { typeIndex ->
@@ -58,10 +57,10 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 //update all weight, gradient descent
-                val loss = layer.loss[LOSS_KEY] ?: emptyArray()
+                val derivedWeights = layer.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
                 layer.weights.forEachIndexed { index, weight ->
                     for (position in weight.indices) {
-                        layer.weights[index][position] = weight[position] - (learningRate * loss[index][position]) / totalDataSize
+                        layer.weights[index][position] = weight[position] - (learningRate * derivedWeights[index][position]) / totalDataSize
                     }
                 }
                 if (epoch % printPeriod == 0) {
@@ -69,7 +68,7 @@ object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
                 }
                 //reset after update
 //                layer.loss.reset(0.0)
-                layer.loss = AtomicMap()//reset after update per one time
+                layer.derivedWeights = AtomicMap()//reset after update per one time
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
                 val weightsData = map[WEIGHTS_KEY]?.jsonToObjectList(Array<Double>::class)?.toTypedArray()

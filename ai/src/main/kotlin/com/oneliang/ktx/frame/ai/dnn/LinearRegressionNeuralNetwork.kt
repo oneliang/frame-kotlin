@@ -15,7 +15,7 @@ import com.oneliang.ktx.util.math.matrix.innerProduct
 
 object LinearRegressionNeuralNetwork : NeuralNetwork {
     private val logger = LoggerManager.getLogger((LinearRegressionNeuralNetwork::class))
-    private const val LOSS_KEY = "loss"
+    private const val DERIVED_WEIGHTS_KEY = "loss"
     private const val WEIGHTS_KEY = "weights"
     private const val SUM_KEY = "sum"
 
@@ -27,7 +27,7 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
             backwardImpl = { layer: LinearRegressionLayer<Array<Double>, Double>, dataId, inputNeuron: Array<Double>, y: Double ->
                 val nextLayerLoss = (layer.nextLayer!! as LinearRegressionOutputLayer<Array<Double>, Double>).loss
                 //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
-                layer.loss.operate(LOSS_KEY, create = {
+                layer.derivedWeights.operate(DERIVED_WEIGHTS_KEY, create = {
                     Array(layer.neuronCount) { xIndex ->
                         val x = inputNeuron[xIndex]
                         ordinaryLeastSquaresDerived(x, nextLayerLoss[dataId]!!)
@@ -45,16 +45,16 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
             },
             updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
                 //update all weight, gradient descent
-                val loss = layer.loss[LOSS_KEY] ?: emptyArray()
+                val derivedWeights = layer.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
                 layer.weights.forEachIndexed { index, weight ->
-                    layer.weights[index] = weight - (learningRate * loss[index]) / totalDataSize
+                    layer.weights[index] = weight - (learningRate * derivedWeights[index]) / totalDataSize
                 }
                 if (epoch % printPeriod == 0) {
                     logger.debug("epoch:%s, weight array:%s", epoch, layer.weights.toJson())
                 }
                 //reset after update
 //                layer.loss.reset(0.0)
-                layer.loss = AtomicMap()//reset after update per one time
+                layer.derivedWeights = AtomicMap()//reset after update per one time
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
                 val weightsData = map[WEIGHTS_KEY]?.jsonToArrayDouble()

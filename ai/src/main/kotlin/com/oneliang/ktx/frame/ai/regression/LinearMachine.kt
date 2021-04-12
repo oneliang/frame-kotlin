@@ -11,7 +11,7 @@ object LinearMachine {
     private val logger = LoggerManager.getLogger(LinearMachine::class)
 
     fun study(
-        batching: Batching,
+        batching: Batching<Pair<Double, Array<Double>>>,
         weightArray: Array<Array<Double>>,
         learningRate: Double,
         times: Int,
@@ -64,7 +64,7 @@ object LinearMachine {
     }
 
     fun test(
-        batching: Batching, weightArray: Array<Array<Double>>,
+        batching: Batching<Pair<Double, Array<Double>>>, weightArray: Array<Array<Double>>,
         activationFunction: (xArray: Array<Double>, newWeightArray: Array<Array<Double>>) -> Array<Double> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
         loggerMessageFunction: (calculateY: Array<Double>, y: Double) -> String = { calculateY, y -> "calculate y:%s, real y:%s".format(calculateY.toJson(), y) }
     ) {

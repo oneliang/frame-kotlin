@@ -19,7 +19,7 @@ class Trainer {
     private val coroutine = Coroutine()
 
     fun train(
-        batching: Batching,
+        batching: Batching<Pair<Double, Array<Double>>>,
         neuralNetwork: NeuralNetwork,
         learningRate: Double,
         epochs: Int,
@@ -154,7 +154,7 @@ class Trainer {
     }
 
     fun test(
-        batching: Batching,
+        batching: Batching<Pair<Double, Array<Double>>>,
         neuralNetwork: NeuralNetwork,
         modelFullFilename: String = Constants.String.BLANK,
     ) {

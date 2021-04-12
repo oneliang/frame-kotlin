@@ -16,7 +16,7 @@ class SoftmaxRegressionLayer<IN : Any, OUT : Any>(
 
     constructor() : this(0, 0)
 
-    var loss = AtomicMap<String, Array<Array<Double>>>()//: Array<Array<Double>> = Array(neuronCount) { Array(this.typeCount) { 0.0 } }
+    var derivedWeights = AtomicMap<String, Array<Array<Double>>>()//: Array<Array<Double>> = Array(neuronCount) { Array(this.typeCount) { 0.0 } }
     var weights: Array<Array<Double>> = Array(neuronCount) { Array(this.typeCount) { 0.0 } }
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {

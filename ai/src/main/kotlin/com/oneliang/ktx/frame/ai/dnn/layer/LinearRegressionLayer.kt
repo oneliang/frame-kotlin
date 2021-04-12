@@ -15,7 +15,7 @@ class LinearRegressionLayer<IN : Any, OUT : Any>(
     private val saveLayerModelDataImpl: ((layer: LinearRegressionLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
 
-    var loss = AtomicMap<String, Array<Double>>()//Array(this.neuronCount) { 0.0 }
+    var derivedWeights = AtomicMap<String, Array<Double>>()//Array(this.neuronCount) { 0.0 }
     var weights: Array<Double> = Array(this.neuronCount) { 0.0 }
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
