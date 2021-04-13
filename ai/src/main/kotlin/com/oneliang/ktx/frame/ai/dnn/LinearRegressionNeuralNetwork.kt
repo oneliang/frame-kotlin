@@ -15,7 +15,7 @@ import com.oneliang.ktx.util.math.matrix.innerProduct
 
 object LinearRegressionNeuralNetwork : NeuralNetwork {
     private val logger = LoggerManager.getLogger((LinearRegressionNeuralNetwork::class))
-    private const val DERIVED_WEIGHTS_KEY = "loss"
+    private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
     private const val WEIGHTS_KEY = "weights"
     private const val SUM_KEY = "sum"
 

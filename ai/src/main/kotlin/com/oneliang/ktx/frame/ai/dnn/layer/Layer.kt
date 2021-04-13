@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 abstract class Layer<IN : Any, OUT : Any> {
 
     open var inputNeuronMap = ConcurrentHashMap<Long, IN>()
+    open var outputNeuronMap = ConcurrentHashMap<Long, OUT>()
 
     @Suppress("UNCHECKED_CAST")
     var nextLayer: Layer<Any, Any>? = null
@@ -33,6 +34,7 @@ abstract class Layer<IN : Any, OUT : Any> {
     fun doForward(dataId: Long, inputNeuron: IN, y: Double, training: Boolean) {
         this.inputNeuronMap[dataId] = inputNeuron
         val outputNeuron = forwardImpl(dataId, inputNeuron, y, training)
+        this.outputNeuronMap[dataId] = outputNeuron
         val nextLayer = this.nextLayer
         nextLayer?.doForward(dataId, outputNeuron, y, training)
     }
@@ -57,6 +59,7 @@ abstract class Layer<IN : Any, OUT : Any> {
     fun doForwardRest(dataId: Long) {
         forwardResetImpl(dataId)
         this.inputNeuronMap.remove(dataId)
+        this.outputNeuronMap.remove(dataId)
         val nextLayer = this.nextLayer
         nextLayer?.doForwardRest(dataId)
     }

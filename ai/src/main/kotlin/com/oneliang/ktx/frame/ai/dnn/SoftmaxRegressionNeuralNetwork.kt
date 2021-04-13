@@ -16,7 +16,7 @@ import com.oneliang.ktx.util.logging.LoggerManager
 
 object SoftmaxRegressionNeuralNetwork : NeuralNetwork {
     private val logger = LoggerManager.getLogger((SoftmaxRegressionNeuralNetwork::class))
-    private const val DERIVED_WEIGHTS_KEY = "loss"
+    private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
     private const val WEIGHTS_KEY = "weights"
     private const val SUM_KEY = "sum"
 
