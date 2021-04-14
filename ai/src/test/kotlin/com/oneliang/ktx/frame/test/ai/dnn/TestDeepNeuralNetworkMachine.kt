@@ -12,6 +12,7 @@ import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import kotlinx.coroutines.Job
+import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
 object TestDeepNeuralNetworkMachine {
@@ -49,11 +50,11 @@ object TestDeepNeuralNetworkMachine {
     }
 
     fun testDeepNeuralNetwork() {
-        val learningRate = 0.01
+        val learningRate = 0.0001
         val times = 1000
         val batchSize = 5
-        val trainFullFilename = "/C:/Users/Administrator/Desktop/temp/dnn.txt"
-        val testFullFilename = "/C:/Users/Administrator/Desktop/temp/dnn.txt"
+        val trainFullFilename = File("ai/src/test/resources/dnn.txt").absolutePath
+        val testFullFilename = File("ai/src/test/resources/dnn.txt").absolutePath
         val modelFullFilename = "/D:/dnn_model.txt"
         val rnnBatching = TestDNNBatching(trainFullFilename, batchSize)
         val neuralNetwork = DeepNeuralNetwork
