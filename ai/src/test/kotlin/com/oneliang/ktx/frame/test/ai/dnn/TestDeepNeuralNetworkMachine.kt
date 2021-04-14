@@ -49,8 +49,8 @@ object TestDeepNeuralNetworkMachine {
     }
 
     fun testDeepNeuralNetwork() {
-        val learningRate = 0.0001
-        val times = 1
+        val learningRate = 0.01
+        val times = 1000
         val batchSize = 5
         val trainFullFilename = "/C:/Users/Administrator/Desktop/temp/dnn.txt"
         val testFullFilename = "/C:/Users/Administrator/Desktop/temp/dnn.txt"
@@ -58,10 +58,10 @@ object TestDeepNeuralNetworkMachine {
         val rnnBatching = TestDNNBatching(trainFullFilename, batchSize)
         val neuralNetwork = DeepNeuralNetwork
         val trainer = Trainer()
-        trainer.train(rnnBatching, neuralNetwork, learningRate, times, 1, modelFullFilename)
+        trainer.train(rnnBatching, neuralNetwork, learningRate, times, 100, modelFullFilename)
         rnnBatching.reset()
-//        val cnnTestBatching = TestDNNBatching(testFullFilename, batchSize)
-//        trainer.test(cnnTestBatching, neuralNetwork, modelFullFilename)
+        val cnnTestBatching = TestDNNBatching(testFullFilename, batchSize)
+        trainer.test(cnnTestBatching, neuralNetwork, modelFullFilename)
     }
 }
 

@@ -54,7 +54,7 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
                 }
                 //reset after update
 //                layer.loss.reset(0.0)
-                layer.derivedWeights = AtomicMap()//reset after update per one time
+                layer.derivedWeights.clear()//reset after update per one time
             }, initializeLayerModelDataImpl = { layer, data ->
                 val map = data.jsonToMap()
                 val weightsData = map[WEIGHTS_KEY]?.jsonToArrayDouble()
