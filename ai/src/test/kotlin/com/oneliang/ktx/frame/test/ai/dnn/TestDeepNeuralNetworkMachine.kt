@@ -51,7 +51,7 @@ object TestDeepNeuralNetworkMachine {
 
     fun testDeepNeuralNetwork() {
         val learningRate = 0.0001
-        val times = 1000
+        val times = 3000
         val batchSize = 5
         val trainFullFilename = File("ai/src/test/resources/dnn.txt").absolutePath
         val testFullFilename = File("ai/src/test/resources/dnn.txt").absolutePath

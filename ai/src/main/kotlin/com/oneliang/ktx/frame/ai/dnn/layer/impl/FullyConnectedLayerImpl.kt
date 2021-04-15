@@ -1,13 +1,9 @@
 package com.oneliang.ktx.frame.ai.dnn.layer.impl
 
-import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.ai.cnn.printToMatrix
-import com.oneliang.ktx.frame.ai.dnn.LinearRegressionNeuralNetwork
 import com.oneliang.ktx.frame.ai.dnn.layer.FullyConnectedLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.OutputLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
-import com.oneliang.ktx.util.json.jsonToArrayDouble
 import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
@@ -17,13 +13,13 @@ import java.util.concurrent.ConcurrentHashMap
 
 class FullyConnectedLayerImpl(
     neuronCount: Int,
+    private val supportBias: Boolean = false,
 ) : FullyConnectedLayer<Array<Double>, Array<Double>>(neuronCount) {
 
     companion object {
         private val logger = LoggerManager.getLogger(FullyConnectedLayerImpl::class)
         private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
         private const val WEIGHTS_KEY = "weights"
-        private const val SUM_KEY = "sum"
     }
 
     //coroutine concurrent, use for all data in layer
@@ -34,33 +30,42 @@ class FullyConnectedLayerImpl(
 
     //use for layer, public
     var weights: Array<Array<Double>> = emptyArray()
+    private var bias: Double = 1.0
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double, training: Boolean): Array<Double> {
+        //add bias when support bias
+        val newInputNeuron = if (this.supportBias) inputNeuron + this.bias else inputNeuron
         //initialize the weights in current layer
         if (this.weights.isEmpty()) {
-            this.weights = Array(inputNeuron.size) { Array(this.neuronCount) { 0.1 } }
+            this.weights = Array(newInputNeuron.size) { Array(this.neuronCount) { 0.1 } }
         }
-        val out = inputNeuron.multiply(this.weights)
+        val out = newInputNeuron.multiply(this.weights)
 //        println("-----forward-----" + this.inputNeuronMap[dataId]?.toJson() + ", weights:" + this.weights.toJson() + ", out:" + out.toJson())
 //        out.printToMatrix(neuronCount)
         return out
     }
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {
+        //add bias when support bias
+        val newInputNeuron = if (this.supportBias) inputNeuron + this.bias else inputNeuron
         //out put loss
         val nextLayerLoss = when (val nextLayer = this.nextLayer ?: error("next layer is null, need FullyConnectedLayer or OutputLayer")) {
             is OutputLayer -> {
+//                println("-----output-----")
                 val outputLayerImpl = nextLayer as OutputLayerImpl
                 arrayOf(outputLayerImpl.loss[dataId]!!)
             }
             is FullyConnectedLayer -> {
+//                println("-----fully connected-----")
                 val fullyConnectedLayerImpl = nextLayer as FullyConnectedLayerImpl
-                fullyConnectedLayerImpl.inputNeuronLoss[dataId]!!//next layer input neuron loss = this layer output neuron loss
+                val outputNeuronLoss = fullyConnectedLayerImpl.inputNeuronLoss[dataId]!!//next layer input neuron loss = this layer output neuron loss
+                if (this.supportBias) outputNeuronLoss.copyOfRange(0, outputNeuronLoss.size - 1) else outputNeuronLoss//when support bias, delete the bias loss, last input is bias
             }
             else -> {
                 error("not support $nextLayer yet, only support FullyConnectedLayer and OutputLayer")
             }
         }
+//        println(this.weights.toJson() + ", next layer loss:" + nextLayerLoss.toJson())
         //update current layer input neuron loss
         val inputNeuronLoss = this.weights.multiply(nextLayerLoss)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
 //        inputNeuronLoss.printToMatrix()
@@ -71,16 +76,16 @@ class FullyConnectedLayerImpl(
 
         //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
         this.derivedWeights.operate(DERIVED_WEIGHTS_KEY, create = {
-            Array(inputNeuron.size) { xIndex ->
-                val x = inputNeuron[xIndex]
+            Array(newInputNeuron.size) { xIndex ->
+                val x = newInputNeuron[xIndex]
                 Array(this.neuronCount) { outputNeuronIndex ->
 //                    println("x:$x, derived:" + ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex][0]))
                     ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex][0])
                 }
             }
         }, update = { oldDerivedWeights ->
-            Array(inputNeuron.size) { xIndex ->
-                val x = inputNeuron[xIndex]
+            Array(newInputNeuron.size) { xIndex ->
+                val x = newInputNeuron[xIndex]
                 Array(this.neuronCount) { outputNeuronIndex ->
                     oldDerivedWeights[xIndex][outputNeuronIndex] + ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex][0])
                 }
