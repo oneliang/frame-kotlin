@@ -4,10 +4,8 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.cnn.layer.LocalResponseNormalizationLayer
 
 open class LocalResponseNormalizationLayerImpl(
-    mapDepth: Int,
-    inX: Int,
-    inY: Int
-) : LocalResponseNormalizationLayer<Array<Array<Array<Double>>>, Array<Array<Array<Double>>>>(mapDepth, inX, inY) {
+    mapDepth: Int
+) : LocalResponseNormalizationLayer<Array<Array<Array<Double>>>, Array<Array<Array<Double>>>>(mapDepth) {
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Double>>>, y: Double, training: Boolean): Array<Array<Array<Double>>> {
         return emptyArray()

@@ -9,8 +9,8 @@ open class ConvolutionLayer<IN : Any, OUT : Any>(
     val mapDepth: Int,//32
     val inX: Int,
     val inY: Int,
-    val x: Int,
-    val y: Int,
+    val filterX: Int,
+    val filterY: Int,
     val padding: Int = 0,
     val stride: Int = 1,
     private val forwardImpl: ((layer: ConvolutionLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
@@ -21,10 +21,10 @@ open class ConvolutionLayer<IN : Any, OUT : Any>(
     private val saveLayerModelDataImpl: ((layer: ConvolutionLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
 
-    var filters = Array(this.previousLayerMapDepth) { Array(this.mapDepth) { Array(this.y) { Array(this.x) { 0.0 } } } }
+    var filters = Array(this.previousLayerMapDepth) { Array(this.mapDepth) { Array(this.filterY) { Array(this.filterX) { 0.0 } } } }
     var biases = Array(this.mapDepth) { 0.0 }
-    val outX = calculateOutSize(inX, padding, x, stride)
-    val outY = calculateOutSize(inY, padding, y, stride)
+    val outX = calculateOutSize(inX, padding, filterX, stride)
+    val outY = calculateOutSize(inY, padding, filterY, stride)
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()

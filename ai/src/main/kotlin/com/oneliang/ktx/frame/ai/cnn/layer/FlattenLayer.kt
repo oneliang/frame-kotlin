@@ -1,22 +1,18 @@
 package com.oneliang.ktx.frame.ai.cnn.layer
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.ai.cnn.calculateOutSize
 import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 
-open class AveragePoolingLayer<IN : Any, OUT : Any>(
-    val inX: Int,
-    val inY: Int,
-    val scale: Int,
-    private val forwardImpl: ((layer: AveragePoolingLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
-    private val backwardImpl: ((layer: AveragePoolingLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
-    private val forwardResetImpl: ((layer: AveragePoolingLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
-    private val updateImpl: ((layer: AveragePoolingLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
-    private val initializeLayerModelDataImpl: ((layer: AveragePoolingLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
-    private val saveLayerModelDataImpl: ((layer: AveragePoolingLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
+open class FlattenLayer<IN : Any, OUT : Any>(
+    val mapDepth: Int,//32
+    private val forwardImpl: ((layer: FlattenLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
+    private val backwardImpl: ((layer: FlattenLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
+    private val forwardResetImpl: ((layer: FlattenLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
+    private val updateImpl: ((layer: FlattenLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
+    private val initializeLayerModelDataImpl: ((layer: FlattenLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
+    private val saveLayerModelDataImpl: ((layer: FlattenLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
-
-    val outX = this.inX / this.scale
-    val outY = this.inY / this.scale
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()

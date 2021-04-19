@@ -5,9 +5,6 @@ import com.oneliang.ktx.frame.ai.cnn.calculateOutSize
 import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 
 open class RectifiedLinearUnitsLayer<IN : Any, OUT : Any>(
-    val mapDepth: Int,//32
-    val inX: Int,
-    val inY: Int,
     private val forwardImpl: ((layer: RectifiedLinearUnitsLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: RectifiedLinearUnitsLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
     private val forwardResetImpl: ((layer: RectifiedLinearUnitsLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
@@ -15,9 +12,6 @@ open class RectifiedLinearUnitsLayer<IN : Any, OUT : Any>(
     private val initializeLayerModelDataImpl: ((layer: RectifiedLinearUnitsLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
     private val saveLayerModelDataImpl: ((layer: RectifiedLinearUnitsLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
-
-    val outX = this.inX
-    val outY = this.inY
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()

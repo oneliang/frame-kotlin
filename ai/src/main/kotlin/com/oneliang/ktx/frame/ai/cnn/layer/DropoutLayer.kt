@@ -5,8 +5,6 @@ import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 
 open class DropoutLayer<IN : Any, OUT : Any>(
     val mapDepth: Int = 1,
-    val inX: Int,
-    val inY: Int,
     private val forwardImpl: ((layer: DropoutLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: DropoutLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
     private val forwardResetImpl: ((layer: DropoutLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
@@ -15,8 +13,8 @@ open class DropoutLayer<IN : Any, OUT : Any>(
     private val saveLayerModelDataImpl: ((layer: DropoutLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
 
-    val outX = this.inX
-    val outY = this.inY
+    val outX = 1
+    val outY = 1
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()

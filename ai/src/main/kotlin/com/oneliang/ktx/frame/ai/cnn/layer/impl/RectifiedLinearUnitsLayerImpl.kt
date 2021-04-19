@@ -1,16 +1,23 @@
 package com.oneliang.ktx.frame.ai.cnn.layer.impl
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.ai.activation.rectifiedLinearUnits
 import com.oneliang.ktx.frame.ai.cnn.layer.RectifiedLinearUnitsLayer
-import com.oneliang.ktx.frame.ai.dnn.layer.Layer
+import com.oneliang.ktx.util.common.doubleIteration
+import com.oneliang.ktx.util.common.singleIteration
 
-class RectifiedLinearUnitsLayerImpl(
-    mapDepth: Int,//32
-    inX: Int,
-    inY: Int
-) : RectifiedLinearUnitsLayer<Array<Array<Array<Double>>>, Array<Array<Array<Double>>>>(mapDepth, inX, inY) {
+class RectifiedLinearUnitsLayerImpl : RectifiedLinearUnitsLayer<Array<Array<Array<Double>>>, Array<Array<Array<Double>>>>() {
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Double>>>, y: Double, training: Boolean): Array<Array<Array<Double>>> {
+        if (inputNeuron.isEmpty() || inputNeuron[0].isEmpty() || inputNeuron[0][0].isEmpty()) {
+            error("input neuron error, data size:[%s][%s][%s]".format(inputNeuron.size, inputNeuron[0].size, inputNeuron[0][0].size))
+        }
+        val outputNeuron = Array(inputNeuron.size) { Array(inputNeuron[0].size) { Array(inputNeuron[0][0].size) { 0.0 } } }
+        singleIteration(inputNeuron.size) { mapDepth ->
+            doubleIteration(inputNeuron[0].size, inputNeuron[0][0].size) { row, column ->
+                outputNeuron[mapDepth][row][column] = rectifiedLinearUnits(inputNeuron[mapDepth][row][column])
+            }
+        }
         return inputNeuron
     }
 

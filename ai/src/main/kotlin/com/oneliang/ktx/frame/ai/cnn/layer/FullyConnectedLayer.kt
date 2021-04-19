@@ -14,9 +14,6 @@ open class FullyConnectedLayer<IN : Any, OUT : Any>(
     private val saveLayerModelDataImpl: ((layer: FullyConnectedLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
 
-    val outX = 1
-    val outY = 1
-
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()
     }
