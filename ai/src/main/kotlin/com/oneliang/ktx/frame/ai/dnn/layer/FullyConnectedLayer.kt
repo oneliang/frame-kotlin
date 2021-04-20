@@ -1,9 +1,6 @@
 package com.oneliang.ktx.frame.ai.dnn.layer
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.pojo.DoubleWrapper
-import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
-import java.util.concurrent.ConcurrentHashMap
 
 open class FullyConnectedLayer<IN : Any, OUT : Any, LOSS : Any>(
     val neuronCount: Int,
