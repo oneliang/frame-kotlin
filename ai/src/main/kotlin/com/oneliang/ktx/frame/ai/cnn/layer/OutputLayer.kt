@@ -7,9 +7,7 @@ import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import java.util.concurrent.ConcurrentHashMap
 
 open class OutputLayer<IN : Any, OUT : Any>(
-    val mapDepth: Int = 1,
-    val x: Int,
-    val y: Int,
+    val typeCount: Int,
     private val forwardImpl: ((layer: OutputLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: OutputLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
     private val forwardResetImpl: ((layer: OutputLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
@@ -18,8 +16,8 @@ open class OutputLayer<IN : Any, OUT : Any>(
     private val saveLayerModelDataImpl: ((layer: OutputLayer<IN, OUT>) -> String) = { Constants.String.BLANK },
 ) : Layer<IN, OUT>() {
 
-    var loss = ConcurrentHashMap<Long, Double>()
-    var sumLoss = AtomicMap<String, DoubleWrapper>()
+    var loss = ConcurrentHashMap<Long, Array<Double>>()//: Array<Double> = Array(this.typeCount) { 0.0 }
+    var sumLoss = AtomicMap<String, DoubleWrapper>()//: Double = 0.0
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()

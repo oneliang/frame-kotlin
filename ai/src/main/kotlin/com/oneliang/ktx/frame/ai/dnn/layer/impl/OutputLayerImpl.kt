@@ -1,24 +1,21 @@
 package com.oneliang.ktx.frame.ai.dnn.layer.impl
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.ai.cnn.printToMatrix
-import com.oneliang.ktx.frame.ai.dnn.LinearRegressionNeuralNetwork
 import com.oneliang.ktx.frame.ai.dnn.layer.OutputLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquares
 import com.oneliang.ktx.pojo.DoubleWrapper
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
-import java.util.concurrent.ConcurrentHashMap
 
-class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Double>>(neuronCount) {
+/**
+ * this output layer, input neuron equal output neuron, so loss named inputNeuronLoss
+ */
+class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Double>, Array<Double>>(neuronCount) {
     companion object {
         private val logger = LoggerManager.getLogger(OutputLayerImpl::class)
         private const val SUM_KEY = "sum"
     }
-
-    //coroutine concurrent, use for input data
-    var loss = ConcurrentHashMap<Long, Array<Double>>()
 
     //coroutine concurrent, use for all data in layer
     var sumLoss = AtomicMap<String, DoubleWrapper>()
@@ -32,7 +29,7 @@ class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Doubl
     }
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {//get 0 for test, only out put one
-        val loss = this.loss.getOrPut(dataId) { arrayOf(inputNeuron[0] - y) }!!
+        val loss = this.inputNeuronLoss.getOrPut(dataId) { arrayOf(inputNeuron[0] - y) }!!
         this.sumLoss.operate(SUM_KEY, create = {
             DoubleWrapper(loss.sumByDouble {
                 ordinaryLeastSquares(it)
@@ -45,7 +42,7 @@ class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Doubl
     }
 
     override fun forwardResetImpl(dataId: Long) {
-        this.loss.remove(dataId)//remove per one data
+        this.inputNeuronLoss.remove(dataId)//remove per one data
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {

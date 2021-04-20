@@ -23,8 +23,8 @@ object ConvolutionNeuralNetwork : NeuralNetwork {
 //        val localResponseNormalizationLayer = LocalResponseNormalizationLayerImpl(fullyConnectedLayer1.mapDepth)
 //        val dropoutLayer = DropoutLayerImpl(localResponseNormalizationLayer.mapDepth)
         val fullyConnectedLayer2 = FullyConnectedLayerImpl(10)//10*1*1
-        val softmaxLayer = SoftmaxLayerImpl()
-        val outputLayer = OutputLayerImpl(10, 1, 1)
+        val softmaxLayer = SoftmaxLayerImpl(fullyConnectedLayer2.mapDepth, 10)
+        val outputLayer = OutputLayerImpl(softmaxLayer.typeCount)
         return listOf(
             inputLayer,
             convolutionLayer1,

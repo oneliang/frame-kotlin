@@ -9,12 +9,11 @@ import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.math.matrix.multiply
-import java.util.concurrent.ConcurrentHashMap
 
 class FullyConnectedLayerImpl(
     neuronCount: Int,
     private val supportBias: Boolean = false,
-) : FullyConnectedLayer<Array<Double>, Array<Double>>(neuronCount) {
+) : FullyConnectedLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount) {
 
     companion object {
         private val logger = LoggerManager.getLogger(FullyConnectedLayerImpl::class)
@@ -26,7 +25,7 @@ class FullyConnectedLayerImpl(
     var derivedWeights = AtomicMap<String, Array<Array<Double>>>()//Array(this.neuronCount) { 0.0 }
 
     //coroutine concurrent, use for input data, need to reset it by data id to release memory
-    var inputNeuronLoss = ConcurrentHashMap<Long, Array<Array<Double>>>()//Array(this.neuronCount) { 0.0 }
+//    var inputNeuronLoss = ConcurrentHashMap<Long, Array<Array<Double>>>()//Array(this.neuronCount) { 0.0 }
 
     //use for layer, public
     var weights: Array<Array<Double>> = emptyArray()
@@ -50,12 +49,12 @@ class FullyConnectedLayerImpl(
         val newInputNeuron = if (this.supportBias) inputNeuron + this.bias else inputNeuron
         //out put loss
         val nextLayerLoss = when (val nextLayer = this.nextLayer ?: error("next layer is null, need FullyConnectedLayer or OutputLayer")) {
-            is OutputLayer -> {
+            is OutputLayer<*, *, *> -> {
 //                println("-----output-----")
                 val outputLayerImpl = nextLayer as OutputLayerImpl
-                arrayOf(outputLayerImpl.loss[dataId]!!)
+                arrayOf(outputLayerImpl.inputNeuronLoss[dataId]!!)
             }
-            is FullyConnectedLayer -> {
+            is FullyConnectedLayer<*, *, *> -> {
 //                println("-----fully connected-----")
                 val fullyConnectedLayerImpl = nextLayer as FullyConnectedLayerImpl
                 val outputNeuronLoss = fullyConnectedLayerImpl.inputNeuronLoss[dataId]!!//next layer input neuron loss = this layer output neuron loss

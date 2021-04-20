@@ -2,15 +2,15 @@ package com.oneliang.ktx.frame.ai.dnn.layer
 
 import com.oneliang.ktx.Constants
 
-open class OutputLayer<IN : Any, OUT : Any>(
+open class OutputLayer<IN : Any, OUT : Any, LOSS : Any>(
     val neuronCount: Int,
-    private val forwardImpl: ((layer: OutputLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
-    private val backwardImpl: ((layer: OutputLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
-    private val forwardResetImpl: ((layer: OutputLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
-    private val updateImpl: ((layer: OutputLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
-    private val initializeLayerModelDataImpl: ((layer: OutputLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
-    private val saveLayerModelDataImpl: ((layer: OutputLayer<IN, OUT>) -> String) = { Constants.String.BLANK },
-) : Layer<IN, OUT>() {
+    private val forwardImpl: ((layer: OutputLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
+    private val backwardImpl: ((layer: OutputLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
+    private val forwardResetImpl: ((layer: OutputLayer<IN, OUT, LOSS>, dataId: Long) -> Unit)? = null,
+    private val updateImpl: ((layer: OutputLayer<IN, OUT, LOSS>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
+    private val initializeLayerModelDataImpl: ((layer: OutputLayer<IN, OUT, LOSS>, data: String) -> Unit) = { _, _ -> },
+    private val saveLayerModelDataImpl: ((layer: OutputLayer<IN, OUT, LOSS>) -> String) = { Constants.String.BLANK },
+) : LossLayer<IN, OUT, LOSS>() {
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()
@@ -21,6 +21,7 @@ open class OutputLayer<IN : Any, OUT : Any>(
     }
 
     override fun forwardResetImpl(dataId: Long) {
+        super.forwardResetImpl(dataId)
         this.forwardResetImpl?.invoke(this, dataId)
     }
 

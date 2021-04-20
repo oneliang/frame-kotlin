@@ -2,8 +2,11 @@ package com.oneliang.ktx.frame.ai.cnn.layer
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.dnn.layer.Layer
+import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 
 open class SoftmaxLayer<IN : Any, OUT : Any>(
+    val neuronCount: Int,
+    val typeCount: Int,
     private val forwardImpl: ((layer: SoftmaxLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: SoftmaxLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
     private val forwardResetImpl: ((layer: SoftmaxLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
@@ -12,8 +15,8 @@ open class SoftmaxLayer<IN : Any, OUT : Any>(
     private val saveLayerModelDataImpl: ((layer: SoftmaxLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
 
-    val outX = 1
-    val outY = 1
+    var derivedWeights = AtomicMap<String, Array<Array<Double>>>()//: Array<Array<Double>> = Array(neuronCount) { Array(this.typeCount) { 0.0 } }
+    var weights: Array<Array<Double>> = Array(this.neuronCount) { Array(this.typeCount) { 0.0 } }
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()

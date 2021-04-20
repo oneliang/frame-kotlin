@@ -5,15 +5,15 @@ import com.oneliang.ktx.pojo.DoubleWrapper
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import java.util.concurrent.ConcurrentHashMap
 
-open class FullyConnectedLayer<IN : Any, OUT : Any>(
+open class FullyConnectedLayer<IN : Any, OUT : Any, LOSS : Any>(
     val neuronCount: Int,
-    private val forwardImpl: ((layer: FullyConnectedLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
-    private val backwardImpl: ((layer: FullyConnectedLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
-    private val forwardResetImpl: ((layer: FullyConnectedLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
-    private val updateImpl: ((layer: FullyConnectedLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
-    private val initializeLayerModelDataImpl: ((layer: FullyConnectedLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
-    private val saveLayerModelDataImpl: ((layer: FullyConnectedLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
-) : Layer<IN, OUT>() {
+    private val forwardImpl: ((layer: FullyConnectedLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
+    private val backwardImpl: ((layer: FullyConnectedLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
+    private val forwardResetImpl: ((layer: FullyConnectedLayer<IN, OUT, LOSS>, dataId: Long) -> Unit)? = null,
+    private val updateImpl: ((layer: FullyConnectedLayer<IN, OUT, LOSS>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
+    private val initializeLayerModelDataImpl: ((layer: FullyConnectedLayer<IN, OUT, LOSS>, data: String) -> Unit) = { _, _ -> },
+    private val saveLayerModelDataImpl: ((layer: FullyConnectedLayer<IN, OUT, LOSS>) -> String) = { Constants.String.BLANK }
+) : LossLayer<IN, OUT, LOSS>() {
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()
@@ -24,6 +24,7 @@ open class FullyConnectedLayer<IN : Any, OUT : Any>(
     }
 
     override fun forwardResetImpl(dataId: Long) {
+        super.forwardResetImpl(dataId)
         this.forwardResetImpl?.invoke(this, dataId)
     }
 
