@@ -90,8 +90,8 @@ class FunctionExecutor(private val code: String) {
         //function input data initialize
         val optimizeInputMap = inputMap.toMutableMap()
 
-        if (defaultFunctionItemCodeMapping.isEmpty() || otherConditionFunctionItemCodeMappingMap.isEmpty()) {
-            logger.info("function result item mapping is empty, code:%s", code)
+        if (defaultFunctionItemCodeMapping.isEmpty() && otherConditionFunctionItemCodeMappingMap.isEmpty()) {
+            logger.error("default function item code mapping and other condition function item code mapping map are empty, code:%s", code)
         } else {
             var functionItemCodeMapping = defaultFunctionItemCodeMapping
             //if matches other condition, replace the function item code mapping
@@ -101,98 +101,102 @@ class FunctionExecutor(private val code: String) {
                     break
                 }
             }
-            //function process and result
-            allFunctionItemList.forEach { functionItem ->
-                val functionItemCode = functionItem.code
-                if (!functionItemCodeMapping.containsKey(functionItemCode)) {
-                    logger.verbose("No need to execute function, code:%s", functionItemCode)
-                    return@forEach
-                }
-                val functionItemType = functionItem.functionType
-                val (inputJson, result) = when (functionItem.parameterType) {
-                    FunctionItem.ParameterType.JSON_OBJECT -> {
-                        val inputJson = optimizeInputMap.toJson()
-                        inputJson to this.engine.invokeFunction(functionItemCode, inputJson)
+            if (functionItemCodeMapping.isEmpty()) {
+                logger.error("function item code mapping is empty, code:%s", code)
+            } else {
+                //function process and result
+                allFunctionItemList.forEach { functionItem ->
+                    val functionItemCode = functionItem.code
+                    if (!functionItemCodeMapping.containsKey(functionItemCode)) {
+                        logger.verbose("No need to execute function, code:%s", functionItemCode)
+                        return@forEach
                     }
-                    FunctionItem.ParameterType.STRING -> {
-                        val functionInputList = mutableListOf<String>()
-                        val parameterList = functionItem.parameter.split(Constants.Symbol.COMMA)
-                        parameterList.forEach parameterList@{
-                            val parameterKey = it.trim()
-                            if (parameterKey.isBlank()) {
-                                logger.error("Function:%s has blank parameter, please check and confirm it", functionItemCode)
-                                return@parameterList
-                            }
-                            when {
-                                optimizeInputMap.containsKey(parameterKey) -> {
-                                    functionInputList.add(optimizeInputMap.getValue(parameterKey))
-                                }
-                                stableValueInputMap.containsKey(parameterKey) -> {
-                                    functionInputList.add(stableValueInputMap.getValue(parameterKey))
-                                }
-                                functionResultItemMap.containsKey(parameterKey) -> {
-                                    val result = functionResultItemMap[parameterKey]!!.value
-                                    functionInputList.add(result)
-                                }
-                                else -> logger.error("Function:%s error, %s not found", functionItemCode, parameterKey)
-                            }
+                    val functionItemType = functionItem.functionType
+                    val (inputJson, result) = when (functionItem.parameterType) {
+                        FunctionItem.ParameterType.JSON_OBJECT -> {
+                            val inputJson = optimizeInputMap.toJson()
+                            inputJson to this.engine.invokeFunction(functionItemCode, inputJson)
                         }
-                        val inputTypeArray = functionInputList.toTypedArray()
-                        val inputJson = inputTypeArray.toJson()
-                        inputJson to this.engine.invokeFunction(functionItemCode, *(inputTypeArray))
-                    }
-                }
-                val (fixValue, resultJson) = when (result) {
-                    null -> Constants.String.NULL to Constants.String.NULL
-                    is Bindings -> {
-                        result.forEach { (key, value) ->
-                            optimizeInputMap[key] = value?.toString().nullToBlank()
-                        }
-                        Constants.String.BLANK to result.toJson()
-                    }
-                    else -> {
-                        val value = result.toString()
-                        value to value
-                    }
-                }
-                logger.info("Function:%s(%s),result:%s, %s", functionItem.name, functionItemCode, resultJson, inputJson)
-                val fixInputJson = if (functionItem.parameterType == FunctionItem.ParameterType.JSON_OBJECT) {
-                    Constants.String.BLANK
-                } else {
-                    inputJson
-                }
-                val functionReturnCode = functionItem.returnCode
-                functionResultItemMap[functionReturnCode] = FunctionResultItem(functionItem.name, functionReturnCode, inputJson = fixInputJson, value = fixValue, codeType = functionResultCode)
-
-                if (functionItem.functionType != FunctionItem.FunctionType.RESULT) {
-                    return@forEach//continue, no need to save
-                }
-
-                //map quote function result
-                if (functionItemCodeMapping.containsKey(functionItemCode)) {
-                    val functionReturnCodeMapping = functionItemCodeMapping[functionItemCode].nullToBlank()
-                    if (functionReturnCodeMapping.isNotBlank()) {
-                        val functionResultValue = fixValue.toDoubleSafely()
-                        val functionResultItem = functionResultItemMappingMap.getOrPut(functionReturnCodeMapping) { FunctionResultItem(functionReturnCodeMapping, functionReturnCodeMapping, Constants.String.ZERO, codeType = functionResultCode) }
-                        val originalFunctionResultItemValue = functionResultItem.value.toDoubleSafely()
-                        functionResultItem.value = "%.2f".format(originalFunctionResultItemValue + functionResultValue)
-                    }
-                }
-                if (result == null) {
-                    logger.error("Error, result is null, did you forget the keyword 'return'")
-                    return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
-                } else {
-                    if (functionItemType == FunctionItem.FunctionType.RESULT) {
-                        resultList += result.toString()
-                        if (checkFunctionResultItem) {
-                            if (!originalFunctionResultMap.containsKey(functionReturnCode)) {
-                                logger.error("Check original function result error, miss functionReturnCode:$functionReturnCode")
-                                return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
+                        FunctionItem.ParameterType.STRING -> {
+                            val functionInputList = mutableListOf<String>()
+                            val parameterList = functionItem.parameter.split(Constants.Symbol.COMMA)
+                            parameterList.forEach parameterList@{
+                                val parameterKey = it.trim()
+                                if (parameterKey.isBlank()) {
+                                    logger.error("Function:%s has blank parameter, please check and confirm it", functionItemCode)
+                                    return@parameterList
+                                }
+                                when {
+                                    optimizeInputMap.containsKey(parameterKey) -> {
+                                        functionInputList.add(optimizeInputMap.getValue(parameterKey))
+                                    }
+                                    stableValueInputMap.containsKey(parameterKey) -> {
+                                        functionInputList.add(stableValueInputMap.getValue(parameterKey))
+                                    }
+                                    functionResultItemMap.containsKey(parameterKey) -> {
+                                        val result = functionResultItemMap[parameterKey]!!.value
+                                        functionInputList.add(result)
+                                    }
+                                    else -> logger.error("Function:%s error, %s not found", functionItemCode, parameterKey)
+                                }
                             }
-                            val originalFunctionResult = originalFunctionResultMap[functionReturnCode]
-                            if (result.toString() != originalFunctionResult) {
-                                logger.error("Check original function result error, functionReturnCode:$functionReturnCode, (result)/(originalFunctionResult):($result)/($originalFunctionResult)")
+                            val inputTypeArray = functionInputList.toTypedArray()
+                            val inputJson = inputTypeArray.toJson()
+                            inputJson to this.engine.invokeFunction(functionItemCode, *(inputTypeArray))
+                        }
+                    }
+                    val (fixValue, resultJson) = when (result) {
+                        null -> Constants.String.NULL to Constants.String.NULL
+                        is Bindings -> {
+                            result.forEach { (key, value) ->
+                                optimizeInputMap[key] = value?.toString().nullToBlank()
+                            }
+                            Constants.String.BLANK to result.toJson()
+                        }
+                        else -> {
+                            val value = result.toString()
+                            value to value
+                        }
+                    }
+                    logger.info("Function:%s(%s),result:%s, %s", functionItem.name, functionItemCode, resultJson, inputJson)
+                    val fixInputJson = if (functionItem.parameterType == FunctionItem.ParameterType.JSON_OBJECT) {
+                        Constants.String.BLANK
+                    } else {
+                        inputJson
+                    }
+                    val functionReturnCode = functionItem.returnCode
+                    functionResultItemMap[functionReturnCode] = FunctionResultItem(functionItem.name, functionReturnCode, inputJson = fixInputJson, value = fixValue, codeType = functionResultCode)
+
+                    if (functionItem.functionType != FunctionItem.FunctionType.RESULT) {
+                        return@forEach//continue, no need to save
+                    }
+
+                    //map quote function result
+                    if (functionItemCodeMapping.containsKey(functionItemCode)) {
+                        val functionReturnCodeMapping = functionItemCodeMapping[functionItemCode].nullToBlank()
+                        if (functionReturnCodeMapping.isNotBlank()) {
+                            val functionResultValue = fixValue.toDoubleSafely()
+                            val functionResultItem = functionResultItemMappingMap.getOrPut(functionReturnCodeMapping) { FunctionResultItem(functionReturnCodeMapping, functionReturnCodeMapping, Constants.String.ZERO, codeType = functionResultCode) }
+                            val originalFunctionResultItemValue = functionResultItem.value.toDoubleSafely()
+                            functionResultItem.value = "%.2f".format(originalFunctionResultItemValue + functionResultValue)
+                        }
+                    }
+                    if (result == null) {
+                        logger.error("Error, result is null, did you forget the keyword 'return'")
+                        return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
+                    } else {
+                        if (functionItemType == FunctionItem.FunctionType.RESULT) {
+                            resultList += result.toString()
+                            if (checkFunctionResultItem) {
+                                if (!originalFunctionResultMap.containsKey(functionReturnCode)) {
+                                    logger.error("Check original function result error, miss functionReturnCode:$functionReturnCode")
+                                    return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
+                                }
+                                val originalFunctionResult = originalFunctionResultMap[functionReturnCode]
+                                if (result.toString() != originalFunctionResult) {
+                                    logger.error("Check original function result error, functionReturnCode:$functionReturnCode, (result)/(originalFunctionResult):($result)/($originalFunctionResult)")
 //                                return FunctionResult(false, functionResultItemMap, functionResultItemMappingMap)
+                                }
                             }
                         }
                     }
