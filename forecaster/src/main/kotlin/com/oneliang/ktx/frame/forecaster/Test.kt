@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.forecaster
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.*
+import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.jxl.readSimpleExcel
 import com.oneliang.ktx.util.jxl.writeSimpleExcel
 
@@ -171,6 +172,26 @@ private fun writeExcel(resourceOutputItemList: List<ResourceOutputItem>) {
 }
 
 fun main() {
+    val a = mapOf<String, String>("1" to "a", "2" to "b")
+    val b = mapOf<String, String>("2" to "b", "1" to "a", "3" to "c")
+    val map = mutableMapOf<Map<String, String>, Map<String, String>>()
+    map.getOrPut(a) { emptyMap() }
+    map.getOrPut(b) { emptyMap() }
+    println(map.size)
+    println(map.toSortedMap(Comparator { o1, o2 ->
+        when {
+            o1.size < o2.size -> {
+                return@Comparator 1
+            }
+            o1.size > o2.size -> {
+                return@Comparator -1
+            }
+            else -> {
+                return@Comparator 0
+            }
+        }
+    }))
+    return
     val DELIVERY_DATE_45 = 45
     val RECEIVABLE_PROPORTION = 0.2
     val resourceInputItem1 = ResourceInputItem(

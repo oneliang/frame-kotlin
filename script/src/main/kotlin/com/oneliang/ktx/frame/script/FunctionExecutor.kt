@@ -1,9 +1,7 @@
 package com.oneliang.ktx.frame.script
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.common.nullToBlank
-import com.oneliang.ktx.util.common.toDoubleSafely
-import com.oneliang.ktx.util.common.toFloatSafely
+import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
@@ -43,7 +41,8 @@ class FunctionExecutor(private val code: String) {
         inputMap: Map<String, String>,
         stableValueInputMap: Map<String, String> = emptyMap(),
         totalResultCode: String = Constants.String.BLANK,//no total result
-        functionItemCodeMapping: Map<String, String> = emptyMap(),
+        defaultFunctionItemCodeMapping: Map<String, String> = emptyMap(),
+        otherConditionFunctionItemCodeMappingMap: Map<Map<String, String>, Map<String, String>> = emptyMap(),
         stableValueCodeType: String = CODE_TYPE_STABLE,
         functionResultCode: String = CODE_TYPE_FUNCTION,
         checkFunctionResultItem: Boolean = false,
@@ -91,9 +90,17 @@ class FunctionExecutor(private val code: String) {
         //function input data initialize
         val optimizeInputMap = inputMap.toMutableMap()
 
-        if (functionItemCodeMapping.isEmpty()) {
+        if (defaultFunctionItemCodeMapping.isEmpty() || otherConditionFunctionItemCodeMappingMap.isEmpty()) {
             logger.info("function result item mapping is empty, code:%s", code)
         } else {
+            var functionItemCodeMapping = defaultFunctionItemCodeMapping
+            //if matches other condition, replace the function item code mapping
+            for ((conditionMap, codeMapping) in otherConditionFunctionItemCodeMappingMap) {
+                if (inputMap.matches(conditionMap)) {
+                    functionItemCodeMapping = codeMapping
+                    break
+                }
+            }
             //function process and result
             allFunctionItemList.forEach { functionItem ->
                 val functionItemCode = functionItem.code
