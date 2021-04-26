@@ -19,7 +19,7 @@ object ConvolutionNeuralNetwork : NeuralNetwork {
         val convolutionLayer2 = ConvolutionLayerImpl(inputLayer.mapDepth, 64, averagePoolingLayer1.outX, averagePoolingLayer1.outY, 5, 5)
         val rectifiedLinearUnitsLayer2 = RectifiedLinearUnitsLayerImpl()
         val averagePoolingLayer2 = AveragePoolingLayerImpl(convolutionLayer2.outX, convolutionLayer2.outY, 2)
-        val flattenLayer = FlattenLayerImpl(1024)
+        val flattenLayer = FlattenLayerImpl(128)
 //        val localResponseNormalizationLayer = LocalResponseNormalizationLayerImpl(fullyConnectedLayer1.mapDepth)
 //        val dropoutLayer = DropoutLayerImpl(localResponseNormalizationLayer.mapDepth)
         val fullyConnectedLayer2 = FullyConnectedLayerImpl(10)//10*1*1

@@ -17,7 +17,7 @@ open class SoftmaxLayer<IN : Any, OUT : Any, LOSS : Any>(
 ) : LossLayer<IN, OUT, LOSS>() {
 
     var derivedWeights = AtomicMap<String, Array<Array<Double>>>()//: Array<Array<Double>> = Array(neuronCount) { Array(this.typeCount) { 0.0 } }
-    var weights: Array<Array<Double>> = Array(this.neuronCount) { Array(this.typeCount) { 0.0 } }
+    var weights: Array<Array<Double>> = emptyArray()
 
     override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()

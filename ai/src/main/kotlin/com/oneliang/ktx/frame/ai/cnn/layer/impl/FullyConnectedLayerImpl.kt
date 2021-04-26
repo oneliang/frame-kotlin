@@ -42,16 +42,7 @@ open class FullyConnectedLayerImpl(
 //add bias when support bias
         val newInputNeuron = inputNeuron
         //out put loss
-        val nextLayerLoss = when (val nextLayer = this.nextLayer ?: error("next layer is null, need FullyConnectedLayer or OutputLayer")) {
-            is LossLayer<*, *, *> -> {
-                val nextLayerImpl = nextLayer as LossLayer<*, *, Array<Array<Double>>>
-                val outputNeuronLoss = nextLayerImpl.inputNeuronLoss[dataId]!!//next layer input neuron loss = this layer output neuron loss
-                outputNeuronLoss//when support bias, delete the bias loss, last input is bias
-            }
-            else -> {
-                error("not support $nextLayer yet, only support FullyConnectedLayer and OutputLayer")
-            }
-        }
+        val nextLayerLoss = getNextLayerInputNeuronLoss<Array<Array<Double>>>(dataId)
 //        println(this.weights.toJson() + ", next layer loss:" + nextLayerLoss.toJson())
         //update current layer input neuron loss
         val inputNeuronLoss = this.weights.multiply(nextLayerLoss)//only one loss, after calculate, transform to inputNeuronCount*1 matrix

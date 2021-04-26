@@ -7,11 +7,12 @@ import com.oneliang.ktx.pojo.DoubleWrapper
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
+import com.oneliang.ktx.util.math.matrix.transpose
 
 /**
  * this output layer, input neuron equal output neuron, so loss named inputNeuronLoss
  */
-class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Double>, Array<Double>>(neuronCount) {
+class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount) {
     companion object {
         private val logger = LoggerManager.getLogger(OutputLayerImpl::class)
         private const val SUM_KEY = "sum"
@@ -29,14 +30,14 @@ class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Doubl
     }
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {//get 0 for test, only out put one
-        val loss = this.inputNeuronLoss.getOrPut(dataId) { arrayOf(inputNeuron[0] - y) }!!
+        val loss = this.inputNeuronLoss.getOrPut(dataId) { inputNeuron.transpose { it - y } }!!//[inputNeuron.size][1]
         this.sumLoss.operate(SUM_KEY, create = {
             DoubleWrapper(loss.sumByDouble {
-                ordinaryLeastSquares(it)
+                ordinaryLeastSquares(it[0])
             })
         }, update = { oldDoubleWrapper ->
             DoubleWrapper(oldDoubleWrapper.value + loss.sumByDouble {
-                ordinaryLeastSquares(it)
+                ordinaryLeastSquares(it[0])
             })
         })
     }

@@ -9,6 +9,7 @@ import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.math.matrix.multiply
+import com.oneliang.ktx.util.math.matrix.transpose
 
 class FullyConnectedLayerImpl(
     neuronCount: Int,
@@ -52,7 +53,7 @@ class FullyConnectedLayerImpl(
             is OutputLayer<*, *, *> -> {
 //                println("-----output-----")
                 val outputLayerImpl = nextLayer as OutputLayerImpl
-                arrayOf(outputLayerImpl.inputNeuronLoss[dataId]!!)
+                outputLayerImpl.inputNeuronLoss[dataId]!!
             }
             is FullyConnectedLayer<*, *, *> -> {
 //                println("-----fully connected-----")
