@@ -41,7 +41,7 @@ class FunctionExecutor(private val code: String) {
         inputMap: Map<String, String>,
         stableValueInputMap: Map<String, String> = emptyMap(),
         totalResultCode: String = Constants.String.BLANK,//no total result
-        defaultFunctionItemCodeMapping: Map<String, String> = emptyMap(),
+        defaultFunctionItemCodeMapping: Map<String, String>,
         otherConditionFunctionItemCodeMappingMap: Map<Map<String, String>, Map<String, String>> = emptyMap(),
         stableValueCodeType: String = CODE_TYPE_STABLE,
         functionResultCode: String = CODE_TYPE_FUNCTION,
@@ -91,7 +91,7 @@ class FunctionExecutor(private val code: String) {
         val optimizeInputMap = inputMap.toMutableMap()
 
         if (defaultFunctionItemCodeMapping.isEmpty() && otherConditionFunctionItemCodeMappingMap.isEmpty()) {
-            logger.error("default function item code mapping and other condition function item code mapping map are empty, code:%s", code)
+            logger.warning("default function item code mapping and other condition function item code mapping map are empty, code:%s", code)
         } else {
             var functionItemCodeMapping = defaultFunctionItemCodeMapping
             //if matches other condition, replace the function item code mapping
@@ -102,7 +102,7 @@ class FunctionExecutor(private val code: String) {
                 }
             }
             if (functionItemCodeMapping.isEmpty()) {
-                logger.error("function item code mapping is empty, code:%s", code)
+                logger.warning("function item code mapping is empty, code:%s", code)
             } else {
                 //function process and result
                 allFunctionItemList.forEach { functionItem ->
