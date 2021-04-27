@@ -272,12 +272,12 @@ class ActionListener : HttpServlet() {
 
         //through the interceptor
         if (beforeGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
-            logger.error("The request name:%s. Can not through the before global interceptors", uri)
+            logger.error("Can not through the before global interceptors! The request name:%s", uri)
             httpServletResponse.status = Constants.Http.StatusCode.FORBIDDEN
             httpServletResponse.outputStream.write(beforeGlobalInterceptorResult.message)
             return false
         }
-        logger.info("Through the before global interceptors!")
+        logger.info("Through the before global interceptors! The request name:%s", uri)
         return true
     }
 
@@ -294,12 +294,12 @@ class ActionListener : HttpServlet() {
         val beforeActionBeanInterceptorList = actionBean.beforeActionInterceptorBeanList
         val beforeActionInterceptorResult = doActionInterceptorBeanList(beforeActionBeanInterceptorList, httpServletRequest, httpServletResponse)
         if (beforeActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
-            logger.error("The request name:%s. Can not through the before action interceptors", uri)
+            logger.error("Can not through the before action interceptors! The request name:%s", uri)
             httpServletResponse.status = Constants.Http.StatusCode.FORBIDDEN
             httpServletResponse.outputStream.write(beforeActionInterceptorResult.message)
             return false
         }
-        logger.info("Through the before action interceptors!")
+        logger.info("Through the before action interceptors! The request name:%s", uri)
         return true
     }
 
@@ -393,7 +393,7 @@ class ActionListener : HttpServlet() {
             logger.info("Static execute, not the first time execute")
             actionForwardBean!!.name
         }
-        val afterActionInterceptorResult = this.doAfterActionInterceptor(actionBean, httpServletRequest, httpServletResponse)
+        val afterActionInterceptorResult = this.doAfterActionInterceptor(uri, actionBean, httpServletRequest, httpServletResponse)
         if (!afterActionInterceptorResult) {
             return false
         }
@@ -507,7 +507,7 @@ class ActionListener : HttpServlet() {
         } else {
             logger.info("Static execute, not the first time execute")
         }
-        val afterActionInterceptorResult = this.doAfterActionInterceptor(actionBean, httpServletRequest, httpServletResponse)
+        val afterActionInterceptorResult = this.doAfterActionInterceptor(uri, actionBean, httpServletRequest, httpServletResponse)
         if (!afterActionInterceptorResult) {
             return false
         }
@@ -523,19 +523,20 @@ class ActionListener : HttpServlet() {
 
     /**
      * do after action interceptor
+     * @param uri
      * @param actionBean
      * @param httpServletRequest
      * @param httpServletResponse
      * @return boolean
      */
-    private fun doAfterActionInterceptor(actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
+    private fun doAfterActionInterceptor(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
         val afterActionBeanInterceptorList = actionBean.afterActionInterceptorBeanList
         val afterActionInterceptorResult = doActionInterceptorBeanList(afterActionBeanInterceptorList, httpServletRequest, httpServletResponse)
         if (afterActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
-            logger.error("Can not through the after action interceptors")
+            logger.error("Can not through the after action interceptors! The request name:%s", uri)
             return false
         }
-        logger.info("Through the after action interceptors!")
+        logger.info("Through the after action interceptors! The request name:%s", uri)
         return true
     }
 
@@ -550,10 +551,10 @@ class ActionListener : HttpServlet() {
         val afterGlobalInterceptorList = ConfigurationContainer.rootConfigurationContext.afterGlobalInterceptorList
         val afterGlobalInterceptorResult = doGlobalInterceptorList(afterGlobalInterceptorList, httpServletRequest, httpServletResponse)
         if (afterGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
-            logger.error("The request name:%s. Can not through the after global interceptors", uri)
+            logger.error("Can not through the after global interceptors! The request name:%s", uri)
             return false
         }
-        logger.info("Through the after global interceptors!")
+        logger.info("Through the after global interceptors! The request name:%s", uri)
         return true
     }
 
