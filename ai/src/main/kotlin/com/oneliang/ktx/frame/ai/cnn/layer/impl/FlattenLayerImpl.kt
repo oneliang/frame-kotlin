@@ -31,6 +31,7 @@ open class FlattenLayerImpl(
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Double>>>, y: Double) {
         //out put loss
         val nextLayerLoss = getNextLayerInputNeuronLoss<Array<Array<Double>>>(dataId)
+        println(nextLayerLoss.toJson())
     }
 
     override fun forwardResetImpl(dataId: Long) {

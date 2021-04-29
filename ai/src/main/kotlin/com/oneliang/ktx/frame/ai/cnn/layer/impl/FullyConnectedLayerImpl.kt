@@ -1,8 +1,6 @@
 package com.oneliang.ktx.frame.ai.cnn.layer.impl
 
-import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.cnn.layer.FullyConnectedLayer
-import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.jsonToMap

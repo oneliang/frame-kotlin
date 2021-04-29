@@ -29,21 +29,22 @@ open class SoftmaxLayerImpl(neuronCount: Int, typeCount: Int) : SoftmaxLayer<Arr
         if (this.weights.isEmpty()) {
             this.weights = Array(this.neuronCount) { Array(this.typeCount) { 0.001 } }
         }
-        println(inputNeuron.toJson())
-        println(softmax(inputNeuron, this.weights).toJson())
+//        println(inputNeuron.toJson())
+//        println(softmax(inputNeuron, this.weights).toJson())
         return softmax(inputNeuron, this.weights)
     }
 
     @Suppress("UNCHECKED_CAST")
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {
         val nextLayerLoss = getNextLayerInputNeuronLoss<Array<Array<Double>>>(dataId)
-        println("-----softmax-----")
-        println(inputNeuron.toJson())
-        println(this.weights.toJson())
-        println(nextLayerLoss.toJson())
+//        println("-----softmax-----")
+//        println(inputNeuron.toJson())
+//        println(this.weights.toJson())
+//        println(nextLayerLoss.toJson())
         //calculate loss
-        val inputNeuronLoss = this.weights.multiply(nextLayerLoss)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
-        this.inputNeuronLoss[dataId] = inputNeuronLoss//[*][1]
+//        val inputNeuronLoss = this.weights.multiply(nextLayerLoss)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
+//        this.inputNeuronLoss[dataId] = inputNeuronLoss//[*][1]
+        this.inputNeuronLoss[dataId] = nextLayerLoss
 
         //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
         this.derivedWeights.operate(DERIVED_WEIGHTS_KEY, create = {
