@@ -12,11 +12,11 @@ object TestCNN {
         val batchSize = 1
         val mnistLabelFullFilename = "D:/Dandelion/data/mnist/t10k-labels-idx1-ubyte"
         val mnistImageFullFilename = "D:/Dandelion/data/mnist/t10k-images-idx3-ubyte"
-        val modelFullFilename = "/D:/cnn_model.txt"
+//        val modelFullFilename = "/D:/cnn_model.txt"
         val rnnBatching = TestConvolutionNeuralNetworkBatching(mnistLabelFullFilename, mnistImageFullFilename, batchSize)
         val neuralNetwork = ConvolutionNeuralNetwork
         val trainer = Trainer()
-        trainer.train(rnnBatching, neuralNetwork, learningRate, times, 1, modelFullFilename)
+        trainer.train(rnnBatching, neuralNetwork, learningRate, times, 1)//, modelFullFilename)
         rnnBatching.reset()
     }
 }

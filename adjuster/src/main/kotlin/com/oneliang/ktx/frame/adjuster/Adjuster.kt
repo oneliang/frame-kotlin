@@ -52,7 +52,44 @@ object Adjuster {
     }
 
     fun backward(resourceList: List<Resource>, ruleList: List<Rule>) {
+        val ruleMap = mutableMapOf<String, Rule>()
+        ruleList.forEach {
+            if (ruleMap.containsKey(it.key)) {
+                error("rule list have duplicate key, key:%s".format(it.key))
+            }
+            ruleMap[it.key] = it
+        }
+        val sortedRuleList = ruleList.sortedBy { it.order }
 
+        val forwardResultList = mutableListOf<ForwardResult>()
+        for (resource in resourceList) {
+            val begin = resource.begin
+            val itemList = resource.itemList
+            val itemListSize = itemList.size
+            var end = begin
+            var minEnd = 0L
+            var maxEnd = 0L
+            var forwardIndex = 0
+            for (index in sortedRuleList.indices) {
+                val rule = sortedRuleList[index]
+                if (index < itemListSize) {
+                    val item = itemList[index]
+                    if (rule.key != item.key) {
+                        error("key not match, did you miss the rule key:%s, rule order:%s, item key:%s, ".format(rule.key, rule.order, item.key))
+                    }
+                    end += item.costTime
+                    minEnd = end
+                    maxEnd = end
+                    forwardIndex = index + 1//next index
+                } else {
+                    minEnd += rule.minCostTime
+                    maxEnd += rule.maxCostTime
+                }
+            }
+            val forwardResult = ForwardResult(resource, minEnd, maxEnd)
+            forwardResult.adjustRuleList = sortedRuleList.subList(forwardIndex, sortedRuleList.size)
+            forwardResultList += forwardResult
+        }
     }
 
     class Rule(val order: Int, val key: String, val minCostTime: Long, val maxCostTime: Long = minCostTime)

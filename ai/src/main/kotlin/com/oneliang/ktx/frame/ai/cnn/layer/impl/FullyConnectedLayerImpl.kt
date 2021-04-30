@@ -41,7 +41,7 @@ open class FullyConnectedLayerImpl(
         val newInputNeuron = inputNeuron
         //out put loss
         val nextLayerLoss = getNextLayerInputNeuronLoss<Array<Array<Double>>>(dataId)
-//        println(this.weights.toJson() + ", next layer loss:" + nextLayerLoss.toJson())
+        println(this.weights.toJson() + ", next layer loss:" + nextLayerLoss.toJson())
         //update current layer input neuron loss
         val inputNeuronLoss = this.weights.multiply(nextLayerLoss)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
 //        inputNeuronLoss.printToMatrix()

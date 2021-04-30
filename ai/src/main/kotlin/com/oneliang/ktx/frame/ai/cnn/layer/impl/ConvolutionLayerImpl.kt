@@ -35,6 +35,7 @@ class ConvolutionLayerImpl(
             //求和后的每个值进行一次sigmoid
             outputNeuron[mapIndex] = sigmoidBias(mapValuesSum!!, this.biases[mapIndex])
         }
+//        println("output data size:[%s][%s][%s]".format(outputNeuron.size, outputNeuron[0].size, outputNeuron[0][0].size))
         return outputNeuron
     }
 

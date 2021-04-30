@@ -21,7 +21,7 @@ abstract class LossLayer<IN : Any, OUT : Any, LOSS : Any> : Layer<IN, OUT>() {
                 outputNeuronLoss//when support bias, delete the bias loss, last input is bias
             }
             else -> {
-                error("not support $nextLayer yet, only support LossLayer")
+                error("not support %s yet, only support LossLayer".format(nextLayer))
             }
         }
     }
