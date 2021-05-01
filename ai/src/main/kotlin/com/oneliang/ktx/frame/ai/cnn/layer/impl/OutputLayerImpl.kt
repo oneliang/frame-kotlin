@@ -22,10 +22,10 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
     }
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double, training: Boolean): Array<Double> {
-//        if (!training) {//test
-        val correctYType = y.toInt()
-        logger.info("calculate y:%s, real y:%s, calculate probability:%s", inputNeuron[correctYType], y, inputNeuron.toJson())
-//        }
+        if (!training) {//test
+            val correctYType = y.toInt()
+            logger.info("calculate y[%s] probability:%s, real y:%s, calculate probability:%s", correctYType, inputNeuron[correctYType], y, inputNeuron.toJson())
+        }
         return inputNeuron
     }
 
@@ -41,7 +41,12 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
-
+        if (epoch % printPeriod == 0) {
+            val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0
+            logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
+        }
+        //reset after update
+        this.sumLoss.clear()//reset after update per one time
     }
 
     override fun initializeLayerModelDataImpl(data: String) {

@@ -42,10 +42,6 @@ class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Doubl
         })
     }
 
-    override fun forwardResetImpl(dataId: Long) {
-        this.inputNeuronLoss.remove(dataId)//remove per one data
-    }
-
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
         if (epoch % printPeriod == 0) {
             val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0

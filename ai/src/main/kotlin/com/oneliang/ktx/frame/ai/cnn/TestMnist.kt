@@ -1,0 +1,27 @@
+package com.oneliang.ktx.frame.ai.cnn
+
+import com.oneliang.ktx.frame.ai.dnn.Trainer
+import com.oneliang.ktx.util.logging.LoggerManager
+
+object TestMnist {
+    private val logger = LoggerManager.getLogger(TestMnist::class)
+    fun testMnistNeuralNetwork() {
+        val learningRate = 0.001
+        val times = 1000
+//    val batching = TestTrendBatching(100)
+        val batchSize = 1
+        val mnistLabelFullFilename = "D:/Dandelion/data/mnist/t10k-labels-idx1-ubyte"
+        val mnistImageFullFilename = "D:/Dandelion/data/mnist/t10k-images-idx3-ubyte"
+        val modelFullFilename = "/D:/cnn_model.txt"
+        val batching = TestMnistBatching(mnistLabelFullFilename, mnistImageFullFilename, batchSize)
+        val neuralNetwork = MnistNeuralNetwork
+        val trainer = Trainer()
+        trainer.train(batching, neuralNetwork, learningRate, times, 10, modelFullFilename)
+        batching.reset()
+        trainer.test(batching, neuralNetwork, modelFullFilename)
+    }
+}
+
+fun main() {
+    TestMnist.testMnistNeuralNetwork()
+}

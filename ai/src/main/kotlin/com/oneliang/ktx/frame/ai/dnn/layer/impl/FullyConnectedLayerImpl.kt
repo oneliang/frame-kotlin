@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.ai.dnn.layer.impl
 
 import com.oneliang.ktx.frame.ai.dnn.layer.FullyConnectedLayer
+import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.OutputLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
@@ -9,7 +10,6 @@ import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.math.matrix.multiply
-import com.oneliang.ktx.util.math.matrix.transpose
 
 class FullyConnectedLayerImpl(
     neuronCount: Int,
@@ -39,12 +39,15 @@ class FullyConnectedLayerImpl(
         if (this.weights.isEmpty()) {
             this.weights = Array(newInputNeuron.size) { Array(this.neuronCount) { 0.1 } }
         }
-        val out = newInputNeuron.multiply(this.weights)
-//        println("-----forward-----" + this.inputNeuronMap[dataId]?.toJson() + ", weights:" + this.weights.toJson() + ", out:" + out.toJson())
-//        out.printToMatrix(neuronCount)
-        return out
+        val outputNeuron = newInputNeuron.multiply(this.weights)
+//        println("-----fully connected forward-----")
+//        println("input:" + inputNeuron.toJson())
+//        println("weights:" + this.weights.toJson())
+//        println("output:" + outputNeuron.toJson())
+        return outputNeuron
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {
         //add bias when support bias
         val newInputNeuron = if (this.supportBias) inputNeuron + this.bias else inputNeuron
@@ -61,14 +64,20 @@ class FullyConnectedLayerImpl(
                 val outputNeuronLoss = fullyConnectedLayerImpl.inputNeuronLoss[dataId]!!//next layer input neuron loss = this layer output neuron loss
                 if (this.supportBias) outputNeuronLoss.copyOfRange(0, outputNeuronLoss.size - 1) else outputNeuronLoss//when support bias, delete the bias loss, last input is bias
             }
+            is LossLayer<*, *, *> -> {
+                val outputNeuronLoss = getNextLayerInputNeuronLoss<Array<Array<Double>>>(dataId)//next layer input neuron loss = this layer output neuron loss
+                if (this.supportBias) outputNeuronLoss.copyOfRange(0, outputNeuronLoss.size - 1) else outputNeuronLoss//when support bias, delete the bias loss, last input is bias
+            }
             else -> {
                 error("not support $nextLayer yet, only support FullyConnectedLayer and OutputLayer")
             }
         }
-//        println(this.weights.toJson() + ", next layer loss:" + nextLayerLoss.toJson())
+//        println("-----fully connected backward-----")
+//        println("next layer loss:" + nextLayerLoss.toJson())
         //update current layer input neuron loss
         val inputNeuronLoss = this.weights.multiply(nextLayerLoss)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
 //        inputNeuronLoss.printToMatrix()
+//        println("input loss:" + inputNeuronLoss.toJson())
         this.inputNeuronLoss[dataId] = inputNeuronLoss
 
 //        println("-----back-----" + this.inputNeuronMap[dataId]?.toJson() + "," + this.inputNeuronLoss[dataId]?.toJson())
@@ -79,7 +88,6 @@ class FullyConnectedLayerImpl(
             Array(newInputNeuron.size) { xIndex ->
                 val x = newInputNeuron[xIndex]
                 Array(this.neuronCount) { outputNeuronIndex ->
-//                    println("x:$x, derived:" + ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex][0]))
                     ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex][0])
                 }
             }
@@ -92,10 +100,7 @@ class FullyConnectedLayerImpl(
             }
         })
 //        println("${inputNeuron.size},${this.neuronCount},${this.weights.toJson()},${this.derivedWeights[DERIVED_WEIGHTS_KEY]?.toJson()}")
-    }
-
-    override fun forwardResetImpl(dataId: Long) {
-        this.inputNeuronLoss.remove(dataId)
+//        println("derived weight:${this.derivedWeights[DERIVED_WEIGHTS_KEY]?.toJson()}")
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
@@ -109,6 +114,8 @@ class FullyConnectedLayerImpl(
         if (epoch % printPeriod == 0) {
             logger.debug("epoch:%s, weight array:%s", epoch, this.weights.toJson())
         }
+//        println("-----fully connected-----")
+//        println("update weights:" + this.weights.toJson())
         //reset after update
         this.derivedWeights.clear()//reset after update per one time
     }

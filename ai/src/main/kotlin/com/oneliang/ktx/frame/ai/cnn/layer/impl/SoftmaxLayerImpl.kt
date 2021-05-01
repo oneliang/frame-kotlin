@@ -3,15 +3,22 @@ package com.oneliang.ktx.frame.ai.cnn.layer.impl
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.activation.softmax
 import com.oneliang.ktx.frame.ai.cnn.layer.SoftmaxLayer
+import com.oneliang.ktx.frame.ai.dnn.SoftmaxRegressionNeuralNetwork
+import com.oneliang.ktx.frame.ai.dnn.layer.impl.FullyConnectedLayerImpl
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.common.singleIteration
+import com.oneliang.ktx.util.json.jsonToMap
+import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
+import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.math.matrix.transpose
 
 open class SoftmaxLayerImpl(neuronCount: Int, typeCount: Int) : SoftmaxLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount, typeCount) {
 
     companion object {
         private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
+        private const val WEIGHTS_KEY = "weights"
+        private val logger = LoggerManager.getLogger(SoftmaxLayerImpl::class)
     }
 
     private val correctProbability = Array(typeCount) { Array(typeCount) { 0.0 } }
@@ -29,7 +36,7 @@ open class SoftmaxLayerImpl(neuronCount: Int, typeCount: Int) : SoftmaxLayer<Arr
         if (this.weights.isEmpty()) {
             this.weights = Array(this.neuronCount) { Array(this.typeCount) { 0.001 } }
         }
-//        println("-----softmax-----")
+//        println("-----softmax forward-----")
 //        println("input:" + inputNeuron.toJson())
         val outputNeuron = softmax(inputNeuron, this.weights)
 //        println("output:" + outputNeuron.toJson())
@@ -47,8 +54,8 @@ open class SoftmaxLayerImpl(neuronCount: Int, typeCount: Int) : SoftmaxLayer<Arr
 
         val outputLoss = loss.transpose()//[*][1]
         this.inputNeuronLoss[dataId] = outputLoss
-        println("-----output loss-----")
-        println(outputLoss.toJson())
+//        println("-----softmax backward-----")
+//        println("output loss:" + outputLoss.toJson())
 
 
         //derived, weight gradient descent, sum all weight grad for every x, use for average weight grad
@@ -70,12 +77,31 @@ open class SoftmaxLayerImpl(neuronCount: Int, typeCount: Int) : SoftmaxLayer<Arr
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+        //update all weight, gradient descent
+        val derivedWeights = this.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
+        this.weights.forEachIndexed { index, weight ->
+            for (position in weight.indices) {
+                this.weights[index][position] = weight[position] - (learningRate * derivedWeights[index][position]) / totalDataSize
+            }
+        }
+        if (epoch % printPeriod == 0) {
+            logger.debug("epoch:%s, weight array:%s", epoch, this.weights.toJson())
+        }
+        //reset after update
+        this.derivedWeights.clear()//reset after update per one time
     }
 
     override fun initializeLayerModelDataImpl(data: String) {
+        val map = data.jsonToMap()
+        val weightsData = map[WEIGHTS_KEY]?.jsonToObjectList(Array<Double>::class)
+        if (weightsData != null) {
+            this.weights = weightsData.toTypedArray()
+        }
     }
 
     override fun saveLayerModelDataImpl(): String {
-        return Constants.String.BLANK
+        val map = mutableMapOf<String, Array<Array<Double>>>()
+        map[WEIGHTS_KEY] = this.weights
+        return map.toJson()
     }
 }

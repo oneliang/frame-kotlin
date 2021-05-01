@@ -7,8 +7,8 @@ import java.util.*
 
 class MnistReader(val labelFullFilename: String, val imageFullFilename: String) {
 
-    private lateinit var labelIO: FileInputStream
-    private lateinit var imageIO: FileInputStream
+    private lateinit var labelInputStream: FileInputStream
+    private lateinit var imageInputStream: FileInputStream
     private var labelSize = 0
     private var imageSize = 0
     var sizeX = 0
@@ -16,15 +16,15 @@ class MnistReader(val labelFullFilename: String, val imageFullFilename: String) 
 
     init {
         try {
-            labelIO = FileInputStream(labelFullFilename)
-            imageIO = FileInputStream(imageFullFilename)
-            if (readInt(labelIO) != 2049) error("Label file header missing")
-            if (readInt(imageIO) != 2051) error("Image file header missing")
-            labelSize = readInt(labelIO)
-            imageSize = readInt(imageIO)
+            labelInputStream = FileInputStream(labelFullFilename)
+            imageInputStream = FileInputStream(imageFullFilename)
+            if (readInt(labelInputStream) != 2049) error("Label file header missing")
+            if (readInt(imageInputStream) != 2051) error("Image file header missing")
+            labelSize = readInt(labelInputStream)
+            imageSize = readInt(imageInputStream)
             if (labelSize != imageSize) throw Exception("Labels and images don't match in number.")
-            sizeY = readInt(imageIO)
-            sizeX = readInt(imageIO)
+            sizeY = readInt(imageInputStream)
+            sizeX = readInt(imageInputStream)
             println("label size:%s, image size:%s, size y:%s, size x:%s".format(labelSize, imageSize, sizeY, sizeX))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -51,16 +51,16 @@ class MnistReader(val labelFullFilename: String, val imageFullFilename: String) 
 
     fun reset() {
         try {
-            labelIO.close()
-            imageIO.close()
-            labelIO = FileInputStream(labelFullFilename)
-            imageIO = FileInputStream(imageFullFilename)
-            readInt(labelIO)
-            readInt(labelIO)
-            readInt(imageIO)
-            readInt(imageIO)
-            readInt(imageIO)
-            readInt(imageIO)
+            labelInputStream.close()
+            imageInputStream.close()
+            labelInputStream = FileInputStream(labelFullFilename)
+            imageInputStream = FileInputStream(imageFullFilename)
+            readInt(labelInputStream)
+            readInt(labelInputStream)
+            readInt(imageInputStream)
+            readInt(imageInputStream)
+            readInt(imageInputStream)
+            readInt(imageInputStream)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -68,21 +68,27 @@ class MnistReader(val labelFullFilename: String, val imageFullFilename: String) 
 
     fun readNextLabel(): Int {
         try {
-            return labelIO.read()
+            return labelInputStream.read()
         } catch (e: Exception) {
             e.printStackTrace()
         }
         return -1
     }
 
-    fun readNextImage(): Array<Double> {
+    fun readNextImage(normalization: Boolean = true): Array<Double> {
         val size = sizeX * sizeY
         val imageArray = ByteArray(size)
         Arrays.fill(imageArray, 0.toByte())
-        imageIO.read(imageArray, 0, size)
+        imageInputStream.read(imageArray, 0, size)
         val arrays = Array(size) { 0.0 }
-        for (i in 0 until size) {
-            arrays[i] = imageArray[i].toDouble()
+        if (normalization) {
+            for (i in 0 until size) {
+                arrays[i] = (imageArray[i].toInt() and 0xFF).toDouble() / 0xFF
+            }
+        } else {
+            for (i in 0 until size) {
+                arrays[i] = imageArray[i].toDouble()
+            }
         }
         return arrays
     }
