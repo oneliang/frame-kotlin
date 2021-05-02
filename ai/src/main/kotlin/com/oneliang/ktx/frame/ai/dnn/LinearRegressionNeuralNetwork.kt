@@ -43,7 +43,7 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
 //                    loss[xIndex] += ordinaryLeastSquaresDerived(x, nextLayerLoss[dataId]!!)//because next layer only one loss value
 //                }
             },
-            updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
+            updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double, training: Boolean ->
                 //update all weight, gradient descent
                 val derivedWeights = layer.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
                 layer.weights.forEachIndexed { index, weight ->
@@ -84,7 +84,7 @@ object LinearRegressionNeuralNetwork : NeuralNetwork {
             forwardResetImpl = { layer, dataId ->
                 layer.loss.remove(dataId)//remove per one data
             },
-            updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double ->
+            updateImpl = { layer, epoch, printPeriod, totalDataSize: Long, learningRate: Double, training: Boolean ->
                 if (epoch % printPeriod == 0) {
                     val totalLoss = layer.sumLoss[SUM_KEY]?.value ?: 0.0
                     logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)

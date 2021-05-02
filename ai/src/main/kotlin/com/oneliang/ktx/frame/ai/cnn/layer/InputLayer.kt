@@ -10,7 +10,7 @@ open class InputLayer<IN : Any, OUT : Any>(
     private val forwardImpl: ((layer: InputLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: InputLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
     private val forwardResetImpl: ((layer: InputLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
-    private val updateImpl: ((layer: InputLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
+    private val updateImpl: ((layer: InputLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) -> Unit)? = null,
     private val initializeLayerModelDataImpl: ((layer: InputLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
     private val saveLayerModelDataImpl: ((layer: InputLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
@@ -27,8 +27,8 @@ open class InputLayer<IN : Any, OUT : Any>(
         this.forwardResetImpl?.invoke(this, dataId)
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
-        this.updateImpl?.invoke(this, epoch, printPeriod, totalDataSize, learningRate)
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
+        this.updateImpl?.invoke(this, epoch, printPeriod, totalDataSize, learningRate, training)
     }
 
     override fun initializeLayerModelDataImpl(data: String) {

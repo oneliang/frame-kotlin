@@ -11,7 +11,7 @@ open class SoftmaxLayer<IN : Any, OUT : Any, LOSS : Any>(
     private val forwardImpl: ((layer: SoftmaxLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: SoftmaxLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
     private val forwardResetImpl: ((layer: SoftmaxLayer<IN, OUT, LOSS>, dataId: Long) -> Unit)? = null,
-    private val updateImpl: ((layer: SoftmaxLayer<IN, OUT, LOSS>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
+    private val updateImpl: ((layer: SoftmaxLayer<IN, OUT, LOSS>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) -> Unit)? = null,
     private val initializeLayerModelDataImpl: ((layer: SoftmaxLayer<IN, OUT, LOSS>, data: String) -> Unit) = { _, _ -> },
     private val saveLayerModelDataImpl: ((layer: SoftmaxLayer<IN, OUT, LOSS>) -> String) = { Constants.String.BLANK }
 ) : LossLayer<IN, OUT, LOSS>() {
@@ -31,8 +31,8 @@ open class SoftmaxLayer<IN : Any, OUT : Any, LOSS : Any>(
         this.forwardResetImpl?.invoke(this, dataId)
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
-        this.updateImpl?.invoke(this, epoch, printPeriod, totalDataSize, learningRate)
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
+        this.updateImpl?.invoke(this, epoch, printPeriod, totalDataSize, learningRate, training)
     }
 
     override fun initializeLayerModelDataImpl(data: String) {

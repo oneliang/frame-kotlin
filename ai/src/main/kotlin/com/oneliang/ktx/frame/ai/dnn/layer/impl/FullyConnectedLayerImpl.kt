@@ -103,7 +103,7 @@ class FullyConnectedLayerImpl(
 //        println("derived weight:${this.derivedWeights[DERIVED_WEIGHTS_KEY]?.toJson()}")
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
 //update all weight, gradient descent
         val derivedWeights = this.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
         this.weights.forEachIndexed { weightIndex, outputNeuronWeightArray ->

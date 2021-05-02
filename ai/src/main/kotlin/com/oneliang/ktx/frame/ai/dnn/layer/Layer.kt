@@ -69,11 +69,11 @@ abstract class Layer<IN : Any, OUT : Any> {
     /**
      * invoke one time
      */
-    fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
-        updateImpl(epoch, printPeriod, totalDataSize, learningRate)
+    fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
+        updateImpl(epoch, printPeriod, totalDataSize, learningRate, training)
     }
 
-    protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double)
+    protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean)
 
     fun getLayerModelData(): String {
         return saveLayerModelDataImpl()

@@ -27,6 +27,7 @@ class Trainer {
         modelFullFilename: String = Constants.String.BLANK,
         parallel: Boolean = false
     ) {
+        val training = true
         val layerList = neuralNetwork.getLayerList()
         val (inputLayer, outputLayer, model) = getInputAndOutputLayer(layerList, modelFullFilename)
         var begin = System.currentTimeMillis()
@@ -49,13 +50,13 @@ class Trainer {
                         if (parallel) {
                             jobList += this.coroutine.launch {
                                 //forward include backward(backPropagation)
-                                forward(inputLayer, currentDataId, xArray, y, true)
+                                forward(inputLayer, currentDataId, xArray, y, training)
                                 backward(outputLayer, currentDataId, y)
                                 forwardReset(inputLayer, currentDataId)
                             }
                         } else {
                             //forward include backward(backPropagation)
-                            forward(inputLayer, currentDataId, xArray, y, true)
+                            forward(inputLayer, currentDataId, xArray, y, training)
                             backward(outputLayer, currentDataId, y)
                             forwardReset(inputLayer, currentDataId)
                         }
@@ -66,7 +67,7 @@ class Trainer {
             }
 
             //update all weight, gradient descent
-            update(layerList, epoch, printPeriod, totalDataSize, learningRate)
+            update(layerList, epoch, printPeriod, totalDataSize, learningRate, training)
             if (epoch % printPeriod == 0) {
                 //first calculate cost
                 val cost = System.currentTimeMillis() - begin
@@ -135,10 +136,10 @@ class Trainer {
         inputLayer.doForwardRest(dataId)
     }
 
-    private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
         for (layerIndex in layerList.indices) {
             val layer = layerList[layerIndex]
-            layer.update(epoch, printPeriod, totalDataSize, learningRate)
+            layer.update(epoch, printPeriod, totalDataSize, learningRate, training)
         }
     }
 
@@ -163,9 +164,11 @@ class Trainer {
         neuralNetwork: NeuralNetwork,
         modelFullFilename: String = Constants.String.BLANK,
     ) {
+        val training = false
         val layerList = neuralNetwork.getLayerList()
         val (inputLayer, _) = getInputAndOutputLayer(layerList, modelFullFilename)
         var dataId = 0L
+        var totalDataSize = 0L
         while (true) {
             val result = batching.fetch()
             if (result.finished) {
@@ -173,12 +176,13 @@ class Trainer {
                 break
             }
             val inputDataList = result.dataList
-
+            totalDataSize += inputDataList.size
             inputDataList.forEach { item ->
                 dataId++
                 val (y, xArray) = item
                 forward(inputLayer, dataId, xArray, y, false)
             }
         }
+        update(layerList, 1, 1, totalDataSize, 0.0, training)
     }
 }
