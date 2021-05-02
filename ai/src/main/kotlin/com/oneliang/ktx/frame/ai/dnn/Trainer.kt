@@ -29,6 +29,7 @@ class Trainer {
     ) {
         val layerList = neuralNetwork.getLayerList()
         val (inputLayer, outputLayer, model) = getInputAndOutputLayer(layerList, modelFullFilename)
+        var begin = System.currentTimeMillis()
         for (epoch in 1..epochs) {
             var dataId = 0L
             var totalDataSize = 0L
@@ -67,8 +68,12 @@ class Trainer {
             //update all weight, gradient descent
             update(layerList, epoch, printPeriod, totalDataSize, learningRate)
             if (epoch % printPeriod == 0) {
+                //first calculate cost
+                val cost = System.currentTimeMillis() - begin
+                //update and replace begin
+                begin = System.currentTimeMillis()
                 saveModel(layerList, modelFullFilename, (model?.times ?: 0) + epoch)
-                logger.debug("times:%s, total data size:%s", epoch, totalDataSize)
+                logger.debug("times:%s, cost:%s, total data size:%s", epoch, cost, totalDataSize)
             }
         }
     }

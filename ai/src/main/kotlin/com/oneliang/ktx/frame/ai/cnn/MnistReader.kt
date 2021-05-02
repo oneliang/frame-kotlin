@@ -1,11 +1,17 @@
 package com.oneliang.ktx.frame.ai.cnn
 
+import com.oneliang.ktx.Constants
+import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.FileInputStream
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.util.*
 
 class MnistReader(val labelFullFilename: String, val imageFullFilename: String) {
+
+    companion object {
+        private val logger = LoggerManager.getLogger(MnistReader::class)
+    }
 
     private lateinit var labelInputStream: FileInputStream
     private lateinit var imageInputStream: FileInputStream
@@ -25,9 +31,9 @@ class MnistReader(val labelFullFilename: String, val imageFullFilename: String) 
             if (labelSize != imageSize) throw Exception("Labels and images don't match in number.")
             sizeY = readInt(imageInputStream)
             sizeX = readInt(imageInputStream)
-            println("label size:%s, image size:%s, size y:%s, size x:%s".format(labelSize, imageSize, sizeY, sizeX))
-        } catch (e: Exception) {
-            e.printStackTrace()
+            logger.info("label size:%s, image size:%s, size y:%s, size x:%s".format(labelSize, imageSize, sizeY, sizeX))
+        } catch (e: Throwable) {
+            logger.error(Constants.String.EXCEPTION, e)
         }
     }
 
