@@ -4,6 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
 import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 import com.oneliang.ktx.frame.coroutine.Coroutine
+import com.oneliang.ktx.util.common.toBriefString
 import com.oneliang.ktx.util.common.toFile
 import com.oneliang.ktx.util.common.toMap
 import com.oneliang.ktx.util.file.fileExists
@@ -109,7 +110,7 @@ class Trainer {
                 logger.info("no model for layer:%s initialize", layerLabel)
                 continue
             }
-            logger.info("initialize layer:%s data:%s", layerLabel, layerModel.data)
+            logger.info("initialize layer:%s data:%s", layerLabel, layerModel.data.toBriefString(100))
             layer.initializeLayerModelData(layerModel.data)
         }
         if (inputLayer == null) {
