@@ -27,7 +27,7 @@ class RectifiedLinearUnitsLayerImpl : RectifiedLinearUnitsLayer<Array<Array<Arra
     override fun forwardResetImpl(dataId: Long) {
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
     }
 
     override fun initializeLayerModelDataImpl(data: String) {

@@ -67,7 +67,7 @@ class Trainer {
             }
 
             //update all weight, gradient descent
-            update(layerList, epoch, printPeriod, totalDataSize, learningRate, training)
+            update(layerList, epoch, printPeriod, totalDataSize, learningRate)
             if (epoch % printPeriod == 0) {
                 //first calculate cost
                 val cost = System.currentTimeMillis() - begin
@@ -136,10 +136,10 @@ class Trainer {
         inputLayer.doForwardRest(dataId)
     }
 
-    private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
+    private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
         for (layerIndex in layerList.indices) {
             val layer = layerList[layerIndex]
-            layer.update(epoch, printPeriod, totalDataSize, learningRate, training)
+            layer.update(epoch, printPeriod, totalDataSize, learningRate)
         }
     }
 
@@ -183,6 +183,13 @@ class Trainer {
                 forward(inputLayer, dataId, xArray, y, false)
             }
         }
-        update(layerList, 1, 1, totalDataSize, 0.0, training)
+        testUpdate(layerList, totalDataSize)
+    }
+
+    private fun testUpdate(layerList: List<Layer<*, *>>, totalDataSize: Long) {
+        for (layerIndex in layerList.indices) {
+            val layer = layerList[layerIndex]
+            layer.testProcess(totalDataSize)
+        }
     }
 }

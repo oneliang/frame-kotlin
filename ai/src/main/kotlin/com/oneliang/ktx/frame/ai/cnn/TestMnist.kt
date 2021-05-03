@@ -7,7 +7,7 @@ import java.io.File
 object TestMnist {
     fun testMnistNeuralNetwork() {
         val learningRate = 0.01
-        val times = 1000
+        val times = 4000
 //    val batching = TestTrendBatching(100)
         val batchSize = 100
         val mnistLabelFullFilename = "D:/Dandelion/data/mnist/t10k-labels-idx1-ubyte"

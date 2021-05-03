@@ -42,7 +42,7 @@ class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Doubl
         })
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
         if (epoch % printPeriod == 0) {
             val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0
             logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)

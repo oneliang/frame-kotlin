@@ -46,18 +46,13 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
         })
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
-        if (training) {//test
-            if (epoch % printPeriod == 0) {
-                val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0
-                logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
-            }
-            //reset after update
-            this.sumLoss.clear()//reset after update per one time
-        } else {
-            val correctDataSize = this.testDataCorrectMap.size
-            logger.debug("epoch:%s, (correct/total)=(%s/%s), correct probability:%s", epoch, correctDataSize, totalDataSize, correctDataSize / totalDataSize)
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+        if (epoch % printPeriod == 0) {
+            val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0
+            logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
         }
+        //reset after update
+        this.sumLoss.clear()//reset after update per one time
     }
 
     override fun initializeLayerModelDataImpl(data: String) {
@@ -65,5 +60,10 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
 
     override fun saveLayerModelDataImpl(): String {
         return Constants.String.BLANK
+    }
+
+    override fun testProcessImpl(totalDataSize: Long) {
+        val correctDataSize = this.testDataCorrectMap.size
+        logger.debug("(correct/total)=(%s/%s), correct probability:%s", correctDataSize, totalDataSize, correctDataSize.toDouble() / totalDataSize)
     }
 }

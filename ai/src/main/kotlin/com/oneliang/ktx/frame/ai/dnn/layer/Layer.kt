@@ -69,11 +69,11 @@ abstract class Layer<IN : Any, OUT : Any> {
     /**
      * invoke one time
      */
-    fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean) {
-        updateImpl(epoch, printPeriod, totalDataSize, learningRate, training)
+    fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+        updateImpl(epoch, printPeriod, totalDataSize, learningRate)
     }
 
-    protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double, training: Boolean)
+    protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double)
 
     fun getLayerModelData(): String {
         return saveLayerModelDataImpl()
@@ -88,4 +88,13 @@ abstract class Layer<IN : Any, OUT : Any> {
     protected abstract fun initializeLayerModelDataImpl(data: String)
 
     protected fun outputNullError(): Nothing = error("out can not be null")
+
+    /**
+     * invoke one time
+     */
+    fun testProcess(totalDataSize: Long) {
+        testProcessImpl(totalDataSize)
+    }
+
+    protected open fun testProcessImpl(totalDataSize: Long) {}
 }
