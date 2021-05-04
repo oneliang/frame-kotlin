@@ -14,6 +14,7 @@ import com.oneliang.ktx.util.math.matrix.multiply
 class FullyConnectedLayerImpl(
     neuronCount: Int,
     private val supportBias: Boolean = false,
+    private val learningRate: Double = 0.0,
 ) : FullyConnectedLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount) {
 
     companion object {
@@ -104,11 +105,12 @@ class FullyConnectedLayerImpl(
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+        val fixLearningRate = if (this.learningRate > 0.0) this.learningRate else learningRate
 //update all weight, gradient descent
         val derivedWeights = this.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
         this.weights.forEachIndexed { weightIndex, outputNeuronWeightArray ->
             outputNeuronWeightArray.forEachIndexed { outputNeuronIndex, weight ->
-                this.weights[weightIndex][outputNeuronIndex] = weight - (learningRate * derivedWeights[weightIndex][outputNeuronIndex]) / totalDataSize
+                this.weights[weightIndex][outputNeuronIndex] = weight - (fixLearningRate * derivedWeights[weightIndex][outputNeuronIndex]) / totalDataSize
             }
         }
         if (epoch % printPeriod == 0) {

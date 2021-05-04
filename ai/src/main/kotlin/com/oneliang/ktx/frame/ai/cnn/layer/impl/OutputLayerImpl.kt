@@ -4,6 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.cnn.layer.OutputLayer
 import com.oneliang.ktx.frame.ai.loss.crossEntropyLoss
 import com.oneliang.ktx.pojo.DoubleWrapper
+import com.oneliang.ktx.util.common.maxOfWithIndexed
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
@@ -16,6 +17,9 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
 
     private val correctProbability = Array(typeCount) { Array(typeCount) { 0.0 } }
     private val testDataCorrectMap = ConcurrentHashMap<Long, Double>()
+    private val testCalculateYMap = ConcurrentHashMap<Int, Counter>()
+
+    class Counter(var correctCount: Int, var totalCount: Int)
 
     init {
         for (type in 0 until typeCount) {
@@ -30,6 +34,12 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
             if (calculateProbability >= 0.9) {
                 this.testDataCorrectMap[dataId] = calculateProbability
             }
+            val (maxIndex, value) = inputNeuron.maxOfWithIndexed { it }
+            val counter = this.testCalculateYMap.getOrPut(correctYType) { Counter(0, 0) }
+            if (maxIndex == correctYType) {
+                counter.correctCount++
+            }
+            counter.totalCount++
             logger.info("calculate y[%s] probability:%s, real y:%s, calculate probability:%s", correctYType, calculateProbability, y, inputNeuron.toJson())
         }
         return inputNeuron
@@ -65,5 +75,12 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
     override fun testProcessImpl(totalDataSize: Long) {
         val correctDataSize = this.testDataCorrectMap.size
         logger.debug("(correct/total)=(%s/%s), correct probability:%s", correctDataSize, totalDataSize, correctDataSize.toDouble() / totalDataSize)
+        val totalCounter = Counter(0, 0)
+        this.testCalculateYMap.forEach { (y, counter) ->
+            logger.debug("y:%s, (correct/total)=(%s/%s)", y, counter.correctCount, counter.totalCount)
+            totalCounter.correctCount += counter.correctCount
+            totalCounter.totalCount += counter.totalCount
+        }
+        logger.debug("(correct/total)=(%s/%s),correct probability:%s", totalCounter.correctCount, totalCounter.totalCount, totalCounter.correctCount.toDouble() / totalCounter.totalCount)
     }
 }

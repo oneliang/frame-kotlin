@@ -12,10 +12,10 @@ object MnistNeuralNetwork : NeuralNetwork {
     @Suppress("UNCHECKED_CAST")
     override fun getLayerList(): List<Layer<*, *>> {
         //input 2 hidden 3 and 2 output 1, input in batch
-        val inputLayer = FullyConnectedLayerImpl(10)
+        val inputLayer = FullyConnectedLayerImpl(10, learningRate = 0.15)
 //        val hiddenLayer1 = FullyConnectedLayerImpl(10)
 //        val hiddenLayer2 = FullyConnectedLayerImpl(10)
-        val softmaxLayer = SoftmaxLayerImpl(inputLayer.neuronCount, 10)
+        val softmaxLayer = SoftmaxLayerImpl(inputLayer.neuronCount, 10, learningRate = 0.06)
         val outputLayer = OutputLayerImpl(softmaxLayer.typeCount)
         return listOf(
             inputLayer,

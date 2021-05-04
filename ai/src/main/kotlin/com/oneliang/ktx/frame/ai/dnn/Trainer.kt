@@ -165,7 +165,6 @@ class Trainer {
         neuralNetwork: NeuralNetwork,
         modelFullFilename: String = Constants.String.BLANK,
     ) {
-        val training = false
         val layerList = neuralNetwork.getLayerList()
         val (inputLayer, _) = getInputAndOutputLayer(layerList, modelFullFilename)
         var dataId = 0L
@@ -184,10 +183,10 @@ class Trainer {
                 forward(inputLayer, dataId, xArray, y, false)
             }
         }
-        testUpdate(layerList, totalDataSize)
+        testProcess(layerList, totalDataSize)
     }
 
-    private fun testUpdate(layerList: List<Layer<*, *>>, totalDataSize: Long) {
+    private fun testProcess(layerList: List<Layer<*, *>>, totalDataSize: Long) {
         for (layerIndex in layerList.indices) {
             val layer = layerList[layerIndex]
             layer.testProcess(totalDataSize)

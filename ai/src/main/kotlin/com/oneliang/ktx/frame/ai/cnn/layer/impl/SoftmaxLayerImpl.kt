@@ -13,7 +13,11 @@ import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.math.matrix.transpose
 
-open class SoftmaxLayerImpl(neuronCount: Int, typeCount: Int) : SoftmaxLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount, typeCount) {
+open class SoftmaxLayerImpl(
+    neuronCount: Int,
+    typeCount: Int,
+    private val learningRate: Double = 0.0
+) : SoftmaxLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount, typeCount) {
 
     companion object {
         private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
@@ -77,6 +81,7 @@ open class SoftmaxLayerImpl(neuronCount: Int, typeCount: Int) : SoftmaxLayer<Arr
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+        val fixLearningRate = if (this.learningRate > 0.0) this.learningRate else learningRate
         //update all weight, gradient descent
         val derivedWeights = this.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
         this.weights.forEachIndexed { index, weight ->
