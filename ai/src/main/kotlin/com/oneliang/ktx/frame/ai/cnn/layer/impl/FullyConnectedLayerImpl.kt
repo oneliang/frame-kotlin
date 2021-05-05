@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.ai.cnn.layer.impl
 
 import com.oneliang.ktx.frame.ai.cnn.layer.FullyConnectedLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
+import com.oneliang.ktx.util.common.toBriefString
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
@@ -81,7 +82,7 @@ open class FullyConnectedLayerImpl(
             }
         }
         if (epoch % printPeriod == 0) {
-            logger.debug("epoch:%s, weight array:%s", epoch, this.weights.toJson())
+            logger.debug("epoch:%s, weight array:%s", epoch, this.weights.toJson().toBriefString(100))
         }
         //reset after update
         this.derivedWeights.clear()//reset after update per one time
