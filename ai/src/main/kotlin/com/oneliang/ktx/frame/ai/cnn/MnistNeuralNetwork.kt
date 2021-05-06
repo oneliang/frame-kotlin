@@ -1,4 +1,4 @@
-package com.oneliang.ktx.frame.test.ai.mnist
+package com.oneliang.ktx.frame.ai.cnn
 
 import com.oneliang.ktx.frame.ai.cnn.layer.impl.*
 import com.oneliang.ktx.frame.ai.dnn.NeuralNetwork

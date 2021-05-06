@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.test.ai.mnist
 
+import com.oneliang.ktx.frame.ai.cnn.MnistNeuralNetwork
 import com.oneliang.ktx.frame.ai.dnn.Trainer
 import com.oneliang.ktx.util.logging.*
 import java.io.File
