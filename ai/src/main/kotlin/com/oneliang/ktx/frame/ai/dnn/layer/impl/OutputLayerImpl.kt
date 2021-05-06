@@ -12,7 +12,7 @@ import com.oneliang.ktx.util.math.matrix.transpose
 /**
  * this output layer, input neuron equal output neuron, so loss named inputNeuronLoss
  */
-class OutputLayerImpl(neuronCount: Int) : OutputLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount) {
+class OutputLayerImpl : OutputLayer<Array<Double>, Array<Double>, Array<Array<Double>>>() {
     companion object {
         private val logger = LoggerManager.getLogger(OutputLayerImpl::class)
         private const val SUM_KEY = "sum"

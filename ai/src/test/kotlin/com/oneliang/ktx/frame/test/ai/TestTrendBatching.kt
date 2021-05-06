@@ -4,9 +4,8 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
 import java.io.File
 
-class TestTrendBatching(override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
+class TestTrendBatching(private val fullFilename:String, override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
 
-    private val fullFilename = "/C:/Users/Administrator/Desktop/input.csv"
     private var reader = File(this.fullFilename).bufferedReader()
 
     private var lineCount = 0

@@ -7,6 +7,7 @@ import com.oneliang.ktx.frame.ai.dnn.Trainer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.frame.test.ai.TestSoftmaxRegressionBatching
+import com.oneliang.ktx.frame.test.ai.TestTrendBatching
 import com.oneliang.ktx.pojo.DoubleWrapper
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.toJson
@@ -64,10 +65,27 @@ object TestDeepNeuralNetworkMachine {
         val cnnTestBatching = TestDNNBatching(testFullFilename, batchSize)
         trainer.test(cnnTestBatching, neuralNetwork, modelFullFilename)
     }
+
+    fun testTrendNeuralNetwork() {
+        val learningRate = 0.002
+        val times = 20000
+        val batchSize = 100
+        val trainFullFilename = "/C:/Users/Administrator/Desktop/temp/电子盘input.csv"
+        val testFullFilename = "/C:/Users/Administrator/Desktop/temp/电子盘input.csv"
+        val modelFullFilename = "/D:/dnn_model.txt"
+        val rnnBatching = TestTrendBatching(trainFullFilename, batchSize)
+        val neuralNetwork = TrendNeuralNetwork
+        val trainer = Trainer()
+        trainer.train(rnnBatching, neuralNetwork, learningRate, times, 100, modelFullFilename)
+        rnnBatching.reset()
+        val testBatching = TestTrendBatching(testFullFilename, batchSize)
+        trainer.test(testBatching, neuralNetwork, modelFullFilename)
+    }
 }
 
 fun main() {
 //    TestDeepNeuralNetworkMachine.testLinearRegressionNeuralNetwork()
 //    TestDeepNeuralNetworkMachine.testSoftmaxRegressionNeuralNetwork()
-    TestDeepNeuralNetworkMachine.testDeepNeuralNetwork()
+//    TestDeepNeuralNetworkMachine.testDeepNeuralNetwork()
+    TestDeepNeuralNetworkMachine.testTrendNeuralNetwork()
 }
