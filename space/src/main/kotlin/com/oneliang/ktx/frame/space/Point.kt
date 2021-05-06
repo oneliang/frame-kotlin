@@ -16,4 +16,8 @@ data class Point(val x: Double, val y: Double, val z: Double = 0.0) {
     fun distance(): Double {
         return sqrt(x.pow(2) + y.pow(2) + z.pow(2))
     }
+
+    fun maybeSamePoint(point: Point, threshold: Double): Boolean {
+        return (this - point).distance() <= threshold
+    }
 }
