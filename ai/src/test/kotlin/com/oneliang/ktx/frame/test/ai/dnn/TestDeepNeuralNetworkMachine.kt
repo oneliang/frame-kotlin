@@ -67,7 +67,7 @@ object TestDeepNeuralNetworkMachine {
     }
 
     fun testTrendNeuralNetwork() {
-        val learningRate = 0.002
+        val learningRate = 0.000001
         val times = 20000
         val batchSize = 100
         val trainFullFilename = "/C:/Users/Administrator/Desktop/temp/电子盘input.csv"

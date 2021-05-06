@@ -1,8 +1,7 @@
-package com.oneliang.ktx.frame.ai.cnn
+package com.oneliang.ktx.frame.test.ai.mnist
 
-import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
-import com.oneliang.ktx.util.common.toArray
+import com.oneliang.ktx.frame.ai.cnn.MnistReader
 
 class TestMnistBatching(private val labelFullFilename: String, private val imageFullFilename: String, override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
 
