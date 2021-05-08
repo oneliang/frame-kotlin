@@ -74,7 +74,7 @@ dependencies {
     // In your *top level* build gradle, and use
     // rootProject.ext.jCudaVersion instead of jCudaVersion when you need to access it
 
-    def jCudaVersion = "11.0.0"
+    def jCudaVersion = "10.2.0"
 
     // JCuda Java libraries
 
