@@ -110,7 +110,7 @@ class Trainer {
                 logger.info("no model for layer:%s initialize", layerLabel)
                 continue
             }
-            logger.info("initialize layer:%s data:%s", layerLabel, layerModel.data.toBriefString(100))
+            logger.info("initialize layer:%s, data:%s", layerLabel, layerModel.data.toBriefString(100))
             layer.initializeLayerModelData(layerModel.data)
         }
         if (inputLayer == null) {

@@ -19,12 +19,12 @@ object TestMnist {
         val batching = TestMnistBatching(mnistLabelFullFilename, mnistImageFullFilename, batchSize)
         val neuralNetwork = MnistNeuralNetwork
         val trainer = Trainer()
-        trainer.train(batching, neuralNetwork, learningRate, times, 10, modelFullFilename, true)
-//        batching.reset()
+        trainer.train(batching, neuralNetwork, learningRate, times, 10, modelFullFilename, false)
+        batching.reset()
         val testMnistLabelFullFilename = "$fileRoot/mnist/train-labels-idx1-ubyte"
         val testMnistImageFullFilename = "$fileRoot/mnist/train-images-idx3-ubyte"
         val testBatching = TestMnistBatching(testMnistLabelFullFilename, testMnistImageFullFilename, batchSize)
-        trainer.test(testBatching, neuralNetwork, modelFullFilename)
+        trainer.test(batching, neuralNetwork, modelFullFilename)
     }
 }
 

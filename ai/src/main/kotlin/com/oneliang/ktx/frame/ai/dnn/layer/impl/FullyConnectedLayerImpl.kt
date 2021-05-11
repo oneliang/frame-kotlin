@@ -41,7 +41,7 @@ class FullyConnectedLayerImpl(
         if (this.weights.isEmpty()) {
             this.weights = Array(newInputNeuron.size) { Array(this.neuronCount) { 0.1 } }
         }
-        val outputNeuron = newInputNeuron.multiply(this.weights)
+        val outputNeuron = newInputNeuron.multiply(this.weights, true)
 //        println("-----fully connected forward-----")
 //        println("input:" + inputNeuron.toJson())
 //        println("weights:" + this.weights.toJson())
