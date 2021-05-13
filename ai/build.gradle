@@ -1,8 +1,9 @@
 apply from: "${rootDir}/gradle/feature.gradle"
 apply from: "${rootDir}/gradle/maven-publish.gradle"
-apply from: "${rootDir}/gradle/jcuda-dependencies.gradle"
+//apply from: "${rootDir}/gradle/jcuda-dependencies.gradle"
 
 dependencies {
     implementation project(":coroutine")
+    implementation "com.aparapi:aparapi:2.0.0"
 }
 
