@@ -78,12 +78,12 @@ open class SoftmaxLayerImpl(
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
-        val fixLearningRate = if (this.learningRate > 0.0) this.learningRate else learningRate
+        val fixLearningRate = if (this.learningRate > 0.0f) this.learningRate else learningRate
         //update all weight, gradient descent
         val derivedWeights = this.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
         this.weights.forEachIndexed { index, weight ->
             for (position in weight.indices) {
-                this.weights[index][position] = weight[position] - (learningRate * derivedWeights[index][position]) / totalDataSize
+                this.weights[index][position] = weight[position] - (fixLearningRate * derivedWeights[index][position]) / totalDataSize
             }
         }
         if (epoch % printPeriod == 0) {

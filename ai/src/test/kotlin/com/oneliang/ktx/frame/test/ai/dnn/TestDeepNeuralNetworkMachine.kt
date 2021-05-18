@@ -52,8 +52,8 @@ object TestDeepNeuralNetworkMachine {
 
     fun testDeepNeuralNetwork() {
         val learningRate = 0.0001f
-        val times = 1
-        val batchSize = 1
+        val times = 1000
+        val batchSize = 100
         val trainFullFilename = File("ai/src/test/resources/dnn.txt").absolutePath
         val testFullFilename = File("ai/src/test/resources/dnn.txt").absolutePath
         val modelFullFilename = "/D:/dnn_model.txt"
@@ -86,6 +86,6 @@ object TestDeepNeuralNetworkMachine {
 fun main() {
 //    TestDeepNeuralNetworkMachine.testLinearRegressionNeuralNetwork()
 //    TestDeepNeuralNetworkMachine.testSoftmaxRegressionNeuralNetwork()
-//    TestDeepNeuralNetworkMachine.testDeepNeuralNetwork()
-    TestDeepNeuralNetworkMachine.testTrendNeuralNetwork()
+    TestDeepNeuralNetworkMachine.testDeepNeuralNetwork()
+//    TestDeepNeuralNetworkMachine.testTrendNeuralNetwork()
 }

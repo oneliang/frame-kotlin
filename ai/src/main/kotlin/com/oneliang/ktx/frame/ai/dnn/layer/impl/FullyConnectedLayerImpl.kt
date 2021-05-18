@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.ai.dnn.layer.impl
 
+import com.oneliang.ktx.frame.ai.base.matrix.multiply
 import com.oneliang.ktx.frame.ai.dnn.layer.FullyConnectedLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.OutputLayer
@@ -10,7 +11,6 @@ import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
-import com.oneliang.ktx.util.math.matrix.multiply
 
 class FullyConnectedLayerImpl(
     neuronCount: Int,
@@ -41,7 +41,7 @@ class FullyConnectedLayerImpl(
         if (this.weights.isEmpty()) {
             this.weights = Array(newInputNeuron.size) { Array(this.neuronCount) { 0.1f } }
         }
-        val outputNeuron = newInputNeuron.multiply(this.weights, true)
+        val outputNeuron = newInputNeuron.multiply(this.weights, parallel = false, gpu = false)
 //        println("-----fully connected forward-----")
 //        println("input:" + inputNeuron.toJson())
 //        println("weights:" + this.weights.toJson())
@@ -77,7 +77,7 @@ class FullyConnectedLayerImpl(
 //        println("-----fully connected backward-----")
 //        println("next layer loss:" + nextLayerLoss.toJson())
         //update current layer input neuron loss
-        val inputNeuronLoss = this.weights.multiply(nextLayerLoss)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
+        val inputNeuronLoss = this.weights.multiply(nextLayerLoss, parallel = false, gpu = false)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
 //        inputNeuronLoss.printToMatrix()
 //        println("input loss:" + inputNeuronLoss.toJson())
         this.inputNeuronLoss[dataId] = inputNeuronLoss

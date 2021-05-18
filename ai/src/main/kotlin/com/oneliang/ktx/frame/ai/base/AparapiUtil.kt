@@ -1,4 +1,4 @@
-package com.oneliang.ktx.frame.test.ai.aparapi.matrix
+package com.oneliang.ktx.frame.ai.base
 
 import com.aparapi.device.Device
 import com.aparapi.device.OpenCLDevice
