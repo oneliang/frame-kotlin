@@ -31,7 +31,7 @@ abstract class Layer<IN : Any, OUT : Any> {
      * do forward
      * invoke per input data
      */
-    fun doForward(dataId: Long, inputNeuron: IN, y: Double, training: Boolean) {
+    fun doForward(dataId: Long, inputNeuron: IN, y: Float, training: Boolean) {
         this.inputNeuronMap[dataId] = inputNeuron
         val outputNeuron = forwardImpl(dataId, inputNeuron, y, training)
         this.outputNeuronMap[dataId] = outputNeuron
@@ -39,18 +39,18 @@ abstract class Layer<IN : Any, OUT : Any> {
         nextLayer?.doForward(dataId, outputNeuron, y, training)
     }
 
-    protected abstract fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT
+    protected abstract fun forwardImpl(dataId: Long, inputNeuron: IN, y: Float, training: Boolean): OUT
 
     /**
      * do backward
      * invoke per input data
      */
-    fun doBackward(dataId: Long, y: Double) {
+    fun doBackward(dataId: Long, y: Float) {
         backwardImpl(dataId, this.inputNeuronMap[dataId]!!, y)
         this.previousLayer?.doBackward(dataId, y)
     }
 
-    protected abstract fun backwardImpl(dataId: Long, inputNeuron: IN, y: Double)
+    protected abstract fun backwardImpl(dataId: Long, inputNeuron: IN, y: Float)
 
     /**
      * do forward reset
@@ -69,11 +69,11 @@ abstract class Layer<IN : Any, OUT : Any> {
     /**
      * invoke one time
      */
-    fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         updateImpl(epoch, printPeriod, totalDataSize, learningRate)
     }
 
-    protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double)
+    protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float)
 
     fun getLayerModelData(): String {
         return saveLayerModelDataImpl()

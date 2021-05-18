@@ -4,7 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
 import java.io.File
 
-class TestBatching(override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
+class TestBatching(override val batchSize: Int) : Batching<Pair<Float, Array<Float>>>(batchSize) {
 
     private var reader = File("/C:/Users/Administrator/Desktop/temp/data.csv").bufferedReader()
 
@@ -24,15 +24,15 @@ class TestBatching(override val batchSize: Int) : Batching<Pair<Double, Array<Do
         this.reader = File("/C:/Users/Administrator/Desktop/temp/data.csv").bufferedReader()
     }
 
-    private fun parseLine(line: String): Pair<Double, Array<Double>> {
+    private fun parseLine(line: String): Pair<Float, Array<Float>> {
         val rowDataList = line.split(Constants.Symbol.COMMA)
-        return rowDataList[0].toDouble() to arrayOf(rowDataList[1].toDouble(), rowDataList[2].toDouble())
+        return rowDataList[0].toFloat() to arrayOf(rowDataList[1].toFloat(), rowDataList[2].toFloat())
     }
 
-    override fun fetch(): Result<Pair<Double, Array<Double>>> {
+    override fun fetch(): Result<Pair<Float, Array<Float>>> {
         var currentLineCount = 0
         var line = reader.readLine() ?: null
-        val dataList = mutableListOf<Pair<Double, Array<Double>>>()
+        val dataList = mutableListOf<Pair<Float, Array<Float>>>()
         while (line != null) {//break when finished
             if (line.isNotBlank()) {
                 dataList += parseLine(line)

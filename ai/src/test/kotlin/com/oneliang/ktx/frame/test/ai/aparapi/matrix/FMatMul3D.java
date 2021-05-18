@@ -28,18 +28,18 @@ package com.oneliang.ktx.frame.test.ai.aparapi.matrix;
 import com.aparapi.Kernel;
 
 class FMatMul3D extends Kernel{
-   float[][][] A;
+   float[][][] aMatrix;
 
-   float[][][] B;
+   float[][][] bMatrix;
 
-   float[][][] C;
+   float[][][] cMatrix;
 
    int N;
 
    public FMatMul3D(float[][][] A, float[][][] B, float[][][] C, int N) {
-      this.A = A;
-      this.B = B;
-      this.C = C;
+      this.aMatrix = A;
+      this.bMatrix = B;
+      this.cMatrix = C;
       this.N = N;
    }
 
@@ -49,7 +49,7 @@ class FMatMul3D extends Kernel{
       int j = (id / N) % N;
       int k = id % N;
       for (int l = 0; l < N; l++) {
-         C[i][j][k] += A[i][j][l] * B[l][j][k];
+         cMatrix[i][j][k] += aMatrix[i][j][l] * bMatrix[l][j][k];
       }
    }
 }

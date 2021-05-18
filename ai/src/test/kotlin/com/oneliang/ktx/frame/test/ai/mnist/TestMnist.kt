@@ -7,7 +7,7 @@ import java.io.File
 
 object TestMnist {
     fun testMnistNeuralNetwork() {
-        val learningRate = 0.060
+        val learningRate = 0.060f
         val times = 5000
 //    val batching = TestTrendBatching(100)
         val batchSize = 100

@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 object TestDeepNeuralNetworkMachine {
     private val logger = LoggerManager.getLogger(TestDeepNeuralNetworkMachine::class)
     fun testLinearRegressionNeuralNetwork() {
-        val learningRate = 0.0001
+        val learningRate = 0.0001f
         val times = 1000
 //    val batching = TestTrendBatching(100)
         val batchSize = 5
@@ -36,7 +36,7 @@ object TestDeepNeuralNetworkMachine {
     }
 
     fun testSoftmaxRegressionNeuralNetwork() {
-        val learningRate = 0.04
+        val learningRate = 0.04f
         val times = 1
         val batchSize = 50
         val batching = TestSoftmaxRegressionBatching(batchSize)
@@ -51,7 +51,7 @@ object TestDeepNeuralNetworkMachine {
     }
 
     fun testDeepNeuralNetwork() {
-        val learningRate = 0.0001
+        val learningRate = 0.0001f
         val times = 1
         val batchSize = 1
         val trainFullFilename = File("ai/src/test/resources/dnn.txt").absolutePath
@@ -67,7 +67,7 @@ object TestDeepNeuralNetworkMachine {
     }
 
     fun testTrendNeuralNetwork() {
-        val learningRate = 0.000001
+        val learningRate = 0.000001f
         val times = 20000
         val batchSize = 100
         val trainFullFilename = "/C:/Users/Administrator/Desktop/temp/电子盘input.csv"

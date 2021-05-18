@@ -7,10 +7,10 @@ open class AveragePoolingLayer<IN : Any, OUT : Any>(
     val inX: Int,
     val inY: Int,
     val scale: Int,
-    private val forwardImpl: ((layer: AveragePoolingLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
-    private val backwardImpl: ((layer: AveragePoolingLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
+    private val forwardImpl: ((layer: AveragePoolingLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
+    private val backwardImpl: ((layer: AveragePoolingLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null,
     private val forwardResetImpl: ((layer: AveragePoolingLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
-    private val updateImpl: ((layer: AveragePoolingLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
+    private val updateImpl: ((layer: AveragePoolingLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) -> Unit)? = null,
     private val initializeLayerModelDataImpl: ((layer: AveragePoolingLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
     private val saveLayerModelDataImpl: ((layer: AveragePoolingLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
@@ -18,11 +18,11 @@ open class AveragePoolingLayer<IN : Any, OUT : Any>(
     val outX = this.inX / this.scale
     val outY = this.inY / this.scale
 
-    override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
+    override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Float, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()
     }
 
-    override fun backwardImpl(dataId: Long, inputNeuron: IN, y: Double) {
+    override fun backwardImpl(dataId: Long, inputNeuron: IN, y: Float) {
         this.backwardImpl?.invoke(this, dataId, inputNeuron, y)
     }
 
@@ -30,7 +30,7 @@ open class AveragePoolingLayer<IN : Any, OUT : Any>(
         this.forwardResetImpl?.invoke(this, dataId)
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         this.updateImpl?.invoke(this, epoch, printPeriod, totalDataSize, learningRate)
     }
 

@@ -15,8 +15,8 @@ import com.oneliang.ktx.util.math.matrix.multiply
 class FullyConnectedLayerImpl(
     neuronCount: Int,
     private val supportBias: Boolean = false,
-    private val learningRate: Double = 0.0,
-) : FullyConnectedLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount) {
+    private val learningRate: Float = 0.0f,
+) : FullyConnectedLayer<Array<Float>, Array<Float>, Array<Array<Float>>>(neuronCount) {
 
     companion object {
         private val logger = LoggerManager.getLogger(FullyConnectedLayerImpl::class)
@@ -25,21 +25,21 @@ class FullyConnectedLayerImpl(
     }
 
     //coroutine concurrent, use for all data in layer
-    var derivedWeights = AtomicMap<String, Array<Array<Double>>>()//Array(this.neuronCount) { 0.0 }
+    var derivedWeights = AtomicMap<String, Array<Array<Float>>>()//Array(this.neuronCount) { 0.0f }
 
     //coroutine concurrent, use for input data, need to reset it by data id to release memory
-//    var inputNeuronLoss = ConcurrentHashMap<Long, Array<Array<Double>>>()//Array(this.neuronCount) { 0.0 }
+//    var inputNeuronLoss = ConcurrentHashMap<Long, Array<Array<Float>>>()//Array(this.neuronCount) { 0.0 }
 
     //use for layer, public
-    var weights: Array<Array<Double>> = emptyArray()
-    private var bias: Double = 1.0
+    var weights: Array<Array<Float>> = emptyArray()
+    private var bias: Float = 1.0f
 
-    override fun forwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double, training: Boolean): Array<Double> {
+    override fun forwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float, training: Boolean): Array<Float> {
         //add bias when support bias
         val newInputNeuron = if (this.supportBias) inputNeuron + this.bias else inputNeuron
         //initialize the weights in current layer
         if (this.weights.isEmpty()) {
-            this.weights = Array(newInputNeuron.size) { Array(this.neuronCount) { 0.1 } }
+            this.weights = Array(newInputNeuron.size) { Array(this.neuronCount) { 0.1f } }
         }
         val outputNeuron = newInputNeuron.multiply(this.weights, true)
 //        println("-----fully connected forward-----")
@@ -50,7 +50,7 @@ class FullyConnectedLayerImpl(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {
+    override fun backwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float) {
         //add bias when support bias
         val newInputNeuron = if (this.supportBias) inputNeuron + this.bias else inputNeuron
         //out put loss
@@ -67,7 +67,7 @@ class FullyConnectedLayerImpl(
                 if (this.supportBias) outputNeuronLoss.copyOfRange(0, outputNeuronLoss.size - 1) else outputNeuronLoss//when support bias, delete the bias loss, last input is bias
             }
             is LossLayer<*, *, *> -> {
-                val outputNeuronLoss = getNextLayerInputNeuronLoss<Array<Array<Double>>>(dataId)//next layer input neuron loss = this layer output neuron loss
+                val outputNeuronLoss = getNextLayerInputNeuronLoss<Array<Array<Float>>>(dataId)//next layer input neuron loss = this layer output neuron loss
                 if (this.supportBias) outputNeuronLoss.copyOfRange(0, outputNeuronLoss.size - 1) else outputNeuronLoss//when support bias, delete the bias loss, last input is bias
             }
             else -> {
@@ -105,7 +105,7 @@ class FullyConnectedLayerImpl(
 //        println("derived weight:${this.derivedWeights[DERIVED_WEIGHTS_KEY]?.toJson()}")
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         val fixLearningRate = if (this.learningRate > 0.0) this.learningRate else learningRate
 //update all weight, gradient descent
         val derivedWeights = this.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
@@ -125,14 +125,14 @@ class FullyConnectedLayerImpl(
 
     override fun initializeLayerModelDataImpl(data: String) {
         val map = data.jsonToMap()
-        val weightsData = map[WEIGHTS_KEY]?.jsonToObjectList(Array<Double>::class)
+        val weightsData = map[WEIGHTS_KEY]?.jsonToObjectList(Array<Float>::class)
         if (weightsData != null) {
             this.weights = weightsData.toTypedArray()
         }
     }
 
     override fun saveLayerModelDataImpl(): String {
-        val map = mutableMapOf<String, Array<Array<Double>>>()
+        val map = mutableMapOf<String, Array<Array<Float>>>()
         map[WEIGHTS_KEY] = this.weights
         return map.toJson()
     }

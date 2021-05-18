@@ -9,18 +9,18 @@ import com.oneliang.ktx.util.math.tensor.innerProduct
 
 open class FlattenLayerImpl(
     mapDepth: Int//32
-) : FlattenLayer<Array<Array<Array<Double>>>, Array<Double>, Array<Array<Double>>>(mapDepth) {
+) : FlattenLayer<Array<Array<Array<Float>>>, Array<Float>, Array<Array<Float>>>(mapDepth) {
 
-    var weights: Array<Array<Array<Array<Double>>>> = emptyArray()//mapDepth * inputMapDepth * inY * inX
+    var weights: Array<Array<Array<Array<Float>>>> = emptyArray()//mapDepth * inputMapDepth * inY * inX
 
-    override fun forwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Double>>>, y: Double, training: Boolean): Array<Double> {
+    override fun forwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float, training: Boolean): Array<Float> {
         if (inputNeuron.isEmpty() || inputNeuron[0].isEmpty() || inputNeuron[0][0].isEmpty()) {
             error("input neuron error, data size:[%s][%s][%s]".format(inputNeuron.size, inputNeuron[0].size, inputNeuron[0][0].size))
         }
         if (this.weights.isEmpty()) {
-            this.weights = Array(this.mapDepth) { Array(inputNeuron.size) { Array(inputNeuron[0].size) { Array(inputNeuron[0][0].size) { 0.1 } } } }
+            this.weights = Array(this.mapDepth) { Array(inputNeuron.size) { Array(inputNeuron[0].size) { Array(inputNeuron[0][0].size) { 0.1f } } } }
         }
-        val outputNeuron = Array(this.mapDepth) { 0.0 }
+        val outputNeuron = Array(this.mapDepth) { 0.0f }
         singleIteration(this.mapDepth) { mapIndex ->
             val currentWeights = this.weights[mapIndex]
             outputNeuron[mapIndex] = inputNeuron.innerProduct(currentWeights)
@@ -28,16 +28,16 @@ open class FlattenLayerImpl(
         return outputNeuron
     }
 
-    override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Double>>>, y: Double) {
+    override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float) {
         //out put loss
-        val nextLayerLoss = getNextLayerInputNeuronLoss<Array<Array<Double>>>(dataId)
+        val nextLayerLoss = getNextLayerInputNeuronLoss<Array<Array<Float>>>(dataId)
         println(nextLayerLoss.toJson())
     }
 
     override fun forwardResetImpl(dataId: Long) {
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
     }
 
     override fun initializeLayerModelDataImpl(data: String) {

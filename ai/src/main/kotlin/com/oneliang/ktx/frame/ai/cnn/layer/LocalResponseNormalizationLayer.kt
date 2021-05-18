@@ -5,19 +5,19 @@ import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 
 open class LocalResponseNormalizationLayer<IN : Any, OUT : Any>(
     val mapDepth: Int = 1,
-    private val forwardImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double, training: Boolean) -> OUT)? = null,
-    private val backwardImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Double) -> Unit)? = null,
+    private val forwardImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
+    private val backwardImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null,
     private val forwardResetImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
-    private val updateImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) -> Unit)? = null,
+    private val updateImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) -> Unit)? = null,
     private val initializeLayerModelDataImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
     private val saveLayerModelDataImpl: ((layer: LocalResponseNormalizationLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
 ) : Layer<IN, OUT>() {
 
-    override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Double, training: Boolean): OUT {
+    override fun forwardImpl(dataId: Long, inputNeuron: IN, y: Float, training: Boolean): OUT {
         return this.forwardImpl?.invoke(this, dataId, inputNeuron, y, training) ?: outputNullError()
     }
 
-    override fun backwardImpl(dataId: Long, inputNeuron: IN, y: Double) {
+    override fun backwardImpl(dataId: Long, inputNeuron: IN, y: Float) {
         this.backwardImpl?.invoke(this, dataId, inputNeuron, y)
     }
 
@@ -25,7 +25,7 @@ open class LocalResponseNormalizationLayer<IN : Any, OUT : Any>(
         this.forwardResetImpl?.invoke(this, dataId)
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         this.updateImpl?.invoke(this, epoch, printPeriod, totalDataSize, learningRate)
     }
 

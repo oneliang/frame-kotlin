@@ -67,7 +67,7 @@ public class CorrMatrixKernel extends Kernel {
 
     int numLongs;
 
-    int[] resultMatrix;
+    long[] resultMatrix;
 
     /**
      * Default constructor
@@ -80,7 +80,7 @@ public class CorrMatrixKernel extends Kernel {
      * @param resultMatrix     The matrix to store the results in.
      */
     public CorrMatrixKernel(final long[] matrixA, final int matrixA_NumTerms, final long[] matrixB, final int matrixB_NumTerms,
-                            final int numLongs, final int[] resultMatrix) {
+                            final int numLongs, final long[] resultMatrix) {
         this.matrixA = matrixA;
         this.matrixA_NumTerms = matrixA_NumTerms;
         this.matrixB = matrixB;
@@ -91,7 +91,6 @@ public class CorrMatrixKernel extends Kernel {
 
     @Override
     public void run() {
-//        System.out.println(Thread.currentThread());
         final int i = this.getGlobalId(0);
 
         if (i < matrixA_NumTerms) {
@@ -114,7 +113,7 @@ public class CorrMatrixKernel extends Kernel {
      * @param bStart   Offset for Matrix B.
      * @param numWords The number of words to operate on.
      */
-    private int naive_pop_intersect(final long matrixA[], final int aStart, final long matrixB[], final int bStart, final int numWords) {
+    private int naive_pop_intersect(final long[] matrixA, final int aStart, final long[] matrixB, final int bStart, final int numWords) {
         int sum = 0;
 
         for (int i = 0; i < numWords; i++) {
@@ -136,7 +135,7 @@ public class CorrMatrixKernel extends Kernel {
      * @param bStart   Offset for Matrix B.
      * @param numWords The number of words to operate on.
      */
-    private int pop_intersect(final long matrixA[], final int aStart, final long matrixB[], final int bStart, final int numWords) {
+    private int pop_intersect(final long[] matrixA, final int aStart, final long[] matrixB, final int bStart, final int numWords) {
 
         /*
          * http://grepcode.com/file/repo1.maven.org/maven2/org.apache.lucene/lucene-core/3.1.0/org/apache/lucene/util/BitUtil.java

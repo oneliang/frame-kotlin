@@ -1,13 +1,40 @@
 package com.oneliang.ktx.frame.ai.loss
 
 import com.oneliang.ktx.util.common.singleIteration
+import com.oneliang.ktx.util.common.sumByFloat
 import com.oneliang.ktx.util.json.toJson
 import kotlin.math.ln
+
+fun informationEntropy(xArray: Array<Float>): Float {
+    return -xArray.sumByFloat {
+        it * ln(it)
+    }
+}
 
 fun informationEntropy(xArray: Array<Double>): Double {
     return -xArray.sumByDouble {
         it * ln(it)
     }
+}
+
+fun relativeEntropy(calculateY: Array<Float>, realY: Array<Float>): Float {
+    if (calculateY.isEmpty() && realY.isEmpty()) {
+        return 0.0f
+    }
+    if (calculateY.size != realY.size) {
+        error("size is not match, calculate y size:%s, real y size:%s".format(calculateY.size, realY.size))
+    }
+    var result = 0.0f
+    singleIteration(calculateY.size) { index ->
+        val calculate = calculateY[index]
+        val real = realY[index]
+        result += if (real == 0.0f) {
+            0.0f
+        } else {
+            real * ln(real / calculate)
+        }
+    }
+    return result
 }
 
 fun relativeEntropy(calculateY: Array<Double>, realY: Array<Double>): Double {
@@ -28,6 +55,26 @@ fun relativeEntropy(calculateY: Array<Double>, realY: Array<Double>): Double {
         }
     }
     return result
+}
+
+fun crossEntropyLoss(calculateY: Array<Float>, realY: Array<Float>): Float {
+    if (calculateY.isEmpty() && realY.isEmpty()) {
+        return 0.0f
+    }
+    if (calculateY.size != realY.size) {
+        error("size is not match, calculate y size:%s, real y size:%s".format(calculateY.size, realY.size))
+    }
+    var result = 0.0f
+    singleIteration(calculateY.size) { index ->
+        val calculate = calculateY[index]
+        val real = realY[index]
+        result += if (real == 0.0f) {
+            0.0f
+        } else {
+            real * ln(calculate)
+        }
+    }
+    return -result
 }
 
 fun crossEntropyLoss(calculateY: Array<Double>, realY: Array<Double>): Double {

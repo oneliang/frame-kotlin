@@ -11,19 +11,19 @@ class InputLayerImpl(
     mapDepth: Int = 1,
     x: Int,
     y: Int
-) : InputLayer<Array<Double>, Array<Array<Array<Double>>>>(mapDepth, x, y) {
+) : InputLayer<Array<Float>, Array<Array<Array<Float>>>>(mapDepth, x, y) {
 
-    override fun forwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double, training: Boolean): Array<Array<Array<Double>>> {
+    override fun forwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float, training: Boolean): Array<Array<Array<Float>>> {
         return inputNeuron.toTripleDimensionArray(mapDepth, this.y, x)
     }
 
-    override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {
+    override fun backwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float) {
     }
 
     override fun forwardResetImpl(dataId: Long) {
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
     }
 
     override fun initializeLayerModelDataImpl(data: String) {

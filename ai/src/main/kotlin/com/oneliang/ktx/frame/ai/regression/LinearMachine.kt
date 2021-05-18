@@ -4,6 +4,7 @@ import com.oneliang.ktx.frame.ai.base.Batching
 import com.oneliang.ktx.frame.ai.function.linear
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquares
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
+import com.oneliang.ktx.util.common.sumByFloat
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 
@@ -11,22 +12,22 @@ object LinearMachine {
     private val logger = LoggerManager.getLogger(LinearMachine::class)
 
     fun study(
-        batching: Batching<Pair<Double, Array<Double>>>,
-        weightArray: Array<Array<Double>>,
-        learningRate: Double,
+        batching: Batching<Pair<Float, Array<Float>>>,
+        weightArray: Array<Array<Float>>,
+        learningRate: Float,
         times: Int,
         printPeriod: Int = 500,
-        activationFunction: (xArray: Array<Double>, newWeightArray: Array<Array<Double>>) -> Array<Double> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
-        lossFunction: (calculateY: Array<Double>, y: Double) -> Double = { calculateY, y -> ordinaryLeastSquares(calculateY[0], y) },
-        gradientFunction: (x: Double, calculateY: Array<Double>, y: Double, typeIndex: Int) -> Double = { x, calculateY, y, _ -> ordinaryLeastSquaresDerived(x, calculateY[0], y) }
-    ): Array<Array<Double>> {
+        activationFunction: (xArray: Array<Float>, newWeightArray: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
+        lossFunction: (calculateY: Array<Float>, y: Float) -> Float = { calculateY, y -> ordinaryLeastSquares(calculateY[0], y) },
+        gradientFunction: (x: Float, calculateY: Array<Float>, y: Float, typeIndex: Int) -> Float = { x, calculateY, y, _ -> ordinaryLeastSquaresDerived(x, calculateY[0], y) }
+    ): Array<Array<Float>> {
         if (weightArray.isEmpty()) {
             error("weight array is empty")
         }
         val newWeightArray = weightArray.copyOf()
         for (count in 1..times) {
             var totalDataSize = 0L
-            val weightGrad = Array(newWeightArray.size) { Array(newWeightArray[0].size) { 0.0 } }
+            val weightGrad = Array(newWeightArray.size) { Array(newWeightArray[0].size) { 0.0f } }
             var totalLoss = 0.0
             while (true) {
                 val result = batching.fetch()
@@ -36,7 +37,7 @@ object LinearMachine {
                 }
                 val inputDataList = result.dataList
                 totalDataSize += inputDataList.size
-                totalLoss += inputDataList.sumByDouble { item ->
+                totalLoss += inputDataList.sumByFloat { item ->
                     val (y, xArray) = item
                     val calculateY = activationFunction(xArray, newWeightArray)
                     val currentLoss = lossFunction(calculateY, y)
@@ -64,9 +65,9 @@ object LinearMachine {
     }
 
     fun test(
-        batching: Batching<Pair<Double, Array<Double>>>, weightArray: Array<Array<Double>>,
-        activationFunction: (xArray: Array<Double>, newWeightArray: Array<Array<Double>>) -> Array<Double> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
-        loggerMessageFunction: (calculateY: Array<Double>, y: Double) -> String = { calculateY, y -> "calculate y:%s, real y:%s".format(calculateY.toJson(), y) }
+        batching: Batching<Pair<Float, Array<Float>>>, weightArray: Array<Array<Float>>,
+        activationFunction: (xArray: Array<Float>, newWeightArray: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
+        loggerMessageFunction: (calculateY: Array<Float>, y: Float) -> String = { calculateY, y -> "calculate y:%s, real y:%s".format(calculateY.toJson(), y) }
     ) {
         while (true) {
             val result = batching.fetch()

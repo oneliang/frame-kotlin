@@ -3,38 +3,38 @@ package com.oneliang.ktx.frame.ai.cnn.layer.impl
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.cnn.layer.OutputLayer
 import com.oneliang.ktx.frame.ai.loss.crossEntropyLoss
-import com.oneliang.ktx.pojo.DoubleWrapper
+import com.oneliang.ktx.pojo.FloatWrapper
 import com.oneliang.ktx.util.common.maxOfWithIndexed
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
 
-class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>>(typeCount) {
+class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Float>, Array<Float>>(typeCount) {
     companion object {
         private val logger = LoggerManager.getLogger((OutputLayerImpl::class))
         private const val SUM_KEY = "sum"
     }
 
-    private val correctProbability = Array(typeCount) { Array(typeCount) { 0.0 } }
-    private val testDataCorrectMap = ConcurrentHashMap<Long, Double>()
+    private val correctProbability = Array(typeCount) { Array(typeCount) { 0.0f } }
+    private val testDataCorrectMap = ConcurrentHashMap<Long, Float>()
     private val testCalculateYMap = ConcurrentHashMap<Int, Counter>()
 
     class Counter(var correctCount: Int, var totalCount: Int)
 
     init {
         for (type in 0 until typeCount) {
-            this.correctProbability[type][type] = 1.0//one hot encode
+            this.correctProbability[type][type] = 1.0f//one hot encode
         }
     }
 
-    override fun forwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double, training: Boolean): Array<Double> {
+    override fun forwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float, training: Boolean): Array<Float> {
         if (!training) {//test
             val correctYType = y.toInt()
             val calculateProbability = inputNeuron[correctYType]
             if (calculateProbability >= 0.9) {
                 this.testDataCorrectMap[dataId] = calculateProbability
             }
-            val (maxIndex, value) = inputNeuron.maxOfWithIndexed { it }
+            val (maxIndex, value) = inputNeuron.maxOfWithIndexed { it.toDouble() }
             val counter = this.testCalculateYMap.getOrPut(correctYType) { Counter(0, 0) }
             if (maxIndex == correctYType) {
                 counter.correctCount++
@@ -45,20 +45,20 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
         return inputNeuron
     }
 
-    override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {
+    override fun backwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float) {
         val correctYType = y.toInt()
 
 //        val calculateYProbability = inputNeuron[correctYType]
         this.sumLoss.operate(SUM_KEY, create = {
-            DoubleWrapper(crossEntropyLoss(inputNeuron, this.correctProbability[correctYType]))
+            FloatWrapper(crossEntropyLoss(inputNeuron, this.correctProbability[correctYType]))
         }, update = {
-            DoubleWrapper(it.value + crossEntropyLoss(inputNeuron, this.correctProbability[correctYType]))
+            FloatWrapper(it.value + crossEntropyLoss(inputNeuron, this.correctProbability[correctYType]))
         })
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         if (epoch % printPeriod == 0) {
-            val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0
+            val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0f
             logger.debug("epoch:%s, total loss:%s, average loss:%s", epoch, totalLoss, totalLoss / totalDataSize)
         }
         //reset after update
@@ -74,13 +74,13 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Double>, Array<Double>
 
     override fun testProcessImpl(totalDataSize: Long) {
         val correctDataSize = this.testDataCorrectMap.size
-        logger.debug("(correct/total)=(%s/%s), correct probability:%s", correctDataSize, totalDataSize, correctDataSize.toDouble() / totalDataSize)
+        logger.debug("(correct/total)=(%s/%s), correct probability:%s", correctDataSize, totalDataSize, correctDataSize.toFloat() / totalDataSize)
         val totalCounter = Counter(0, 0)
         this.testCalculateYMap.forEach { (y, counter) ->
             logger.debug("y:%s, (correct/total)=(%s/%s)", y, counter.correctCount, counter.totalCount)
             totalCounter.correctCount += counter.correctCount
             totalCounter.totalCount += counter.totalCount
         }
-        logger.debug("(correct/total)=(%s/%s),correct probability:%s", totalCounter.correctCount, totalCounter.totalCount, totalCounter.correctCount.toDouble() / totalCounter.totalCount)
+        logger.debug("(correct/total)=(%s/%s),correct probability:%s", totalCounter.correctCount, totalCounter.totalCount, totalCounter.correctCount.toFloat() / totalCounter.totalCount)
     }
 }

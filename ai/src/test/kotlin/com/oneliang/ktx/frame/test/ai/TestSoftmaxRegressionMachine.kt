@@ -7,17 +7,17 @@ import com.oneliang.ktx.frame.ai.regression.LinearMachine
 import com.oneliang.ktx.util.json.toJson
 
 fun main() {
-    val weightArray = Array(3) { Array(4) { 0.0 } }
-    val learningRate = 0.04
+    val weightArray = Array(3) { Array(4) { 0.0f } }
+    val learningRate = 0.04f
     val times = 10000
     val batching = TestSoftmaxRegressionBatching(100)
 //    val batching = TestStableDataBatching(100)
     val typeCount = weightArray[0].size
-    val correctProbability = Array(typeCount) { Array(typeCount) { 0.0 } }
+    val correctProbability = Array(typeCount) { Array(typeCount) { 0.0f } }
     for (type in 0 until typeCount) {
-        correctProbability[type][type] = 1.0
+        correctProbability[type][type] = 1.0f
     }
-    val activationFunction: (xArray: Array<Double>, newWeightArray: Array<Array<Double>>) -> Array<Double> = { xArray, newWeightArray ->
+    val activationFunction: (xArray: Array<Float>, newWeightArray: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray ->
         softmax(xArray, newWeightArray)
     }
     val newWeightArray = LinearMachine.study(batching, weightArray, learningRate, times, 100,

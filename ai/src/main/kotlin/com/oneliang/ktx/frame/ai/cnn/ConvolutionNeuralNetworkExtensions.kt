@@ -25,7 +25,18 @@ fun calculateOutSize(inSize: Int, padding: Int, size: Int, stride: Int = 1): Int
 }
 
 fun Array<Double>.toTripleDimensionArray(depth: Int, rows: Int, columns: Int): Array<Array<Array<Double>>> {
-    val maps: Array<Array<Array<Double>>> = Array(depth) { Array(rows) { Array(columns) { 0.0 } } } //输出图的内容值
+    val maps = Array(depth) { Array(rows) { Array(columns) { 0.0 } } } //输出图的内容值
+    var k = 0
+    singleIteration(depth) { depthIndex ->
+        doubleIteration(rows, columns) { row, column ->
+            maps[depthIndex][row][column] = this[k++]
+        }
+    }
+    return maps
+}
+
+fun Array<Float>.toTripleDimensionArray(depth: Int, rows: Int, columns: Int): Array<Array<Array<Float>>> {
+    val maps = Array(depth) { Array(rows) { Array(columns) { 0.0f } } } //输出图的内容值
     var k = 0
     singleIteration(depth) { depthIndex ->
         doubleIteration(rows, columns) { row, column ->

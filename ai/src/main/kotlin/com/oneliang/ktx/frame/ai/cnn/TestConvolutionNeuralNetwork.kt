@@ -6,7 +6,7 @@ import com.oneliang.ktx.util.logging.LoggerManager
 object TestCNN {
     private val logger = LoggerManager.getLogger(TestCNN::class)
     fun testConvolutionNeuralNetwork() {
-        val learningRate = 0.0001
+        val learningRate = 0.0001f
         val times = 1
 //    val batching = TestTrendBatching(100)
         val batchSize = 1

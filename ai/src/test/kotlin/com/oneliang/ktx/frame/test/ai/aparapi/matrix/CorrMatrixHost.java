@@ -90,13 +90,12 @@ public class CorrMatrixHost {
      * @param deviceType Device.TYPE
      * @return result Matrix
      */
-    public static int[][] intersectionMatrix(final long[][] matrixA, final long[][] matrixB, final Device.TYPE deviceType) {
+    public static long[][] intersectionMatrix(final long[][] matrixA, final long[][] matrixB, final Device.TYPE deviceType) {
 
         // Basic validation
         if (matrixA == null) {
             throw new NullPointerException("MatrixA cannot be NULL");
         }
-
         if (matrixB == null) {
             throw new NullPointerException("MatrixB cannot be NULL");
         }
@@ -141,7 +140,7 @@ public class CorrMatrixHost {
         logger.debug("----------");
 //      }
 
-        final int[][] resultMatrix = new int[matrixA_numTerms][matrixB_numTerms];
+        final long[][] resultMatrix = new long[matrixA_numTerms][matrixB_numTerms];
 
 //      if (logger.isDebugEnabled()) {
         final long resultMatrix_TotalBytes = (matrixA_numTerms * matrixB_numTerms * 4L) + arrayMemOverhead;
@@ -252,7 +251,7 @@ public class CorrMatrixHost {
 
         final long[] subMatrixA = new long[NUM_SUB_ROWS * matrixA_numLongs];
         final long[] subMatrixB = new long[NUM_SUB_ROWS * matrixB_numLongs];
-        final int[] subResultMatrix = new int[NUM_SUB_ROWS * NUM_SUB_ROWS];
+        final long[] subResultMatrix = new long[NUM_SUB_ROWS * NUM_SUB_ROWS];
 
         final CorrMatrixKernel kernel = new CorrMatrixKernel(subMatrixA, NUM_SUB_ROWS, subMatrixB, NUM_SUB_ROWS, matrixA_numLongs, subResultMatrix);
         kernel.setExplicit(true);
@@ -339,7 +338,7 @@ public class CorrMatrixHost {
      *
      * @return resultMatrix
      */
-    private static void executeKernel(final Device device, final long[] subMatrixA, final int matrixA_NumTerms, final long[] subMatrixB, final int matrixB_NumTerms, final int numLongs, final int[] subResultMatrix, final Kernel kernel) {
+    private static void executeKernel(final Device device, final long[] subMatrixA, final int matrixA_NumTerms, final long[] subMatrixB, final int matrixB_NumTerms, final int numLongs, final long[] subResultMatrix, final Kernel kernel) {
 
         // Power of Two for best performance
         int matrixA_NumTermsRnd = matrixA_NumTerms;

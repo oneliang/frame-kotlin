@@ -4,7 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.base.Batching
 import java.io.File
 
-class TestTrendBatching(private val fullFilename:String, override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
+class TestTrendBatching(private val fullFilename:String, override val batchSize: Int) : Batching<Pair<Float, Array<Float>>>(batchSize) {
 
     private var reader = File(this.fullFilename).bufferedReader()
 
@@ -17,12 +17,12 @@ class TestTrendBatching(private val fullFilename:String, override val batchSize:
         this.reader = File(this.fullFilename).bufferedReader()
     }
 
-    private fun parseLine(line: String): Pair<Double, Array<Double>> {
+    private fun parseLine(line: String): Pair<Float, Array<Float>> {
         val rowDataList = line.split(Constants.Symbol.COMMA)
-        var result = 0.0
-        val dataArray = Array(rowDataList.size - 1) { 0.0 }
+        var result = 0.0f
+        val dataArray = Array(rowDataList.size - 1) { 0.0f }
         rowDataList.forEachIndexed { index: Int, string: String ->
-            val value = string.trim().toDouble()
+            val value = string.trim().toFloat()
             if (index == 0) {
                 result = value / 1000
             } else if (index in 1..2 || index == 4 || index == 6 || index in 10..15) {
@@ -40,10 +40,10 @@ class TestTrendBatching(private val fullFilename:String, override val batchSize:
         return result to dataArray
     }
 
-    override fun fetch(): Result<Pair<Double, Array<Double>>> {
+    override fun fetch(): Result<Pair<Float, Array<Float>>> {
         var currentLineCount = 0
         var line = this.reader.readLine() ?: null
-        val dataList = mutableListOf<Pair<Double, Array<Double>>>()
+        val dataList = mutableListOf<Pair<Float, Array<Float>>>()
         while (line != null) {//break when finished
             if (line.isNotBlank()) {
                 if (this.lineIndex == 0) {

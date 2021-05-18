@@ -6,13 +6,13 @@ import com.oneliang.ktx.frame.ai.regression.LinearMachine
 
 fun main() {
 //    val weightArray = Array(3) { 0.0 }
-    val weightArray = Array(2) { Array(1) { 0.0 } }
+    val weightArray = Array(2) { Array(1) { 0.0f } }
 //    val learningRate = 0.00000000001
-    val learningRate = 0.01
+    val learningRate = 0.01f
     val times = 10000
     val batching = TestLogisticRegressionBatching(100)
 //    val batching = TestStableDataBatching(100)
-    val activationFunction: (xArray: Array<Double>, newWeightArray: Array<Array<Double>>) -> Array<Double> = { xArray, newWeightArray ->
+    val activationFunction: (xArray: Array<Float>, newWeightArray: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray ->
         val calculateY = linear(xArray, newWeightArray)
         calculateY.forEachIndexed { index, d ->
             calculateY[index] = sigmoid(d)

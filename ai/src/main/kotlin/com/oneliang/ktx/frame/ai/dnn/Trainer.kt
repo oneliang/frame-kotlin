@@ -20,9 +20,9 @@ class Trainer {
     private val coroutine = Coroutine()
 
     fun train(
-        batching: Batching<Pair<Double, Array<Double>>>,
+        batching: Batching<Pair<Float, Array<Float>>>,
         neuralNetwork: NeuralNetwork,
-        learningRate: Double,
+        learningRate: Float,
         epochs: Int,
         printPeriod: Int = 500,
         modelFullFilename: String = Constants.String.BLANK,
@@ -123,12 +123,12 @@ class Trainer {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun forward(inputLayer: Layer<Any, Any>, dataId: Long, xArray: Array<Double>, y: Double, training: Boolean) {
+    private fun forward(inputLayer: Layer<Any, Any>, dataId: Long, xArray: Array<Float>, y: Float, training: Boolean) {
         inputLayer.doForward(dataId, xArray, y, training)
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun backward(outputLayer: Layer<Any, Any>, dataId: Long, y: Double) {
+    private fun backward(outputLayer: Layer<Any, Any>, dataId: Long, y: Float) {
         outputLayer.doBackward(dataId, y)
     }
 
@@ -137,7 +137,7 @@ class Trainer {
         inputLayer.doForwardRest(dataId)
     }
 
-    private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         for (layerIndex in layerList.indices) {
             val layer = layerList[layerIndex]
             layer.update(epoch, printPeriod, totalDataSize, learningRate)
@@ -161,7 +161,7 @@ class Trainer {
     }
 
     fun test(
-        batching: Batching<Pair<Double, Array<Double>>>,
+        batching: Batching<Pair<Float, Array<Float>>>,
         neuralNetwork: NeuralNetwork,
         modelFullFilename: String = Constants.String.BLANK,
     ) {

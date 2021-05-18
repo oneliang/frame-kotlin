@@ -81,19 +81,19 @@ class MnistReader(val labelFullFilename: String, val imageFullFilename: String) 
         return -1
     }
 
-    fun readNextImage(normalization: Boolean = true): Array<Double> {
+    fun readNextImage(normalization: Boolean = true): Array<Float> {
         val size = sizeX * sizeY
         val imageArray = ByteArray(size)
         Arrays.fill(imageArray, 0.toByte())
         imageInputStream.read(imageArray, 0, size)
-        val arrays = Array(size) { 0.0 }
+        val arrays = Array(size) { 0.0f }
         if (normalization) {
             for (i in 0 until size) {
-                arrays[i] = (imageArray[i].toInt() and 0xFF).toDouble() / 0xFF
+                arrays[i] = (imageArray[i].toInt() and 0xFF).toFloat() / 0xFF
             }
         } else {
             for (i in 0 until size) {
-                arrays[i] = imageArray[i].toDouble()
+                arrays[i] = imageArray[i].toFloat()
             }
         }
         return arrays

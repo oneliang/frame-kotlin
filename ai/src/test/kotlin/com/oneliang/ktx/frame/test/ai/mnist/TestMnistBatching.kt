@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.test.ai.mnist
 import com.oneliang.ktx.frame.ai.base.Batching
 import com.oneliang.ktx.frame.ai.cnn.MnistReader
 
-class TestMnistBatching(private val labelFullFilename: String, private val imageFullFilename: String, override val batchSize: Int) : Batching<Pair<Double, Array<Double>>>(batchSize) {
+class TestMnistBatching(private val labelFullFilename: String, private val imageFullFilename: String, override val batchSize: Int) : Batching<Pair<Float, Array<Float>>>(batchSize) {
 
     private var reader = MnistReader(labelFullFilename, imageFullFilename)
     private val dataSize = this.reader.size()
@@ -13,11 +13,11 @@ class TestMnistBatching(private val labelFullFilename: String, private val image
         this.reader.reset()
     }
 
-    override fun fetch(): Result<Pair<Double, Array<Double>>> {
+    override fun fetch(): Result<Pair<Float, Array<Float>>> {
         var currentLineCount = 0
-        val dataList = mutableListOf<Pair<Double, Array<Double>>>()
+        val dataList = mutableListOf<Pair<Float, Array<Float>>>()
         while (this.lineCount < this.dataSize) {
-            dataList += Pair(this.reader.readNextLabel().toDouble(), this.reader.readNextImage())
+            dataList += Pair(this.reader.readNextLabel().toFloat(), this.reader.readNextImage())
             currentLineCount++
             this.lineCount++
             if (currentLineCount == this.batchSize) {

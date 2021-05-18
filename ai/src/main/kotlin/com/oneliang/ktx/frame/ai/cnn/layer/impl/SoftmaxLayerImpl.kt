@@ -1,10 +1,7 @@
 package com.oneliang.ktx.frame.ai.cnn.layer.impl
 
-import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.activation.softmax
 import com.oneliang.ktx.frame.ai.cnn.layer.SoftmaxLayer
-import com.oneliang.ktx.frame.ai.dnn.SoftmaxRegressionNeuralNetwork
-import com.oneliang.ktx.frame.ai.dnn.layer.impl.FullyConnectedLayerImpl
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.common.singleIteration
 import com.oneliang.ktx.util.json.jsonToMap
@@ -16,8 +13,8 @@ import com.oneliang.ktx.util.math.matrix.transpose
 open class SoftmaxLayerImpl(
     neuronCount: Int,
     typeCount: Int,
-    private val learningRate: Double = 0.0
-) : SoftmaxLayer<Array<Double>, Array<Double>, Array<Array<Double>>>(neuronCount, typeCount) {
+    private val learningRate: Float = 0.0f
+) : SoftmaxLayer<Array<Float>, Array<Float>, Array<Array<Float>>>(neuronCount, typeCount) {
 
     companion object {
         private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
@@ -25,20 +22,20 @@ open class SoftmaxLayerImpl(
         private val logger = LoggerManager.getLogger(SoftmaxLayerImpl::class)
     }
 
-    private val correctProbability = Array(typeCount) { Array(typeCount) { 0.0 } }
+    private val correctProbability = Array(typeCount) { Array(typeCount) { 0.0f } }
 
     init {
         for (type in 0 until typeCount) {
-            this.correctProbability[type][type] = 1.0//one hot encode
+            this.correctProbability[type][type] = 1.0f//one hot encode
         }
     }
 
-    override fun forwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double, training: Boolean): Array<Double> {
+    override fun forwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float, training: Boolean): Array<Float> {
         if (inputNeuron.isEmpty()) {
             error("input neuron error, data size:[%s]".format(inputNeuron.size))
         }
         if (this.weights.isEmpty()) {
-            this.weights = Array(this.neuronCount) { Array(this.typeCount) { 0.001 } }
+            this.weights = Array(this.neuronCount) { Array(this.typeCount) { 0.001f } }
         }
 //        println("-----softmax forward-----")
 //        println("input:" + inputNeuron.toJson())
@@ -48,9 +45,9 @@ open class SoftmaxLayerImpl(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun backwardImpl(dataId: Long, inputNeuron: Array<Double>, y: Double) {
+    override fun backwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float) {
         val outputNeuron = this.outputNeuronMap[dataId]!!
-        val loss = Array(this.typeCount) { 0.0 }
+        val loss = Array(this.typeCount) { 0.0f }
         val correctYType = y.toInt()
         singleIteration(this.typeCount) { typeIndex ->
             loss[typeIndex] = outputNeuron[typeIndex] - this.correctProbability[correctYType][typeIndex]
@@ -80,7 +77,7 @@ open class SoftmaxLayerImpl(
         })
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         val fixLearningRate = if (this.learningRate > 0.0) this.learningRate else learningRate
         //update all weight, gradient descent
         val derivedWeights = this.derivedWeights[DERIVED_WEIGHTS_KEY] ?: emptyArray()
@@ -98,14 +95,14 @@ open class SoftmaxLayerImpl(
 
     override fun initializeLayerModelDataImpl(data: String) {
         val map = data.jsonToMap()
-        val weightsData = map[WEIGHTS_KEY]?.jsonToObjectList(Array<Double>::class)
+        val weightsData = map[WEIGHTS_KEY]?.jsonToObjectList(Array<Float>::class)
         if (weightsData != null) {
             this.weights = weightsData.toTypedArray()
         }
     }
 
     override fun saveLayerModelDataImpl(): String {
-        val map = mutableMapOf<String, Array<Array<Double>>>()
+        val map = mutableMapOf<String, Array<Array<Float>>>()
         map[WEIGHTS_KEY] = this.weights
         return map.toJson()
     }

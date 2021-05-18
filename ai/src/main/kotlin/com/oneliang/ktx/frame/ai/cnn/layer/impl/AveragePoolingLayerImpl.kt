@@ -10,23 +10,23 @@ open class AveragePoolingLayerImpl(
     inX: Int,
     inY: Int,
     scale: Int
-) : AveragePoolingLayer<Array<Array<Array<Double>>>, Array<Array<Array<Double>>>>(inX, inY, scale) {
+) : AveragePoolingLayer<Array<Array<Array<Float>>>, Array<Array<Array<Float>>>>(inX, inY, scale) {
 
-    override fun forwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Double>>>, y: Double, training: Boolean): Array<Array<Array<Double>>> {
-        val outputNeuron = Array(inputNeuron.size) { Array(this.outY) { Array(this.outX) { 0.0 } } }
+    override fun forwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float, training: Boolean): Array<Array<Array<Float>>> {
+        val outputNeuron = Array(inputNeuron.size) { Array(this.outY) { Array(this.outX) { 0.0f } } }
         singleIteration(inputNeuron.size) { mapIndex ->
             outputNeuron[mapIndex] = inputNeuron[mapIndex].scaleToSmall(this.scale)
         }
         return inputNeuron
     }
 
-    override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Double>>>, y: Double) {
+    override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float) {
     }
 
     override fun forwardResetImpl(dataId: Long) {
     }
 
-    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Double) {
+    override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
     }
 
     override fun initializeLayerModelDataImpl(data: String) {
