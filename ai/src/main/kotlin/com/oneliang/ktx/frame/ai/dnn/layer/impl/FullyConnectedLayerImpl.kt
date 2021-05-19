@@ -16,6 +16,7 @@ class FullyConnectedLayerImpl(
     neuronCount: Int,
     private val supportBias: Boolean = false,
     private val learningRate: Float = 0.0f,
+    private val parallel: Boolean = false,
 ) : FullyConnectedLayer<Array<Float>, Array<Float>, Array<Array<Float>>>(neuronCount) {
 
     companion object {
@@ -41,7 +42,7 @@ class FullyConnectedLayerImpl(
         if (this.weights.isEmpty()) {
             this.weights = Array(newInputNeuron.size) { Array(this.neuronCount) { 0.1f } }
         }
-        val outputNeuron = newInputNeuron.multiply(this.weights, parallel = false, gpu = false)
+        val outputNeuron = newInputNeuron.multiply(this.weights, parallel = this.parallel, gpu = false)
 //        println("-----fully connected forward-----")
 //        println("input:" + inputNeuron.toJson())
 //        println("weights:" + this.weights.toJson())
