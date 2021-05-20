@@ -22,7 +22,7 @@ fun softmax(xArray: Array<Double>, weightArray: Array<Array<Double>>, negative: 
 
 fun softmax(xArray: Array<Float>, weightArray: Array<Array<Float>>, negative: Boolean = false): Array<Float> {
     var totalValue = 0.0f
-    val valueMatrix = xArray.multiply(weightArray, true, transform = {
+    val valueMatrix = xArray.multiply(weightArray, false, transform = {
         val value = exp(it)
         totalValue += value
         value
