@@ -67,8 +67,12 @@ class Trainer {
                 jobList.forEach { it.join() }
             }
 
+            //check loss
+            checkLoss(layerList, epoch, printPeriod, totalDataSize, learningRate)
+
             //update all weight, gradient descent
             update(layerList, epoch, printPeriod, totalDataSize, learningRate)
+
             if (epoch % printPeriod == 0) {
                 //first calculate cost
                 val cost = System.currentTimeMillis() - begin
@@ -135,6 +139,16 @@ class Trainer {
     @Suppress("UNCHECKED_CAST")
     private fun forwardReset(inputLayer: Layer<Any, Any>, dataId: Long) {
         inputLayer.doForwardRest(dataId)
+    }
+
+    private fun checkLoss(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
+        for (layerIndex in layerList.indices) {
+            val layer = layerList[layerIndex]
+            val checkResult = layer.checkLoss(epoch, printPeriod, totalDataSize, learningRate)
+            if (!checkResult) {
+                error("epoch:%s, loss error, learning rate:%s".format(epoch, learningRate))
+            }
+        }
     }
 
     private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {

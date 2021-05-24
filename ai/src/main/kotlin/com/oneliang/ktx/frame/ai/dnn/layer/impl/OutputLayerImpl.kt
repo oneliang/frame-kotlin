@@ -21,6 +21,7 @@ class OutputLayerImpl : OutputLayer<Array<Float>, Array<Float>, Array<Array<Floa
 
     //coroutine concurrent, use for all data in layer
     var sumLoss = AtomicMap<String, FloatWrapper>()
+    private var lastSumLoss = Float.MAX_VALUE
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float, training: Boolean): Array<Float> {
 //        println("-----forward-----" + this.inputNeuronMap[dataId]?.toJson() + "," + inputNeuron.toJson())
@@ -41,6 +42,16 @@ class OutputLayerImpl : OutputLayer<Array<Float>, Array<Float>, Array<Array<Floa
                 ordinaryLeastSquares(it[0])
             })
         })
+    }
+
+    override fun checkLossImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Boolean {
+        val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0f
+        val result = totalLoss <= this.lastSumLoss
+        if (!result) {
+            logger.error("epoch:%s, last total loss:%s, current total loss:%s, total data size:%s", epoch, this.lastSumLoss, totalLoss, totalDataSize)
+        }
+        this.lastSumLoss = totalLoss
+        return result
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {

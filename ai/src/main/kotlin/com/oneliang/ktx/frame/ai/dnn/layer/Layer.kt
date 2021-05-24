@@ -67,7 +67,7 @@ abstract class Layer<IN : Any, OUT : Any> {
     protected abstract fun forwardResetImpl(dataId: Long)
 
     /**
-     * invoke one time
+     * invoke one time for one train
      */
     fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         updateImpl(epoch, printPeriod, totalDataSize, learningRate)
@@ -75,6 +75,18 @@ abstract class Layer<IN : Any, OUT : Any> {
 
     protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float)
 
+    /**
+     * check loss before update, invoke one time for one train
+     */
+    fun checkLoss(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Boolean {
+        return checkLossImpl(epoch, printPeriod, totalDataSize, learningRate)
+    }
+
+    protected open fun checkLossImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Boolean = true
+
+    /**
+     * get layer model data
+     */
     fun getLayerModelData(): String {
         return saveLayerModelDataImpl()
     }
@@ -90,7 +102,7 @@ abstract class Layer<IN : Any, OUT : Any> {
     protected fun outputNullError(): Nothing = error("out can not be null")
 
     /**
-     * invoke one time
+     * invoke one time for one test
      */
     fun testProcess(totalDataSize: Long) {
         testProcessImpl(totalDataSize)

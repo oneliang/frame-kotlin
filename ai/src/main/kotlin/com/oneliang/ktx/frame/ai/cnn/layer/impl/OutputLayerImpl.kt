@@ -15,6 +15,8 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Float>, Array<Float>>(
         private const val SUM_KEY = "sum"
     }
 
+    private var lastSumLoss = Float.MAX_VALUE
+
     private val correctProbability = Array(typeCount) { Array(typeCount) { 0.0f } }
     private val testDataCorrectMap = ConcurrentHashMap<Long, Float>()
     private val testCalculateYMap = ConcurrentHashMap<Int, Counter>()
@@ -54,6 +56,16 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Float>, Array<Float>>(
         }, update = {
             FloatWrapper(it.value + crossEntropyLoss(inputNeuron, this.correctProbability[correctYType]))
         })
+    }
+
+    override fun checkLossImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Boolean {
+        val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0f
+        val result = totalLoss <= this.lastSumLoss
+        if (!result) {
+            logger.error("epoch:%s, last total loss:%s, current total loss:%s, total data size:%s", epoch, this.lastSumLoss, totalLoss, totalDataSize)
+        }
+        this.lastSumLoss = totalLoss
+        return result
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
