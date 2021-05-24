@@ -38,9 +38,13 @@ open class SoftmaxLayerImpl(
             this.weights = Array(this.neuronCount) { Array(this.typeCount) { 0.001f } }
         }
 //        println("-----softmax forward-----")
-//        println("input:" + inputNeuron.toJson())
         val outputNeuron = softmax(inputNeuron, this.weights)
-//        println("output:" + outputNeuron.toJson())
+//        if (dataId == 6130L) {
+//            println("y:$y")
+//            println("input:" + inputNeuron.toJson())
+//            println("weights:" + this.weights.toJson())
+//            println("output:" + outputNeuron.toJson())
+//        }
         return outputNeuron
     }
 

@@ -51,6 +51,10 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Float>, Array<Float>>(
         val correctYType = y.toInt()
 
 //        val calculateYProbability = inputNeuron[correctYType]
+        val a = crossEntropyLoss(inputNeuron, this.correctProbability[correctYType])
+        if (a.isNaN()) {
+            error("data id:%s, input:%s".format(dataId, inputNeuron.toJson()))
+        }
         this.sumLoss.operate(SUM_KEY, create = {
             FloatWrapper(crossEntropyLoss(inputNeuron, this.correctProbability[correctYType]))
         }, update = {

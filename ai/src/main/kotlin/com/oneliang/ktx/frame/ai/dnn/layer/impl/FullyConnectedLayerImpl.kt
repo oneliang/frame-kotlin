@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.ai.dnn.layer.impl
 
+import com.oneliang.ktx.frame.ai.activation.l2Normalization
 import com.oneliang.ktx.frame.ai.base.matrix.multiply
 import com.oneliang.ktx.frame.ai.dnn.layer.FullyConnectedLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
@@ -42,7 +43,8 @@ class FullyConnectedLayerImpl(
         if (this.weights.isEmpty()) {
             this.weights = Array(newInputNeuron.size) { Array(this.neuronCount) { 0.1f } }
         }
-        val outputNeuron = newInputNeuron.multiply(this.weights, parallel = this.parallel, gpu = false)
+        val tempOutputNeuron = newInputNeuron.multiply(this.weights, parallel = this.parallel, gpu = false)
+        val outputNeuron = l2Normalization(tempOutputNeuron)
 //        println("-----fully connected forward-----")
 //        println("input:" + inputNeuron.toJson())
 //        println("weights:" + this.weights.toJson())
