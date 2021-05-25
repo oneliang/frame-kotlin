@@ -4,6 +4,7 @@ import com.oneliang.ktx.frame.ai.cnn.layer.impl.*
 import com.oneliang.ktx.frame.ai.dnn.NeuralNetwork
 import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 import com.oneliang.ktx.frame.ai.dnn.layer.impl.FullyConnectedLayerImpl
+import com.oneliang.ktx.frame.ai.dnn.layer.impl.L2NormalizationLayerImpl
 import com.oneliang.ktx.util.logging.LoggerManager
 
 object MnistNeuralNetwork : NeuralNetwork {
@@ -13,6 +14,7 @@ object MnistNeuralNetwork : NeuralNetwork {
     override fun getLayerList(): List<Layer<*, *>> {
         //input 2 hidden 3 and 2 output 1, input in batch
         val inputLayer = FullyConnectedLayerImpl(10, learningRate = 0.5f)
+        val l2NormalizationLayer = L2NormalizationLayerImpl()
 //        val hiddenLayer1 = FullyConnectedLayerImpl(10)
 //        val hiddenLayer2 = FullyConnectedLayerImpl(10)
         val softmaxLayer = SoftmaxLayerImpl(inputLayer.neuronCount, 10, learningRate = 0.01f)
@@ -21,6 +23,7 @@ object MnistNeuralNetwork : NeuralNetwork {
             inputLayer,
 //            hiddenLayer1,
 //            hiddenLayer2,
+            l2NormalizationLayer,
             softmaxLayer,
             outputLayer
         )

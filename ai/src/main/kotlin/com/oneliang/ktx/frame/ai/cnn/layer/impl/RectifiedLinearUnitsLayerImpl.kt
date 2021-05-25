@@ -18,6 +18,7 @@ class RectifiedLinearUnitsLayerImpl : RectifiedLinearUnitsLayer<Array<Array<Arra
                 outputNeuron[mapDepth][row][column] = rectifiedLinearUnits(inputNeuron[mapDepth][row][column])
             }
         }
+//        return outputNeuron
         return inputNeuron
     }
 
