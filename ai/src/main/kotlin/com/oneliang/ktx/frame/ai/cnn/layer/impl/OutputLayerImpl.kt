@@ -66,7 +66,6 @@ class OutputLayerImpl(typeCount: Int) : OutputLayer<Array<Float>, Array<Float>>(
             logger.error("epoch:%s, last total loss:%s, current total loss:%s, total data size:%s", epoch, this.lastSumLoss, totalLoss, totalDataSize)
         }
         val diffLoss = totalLoss - this.lastSumLoss
-        println("total loss:$totalLoss, last sum loss:${this.lastSumLoss}, diff loss:$diffLoss")
         this.lastSumLoss = totalLoss
         return result to diffLoss
     }
