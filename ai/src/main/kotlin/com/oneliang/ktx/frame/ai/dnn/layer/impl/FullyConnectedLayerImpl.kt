@@ -24,7 +24,7 @@ class FullyConnectedLayerImpl(
         private val logger = LoggerManager.getLogger(FullyConnectedLayerImpl::class)
         private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
         private const val SAVE_MODEL_KEY_WEIGHTS = "weights"
-        private const val SAVE_MODEL_KEYLEARNING_RATE = "learningRate"
+        private const val SAVE_MODEL_KEY_LEARNING_RATE = "learningRate"
     }
 
     //coroutine concurrent, use for all data in layer
@@ -127,13 +127,13 @@ class FullyConnectedLayerImpl(
     }
 
     override fun afterUpdateImpl(epoch: Int, diffLoss: Float, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
-        if (diffLoss < 0f && abs(diffLoss) < 1) {//loss is small, can update layer learning rate
-//            this.learningRate++
+        if (diffLoss < 0f && abs(diffLoss) < 1 && (epoch % printPeriod) == 0) {//loss is small, can update layer learning rate
+            this.learningRate++
         }
     }
 
     override fun onErrorImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
-//        this.learningRate--
+        this.learningRate--
     }
 
     override fun initializeLayerModelDataImpl(data: String) {
@@ -142,7 +142,7 @@ class FullyConnectedLayerImpl(
         if (weightsData != null) {
             this.weights = weightsData.toTypedArray()
         }
-        val learningRateData = map[SAVE_MODEL_KEYLEARNING_RATE]
+        val learningRateData = map[SAVE_MODEL_KEY_LEARNING_RATE]
         if (learningRateData != null) {
             this.learningRate = learningRateData.toFloat()
         }
@@ -151,7 +151,7 @@ class FullyConnectedLayerImpl(
     override fun saveLayerModelDataImpl(): String {
         val map = mutableMapOf<String, Any>()
         map[SAVE_MODEL_KEY_WEIGHTS] = this.weights
-        map[SAVE_MODEL_KEYLEARNING_RATE] = this.learningRate
+        map[SAVE_MODEL_KEY_LEARNING_RATE] = this.learningRate
         return map.toJson()
     }
 }
