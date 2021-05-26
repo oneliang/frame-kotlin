@@ -1,6 +1,5 @@
 package com.oneliang.ktx.frame.ai.dnn.layer.impl
 
-import com.oneliang.ktx.frame.ai.activation.l2Normalization
 import com.oneliang.ktx.frame.ai.base.matrix.multiply
 import com.oneliang.ktx.frame.ai.dnn.layer.FullyConnectedLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
@@ -12,18 +11,20 @@ import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
+import kotlin.math.abs
 
 class FullyConnectedLayerImpl(
     neuronCount: Int,
     private val supportBias: Boolean = false,
-    private val learningRate: Float = 0.0f,
+    private var learningRate: Float = 0.0f,
     private val parallel: Boolean = false,
 ) : FullyConnectedLayer<Array<Float>, Array<Float>, Array<Array<Float>>>(neuronCount) {
 
     companion object {
         private val logger = LoggerManager.getLogger(FullyConnectedLayerImpl::class)
         private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
-        private const val WEIGHTS_KEY = "weights"
+        private const val SAVE_MODEL_KEY_WEIGHTS = "weights"
+        private const val SAVE_MODEL_KEYLEARNING_RATE = "learningRate"
     }
 
     //coroutine concurrent, use for all data in layer
@@ -125,17 +126,32 @@ class FullyConnectedLayerImpl(
         this.derivedWeights.clear()//reset after update per one time
     }
 
+    override fun afterUpdateImpl(epoch: Int, diffLoss: Float, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
+        if (diffLoss < 0f && abs(diffLoss) < 1) {//loss is small, can update layer learning rate
+//            this.learningRate++
+        }
+    }
+
+    override fun onErrorImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
+//        this.learningRate--
+    }
+
     override fun initializeLayerModelDataImpl(data: String) {
         val map = data.jsonToMap()
-        val weightsData = map[WEIGHTS_KEY]?.jsonToObjectList(Array<Float>::class)
+        val weightsData = map[SAVE_MODEL_KEY_WEIGHTS]?.jsonToObjectList(Array<Float>::class)
         if (weightsData != null) {
             this.weights = weightsData.toTypedArray()
+        }
+        val learningRateData = map[SAVE_MODEL_KEYLEARNING_RATE]
+        if (learningRateData != null) {
+            this.learningRate = learningRateData.toFloat()
         }
     }
 
     override fun saveLayerModelDataImpl(): String {
-        val map = mutableMapOf<String, Array<Array<Float>>>()
-        map[WEIGHTS_KEY] = this.weights
+        val map = mutableMapOf<String, Any>()
+        map[SAVE_MODEL_KEY_WEIGHTS] = this.weights
+        map[SAVE_MODEL_KEYLEARNING_RATE] = this.learningRate
         return map.toJson()
     }
 }

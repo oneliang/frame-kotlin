@@ -44,14 +44,15 @@ class OutputLayerImpl : OutputLayer<Array<Float>, Array<Float>, Array<Array<Floa
         })
     }
 
-    override fun checkLossImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Boolean {
+    override fun checkLossImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Pair<Boolean,Float> {
         val totalLoss = this.sumLoss[SUM_KEY]?.value ?: 0.0f
         val result = totalLoss <= this.lastSumLoss
         if (!result) {
             logger.error("epoch:%s, last total loss:%s, current total loss:%s, total data size:%s", epoch, this.lastSumLoss, totalLoss, totalDataSize)
         }
+        val diffLoss = totalLoss - this.lastSumLoss
         this.lastSumLoss = totalLoss
-        return result
+        return result to diffLoss
     }
 
     override fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {

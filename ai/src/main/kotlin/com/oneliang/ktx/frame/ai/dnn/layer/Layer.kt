@@ -67,6 +67,15 @@ abstract class Layer<IN : Any, OUT : Any> {
     protected abstract fun forwardResetImpl(dataId: Long)
 
     /**
+     * check loss before update, invoke one time for one train
+     */
+    fun checkLoss(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Pair<Boolean, Float> {
+        return checkLossImpl(epoch, printPeriod, totalDataSize, learningRate)
+    }
+
+    protected open fun checkLossImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Pair<Boolean, Float> = true to 0f
+
+    /**
      * invoke one time for one train
      */
     fun update(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
@@ -76,13 +85,22 @@ abstract class Layer<IN : Any, OUT : Any> {
     protected abstract fun updateImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float)
 
     /**
-     * check loss before update, invoke one time for one train
+     * invoke one time for one train, after update
      */
-    fun checkLoss(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Boolean {
-        return checkLossImpl(epoch, printPeriod, totalDataSize, learningRate)
+    fun afterUpdate(epoch: Int, diffLoss: Float, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
+        afterUpdateImpl(epoch, diffLoss, printPeriod, totalDataSize, learningRate)
     }
 
-    protected open fun checkLossImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Boolean = true
+    protected open fun afterUpdateImpl(epoch: Int, diffLoss: Float, printPeriod: Int, totalDataSize: Long, learningRate: Float) {}
+
+    /**
+     * on error, invoke one time for one train
+     */
+    fun onError(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
+        onErrorImpl(epoch, printPeriod, totalDataSize, learningRate)
+    }
+
+    protected open fun onErrorImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {}
 
     /**
      * get layer model data

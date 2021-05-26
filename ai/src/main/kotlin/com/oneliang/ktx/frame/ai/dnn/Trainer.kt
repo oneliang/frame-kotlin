@@ -28,58 +28,91 @@ class Trainer {
         modelFullFilename: String = Constants.String.BLANK,
         parallel: Boolean = false
     ) {
+        val maxRetryCount = 3
+        var retryCount = 0
+        var needToTrain = true
+        while (needToTrain && retryCount <= maxRetryCount) {
+            needToTrain = try {
+                innerTrain(batching, neuralNetwork, learningRate, epochs, printPeriod, modelFullFilename, parallel)
+                false
+            } catch (e: Throwable) {
+                retryCount++
+                logger.error("has occur an exception, need to retry, retry count:%s", e, retryCount)
+                true//need to retry
+            }
+        }
+    }
+
+    private fun innerTrain(
+        batching: Batching<Pair<Float, Array<Float>>>,
+        neuralNetwork: NeuralNetwork,
+        learningRate: Float,
+        epochs: Int,
+        printPeriod: Int,
+        modelFullFilename: String,
+        parallel: Boolean
+    ) {
         val training = true
         val layerList = neuralNetwork.getLayerList()
         val (inputLayer, outputLayer, model) = getInputAndOutputLayer(layerList, modelFullFilename)
         var begin = System.currentTimeMillis()
         for (epoch in 1..epochs) {
-            var dataId = 0L
             var totalDataSize = 0L
-            val jobList = mutableListOf<Job>()
-            this.coroutine.runBlocking {
-                while (true) {
-                    val result = batching.fetch()
-                    if (result.finished) {
-                        batching.reset()
-                        break
-                    }
-                    val inputDataList = result.dataList
-                    totalDataSize += inputDataList.size
-                    inputDataList.forEach {
-                        val currentDataId = ++dataId
-                        val (y, xArray) = it
-                        if (parallel) {
-                            jobList += this.coroutine.launch {
+            try {
+                var dataId = 0L
+                val jobList = mutableListOf<Job>()
+                this.coroutine.runBlocking {
+                    while (true) {
+                        val result = batching.fetch()
+                        if (result.finished) {
+                            batching.reset()
+                            break
+                        }
+                        val inputDataList = result.dataList
+                        totalDataSize += inputDataList.size
+                        inputDataList.forEach {
+                            val currentDataId = ++dataId
+                            val (y, xArray) = it
+                            if (parallel) {
+                                jobList += this.coroutine.launch {
+                                    //forward include backward(backPropagation)
+                                    forward(inputLayer, currentDataId, xArray, y, training)
+                                    backward(outputLayer, currentDataId, y)
+                                    forwardReset(inputLayer, currentDataId)
+                                }
+                            } else {
                                 //forward include backward(backPropagation)
                                 forward(inputLayer, currentDataId, xArray, y, training)
                                 backward(outputLayer, currentDataId, y)
                                 forwardReset(inputLayer, currentDataId)
                             }
-                        } else {
-                            //forward include backward(backPropagation)
-                            forward(inputLayer, currentDataId, xArray, y, training)
-                            backward(outputLayer, currentDataId, y)
-                            forwardReset(inputLayer, currentDataId)
+
                         }
-
                     }
+                    jobList.forEach { it.join() }
                 }
-                jobList.forEach { it.join() }
-            }
 
-            //check loss
-            checkLoss(layerList, epoch, printPeriod, totalDataSize, learningRate)
+                //check loss
+                val outputLoss = checkLoss(outputLayer, epoch, printPeriod, totalDataSize, learningRate)
 
-            //update all weight, gradient descent
-            update(layerList, epoch, printPeriod, totalDataSize, learningRate)
+                //update all weight, gradient descent
+                update(layerList, epoch, printPeriod, totalDataSize, learningRate)
 
-            if (epoch % printPeriod == 0) {
-                //first calculate cost
-                val cost = System.currentTimeMillis() - begin
-                //update and replace begin
-                begin = System.currentTimeMillis()
-                saveModel(layerList, modelFullFilename, (model?.times ?: 0) + epoch)
-                logger.debug("times:%s, cost:%s, total data size:%s", epoch, cost, totalDataSize)
+                //after update, can update other data for you need
+                afterUpdate(layerList, epoch, outputLoss, printPeriod, totalDataSize, learningRate)
+
+                if (epoch % printPeriod == 0) {
+                    //first calculate cost
+                    val cost = System.currentTimeMillis() - begin
+                    //update and replace begin
+                    begin = System.currentTimeMillis()
+                    saveModel(layerList, modelFullFilename, (model?.times ?: 0) + epoch)
+                    logger.debug("times:%s, cost:%s, total data size:%s", epoch, cost, totalDataSize)
+                }
+            } catch (e: Throwable) {
+                //on error
+                onError(layerList, epoch, printPeriod, totalDataSize, learningRate)
+                throw e
             }
         }
     }
@@ -141,20 +174,32 @@ class Trainer {
         inputLayer.doForwardRest(dataId)
     }
 
-    private fun checkLoss(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
-        for (layerIndex in layerList.indices) {
-            val layer = layerList[layerIndex]
-            val checkResult = layer.checkLoss(epoch, printPeriod, totalDataSize, learningRate)
-            if (!checkResult) {
-                error("epoch:%s, loss error, learning rate:%s".format(epoch, learningRate))
-            }
+    private fun checkLoss(outputLayer: Layer<*, *>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float): Float {
+        val (checkResult, outputLoss) = outputLayer.checkLoss(epoch, printPeriod, totalDataSize, learningRate)
+        if (!checkResult) {
+            error("epoch:%s, loss error, learning rate:%s".format(epoch, learningRate))
         }
+        return outputLoss
     }
 
     private fun update(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         for (layerIndex in layerList.indices) {
             val layer = layerList[layerIndex]
             layer.update(epoch, printPeriod, totalDataSize, learningRate)
+        }
+    }
+
+    private fun afterUpdate(layerList: List<Layer<*, *>>, epoch: Int, outputLoss: Float, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
+        for (layerIndex in layerList.indices) {
+            val layer = layerList[layerIndex]
+            layer.afterUpdate(epoch, outputLoss, printPeriod, totalDataSize, learningRate)
+        }
+    }
+
+    private fun onError(layerList: List<Layer<*, *>>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
+        for (layerIndex in layerList.indices) {
+            val layer = layerList[layerIndex]
+            layer.onError(epoch, printPeriod, totalDataSize, learningRate)
         }
     }
 
@@ -180,7 +225,7 @@ class Trainer {
         modelFullFilename: String = Constants.String.BLANK,
     ) {
         val layerList = neuralNetwork.getLayerList()
-        val (inputLayer, _) = getInputAndOutputLayer(layerList, modelFullFilename)
+        val (inputLayer, outputLayer, _) = getInputAndOutputLayer(layerList, modelFullFilename)
         var dataId = 0L
         var totalDataSize = 0L
         while (true) {
