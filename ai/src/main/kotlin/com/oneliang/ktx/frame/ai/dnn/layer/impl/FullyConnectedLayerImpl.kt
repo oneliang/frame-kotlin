@@ -128,12 +128,12 @@ class FullyConnectedLayerImpl(
 
     override fun afterUpdateImpl(epoch: Int, diffLoss: Float, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
         if (diffLoss < 0f && abs(diffLoss) < 1 && (epoch % printPeriod) == 0) {//loss is small, can update layer learning rate
-            this.learningRate++
+//            this.learningRate++
         }
     }
 
     override fun onErrorImpl(epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) {
-        this.learningRate--
+//        this.learningRate--
     }
 
     override fun initializeLayerModelDataImpl(data: String) {

@@ -7,8 +7,6 @@ import com.oneliang.ktx.util.logging.LoggerManager
 
 object ConvolutionNeuralNetwork : NeuralNetwork {
     private val logger = LoggerManager.getLogger((ConvolutionNeuralNetwork::class))
-    private const val WEIGHTS_KEY = "weights"
-    private const val SUM_KEY = "sum"
 
     @Suppress("UNCHECKED_CAST")
     override fun getLayerList(): List<Layer<*, *>> {
