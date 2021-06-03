@@ -1,5 +1,7 @@
 package com.oneliang.ktx.frame.ioc.aop
 
+import com.oneliang.ktx.exception.MethodInvokeException
+import com.oneliang.ktx.util.common.nullToBlank
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.util.concurrent.CopyOnWriteArrayList
@@ -22,7 +24,7 @@ class AopInvocationHandler<T : Any>(private val interfaceImpl: T) : InvocationHa
             for (afterThrowingProcessor in afterThrowingProcessorList) {
                 afterThrowingProcessor.afterThrowing(this.interfaceImpl, method, args ?: emptyArray(), e)
             }
-            throw e
+            throw MethodInvokeException(e.cause?.message.nullToBlank(), e)
         }
 
         for (afterReturningProcessor in afterReturningProcessorList) {
