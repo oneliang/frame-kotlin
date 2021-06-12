@@ -1,8 +1,11 @@
-package com.oneliang.ktx.frame.forecaster
+package com.oneliang.ktx.frame.test.forecaster
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.forecaster.ResourceForecaster
+import com.oneliang.ktx.frame.forecaster.ResourceInputItem
+import com.oneliang.ktx.frame.forecaster.ResourceOutputItem
+import com.oneliang.ktx.frame.forecaster.ResourceTotalItem
 import com.oneliang.ktx.util.common.*
-import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.jxl.readSimpleExcel
 import com.oneliang.ktx.util.jxl.writeSimpleExcel
 
