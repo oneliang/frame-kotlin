@@ -5,7 +5,8 @@ import java.math.BigDecimal
 import java.util.*
 
 open class ResourceTotalItem {
-    companion object;
+    companion object
+
     var totalPlanShouldReceive: BigDecimal = BigDecimal(0)
         //总计划应收
         set(value) {

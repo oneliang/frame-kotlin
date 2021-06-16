@@ -31,13 +31,13 @@ class ResourceOutputItem : ResourceTotalItem() {
             this.actualShouldDifferent = this.actualShouldReceive - field
         }
     var actualReceive: BigDecimal = BigDecimal(0)
-        //实收
+        //当日实收
         set(value) {
             field = value
             this.actualDifferent = field - this.actualPay
         }
     var actualPay: BigDecimal = BigDecimal(0)
-        //实付
+        //当日实付
         set(value) {
             field = value
             this.actualDifferent = this.actualReceive - field
