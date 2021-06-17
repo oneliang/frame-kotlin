@@ -119,6 +119,8 @@ open class ActionContext : AbstractContext() {
                 if (objectMap.containsKey(actionInterceptorBean.id)) {
                     val interceptorInstance = objectMap[actionInterceptorBean.id] as InterceptorInterface
                     actionInterceptorBean.interceptorInstance = interceptorInstance
+                } else {
+                    throw InitializeException("class:%s, action interceptor id not found in object map, interceptor id:%s".format(actionBean.type, actionInterceptorBean.id))
                 }
             }
         }

@@ -71,6 +71,7 @@ class AnnotationActionContext : ActionContext() {
                             val interceptorId = interceptor.id
                             val interceptorMode = interceptor.mode
                             if (interceptorId.isBlank()) {
+                                logger.warning("Action interceptor id is blank. @%s, class:%s, method:%s", Action.RequestMapping.Interceptor::class.java.simpleName, kClass.java.name, method.name)
                                 continue
                             }
                             val actionInterceptorBean = ActionInterceptorBean()
