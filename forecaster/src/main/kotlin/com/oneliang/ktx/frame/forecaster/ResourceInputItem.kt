@@ -1,6 +1,6 @@
 package com.oneliang.ktx.frame.forecaster
 
-import com.oneliang.ktx.util.common.getDayZeroTime
+import com.oneliang.ktx.util.common.getZeroTime
 import com.oneliang.ktx.util.json.toJson
 import java.math.BigDecimal
 import java.util.*
@@ -23,9 +23,9 @@ class ResourceInputItem(
         ACTUAL(2)//实际,实际收付
     }
 
-    fun calculateMinAndMaxTime(): Pair<Date, Date> {
-        val timeLong = this.time.getDayZeroTime()
-        val amountTimeLong = this.amountTime.getDayZeroTime()
+    fun calculateMinAndMaxTime(modulusTime: Long): Pair<Date, Date> {
+        val timeLong = this.time.getZeroTime(modulusTime)
+        val amountTimeLong = this.amountTime.getZeroTime(modulusTime)
         return if (timeLong > amountTimeLong) {
             this.amountTime to this.time
         } else {
