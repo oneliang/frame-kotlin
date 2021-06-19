@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
  * @author Dandelion
  * @since 2011-01-07
  */
-class DefaultSqlProcessor : AbstractSqlProcessor() {
+open class DefaultSqlProcessor : AbstractSqlProcessor() {
 
     override val keywordSymbolLeft: String = Constants.Symbol.ACCENT
     override val keywordSymbolRight: String = Constants.Symbol.ACCENT
