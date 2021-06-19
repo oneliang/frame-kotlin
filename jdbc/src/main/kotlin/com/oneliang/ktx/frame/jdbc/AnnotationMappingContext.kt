@@ -51,7 +51,8 @@ class AnnotationMappingContext : MappingContext() {
                         }
                     }
                 }
-                annotationMappingBean.createTableSqls = SqlUtil.createTableSqls(annotationMappingBean)
+                //TODO:oneliang
+//                annotationMappingBean.createTableSqls = SqlUtil.createTableSqls(annotationMappingBean)
                 classNameMappingBeanMap[className] = annotationMappingBean
                 simpleNameMappingBeanMap[classSimpleName] = annotationMappingBean
             }

@@ -3,7 +3,6 @@ package com.oneliang.ktx.frame.jdbc
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.exception.MappingNotFoundException
 import com.oneliang.ktx.util.common.ObjectUtil
-import com.oneliang.ktx.util.common.transform
 import com.oneliang.ktx.util.json.toJson
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -17,16 +16,16 @@ import kotlin.reflect.KClass
 object SqlUtil {
 
     @Throws(Throwable::class)
-    internal fun fixTable(table: String, mappingBean: MappingBean?): String {
+    internal fun fixTable(table: String, mappingBean: MappingBean?, sqlProcessor: SqlProcessor): String {
         return if (table.isBlank() && mappingBean == null) {
             throw MappingNotFoundException("Can not find the object mapping or table, object mapping or table can not be null or empty string!")
         } else {
             if (table.isBlank() && mappingBean != null) {
                 val schema = mappingBean.schema
                 if (schema.isBlank()) {
-                    Constants.Symbol.ACCENT + mappingBean.table + Constants.Symbol.ACCENT
+                    sqlProcessor.keywordSymbolLeft + mappingBean.table + sqlProcessor.keywordSymbolRight
                 } else {
-                    Constants.Symbol.ACCENT + schema + Constants.Symbol.ACCENT + Constants.Symbol.DOT + Constants.Symbol.ACCENT + mappingBean.table + Constants.Symbol.ACCENT
+                    sqlProcessor.keywordSymbolLeft + schema + sqlProcessor.keywordSymbolRight + Constants.Symbol.DOT + sqlProcessor.keywordSymbolLeft + mappingBean.table + sqlProcessor.keywordSymbolRight
                 }
             } else {//table is not blank, use input table first, don't add accent
                 table
@@ -112,10 +111,11 @@ object SqlUtil {
      * @param table
      * @param condition
      * @param mappingBean
+     * @param sqlProcessor
      * @return String
     </T> */
-    fun selectSql(selectColumns: Array<String>, table: String, condition: String = Constants.String.BLANK, mappingBean: MappingBean?): String {
-        val tempTable = fixTable(table, mappingBean)
+    fun selectSql(selectColumns: Array<String>, table: String, condition: String = Constants.String.BLANK, mappingBean: MappingBean?, sqlProcessor: SqlProcessor): String {
+        val tempTable = fixTable(table, mappingBean, sqlProcessor)
         return selectSql(selectColumns, tempTable, condition)
     }
 
@@ -168,10 +168,11 @@ object SqlUtil {
      * @param table
      * @param condition
      * @param mappingBean
+     * @param sqlProcessor
      * @return String
      */
-    fun deleteSql(table: String, condition: String = Constants.String.BLANK, mappingBean: MappingBean?): String {
-        val tempTable = fixTable(table, mappingBean)
+    fun deleteSql(table: String, condition: String = Constants.String.BLANK, mappingBean: MappingBean?, sqlProcessor: SqlProcessor): String {
+        val tempTable = fixTable(table, mappingBean, sqlProcessor)
         return deleteSql(tempTable, condition)
     }
 
@@ -180,10 +181,11 @@ object SqlUtil {
      * @param <T>
      * @param kClass
      * @param mappingBean
+     * @param sqlProcessor
      * @return String
     </T> */
-    fun <T : Any> classToSelectSingleIdSql(kClass: KClass<T>, mappingBean: MappingBean): String {
-        return classToSelectIdSql(kClass, emptyArray(), mappingBean, SelectIdType.SINGLE_ID)
+    fun <T : Any> classToSelectSingleIdSql(kClass: KClass<T>, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
+        return classToSelectIdSql(kClass, emptyArray(), mappingBean, sqlProcessor, SelectIdType.SINGLE_ID)
     }
 
     /**
@@ -192,10 +194,11 @@ object SqlUtil {
      * @param kClass
      * @param ids
      * @param mappingBean
+     * @param sqlProcessor
      * @return String
     </T> */
-    fun <T : Any, IdType : Any> classToSelectMultipleIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean): String {
-        return classToSelectIdSql(kClass, ids, mappingBean, SelectIdType.MULTIPLE_ID)
+    fun <T : Any, IdType : Any> classToSelectMultipleIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
+        return classToSelectIdSql(kClass, ids, mappingBean, sqlProcessor, SelectIdType.MULTIPLE_ID)
     }
 
     /**
@@ -204,10 +207,11 @@ object SqlUtil {
      * @param kClass
      * @param ids
      * @param mappingBean
+     * @param sqlProcessor
      * @param selectIdType
      * @return String
     </T> */
-    private fun <T : Any, IdType : Any> classToSelectIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, selectIdType: SelectIdType): String {
+    private fun <T : Any, IdType : Any> classToSelectIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor, selectIdType: SelectIdType): String {
         val methods = kClass.java.methods
         val condition = StringBuilder()
         for (mappingColumnBean in mappingBean.mappingColumnBeanList) {
@@ -224,18 +228,18 @@ object SqlUtil {
                 continue
             }
             when (selectIdType) {
-                SelectIdType.SINGLE_ID -> condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " = ?")
+                SelectIdType.SINGLE_ID -> condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + " = ?")
                 SelectIdType.MULTIPLE_ID -> {
                     if (ids.isEmpty()) {
                         throw NullPointerException("ids can not be null or empty.select id type:${selectIdType}")
                     }
                     val idsJson = ids.toJson()
                     val idsSql = idsJson.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), Constants.String.BLANK).replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), Constants.String.BLANK)
-                    condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " IN ($idsSql)")
+                    condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + " IN ($idsSql)")
                 }
             }
         }
-        val table = fixTable(Constants.String.BLANK, mappingBean)
+        val table = fixTable(Constants.String.BLANK, mappingBean, sqlProcessor)
         return selectSql(emptyArray(), table, condition.toString())
     }
 
@@ -246,12 +250,13 @@ object SqlUtil {
      * @param kClass
      * @param id
      * @param mappingBean
+     * @param sqlProcessor
      * @return String
      * @throws Exception
     </T> */
     @Throws(Exception::class)
-    fun <T : Any, IdType : Any> classToDeleteSingleRowSql(kClass: KClass<T>, id: IdType, mappingBean: MappingBean): String {
-        return classToDeleteSql(kClass, arrayOf<Any>(id), mappingBean, DeleteType.SINGLE_ROW)
+    fun <T : Any, IdType : Any> classToDeleteSingleRowSql(kClass: KClass<T>, id: IdType, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
+        return classToDeleteSql(kClass, arrayOf<Any>(id), mappingBean, sqlProcessor, DeleteType.SINGLE_ROW)
     }
 
     /**
@@ -260,12 +265,13 @@ object SqlUtil {
      * @param kClass
      * @param ids
      * @param mappingBean
+     * @param sqlProcessor
      * @return String
      * @throws Exception
     </T> */
     @Throws(Exception::class)
-    fun <T : Any, IdType : Any> classToDeleteMultipleRowSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean): String {
-        return classToDeleteSql(kClass, ids, mappingBean, DeleteType.MULTIPLE_ROW)
+    fun <T : Any, IdType : Any> classToDeleteMultipleRowSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
+        return classToDeleteSql(kClass, ids, mappingBean, sqlProcessor, DeleteType.MULTIPLE_ROW)
     }
 
     /**
@@ -274,12 +280,13 @@ object SqlUtil {
      * @param kClass
      * @param ids
      * @param mappingBean
+     * @param sqlProcessor
      * @param deleteType
      * @return String
      * @throws Exception
     </T> */
     @Throws(Exception::class)
-    private fun <T : Any, IdType : Any> classToDeleteSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, deleteType: DeleteType): String {
+    private fun <T : Any, IdType : Any> classToDeleteSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor, deleteType: DeleteType): String {
         if (ids.isEmpty()) {
             throw NullPointerException("ids can not be null or empty.")
         }
@@ -296,16 +303,16 @@ object SqlUtil {
             }
             if (isId) {
                 when (deleteType) {
-                    DeleteType.SINGLE_ROW -> condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='" + ids[0] + "'")
+                    DeleteType.SINGLE_ROW -> condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "='" + ids[0] + "'")
                     DeleteType.MULTIPLE_ROW -> {
                         val idsJson = ids.toJson()
                         val idsSql = idsJson.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), "").replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), "")
-                        condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " IN ($idsSql)")
+                        condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + " IN ($idsSql)")
                     }
                 }
             }
         }
-        val table = fixTable(Constants.String.BLANK, mappingBean)
+        val table = fixTable(Constants.String.BLANK, mappingBean, sqlProcessor)
         return deleteSql(table, condition.toString())
     }
 
@@ -315,9 +322,10 @@ object SqlUtil {
      * @param instance
      * @param table
      * @param mappingBean
+     * @param sqlProcessor
      * @return String
     </T> */
-    fun <T : Any> objectToSelectSql(instance: T, table: String, mappingBean: MappingBean): String {
+    fun <T : Any> objectToSelectSql(instance: T, table: String, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
         val sql: String
         try {
             val methods = instance.javaClass.methods
@@ -337,9 +345,9 @@ object SqlUtil {
                     continue
                 }
                 val value = method.invoke(instance)
-                condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'")
+                condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "='$value'")
             }
-            val tempTable = fixTable(table, mappingBean)
+            val tempTable = fixTable(table, mappingBean, sqlProcessor)
             sql = selectSql(emptyArray(), tempTable, condition.toString())
         } catch (e: Exception) {
             throw SqlUtilException(e)
@@ -356,7 +364,7 @@ object SqlUtil {
      * @param sqlProcessor
      * @return String
     </T> */
-    fun <T : Any> objectToInsertSql(instance: T, table: String, mappingBean: MappingBean, sqlProcessor: SqlProcessor? = null): String {
+    fun <T : Any> objectToInsertSql(instance: T, table: String, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
         val sql: String
         try {
             val methods = instance.javaClass.methods
@@ -372,21 +380,13 @@ object SqlUtil {
                 if (columnName.isBlank()) {
                     continue
                 }
-                columnNames.append(Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + Constants.Symbol.COMMA)
+                columnNames.append(sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + Constants.Symbol.COMMA)
                 val type = method.returnType
                 val value = method.invoke(instance)
-                if (sqlProcessor != null) {
-                    values.append(sqlProcessor.beforeInsertProcess(type.kotlin, value) + Constants.Symbol.COMMA)
-                } else {
-                    if (value != null) {
-                        values.append("'$value'")
-                        values.append(Constants.Symbol.COMMA)
-                    } else {
-                        values.append(Constants.String.NULL + Constants.Symbol.COMMA)
-                    }
-                }
+//                if (sqlProcessor != null) {
+                values.append(sqlProcessor.beforeInsertProcess(type.kotlin, value) + Constants.Symbol.COMMA)
             }
-            val tempTable = fixTable(table, mappingBean)
+            val tempTable = fixTable(table, mappingBean, sqlProcessor)
             sql = insertSql(tempTable, columnNames.substring(0, columnNames.length - 1), values.substring(0, values.length - 1))
         } catch (e: Exception) {
             throw SqlUtilException(e)
@@ -405,7 +405,7 @@ object SqlUtil {
      * @param sqlProcessor
      * @return String
     </T> */
-    fun <T : Any> objectToUpdateSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlProcessor? = null): String {
+    fun <T : Any> objectToUpdateSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
         val sql: String
         try {
             val methods = instance.javaClass.methods
@@ -424,11 +424,7 @@ object SqlUtil {
                 val isId = mappingBean.isId(fieldName)
                 val type = method.returnType
                 val value = method.invoke(instance)
-                val result = sqlProcessor?.beforeUpdateProcess(type.kotlin, isId, columnName, value) ?: if (value != null) {
-                    Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'"
-                } else {
-                    Constants.String.BLANK
-                }
+                val result = sqlProcessor.beforeUpdateProcess(type.kotlin, isId, columnName, value)
                 if (isId) {
                     if (byId) {
                         condition.append(result)
@@ -439,7 +435,7 @@ object SqlUtil {
                     }
                 }
             }
-            val tempTable = fixTable(table, mappingBean)
+            val tempTable = fixTable(table, mappingBean, sqlProcessor)
             sql = updateSql(tempTable, columnsAndValueList, "$condition $otherCondition")
         } catch (e: Throwable) {
             throw SqlUtilException(e)
@@ -455,9 +451,10 @@ object SqlUtil {
      * @param table
      * @param otherCondition
      * @param mappingBean
+     * @param sqlProcessor
      * @return String
     </T> */
-    fun <T : Any> objectToDeleteSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlProcessor? = null): String {
+    fun <T : Any> objectToDeleteSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
         val sql: String
         try {
             val methods = instance.javaClass.methods
@@ -476,17 +473,11 @@ object SqlUtil {
                 if (byId && isId || !byId && !isId) {
                     val type = method.returnType
                     val value = method.invoke(instance)
-                    if (sqlProcessor != null) {
-                        val result = sqlProcessor.beforeDeleteProcess(type.kotlin, isId, columnName, value)
-                        condition.append(result)
-                    } else {
-                        if (value != null) {
-                            condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'")
-                        }
-                    }
+                    val result = sqlProcessor.beforeDeleteProcess(type.kotlin, isId, columnName, value)
+                    condition.append(result)
                 }
             }
-            val tempTable = fixTable(table, mappingBean)
+            val tempTable = fixTable(table, mappingBean, sqlProcessor)
             sql = deleteSql(tempTable, "$condition $otherCondition")
         } catch (e: Throwable) {
             throw SqlUtilException(e)
@@ -497,11 +488,12 @@ object SqlUtil {
     /**
      * create table sqls,include drop table
      * @param annotationMappingBean
+     * @param sqlProcessor
      * @return String[]
      */
-    fun createTableSqls(annotationMappingBean: AnnotationMappingBean): Array<String> {
+    fun createTableSqls(annotationMappingBean: AnnotationMappingBean, sqlProcessor: SqlProcessor): Array<String> {
         val sqlList = mutableListOf<String>()
-        val table = fixTable(Constants.String.BLANK, annotationMappingBean)
+        val table = fixTable(Constants.String.BLANK, annotationMappingBean, sqlProcessor)
         if (annotationMappingBean.isDropIfExist) {
             sqlList.add("DROP TABLE IF EXISTS " + table + Constants.Symbol.SEMICOLON)
         }
@@ -511,7 +503,7 @@ object SqlUtil {
         if (mappingColumnBeanList.isNotEmpty()) {
             for (mappingColumnBean in mappingColumnBeanList) {
                 if (mappingColumnBean is AnnotationMappingColumnBean) {
-                    createTableSql.append(Constants.Symbol.ACCENT + mappingColumnBean.column + Constants.Symbol.ACCENT)
+                    createTableSql.append(sqlProcessor.keywordSymbolLeft + mappingColumnBean.column + sqlProcessor.keywordSymbolRight)
                     createTableSql.append(" " + mappingColumnBean.condition + Constants.Symbol.COMMA)
                     if (mappingColumnBean.isId) {
                         createTableSql.append("PRIMARY KEY (" + mappingColumnBean.column + ")")
@@ -530,6 +522,10 @@ object SqlUtil {
     class SqlUtilException(cause: Throwable) : RuntimeException(cause)
 
     interface SqlProcessor {
+
+        val keywordSymbolLeft: String
+
+        val keywordSymbolRight: String
 
         /**
          * statement process,for statement use

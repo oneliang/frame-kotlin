@@ -8,6 +8,9 @@ import kotlin.reflect.KClass
 
 class OracleSqlProcessor : AbstractSqlProcessor() {
 
+    override val keywordSymbolLeft: String = Constants.String.BLANK
+    override val keywordSymbolRight: String = Constants.String.BLANK
+
     /**
      * before insert process,for generate insert sql
      * @param <T>

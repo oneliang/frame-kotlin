@@ -13,10 +13,13 @@ import kotlin.reflect.KClass
  */
 class DefaultSqlProcessor : AbstractSqlProcessor() {
 
+    override val keywordSymbolLeft: String = Constants.Symbol.ACCENT
+    override val keywordSymbolRight: String = Constants.Symbol.ACCENT
+
     /**
      * mostly for mysql database
      * default sql insert processor
-     * promiss:if value is null return null,if it is not null return the new value
+     * promise:if value is null return null,if it is not null return the new value
      */
     override fun <T : Any> beforeInsertProcess(kClass: KClass<T>, value: Any?): String {
         return if (value != null) {
@@ -33,17 +36,17 @@ class DefaultSqlProcessor : AbstractSqlProcessor() {
     /**
      * mostly for mysql database
      * default sql update processor
-     * promiss:if value is null,return the blank,if it is not null return the new value
+     * promise:if value is null,return the blank,if it is not null return the new value
      */
     override fun <T : Any> beforeUpdateProcess(kClass: KClass<T>, isId: Boolean, columnName: String, value: Any?): String {
         return if (isId) {
-            " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'"
+            " AND " + this.keywordSymbolLeft + columnName + this.keywordSymbolRight + "='$value'"
         } else {
             if (value != null) {
                 when (kClass) {
-                    Boolean::class -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=$value"
-                    Date::class -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='" + (value as Date).toFormatString() + "'"
-                    else -> Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'"
+                    Boolean::class -> this.keywordSymbolLeft + columnName + this.keywordSymbolRight + "=$value"
+                    Date::class -> this.keywordSymbolLeft + columnName + this.keywordSymbolRight + "='" + (value as Date).toFormatString() + "'"
+                    else -> this.keywordSymbolLeft + columnName + this.keywordSymbolRight + "='$value'"
                 }
             } else {
                 Constants.String.BLANK
@@ -62,13 +65,13 @@ class DefaultSqlProcessor : AbstractSqlProcessor() {
     </T> */
     override fun <T : Any> beforeDeleteProcess(kClass: KClass<T>, isId: Boolean, columnName: String, value: Any?): String {
         return if (isId) {
-            " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'"
+            " AND " + this.keywordSymbolLeft + columnName + this.keywordSymbolRight + "='$value'"
         } else {
             if (value != null) {
                 when (kClass) {
-                    Boolean::class -> " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=$value"
-                    Date::class -> " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='" + (value as Date).toFormatString() + "'"
-                    else -> " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "='$value'"
+                    Boolean::class -> " AND " + this.keywordSymbolLeft + columnName + this.keywordSymbolRight + "=$value"
+                    Date::class -> " AND " + this.keywordSymbolLeft + columnName + this.keywordSymbolRight + "='" + (value as Date).toFormatString() + "'"
+                    else -> " AND " + this.keywordSymbolLeft + columnName + this.keywordSymbolRight + "='$value'"
                 }
             } else {
                 Constants.String.BLANK

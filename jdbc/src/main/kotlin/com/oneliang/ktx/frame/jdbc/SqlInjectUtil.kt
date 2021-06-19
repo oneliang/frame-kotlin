@@ -2,7 +2,6 @@ package com.oneliang.ktx.frame.jdbc
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.ObjectUtil
-import java.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -18,9 +17,10 @@ object SqlInjectUtil {
      * @param instance
      * @param table
      * @param mappingBean
+     * @param sqlProcessor
      * @return Pair<String,List<Any>>
     </T> */
-    fun <T : Any> objectToInsertSql(instance: T, table: String, mappingBean: MappingBean): Pair<String, List<Any>> {
+    fun <T : Any> objectToInsertSql(instance: T, table: String, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any>> {
         val sql = StringBuilder()
         val parameterList = mutableListOf<Any>()
         try {
@@ -37,12 +37,12 @@ object SqlInjectUtil {
                 if (columnName.isBlank()) {
                     continue
                 }
-                columnNameList += Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT
+                columnNameList += sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight
                 val value = method.invoke(instance)
                 valueList += Constants.Symbol.QUESTION_MARK
                 parameterList.add(value)
             }
-            val fixTable = SqlUtil.fixTable(table, mappingBean)
+            val fixTable = SqlUtil.fixTable(table, mappingBean, sqlProcessor)
             sql.append("INSERT INTO ")
             sql.append(fixTable)
             sql.append("(" + columnNameList.joinToString() + ")")
@@ -59,9 +59,10 @@ object SqlInjectUtil {
      * @param kClass
      * @param table
      * @param mappingBean
+     * @param sqlProcessor
      * @return Pair<String, List<String>>
     </T> */
-    fun <T : Any> classToInsertSql(kClass: KClass<T>, table: String, mappingBean: MappingBean): Pair<String, List<String>> {
+    fun <T : Any> classToInsertSql(kClass: KClass<T>, table: String, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<String>> {
         val sql = StringBuilder()
         val fieldNameList = mutableListOf<String>()
         val methods = kClass.java.methods
@@ -77,11 +78,11 @@ object SqlInjectUtil {
             if (columnName.isBlank()) {
                 continue
             }
-            columnNameList += Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT
+            columnNameList += sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight
             valueList += Constants.Symbol.QUESTION_MARK
             fieldNameList.add(fieldName)
         }
-        val fixTable = SqlUtil.fixTable(table, mappingBean)
+        val fixTable = SqlUtil.fixTable(table, mappingBean, sqlProcessor)
         sql.append("INSERT INTO ")
         sql.append(fixTable)
         sql.append("(" + columnNameList.joinToString() + ")")
@@ -97,9 +98,10 @@ object SqlInjectUtil {
      * @param otherCondition
      * @param byId
      * @param mappingBean
+     * @param sqlProcessor
      * @return Pair<String, List<Any>>
     </T> */
-    fun <T : Any> objectToUpdateSql(instance: T, updateFields: Array<String> = emptyArray(), table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean): Pair<String, List<Any>> {
+    fun <T : Any> objectToUpdateSql(instance: T, updateFields: Array<String> = emptyArray(), table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any>> {
         try {
             val idList = mutableListOf<Any>()
             val valueList = mutableListOf<Any>()
@@ -127,22 +129,22 @@ object SqlInjectUtil {
                 if (byId && isId) {
                     val result: String
                     if (value != null) {
-                        result = " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
+                        result = " AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "=?"
                         idList.add(value)
                         condition.append(result)
                     } else {
-                        result = " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " is " + Constants.String.NULL
+                        result = " AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + " is " + Constants.String.NULL
                         condition.append(result)
                     }
                 } else {
                     if (value != null) {
-                        val result = Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
+                        val result = sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "=?"
                         valueList.add(value)
                         columnsAndValueList += result
                     }
                 }
             }
-            val fixTable = SqlUtil.fixTable(table, mappingBean)
+            val fixTable = SqlUtil.fixTable(table, mappingBean, sqlProcessor)
             val sql = SqlUtil.updateSql(fixTable, columnsAndValueList, "$condition $otherCondition")
             parameterList.addAll(valueList)
             parameterList.addAll(idList)
@@ -160,9 +162,10 @@ object SqlInjectUtil {
      * @param otherCondition
      * @param byId
      * @param mappingBean
+     * @param sqlProcessor
      * @return Pair<String, List<String>>
     </T> */
-    fun <T : Any> classToUpdateSql(kClass: KClass<T>, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean): Pair<String, List<String>> {
+    fun <T : Any> classToUpdateSql(kClass: KClass<T>, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<String>> {
         val fieldNameList = mutableListOf<String>()
         val idList = ArrayList<String>()
         val valueList = ArrayList<String>()
@@ -181,16 +184,16 @@ object SqlInjectUtil {
             }
             val isId = mappingBean.isId(fieldName)
             if (byId && isId) {
-                val result = " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
+                val result = " AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "=?"
                 idList.add(fieldName)
                 condition.append(result)
             } else {
-                val result = Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
+                val result = sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "=?"
                 valueList.add(fieldName)
                 columnsAndValueList += result
             }
         }
-        val fixTable = SqlUtil.fixTable(table, mappingBean)
+        val fixTable = SqlUtil.fixTable(table, mappingBean, sqlProcessor)
         val sql = SqlUtil.updateSql(fixTable, columnsAndValueList, "$condition $otherCondition")
         fieldNameList.addAll(valueList)
         fieldNameList.addAll(idList)
@@ -206,9 +209,10 @@ object SqlInjectUtil {
      * @param otherCondition
      * @param byId
      * @param mappingBean
+     * @param sqlProcessor
      * @return Pair<String,List<Any>>
     </T> */
-    fun <T : Any> objectToDeleteSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean): Pair<String, List<Any>> {
+    fun <T : Any> objectToDeleteSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any>> {
         val sql: String
         val parameterList = mutableListOf<Any>()
         try {
@@ -228,16 +232,16 @@ object SqlInjectUtil {
                 if ((byId && isId) || (!byId && !isId)) {
                     val value = method.invoke(instance)
                     if (value != null) {
-                        condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?")
+                        condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "=?")
                         parameterList.add(value)
                     } else {//only delete not null value when delete not by id, because null will be a condition value
                         if (byId && isId) {
-                            condition.append(" AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + " is " + Constants.String.NULL)
+                            condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + " is " + Constants.String.NULL)
                         }
                     }
                 }
             }
-            val fixTable = SqlUtil.fixTable(table, mappingBean)
+            val fixTable = SqlUtil.fixTable(table, mappingBean, sqlProcessor)
             sql = SqlUtil.deleteSql(fixTable, "$condition $otherCondition")
         } catch (e: Exception) {
             throw SqlInjectUtilException(e)
@@ -253,9 +257,10 @@ object SqlInjectUtil {
      * @param otherCondition
      * @param byId
      * @param mappingBean
+     * @param sqlProcessor
      * @return Pair<String,List<String>>
     </T> */
-    fun <T : Any> classToDeleteSql(kClass: KClass<T>, table: String = Constants.String.BLANK, otherCondition: String = Constants.String.BLANK, byId: Boolean, mappingBean: MappingBean): Pair<String, List<String>> {
+    fun <T : Any> classToDeleteSql(kClass: KClass<T>, table: String = Constants.String.BLANK, otherCondition: String = Constants.String.BLANK, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<String>> {
         val methods = kClass.java.methods
         val fieldNameList = mutableListOf<String>()
         val conditionList = mutableListOf<String>()
@@ -272,11 +277,11 @@ object SqlInjectUtil {
             }
             val isId = mappingBean.isId(fieldName)
             if ((byId && isId) || (!byId && !isId)) {
-                conditionList += " AND " + Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT + "=?"
+                conditionList += " AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "=?"
                 fieldNameList.add(fieldName)
             }
         }
-        val fixTable = SqlUtil.fixTable(table, mappingBean)
+        val fixTable = SqlUtil.fixTable(table, mappingBean, sqlProcessor)
         val sql = SqlUtil.deleteSql(fixTable, "${conditionList.joinToString()} $otherCondition")
         return sql to fieldNameList
     }

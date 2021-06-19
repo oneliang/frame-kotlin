@@ -22,11 +22,12 @@ object DatabaseMappingUtil {
     /**
      * parse sql like:select * from {User}--can find the mapping file where {User.id} and so on
      * @param sql
+     * @param sqlProcessor
      * @return the parse sql
      * @throws Exception
      */
     @Throws(MappingNotFoundException::class)
-    fun parseSql(sql: String): String {
+    fun parseSql(sql: String, sqlProcessor: SqlUtil.SqlProcessor): String {
         var parsedSql = sql
         val list = parsedSql.parseRegexGroup(REGEX)
         for (string in list) {
@@ -38,7 +39,7 @@ object DatabaseMappingUtil {
                 if (mappingBean != null) {
                     val columnName = mappingBean.getColumn(fieldName)
                     if (columnName.isNotBlank()) {
-                        parsedSql = parsedSql.replaceFirst(REGEX.toRegex(), Constants.Symbol.ACCENT + columnName + Constants.Symbol.ACCENT)
+                        parsedSql = parsedSql.replaceFirst(REGEX.toRegex(), sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight)
                     } else {
                         throw MappingNotFoundException("can not find the mapping field: " + className + Constants.Symbol.DOT + fieldName)
                     }
@@ -52,9 +53,9 @@ object DatabaseMappingUtil {
                     val table = mappingBean.table
                     if (table.isNotBlank()) {
                         parsedSql = if (schema.isNotBlank()) {
-                            parsedSql.replaceFirst(REGEX.toRegex(), Constants.Symbol.ACCENT + schema + Constants.Symbol.ACCENT + Constants.Symbol.DOT + Constants.Symbol.ACCENT + table + Constants.Symbol.ACCENT)
+                            parsedSql.replaceFirst(REGEX.toRegex(), sqlProcessor.keywordSymbolLeft + schema + sqlProcessor.keywordSymbolRight + Constants.Symbol.DOT + sqlProcessor.keywordSymbolLeft + table + sqlProcessor.keywordSymbolRight)
                         } else {
-                            parsedSql.replaceFirst(REGEX.toRegex(), Constants.Symbol.ACCENT + table + Constants.Symbol.ACCENT)
+                            parsedSql.replaceFirst(REGEX.toRegex(), sqlProcessor.keywordSymbolLeft + table + sqlProcessor.keywordSymbolRight)
                         }
                     } else {
                         throw MappingNotFoundException("can not find the mapping table of the class:$string")
