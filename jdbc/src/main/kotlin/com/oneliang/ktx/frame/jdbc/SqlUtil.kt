@@ -306,7 +306,7 @@ object SqlUtil {
                     DeleteType.SINGLE_ROW -> condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "='" + ids[0] + "'")
                     DeleteType.MULTIPLE_ROW -> {
                         val idsJson = ids.toJson()
-                        val idsSql = idsJson.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), "").replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), "")
+                        val idsSql = idsJson.replace(("^\\" + Constants.Symbol.MIDDLE_BRACKET_LEFT).toRegex(), Constants.String.BLANK).replace(("\\" + Constants.Symbol.MIDDLE_BRACKET_RIGHT + "$").toRegex(), Constants.String.BLANK)
                         condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + " IN ($idsSql)")
                     }
                 }
