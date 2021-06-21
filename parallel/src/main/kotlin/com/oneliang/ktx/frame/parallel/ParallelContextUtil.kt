@@ -1,8 +1,9 @@
 package com.oneliang.ktx.frame.parallel
 
 import com.oneliang.ktx.frame.coroutine.Coroutine
-import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.frame.parallel.cache.CacheData
+import com.oneliang.ktx.util.json.toJson
+import com.oneliang.ktx.util.logging.LoggerManager
 
 internal object ParallelContextUtil {
     private val logger = LoggerManager.getLogger(ParallelContextUtil::class)
@@ -22,7 +23,7 @@ internal object ParallelContextUtil {
                 }
             }
             parallelJobStep.isParallelSinkProcessor() -> {
-                logger.info("sink processor, value:%s, parent context action:%s", value, parentParallelContextAction)
+                logger.info("sink processor, value:%s, parent context action:%s", value.toJson(), parentParallelContextAction)
                 for (parallelSinkProcessor in parallelJobStep.parallelSinkProcessorList) {
                     if (parallelJob.parallelJobConfiguration.async) {
                         coroutine.launch {
@@ -32,8 +33,9 @@ internal object ParallelContextUtil {
                         parallelSinkProcessor.sink(value)
                     }
                     if ((parentParallelContextAction == ParallelContextAction.SAVEPOINT
-                                    || parentParallelContextAction == ParallelContextAction.FINISHED)
-                            && parallelJob.parallelJobConfiguration.useCache) {
+                                || parentParallelContextAction == ParallelContextAction.FINISHED)
+                        && parallelJob.parallelJobConfiguration.useCache
+                    ) {
                         val sinkKey = parallelSinkProcessor.cacheKey
                         val sinkData = parallelJob.getSinkData(sinkKey) ?: CacheData.Data()
                         parallelSinkProcessor.savepoint(sinkData)
