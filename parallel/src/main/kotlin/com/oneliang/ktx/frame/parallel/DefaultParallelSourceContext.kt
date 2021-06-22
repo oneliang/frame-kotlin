@@ -17,7 +17,7 @@ internal class DefaultParallelSourceContext(
 
     override suspend fun collect(value: Any, parallelContextAction: ParallelContextAction) {
         if (this.parallelJobStepList.isEmpty()) {
-            parallelJob.finish()
+            this.parallelJob.finish()
         }
         this.parallelJobStepList.forEach {
             if (this.parallelJob.parallelJobConfiguration.async) {
