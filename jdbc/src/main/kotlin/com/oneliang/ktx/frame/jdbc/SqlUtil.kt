@@ -86,7 +86,7 @@ object SqlUtil {
      * @param condition can be blank
      * @return String
      */
-    fun selectSql(selectColumns: Array<String> = emptyArray(), table: String, condition: String = Constants.String.BLANK): String {
+    fun selectSql(selectColumns: Array<String> = emptyArray(), table: String, condition: String = Constants.String.BLANK, distinct : Boolean = true): String {
         val selectColumnStringBuilder = StringBuilder()
         if (selectColumns.isNotEmpty()) {
             selectColumnStringBuilder.append(selectColumns.joinToString(Constants.Symbol.COMMA))
@@ -95,7 +95,9 @@ object SqlUtil {
         }
         val sql = StringBuilder()
         sql.append("SELECT ")
-        sql.append("DISTINCT ")
+        if (distinct) {
+            sql.append("DISTINCT ")
+        }
         sql.append(selectColumnStringBuilder)
         sql.append(" FROM ")
         sql.append(table)
@@ -114,9 +116,9 @@ object SqlUtil {
      * @param sqlProcessor
      * @return String
     </T> */
-    fun selectSql(selectColumns: Array<String>, table: String, condition: String = Constants.String.BLANK, mappingBean: MappingBean?, sqlProcessor: SqlProcessor): String {
+    fun selectSql(selectColumns: Array<String>, table: String, condition: String = Constants.String.BLANK, mappingBean: MappingBean?, sqlProcessor: SqlProcessor, distinct : Boolean = true): String {
         val tempTable = fixTable(table, mappingBean, sqlProcessor)
-        return selectSql(selectColumns, tempTable, condition)
+        return selectSql(selectColumns, tempTable, condition, distinct)
     }
 
     fun insertSql(table: String, columnNameArray: Array<String>, valueArray: Array<String>): String {

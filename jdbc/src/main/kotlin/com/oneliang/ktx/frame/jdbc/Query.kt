@@ -239,7 +239,7 @@ interface Query : BaseQuery {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): T?
+    fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>(), distinct : Boolean = true): T?
 
     /**
      * Method: select object list,by column,table,condition,parameters,it is sql binding
@@ -254,7 +254,7 @@ interface Query : BaseQuery {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<T>
+    fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>(), distinct : Boolean = true): List<T>
 
     /**
      * Method: select object list by sql,it is sql binding

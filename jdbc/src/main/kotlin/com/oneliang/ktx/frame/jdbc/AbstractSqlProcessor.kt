@@ -108,6 +108,12 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
                         value = value ?: BigDecimal(Constants.String.ZERO)
                     }
                 }
+                KotlinClassUtil.ClassType.BYTE_ARRAY -> {
+                    value = resultSet.getBytes(columnName)
+                    if (!this.nullable) {
+                        value = value ?: ByteArray(0)
+                    }
+                }
                 else -> {
                     logger.error("unsupport class type:$parameterType")
                 }
