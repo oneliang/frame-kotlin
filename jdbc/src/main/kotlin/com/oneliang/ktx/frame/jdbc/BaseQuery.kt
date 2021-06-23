@@ -31,12 +31,13 @@ interface BaseQuery {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useDistinct
      * @param parameters
      * @return list<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> executeQuery(connection: Connection, kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, parameters: Array<*> = emptyArray<Any>(), distinct : Boolean = true): List<T>
+    fun <T : Any> executeQuery(connection: Connection, kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useDistinct: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<T>
 
     /**
      * Method: execute query with id
@@ -44,11 +45,12 @@ interface BaseQuery {
      * @param connection
      * @param kClass
      * @param id
+     * @param useDistinct
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any, IdType : Any> executeQueryById(connection: Connection, kClass: KClass<T>, id: IdType): T?
+    fun <T : Any, IdType : Any> executeQueryById(connection: Connection, kClass: KClass<T>, id: IdType, useDistinct: Boolean = true): T?
 
     /**
      * Method: execute query with ids
@@ -56,11 +58,12 @@ interface BaseQuery {
      * @param connection
      * @param kClass
      * @param ids
+     * @param useDistinct
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any, IdType : Any> executeQueryByIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>): List<T>
+    fun <T : Any, IdType : Any> executeQueryByIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>, useDistinct: Boolean = true): List<T>
 
     /**
      * Method: execute query base on the connection and sql command

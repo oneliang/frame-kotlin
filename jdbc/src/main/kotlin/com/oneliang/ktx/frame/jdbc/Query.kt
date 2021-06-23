@@ -206,24 +206,26 @@ interface Query : BaseQuery {
      * @param <T>
      * @param kClass
      * @param id
+     * @param useDistinct
      * @param useStable
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType, useStable: Boolean = true): T?
+    fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType, useDistinct: Boolean = true, useStable: Boolean = true): T?
 
     /**
      * Method: select object list by ids, only for single id column
      * @param <T>
      * @param kClass
      * @param ids
+     * @param useDistinct
      * @param useStable
      * @return List<T>
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>, useStable: Boolean = true): List<T>
+    fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>, useDistinct: Boolean = true, useStable: Boolean = true): List<T>
 
     /**
      * Method: select object, by column, table, condition, parameters,it is sql binding
@@ -233,13 +235,14 @@ interface Query : BaseQuery {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return T or null
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>(), distinct : Boolean = true): T?
+    fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useDistinct: Boolean = true, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): T?
 
     /**
      * Method: select object list,by column,table,condition,parameters,it is sql binding
@@ -248,13 +251,14 @@ interface Query : BaseQuery {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>(), distinct : Boolean = true): List<T>
+    fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String> = emptyArray(), table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useDistinct: Boolean = true, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): List<T>
 
     /**
      * Method: select object list by sql,it is sql binding
@@ -278,6 +282,7 @@ interface Query : BaseQuery {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return List<T>
@@ -291,6 +296,7 @@ interface Query : BaseQuery {
         selectColumns: Array<String> = emptyArray(),
         table: String = Constants.String.BLANK,
         condition: String = Constants.String.BLANK,
+        useDistinct: Boolean = true,
         useStable: Boolean = true,
         parameters: Array<*> = emptyArray<Any>()
     ): List<T>
@@ -392,13 +398,14 @@ interface Query : BaseQuery {
      * @param countColumn
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any> totalRows(countColumn: String = Constants.String.BLANK, table: String, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): Int
+    fun <T : Any> totalRows(countColumn: String = Constants.String.BLANK, table: String, condition: String = Constants.String.BLANK, useDistinct: Boolean = true, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): Int
 
     /**
      * Method: get the total size, it is sql binding
@@ -407,13 +414,14 @@ interface Query : BaseQuery {
      * @param countColumn
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    fun <T : Any> totalRows(kClass: KClass<T>? = null, countColumn: String = Constants.String.BLANK, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): Int
+    fun <T : Any> totalRows(kClass: KClass<T>? = null, countColumn: String = Constants.String.BLANK, table: String = Constants.String.BLANK, condition: String = Constants.String.BLANK, useDistinct: Boolean = true, useStable: Boolean = true, parameters: Array<*> = emptyArray<Any>()): Int
 
     /**
      * execute transaction, if you need to stop transaction, you can throw exception

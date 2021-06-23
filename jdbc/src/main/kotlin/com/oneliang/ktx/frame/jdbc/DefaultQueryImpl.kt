@@ -282,19 +282,20 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param <T>
      * @param kClass
      * @param id
+     * @param useDistinct
      * @param useStable
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType, useStable: Boolean): T? {
+    override fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType, useDistinct: Boolean, useStable: Boolean): T? {
         return if (useStable) {
             useStableConnection {
-                this.executeQueryById(it, kClass, id)
+                this.executeQueryById(it, kClass, id, useDistinct)
             }
         } else {
             useConnection {
-                this.executeQueryById(it, kClass, id)
+                this.executeQueryById(it, kClass, id, useDistinct)
             }
         }
     }
@@ -304,19 +305,20 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param <T>
      * @param kClass
      * @param ids
+     * @param useDistinct
      * @param useStable
      * @return List<T>
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>, useStable: Boolean): List<T> {
+    override fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>, useDistinct: Boolean, useStable: Boolean): List<T> {
         return if (useStable) {
             useStableConnection {
-                this.executeQueryByIds(it, kClass, ids)
+                this.executeQueryByIds(it, kClass, ids, useDistinct)
             }
         } else {
             useConnection {
-                this.executeQueryByIds(it, kClass, ids)
+                this.executeQueryByIds(it, kClass, ids, useDistinct)
             }
         }
     }
@@ -329,13 +331,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return T or null
      * @throws QueryException
     </T></T> */
-    override fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>, distinct : Boolean): T? {
-        val list = this.selectObjectList(kClass, selectColumns, table, condition, useStable, parameters, distinct)
+    override fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): T? {
+        val list = this.selectObjectList(kClass, selectColumns, table, condition, useDistinct, useStable, parameters)
         return if (list.isNotEmpty()) {
             list[0]
         } else {
@@ -350,20 +353,21 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>, distinct : Boolean): List<T> {
+    override fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
         return if (useStable) {
             useStableConnection {
-                this.executeQuery(it, kClass, selectColumns, table, condition, parameters, distinct)
+                this.executeQuery(it, kClass, selectColumns, table, condition, useDistinct, parameters)
             }
         } else {
             useConnection {
-                this.executeQuery(it, kClass, selectColumns, table, condition, parameters, distinct)
+                this.executeQuery(it, kClass, selectColumns, table, condition, useDistinct, parameters)
             }
         }
     }
@@ -400,13 +404,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param table
      * @param condition
      * @param useStable
+     * @param useDistinct
      * @param parameters
      * @return List<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>): List<T> {
-        val totalRows = this.totalRows(kClass, countColumn, table, condition, useStable, parameters)
+    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
+        val totalRows = this.totalRows(kClass, countColumn, table, condition, useDistinct, useStable, parameters)
         val rowsPerPage = page.rowsPerPage
         page.initialize(totalRows, rowsPerPage)
         val startRow = page.pageFirstRow
@@ -414,7 +419,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
         sqlConditions.append(condition)
         sqlConditions.append(Constants.String.SPACE + Constants.Database.MySql.PAGINATION + Constants.String.SPACE)
         sqlConditions.append(startRow.toString() + Constants.Symbol.COMMA + rowsPerPage)
-        return this.selectObjectList(kClass, selectColumns, table, sqlConditions.toString(), useStable, parameters)
+        return this.selectObjectList(kClass, selectColumns, table, sqlConditions.toString(), useDistinct, useStable, parameters)
     }
 
     /**
@@ -614,8 +619,8 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any> totalRows(countColumn: String, table: String, condition: String, useStable: Boolean, parameters: Array<*>): Int {
-        return this.totalRows<T>(null, countColumn, table, condition, useStable, parameters)
+    override fun <T : Any> totalRows(countColumn: String, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): Int {
+        return this.totalRows<T>(null, countColumn, table, condition, useDistinct, useStable, parameters)
     }
 
     /**
@@ -624,23 +629,28 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param kClass
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return int
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any> totalRows(kClass: KClass<T>?, countColumn: String, table: String, condition: String, useStable: Boolean, parameters: Array<*>): Int {
+    override fun <T : Any> totalRows(kClass: KClass<T>?, countColumn: String, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): Int {
         val innerCountColumn = if (countColumn.isBlank()) {
             Constants.String.ZERO
         } else {
-            "DISTINCT $countColumn"
+            if (useDistinct) {
+                "DISTINCT $countColumn"
+            } else {
+                countColumn
+            }
         }
         val sql = if (kClass != null) {
             val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass)
-            SqlUtil.selectSql(arrayOf("COUNT(${innerCountColumn}) AS " + Constants.Database.COLUMN_NAME_TOTAL), table, condition, mappingBean, this.sqlProcessor)
+            SqlUtil.selectSql(arrayOf("COUNT(${innerCountColumn}) AS " + Constants.Database.COLUMN_NAME_TOTAL), table, condition, useDistinct, mappingBean, this.sqlProcessor)
         } else {
-            SqlUtil.selectSql(arrayOf("COUNT(${innerCountColumn}) AS " + Constants.Database.COLUMN_NAME_TOTAL), table, condition, null, this.sqlProcessor)
+            SqlUtil.selectSql(arrayOf("COUNT(${innerCountColumn}) AS " + Constants.Database.COLUMN_NAME_TOTAL), table, condition, useDistinct, null, this.sqlProcessor)
         }
         val totalList = this.selectObjectListBySql(Total::class, sql, useStable, parameters)
         return if (totalList.isNotEmpty()) {

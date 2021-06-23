@@ -64,17 +64,18 @@ open class BaseQueryImpl : BaseQuery {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useDistinct
      * @param parameters
      * @return list<T>
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> executeQuery(connection: Connection, kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, parameters: Array<*>, distinct : Boolean): List<T> {
+    override fun <T : Any> executeQuery(connection: Connection, kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, parameters: Array<*>): List<T> {
         var resultSet: ResultSet? = null
         val list: List<T>
         try {
             val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
-            val sql = SqlUtil.selectSql(selectColumns, table, condition, mappingBean, this.sqlProcessor, distinct)
+            val sql = SqlUtil.selectSql(selectColumns, table, condition, useDistinct, mappingBean, this.sqlProcessor)
             resultSet = this.executeQueryBySql(connection, sql, parameters)
             list = SqlUtil.resultSetToObjectList(resultSet, kClass, mappingBean, this.sqlProcessor)
             logger.debug("sql select result:%s, sql:%s, parameters:[%s]", list.size, sql, parameters.joinToString())
@@ -99,13 +100,14 @@ open class BaseQueryImpl : BaseQuery {
      * @param connection
      * @param kClass
      * @param id
+     * @param useDistinct
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any, IdType : Any> executeQueryById(connection: Connection, kClass: KClass<T>, id: IdType): T? {
+    override fun <T : Any, IdType : Any> executeQueryById(connection: Connection, kClass: KClass<T>, id: IdType, useDistinct: Boolean): T? {
         var instance: T? = null
-        val list: List<T> = executeQueryByIdOrIds(connection, kClass, arrayOf<Any>(id), true)
+        val list: List<T> = executeQueryByIdOrIds(connection, kClass, arrayOf<Any>(id), useDistinct, true)
         if (list.isNotEmpty()) {
             instance = list[0]
         }
@@ -118,12 +120,13 @@ open class BaseQueryImpl : BaseQuery {
      * @param connection
      * @param kClass
      * @param ids
+     * @param useDistinct
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    override fun <T : Any, IdType : Any> executeQueryByIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>): List<T> {
-        return executeQueryByIdOrIds(connection, kClass, ids, false)
+    override fun <T : Any, IdType : Any> executeQueryByIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>, useDistinct: Boolean): List<T> {
+        return executeQueryByIdOrIds(connection, kClass, ids, useDistinct, false)
     }
 
     /**
@@ -132,12 +135,13 @@ open class BaseQueryImpl : BaseQuery {
      * @param connection
      * @param kClass
      * @param ids
+     * @param useDistinct
      * @param singleId
      * @return T
      * @throws QueryException
     </T> */
     @Throws(QueryException::class)
-    private fun <T : Any, IdType : Any> executeQueryByIdOrIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>, singleId: Boolean): List<T> {
+    private fun <T : Any, IdType : Any> executeQueryByIdOrIds(connection: Connection, kClass: KClass<T>, ids: Array<IdType>, useDistinct: Boolean = true, singleId: Boolean): List<T> {
         if (ids.isEmpty()) {
             return emptyList()
         }
