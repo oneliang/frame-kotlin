@@ -334,8 +334,8 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @return T or null
      * @throws QueryException
     </T></T> */
-    override fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>): T? {
-        val list = this.selectObjectList(kClass, selectColumns, table, condition, useStable, parameters)
+    override fun <T : Any> selectObject(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>, distinct : Boolean): T? {
+        val list = this.selectObjectList(kClass, selectColumns, table, condition, useStable, parameters, distinct)
         return if (list.isNotEmpty()) {
             list[0]
         } else {
@@ -356,14 +356,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>): List<T> {
+    override fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>, distinct : Boolean): List<T> {
         return if (useStable) {
             useStableConnection {
-                this.executeQuery(it, kClass, selectColumns, table, condition, parameters)
+                this.executeQuery(it, kClass, selectColumns, table, condition, parameters, distinct)
             }
         } else {
             useConnection {
-                this.executeQuery(it, kClass, selectColumns, table, condition, parameters)
+                this.executeQuery(it, kClass, selectColumns, table, condition, parameters, distinct)
             }
         }
     }

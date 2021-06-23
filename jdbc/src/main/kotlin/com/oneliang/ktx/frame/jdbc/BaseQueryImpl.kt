@@ -69,12 +69,12 @@ open class BaseQueryImpl : BaseQuery {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> executeQuery(connection: Connection, kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, parameters: Array<*>): List<T> {
+    override fun <T : Any> executeQuery(connection: Connection, kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, parameters: Array<*>, distinct : Boolean): List<T> {
         var resultSet: ResultSet? = null
         val list: List<T>
         try {
             val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
-            val sql = SqlUtil.selectSql(selectColumns, table, condition, mappingBean, this.sqlProcessor)
+            val sql = SqlUtil.selectSql(selectColumns, table, condition, mappingBean, this.sqlProcessor, distinct)
             resultSet = this.executeQueryBySql(connection, sql, parameters)
             list = SqlUtil.resultSetToObjectList(resultSet, kClass, mappingBean, this.sqlProcessor)
             logger.debug("sql select result:%s, sql:%s, parameters:[%s]", list.size, sql, parameters.joinToString())
