@@ -23,10 +23,10 @@ class OracleQueryImpl : DefaultQueryImpl() {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, useStable: Boolean, parameters: Array<*>): List<T> {
+    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
         var tempSelectColumns = selectColumns
         var tempTable = table
-        val totalRows = this.totalRows(kClass, countColumn, tempTable, condition, useStable, parameters)
+        val totalRows = this.totalRows(kClass, countColumn, tempTable, condition, useStable, useDistinct, parameters)
         val rowsPerPage = page.rowsPerPage
         page.initialize(totalRows, rowsPerPage)
         val startRow = page.pageFirstRow
@@ -51,7 +51,7 @@ class OracleQueryImpl : DefaultQueryImpl() {
         val sqlConditions = StringBuilder()
         sqlConditions.append("and " + rowNumAlias + ">" + startRow + " and " + rowNumAlias + "<=" + rowsPerPage * currentPage)
         return useConnection {
-            this.executeQuery(it, kClass, emptyArray(), tempTable, sqlConditions.toString(), parameters)
+            this.executeQuery(it, kClass, emptyArray(), tempTable, sqlConditions.toString(), useDistinct, parameters)
         }
     }
 }
