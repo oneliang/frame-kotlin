@@ -2,8 +2,8 @@ package com.oneliang.ktx.frame.jdbc
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.exception.MappingNotFoundException
-import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import com.oneliang.ktx.frame.bean.Page
+import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import kotlin.reflect.KClass
 
 class OracleQueryImpl : DefaultQueryImpl() {
@@ -17,6 +17,7 @@ class OracleQueryImpl : DefaultQueryImpl() {
      * @param selectColumns
      * @param table
      * @param condition
+     * @param useDistinct
      * @param useStable
      * @param parameters
      * @return List<T>
