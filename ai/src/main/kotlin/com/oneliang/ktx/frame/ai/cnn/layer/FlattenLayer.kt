@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.ai.cnn.calculateOutSize
 import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 
-open class FlattenLayer<IN : Any, OUT : Any, LOSS : Any>(
+open class FlattenLayer<IN : Any, OUT : Any, LOSS : IN>(
     val mapDepth: Int,//32
     private val forwardImpl: ((layer: FlattenLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: FlattenLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null,

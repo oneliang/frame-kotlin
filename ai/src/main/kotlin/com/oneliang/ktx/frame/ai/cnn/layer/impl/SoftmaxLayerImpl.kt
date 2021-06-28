@@ -8,13 +8,12 @@ import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
-import com.oneliang.ktx.util.math.matrix.transpose
 
 open class SoftmaxLayerImpl(
     neuronCount: Int,
     typeCount: Int,
     private val learningRate: Float = 0.0f
-) : SoftmaxLayer<Array<Float>, Array<Float>, Array<Array<Float>>>(neuronCount, typeCount) {
+) : SoftmaxLayer<Array<Float>, Array<Float>, Array<Float>>(neuronCount, typeCount) {
 
     companion object {
         private const val DERIVED_WEIGHTS_KEY = "derivedWeights"
@@ -57,7 +56,7 @@ open class SoftmaxLayerImpl(
             loss[typeIndex] = outputNeuron[typeIndex] - this.correctProbability[correctYType][typeIndex]
         }
 
-        val outputLoss = loss.transpose()//[*][1]
+        val outputLoss = loss//.transpose()//[*][1]
         this.inputNeuronLoss[dataId] = outputLoss
 //        println("-----softmax backward-----")
 //        println("output loss:" + outputLoss.toJson())
@@ -68,14 +67,14 @@ open class SoftmaxLayerImpl(
             Array(this.neuronCount) { xIndex ->
                 val x = inputNeuron[xIndex]
                 Array(this.typeCount) { typeIndex ->
-                    ordinaryLeastSquaresDerived(x, outputLoss[typeIndex][0])
+                    ordinaryLeastSquaresDerived(x, outputLoss[typeIndex])
                 }
             }
         }, update = {
             Array(this.neuronCount) { xIndex ->
                 val x = inputNeuron[xIndex]
                 Array(this.typeCount) { typeIndex ->
-                    it[xIndex][typeIndex] + ordinaryLeastSquaresDerived(x, outputLoss[typeIndex][0])
+                    it[xIndex][typeIndex] + ordinaryLeastSquaresDerived(x, outputLoss[typeIndex])
                 }
             }
         })

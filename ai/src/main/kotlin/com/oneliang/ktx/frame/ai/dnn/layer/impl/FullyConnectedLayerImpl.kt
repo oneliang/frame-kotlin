@@ -6,11 +6,13 @@ import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 import com.oneliang.ktx.frame.ai.dnn.layer.OutputLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquaresDerived
 import com.oneliang.ktx.util.common.toBriefString
+import com.oneliang.ktx.util.common.toNewArray
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.jsonToMap
 import com.oneliang.ktx.util.json.jsonToObjectList
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
+import com.oneliang.ktx.util.math.matrix.transpose
 import kotlin.math.abs
 
 class FullyConnectedLayerImpl(
@@ -18,7 +20,7 @@ class FullyConnectedLayerImpl(
     private val supportBias: Boolean = false,
     private var learningRate: Float = 0.0f,
     private val parallel: Boolean = false,
-) : FullyConnectedLayer<Array<Float>, Array<Float>, Array<Array<Float>>>(neuronCount) {
+) : FullyConnectedLayer<Array<Float>, Array<Float>, Array<Float>>(neuronCount) {
 
     companion object {
         private val logger = LoggerManager.getLogger(FullyConnectedLayerImpl::class)
@@ -28,13 +30,13 @@ class FullyConnectedLayerImpl(
     }
 
     //coroutine concurrent, use for all data in layer
-    var derivedWeights = AtomicMap<String, Array<Array<Float>>>()//Array(this.neuronCount) { 0.0f }
+    private var derivedWeights = AtomicMap<String, Array<Array<Float>>>()//Array(this.neuronCount) { 0.0f }
 
     //coroutine concurrent, use for input data, need to reset it by data id to release memory
 //    var inputNeuronLoss = ConcurrentHashMap<Long, Array<Array<Float>>>()//Array(this.neuronCount) { 0.0 }
 
     //use for layer, public
-    var weights: Array<Array<Float>> = emptyArray()
+    private var weights: Array<Array<Float>> = emptyArray()
     private var bias: Float = 1.0f
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float, training: Boolean): Array<Float> {
@@ -70,7 +72,7 @@ class FullyConnectedLayerImpl(
                 if (this.supportBias) outputNeuronLoss.copyOfRange(0, outputNeuronLoss.size - 1) else outputNeuronLoss//when support bias, delete the bias loss, last input is bias
             }
             is LossLayer<*, *, *> -> {
-                val outputNeuronLoss = getNextLayerInputNeuronLoss<Array<Array<Float>>>(dataId)//next layer input neuron loss = this layer output neuron loss
+                val outputNeuronLoss = getNextLayerInputNeuronLoss(dataId)//next layer input neuron loss = this layer output neuron loss
                 if (this.supportBias) outputNeuronLoss.copyOfRange(0, outputNeuronLoss.size - 1) else outputNeuronLoss//when support bias, delete the bias loss, last input is bias
             }
             else -> {
@@ -80,10 +82,9 @@ class FullyConnectedLayerImpl(
 //        println("-----fully connected backward-----")
 //        println("next layer loss:" + nextLayerLoss.toJson())
         //update current layer input neuron loss
-        val inputNeuronLoss = this.weights.multiply(nextLayerLoss, parallel = false, gpu = false)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
+        val inputNeuronLoss = this.weights.multiply(nextLayerLoss.transpose(), parallel = false, gpu = false)//only one loss, after calculate, transform to inputNeuronCount*1 matrix
 //        inputNeuronLoss.printToMatrix()
-//        println("input loss:" + inputNeuronLoss.toJson())
-        this.inputNeuronLoss[dataId] = inputNeuronLoss
+        this.inputNeuronLoss[dataId] = inputNeuronLoss.toNewArray { it[0] }//because nextLayerLoss is one dimension array
 
 //        println("-----back-----" + this.inputNeuronMap[dataId]?.toJson() + "," + this.inputNeuronLoss[dataId]?.toJson())
 //        println("input size:${inputNeuron.size}, out put size:${this.neuronCount}, next layer loss:${nextLayerLoss.toJson()}")
@@ -93,14 +94,14 @@ class FullyConnectedLayerImpl(
             Array(newInputNeuron.size) { xIndex ->
                 val x = newInputNeuron[xIndex]
                 Array(this.neuronCount) { outputNeuronIndex ->
-                    ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex][0])
+                    ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex])
                 }
             }
         }, update = { oldDerivedWeights ->
             Array(newInputNeuron.size) { xIndex ->
                 val x = newInputNeuron[xIndex]
                 Array(this.neuronCount) { outputNeuronIndex ->
-                    oldDerivedWeights[xIndex][outputNeuronIndex] + ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex][0])
+                    oldDerivedWeights[xIndex][outputNeuronIndex] + ordinaryLeastSquaresDerived(x, nextLayerLoss[outputNeuronIndex])
                 }
             }
         })

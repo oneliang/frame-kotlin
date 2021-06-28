@@ -2,14 +2,13 @@ package com.oneliang.ktx.frame.ai.cnn.layer.impl
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.cnn.layer.FlattenLayer
-import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 import com.oneliang.ktx.util.common.singleIteration
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.math.tensor.innerProduct
 
 open class FlattenLayerImpl(
     mapDepth: Int//32
-) : FlattenLayer<Array<Array<Array<Float>>>, Array<Float>, Array<Array<Float>>>(mapDepth) {
+) : FlattenLayer<Array<Array<Array<Float>>>, Array<Float>, Array<Array<Array<Float>>>>(mapDepth) {
 
     var weights: Array<Array<Array<Array<Float>>>> = emptyArray()//mapDepth * inputMapDepth * inY * inX
 
@@ -30,7 +29,7 @@ open class FlattenLayerImpl(
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float) {
         //out put loss
-        val nextLayerLoss = getNextLayerInputNeuronLoss<Array<Array<Float>>>(dataId)
+        val nextLayerLoss = getNextLayerInputNeuronLoss(dataId)
         println(nextLayerLoss.toJson())
     }
 

@@ -2,7 +2,7 @@ package com.oneliang.ktx.frame.ai.dnn.layer
 
 import com.oneliang.ktx.Constants
 
-open class OutputLayer<IN : Any, OUT : Any, LOSS : Any>(
+open class OutputLayer<IN : Any, OUT : Any, LOSS : IN>(
     private val forwardImpl: ((layer: OutputLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: OutputLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null,
     private val forwardResetImpl: ((layer: OutputLayer<IN, OUT, LOSS>, dataId: Long) -> Unit)? = null,

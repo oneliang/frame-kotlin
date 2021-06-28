@@ -2,7 +2,7 @@ package com.oneliang.ktx.frame.ai.dnn.layer
 
 import com.oneliang.ktx.Constants
 
-open class FullyConnectedLayer<IN : Any, OUT : Any, LOSS : Any>(
+open class FullyConnectedLayer<IN : Any, OUT : Any, LOSS : IN>(
     val neuronCount: Int,
     private val forwardImpl: ((layer: FullyConnectedLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: FullyConnectedLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null,

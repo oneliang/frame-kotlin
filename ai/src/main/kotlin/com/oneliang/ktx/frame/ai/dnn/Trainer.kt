@@ -28,7 +28,7 @@ class Trainer {
         modelFullFilename: String = Constants.String.BLANK,
         parallel: Boolean = false
     ) {
-        val maxRetryCount = 3
+        val maxRetryCount = 0
         var retryCount = 0
         var needToTrain = true
         while (needToTrain && retryCount <= maxRetryCount) {

@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.ai.cnn.layer
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 
-open class TransformLayer<IN : Any, OUT : Any, LOSS : Any>(
+open class TransformLayer<IN : Any, OUT : Any, LOSS : IN>(
     private val forwardImpl: ((layer: TransformLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: TransformLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null,
     private val forwardResetImpl: ((layer: TransformLayer<IN, OUT, LOSS>, dataId: Long) -> Unit)? = null,

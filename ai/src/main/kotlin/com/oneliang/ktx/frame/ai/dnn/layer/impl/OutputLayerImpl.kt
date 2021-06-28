@@ -5,6 +5,7 @@ import com.oneliang.ktx.frame.ai.dnn.layer.OutputLayer
 import com.oneliang.ktx.frame.ai.loss.ordinaryLeastSquares
 import com.oneliang.ktx.pojo.FloatWrapper
 import com.oneliang.ktx.util.common.sumByFloat
+import com.oneliang.ktx.util.common.toNewArray
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
@@ -13,7 +14,7 @@ import com.oneliang.ktx.util.math.matrix.transpose
 /**
  * this output layer, input neuron equal output neuron, so loss named inputNeuronLoss
  */
-class OutputLayerImpl : OutputLayer<Array<Float>, Array<Float>, Array<Array<Float>>>() {
+class OutputLayerImpl : OutputLayer<Array<Float>, Array<Float>, Array<Float>>() {
     companion object {
         private val logger = LoggerManager.getLogger(OutputLayerImpl::class)
         private const val SUM_KEY = "sum"
@@ -32,14 +33,14 @@ class OutputLayerImpl : OutputLayer<Array<Float>, Array<Float>, Array<Array<Floa
     }
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float) {//get 0 for test, only out put one
-        val loss = this.inputNeuronLoss.getOrPut(dataId) { inputNeuron.transpose { it - y } }!!//[inputNeuron.size][1]
+        val loss = this.inputNeuronLoss.getOrPut(dataId) { inputNeuron.toNewArray { it - y } }!!//[inputNeuron.size]
         this.sumLoss.operate(SUM_KEY, create = {
             FloatWrapper(loss.sumByFloat {
-                ordinaryLeastSquares(it[0])
+                ordinaryLeastSquares(it)
             })
         }, update = { oldFloatWrapper ->
             FloatWrapper(oldFloatWrapper.value + loss.sumByFloat {
-                ordinaryLeastSquares(it[0])
+                ordinaryLeastSquares(it)
             })
         })
     }

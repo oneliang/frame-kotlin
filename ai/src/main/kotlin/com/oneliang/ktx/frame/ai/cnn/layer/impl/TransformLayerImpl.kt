@@ -3,9 +3,10 @@ package com.oneliang.ktx.frame.ai.cnn.layer.impl
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.cnn.layer.TransformLayer
 import com.oneliang.ktx.util.common.singleIteration
+import com.oneliang.ktx.util.common.toNewArray
 import com.oneliang.ktx.util.json.toJson
 
-open class TransformLayerImpl : TransformLayer<Array<Array<Array<Float>>>, Array<Float>, Array<Array<Float>>>() {
+open class TransformLayerImpl : TransformLayer<Array<Array<Array<Float>>>, Array<Float>, Array<Array<Array<Float>>>>() {
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float, training: Boolean): Array<Float> {
         if (inputNeuron.isEmpty() || inputNeuron[0].isEmpty() || inputNeuron[0].size != 1 || inputNeuron[0][0].isEmpty() || inputNeuron[0][0].size != 1) {
@@ -19,8 +20,9 @@ open class TransformLayerImpl : TransformLayer<Array<Array<Array<Float>>>, Array
     }
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float) {
-        val nextLayerLoss = getNextLayerInputNeuronLoss<Array<Array<Float>>>(dataId)
+        val nextLayerLoss = getNextLayerInputNeuronLoss(dataId)
         println("next layer loss:" + nextLayerLoss.toJson())
+        this.inputNeuronLoss[dataId] = nextLayerLoss.toNewArray { value -> Array(1) { Array(1) { value } } }
     }
 
     override fun forwardResetImpl(dataId: Long) {

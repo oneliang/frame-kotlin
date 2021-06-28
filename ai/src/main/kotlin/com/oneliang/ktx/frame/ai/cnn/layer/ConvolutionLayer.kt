@@ -2,9 +2,9 @@ package com.oneliang.ktx.frame.ai.cnn.layer
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.cnn.calculateOutSize
-import com.oneliang.ktx.frame.ai.dnn.layer.Layer
+import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 
-open class ConvolutionLayer<IN : Any, OUT : Any>(
+open class ConvolutionLayer<IN : Any, OUT : Any, LOSS : IN>(
     val previousLayerMapDepth: Int,//1
     val mapDepth: Int,//32
     val inX: Int,
@@ -13,13 +13,13 @@ open class ConvolutionLayer<IN : Any, OUT : Any>(
     val filterY: Int,
     val padding: Int = 0,
     val stride: Int = 1,
-    private val forwardImpl: ((layer: ConvolutionLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
-    private val backwardImpl: ((layer: ConvolutionLayer<IN, OUT>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null,
-    private val forwardResetImpl: ((layer: ConvolutionLayer<IN, OUT>, dataId: Long) -> Unit)? = null,
-    private val updateImpl: ((layer: ConvolutionLayer<IN, OUT>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) -> Unit)? = null,
-    private val initializeLayerModelDataImpl: ((layer: ConvolutionLayer<IN, OUT>, data: String) -> Unit) = { _, _ -> },
-    private val saveLayerModelDataImpl: ((layer: ConvolutionLayer<IN, OUT>) -> String) = { Constants.String.BLANK }
-) : Layer<IN, OUT>() {
+    private val forwardImpl: ((layer: ConvolutionLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
+    private val backwardImpl: ((layer: ConvolutionLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null,
+    private val forwardResetImpl: ((layer: ConvolutionLayer<IN, OUT, LOSS>, dataId: Long) -> Unit)? = null,
+    private val updateImpl: ((layer: ConvolutionLayer<IN, OUT, LOSS>, epoch: Int, printPeriod: Int, totalDataSize: Long, learningRate: Float) -> Unit)? = null,
+    private val initializeLayerModelDataImpl: ((layer: ConvolutionLayer<IN, OUT, LOSS>, data: String) -> Unit) = { _, _ -> },
+    private val saveLayerModelDataImpl: ((layer: ConvolutionLayer<IN, OUT, LOSS>) -> String) = { Constants.String.BLANK }
+) : LossLayer<IN, OUT, LOSS>() {
 
     var filters = Array(this.previousLayerMapDepth) { Array(this.mapDepth) { Array(this.filterY) { Array(this.filterX) { 0.0f } } } }
     var biases = Array(this.mapDepth) { 0.0f }

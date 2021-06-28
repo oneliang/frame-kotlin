@@ -2,7 +2,7 @@ package com.oneliang.ktx.frame.ai.dnn.layer
 
 import com.oneliang.ktx.Constants
 
-open class L2NormalizationLayer<IN : Any, OUT : Any, LOSS : Any>(
+open class L2NormalizationLayer<IN : Any, OUT : Any, LOSS : IN>(
     private val forwardImpl: ((layer: L2NormalizationLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,
     private val backwardImpl: ((layer: L2NormalizationLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float) -> Unit)? = null
 ) : LossLayer<IN, OUT, LOSS>() {

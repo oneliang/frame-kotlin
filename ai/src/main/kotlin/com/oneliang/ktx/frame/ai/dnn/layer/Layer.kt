@@ -1,8 +1,13 @@
 package com.oneliang.ktx.frame.ai.dnn.layer
 
+import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class Layer<IN : Any, OUT : Any> {
+
+    companion object {
+        private val logger = LoggerManager.getLogger(Layer::class)
+    }
 
     open var inputNeuronMap = ConcurrentHashMap<Long, IN>()
     open var outputNeuronMap = ConcurrentHashMap<Long, OUT>()
@@ -32,6 +37,7 @@ abstract class Layer<IN : Any, OUT : Any> {
      * invoke per input data
      */
     fun doForward(dataId: Long, inputNeuron: IN, y: Float, training: Boolean) {
+        logger.verbose("doing forward, %s", this)
         this.inputNeuronMap[dataId] = inputNeuron
         val outputNeuron = forwardImpl(dataId, inputNeuron, y, training)
         this.outputNeuronMap[dataId] = outputNeuron
@@ -46,6 +52,7 @@ abstract class Layer<IN : Any, OUT : Any> {
      * invoke per input data
      */
     fun doBackward(dataId: Long, y: Float) {
+        logger.verbose("doing backward, %s", this)
         backwardImpl(dataId, this.inputNeuronMap[dataId]!!, y)
         this.previousLayer?.doBackward(dataId, y)
     }

@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.ai.dnn.layer.impl
 import com.oneliang.ktx.frame.ai.activation.l2Normalization
 import com.oneliang.ktx.frame.ai.dnn.layer.L2NormalizationLayer
 
-class L2NormalizationLayerImpl : L2NormalizationLayer<Array<Float>, Array<Float>, Array<Array<Float>>>() {
+class L2NormalizationLayerImpl : L2NormalizationLayer<Array<Float>, Array<Float>, Array<Float>>() {
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Float>, y: Float, training: Boolean): Array<Float> {
         if (inputNeuron.isEmpty()) {

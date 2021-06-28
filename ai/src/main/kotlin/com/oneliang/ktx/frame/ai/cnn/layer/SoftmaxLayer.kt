@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.ai.dnn.layer.Layer
 import com.oneliang.ktx.frame.ai.dnn.layer.LossLayer
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 
-open class SoftmaxLayer<IN : Any, OUT : Any, LOSS : Any>(
+open class SoftmaxLayer<IN : Any, OUT : Any, LOSS : IN>(
     val neuronCount: Int,
     val typeCount: Int,
     private val forwardImpl: ((layer: SoftmaxLayer<IN, OUT, LOSS>, dataId: Long, inputNeuron: IN, y: Float, training: Boolean) -> OUT)? = null,

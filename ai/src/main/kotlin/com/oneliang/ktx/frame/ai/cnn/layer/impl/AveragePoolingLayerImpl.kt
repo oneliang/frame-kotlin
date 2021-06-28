@@ -21,6 +21,7 @@ open class AveragePoolingLayerImpl(
     }
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float) {
+        println("xxxxxxxxxx")
     }
 
     override fun forwardResetImpl(dataId: Long) {
