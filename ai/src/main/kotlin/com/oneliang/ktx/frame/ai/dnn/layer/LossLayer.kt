@@ -21,7 +21,7 @@ abstract class LossLayer<IN : Any, OUT : Any, LOSS : IN> : Layer<IN, OUT>() {
                 outputNeuronLoss
             }
             else -> {
-                error("not support %s yet, only support LossLayer".format(nextLayer))
+                error("only support LossLayer or its subclass, not support %s yet".format(nextLayer))
             }
         }
     }

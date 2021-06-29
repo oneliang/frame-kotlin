@@ -44,10 +44,8 @@ object AnnotationContextUtil {
     @Throws(ClassNotFoundException::class, FileLoadException::class)
     fun parseAnnotationContextParameterAndSearchClass(parameters: String, classLoader: ClassLoader, classesRealPath: String, jarClassLoader: JarClassLoader, annotationClass: KClass<out Annotation>): List<KClass<*>> {
         val parameterArray = parameters.replaceAllSpace().replaceAllLines().split(Constants.Symbol.COMMA)
-        val fixedClassesRealPath = if (classesRealPath.isBlank()) {
+        val fixedClassesRealPath = classesRealPath.ifBlank {
             classLoader.getResource(Constants.String.BLANK)?.path.nullToBlank()
-        } else {
-            classesRealPath
         }
         return if (parameterArray.size == 1) {
             val path = File(fixedClassesRealPath, parameters).absolutePath
