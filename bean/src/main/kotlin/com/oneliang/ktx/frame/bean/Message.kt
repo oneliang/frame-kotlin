@@ -66,7 +66,7 @@ class Message<O : Any, I : Any> {
          * @param <O>
          * @param <I>
          * @param message
-         * @param object
+         * @param instance
          * @param objectList
          * @param otherInformation
          * @return Message<O></O>,I>

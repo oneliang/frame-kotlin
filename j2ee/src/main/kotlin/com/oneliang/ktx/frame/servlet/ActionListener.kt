@@ -231,11 +231,12 @@ class ActionListener : HttpServlet() {
 
         httpServletRequest.setAttribute(ConstantsAction.RequestKey.KEY_STRING_CURRENT_REQUEST_URI, uri)
 
-        this.lifecycle?.onRequest(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
-
-        this.dispatchToDoAction(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
-
-        this.lifecycle?.onResponse(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
+        try {
+            this.lifecycle?.onRequest(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
+            this.dispatchToDoAction(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
+        } finally {
+            this.lifecycle?.onResponse(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
+        }
     }
 
     /**
