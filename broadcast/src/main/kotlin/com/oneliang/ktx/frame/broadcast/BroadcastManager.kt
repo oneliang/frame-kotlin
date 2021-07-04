@@ -39,10 +39,7 @@ class BroadcastManager() : LoopThread(), BroadcastSender {
      * @param broadcastReceiver
      */
     fun unregisterBroadcastReceiver(broadcastReceiver: BroadcastReceiver) {
-        val iterator = broadcastReceiverMap.entries.iterator()
-        while (iterator.hasNext()) {
-            val entry = iterator.next()
-            val broadcastReceiverList = entry.value
+        this.broadcastReceiverMap.forEach { (_, broadcastReceiverList) ->
             if (broadcastReceiverList.contains(broadcastReceiver)) {
                 broadcastReceiverList.remove(broadcastReceiver)
             }
@@ -69,6 +66,12 @@ class BroadcastManager() : LoopThread(), BroadcastSender {
                 lock.wait()
             }
         }
+    }
+
+    override fun interrupt() {
+        super.interrupt()
+        this.broadcastReceiverMap.clear()
+        this.messageQueue.clear()
     }
 
     /**

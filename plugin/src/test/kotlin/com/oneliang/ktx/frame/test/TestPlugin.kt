@@ -27,7 +27,9 @@ class TestPlugin : PluginGroupBean.OnLoadedListener, PluginFileBean.OnLoadedList
         pluginGroupBean.onLoadedListener = this
         pluginGroupBean.addPluginFileBean(pluginFileBean)
         pluginGroupBean.loadPluginFileBean()
-//        pluginGroupBean.interrupt()
+        pluginGroupBean.interrupt()
+        pluginFileBean.onLoadedListener = null
+        pluginGroupBean.onLoadedListener = null
     }
 
     override fun onLoaded(pluginGroupBean: PluginGroupBean) {
@@ -43,28 +45,34 @@ class TestPlugin : PluginGroupBean.OnLoadedListener, PluginFileBean.OnLoadedList
     }
 
     fun testUnloadClass() {
-        val classList = mutableListOf<Class<*>?>()
         var jarClassLoader: JarClassLoader? = JarClassLoader(Thread.currentThread().contextClassLoader)
-        jarClassLoader?.addURL(URL("file:///D:/a.jar"))
-//    var testClass: Class<*>? = jarClassLoader?.loadClass("TestClass")
-//    classList += testClass
-        classList += jarClassLoader?.loadClass("TestClass")
-//    var instance = testClass?.newInstance()
-//    println(instance)
-        classList.clear()
+        jarClassLoader?.addURL(URL("file:///D:/plugin-a.jar"))
+        var testClass: Class<*>? = jarClassLoader?.loadClass("com.oneliang.ktx.frame.test.PluginA")
+        var instance = testClass?.newInstance()
+        println(instance)
         jarClassLoader = null
-//    testClass = null
-//    instance = null
+        testClass = null
+        instance = null
+        System.gc()
+        Thread.sleep(5000)
+        jarClassLoader = JarClassLoader(Thread.currentThread().contextClassLoader)
+        jarClassLoader.addURL(URL("file:///D:/plugin-a.jar"))
+        testClass = jarClassLoader.loadClass("com.oneliang.ktx.frame.test.PluginA")
+        instance = testClass?.newInstance()
+        println(instance)
+        jarClassLoader = null
+        testClass = null
+        instance = null
     }
 }
 
 fun main() {
-    TestPlugin().test()
-    Thread.sleep(5000)
-    System.gc()
-    Thread.sleep(5000)
-    println("-----------------")
-    System.gc()
-//    TestPlugin().testUnloadClass()
+//    TestPlugin().test()
+//    Thread.sleep(5000)
 //    System.gc()
+//    Thread.sleep(5000)
+//    println("-----------------")
+//    System.gc()
+    TestPlugin().testUnloadClass()
+    System.gc()
 }
