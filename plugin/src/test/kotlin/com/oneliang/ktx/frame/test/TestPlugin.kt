@@ -24,7 +24,7 @@ class TestPlugin : PluginGroupBean.OnLoadedListener, PluginFileBean.OnLoadedList
         pluginGroupBean.loadPluginFileBean()
         val pluginA = pluginGroupBean.findPlugin(PLUGIN_GROUP_A, PLUGIN_A)
         pluginA?.dispatch(Plugin.Command("command_a"))
-        pluginGroupBean.interrupt()
+        pluginGroupBean.destroy()
 //        pluginFileBean.onLoadedListener = null
 //        pluginGroupBean.onLoadedListener = null
     }

@@ -25,14 +25,14 @@ class PluginGroupBean(var id: String) : BroadcastReceiver {
         this.broadcastManager?.start()
     }
 
-    fun interrupt() {
+    fun destroy() {
         this.broadcastManager?.interrupt()
         this.broadcastManager = null
         this.defaultPluginDownloader?.interrupt()
         this.defaultPluginDownloader = null
 //        this.jarClassLoader = null
         this.pluginFileBeanList.forEach {
-            it.interrupt()
+            it.destroy()
         }
         this.pluginFileBeanList.clear()
         this.pluginFileBeanMap.clear()

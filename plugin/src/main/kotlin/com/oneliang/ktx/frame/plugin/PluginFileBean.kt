@@ -44,7 +44,7 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
             }
         }
 
-    fun interrupt() {
+    fun destroy() {
         this.broadcastManager = null
         this.pluginBeanMap.forEach { (_, pluginBean) ->
             pluginBean.pluginInstance = null
