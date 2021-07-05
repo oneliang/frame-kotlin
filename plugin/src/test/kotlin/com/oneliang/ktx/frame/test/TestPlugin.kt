@@ -15,21 +15,18 @@ class TestPlugin : PluginGroupBean.OnLoadedListener, PluginFileBean.OnLoadedList
     }
 
     fun test() {
-        val pluginGroupBean = PluginGroupBean()
-        pluginGroupBean.id = PLUGIN_GROUP_A
+        val pluginGroupBean = PluginGroupBean(PLUGIN_GROUP_A)
         //plugin a
-        val pluginFileBean = PluginFileBean()
-        pluginFileBean.id = PLUGIN_FILE_A
-        pluginFileBean.type = PluginFileBean.Type.JAR
-        pluginFileBean.source = PluginFileBean.Source.LOCAL
-        pluginFileBean.url = "D:/plugin-a.jar"
-        pluginFileBean.onLoadedListener = this
-        pluginGroupBean.onLoadedListener = this
+        val pluginFileBean = PluginFileBean(PLUGIN_FILE_A, url = "D:/plugin-a.jar")
+//        pluginFileBean.onLoadedListener = this
+//        pluginGroupBean.onLoadedListener = this
         pluginGroupBean.addPluginFileBean(pluginFileBean)
         pluginGroupBean.loadPluginFileBean()
+        val pluginA = pluginGroupBean.findPlugin(PLUGIN_GROUP_A, PLUGIN_A)
+        pluginA?.dispatch(Plugin.Command("command_a"))
         pluginGroupBean.interrupt()
-        pluginFileBean.onLoadedListener = null
-        pluginGroupBean.onLoadedListener = null
+//        pluginFileBean.onLoadedListener = null
+//        pluginGroupBean.onLoadedListener = null
     }
 
     override fun onLoaded(pluginGroupBean: PluginGroupBean) {
@@ -37,10 +34,10 @@ class TestPlugin : PluginGroupBean.OnLoadedListener, PluginFileBean.OnLoadedList
     }
 
     override fun onLoaded(pluginFileBean: PluginFileBean) {
-        if (pluginFileBean.id == PLUGIN_FILE_A) {
-            val pluginA = pluginFileBean.findPlugin(PLUGIN_A)
-            pluginA?.dispatch(Plugin.Command("command_a"))
-        }
+//        if (pluginFileBean.id == PLUGIN_FILE_A) {
+//            val pluginA = pluginFileBean.findPlugin(PLUGIN_A)
+//            pluginA?.dispatch(Plugin.Command("command_a"))
+//        }
         println("id:" + pluginFileBean.id)
     }
 
@@ -67,12 +64,9 @@ class TestPlugin : PluginGroupBean.OnLoadedListener, PluginFileBean.OnLoadedList
 }
 
 fun main() {
-//    TestPlugin().test()
-//    Thread.sleep(5000)
-//    System.gc()
-//    Thread.sleep(5000)
-//    println("-----------------")
-//    System.gc()
-    TestPlugin().testUnloadClass()
+    TestPlugin().test()
     System.gc()
+    Thread.sleep(2000)
+//    TestPlugin().testUnloadClass()
+//    System.gc()
 }

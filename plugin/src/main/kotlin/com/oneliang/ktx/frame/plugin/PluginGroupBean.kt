@@ -1,6 +1,5 @@
 package com.oneliang.ktx.frame.plugin
 
-import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.broadcast.BroadcastManager
 import com.oneliang.ktx.frame.broadcast.BroadcastReceiver
 import com.oneliang.ktx.frame.broadcast.Message
@@ -8,18 +7,17 @@ import com.oneliang.ktx.util.jar.JarClassLoader
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
-class PluginGroupBean : BroadcastReceiver {
+class PluginGroupBean(var id: String) : BroadcastReceiver {
 
     companion object {
         const val ACTION_PLUGIN_FILE_FINISHED = "action.plugin.file.finished"
         const val KEY_PLUGIN_FILE_ID = "key.plugin.file.id"
     }
 
-    var id = Constants.String.BLANK
     private val pluginFileBeanList: MutableList<PluginFileBean> = CopyOnWriteArrayList()
     private val pluginFileBeanMap: MutableMap<String, PluginFileBean> = ConcurrentHashMap<String, PluginFileBean>()
     var onLoadedListener: OnLoadedListener? = null
-    private var jarClassLoader: JarClassLoader? = JarClassLoader(Thread.currentThread().contextClassLoader)
+    private var jarClassLoader: JarClassLoader = JarClassLoader(Thread.currentThread().contextClassLoader)
     private var defaultPluginDownloader: PluginAsyncHttpDownloader? = PluginAsyncHttpDownloader()
     private var broadcastManager: BroadcastManager? = BroadcastManager()
 
@@ -32,7 +30,7 @@ class PluginGroupBean : BroadcastReceiver {
         this.broadcastManager = null
         this.defaultPluginDownloader?.interrupt()
         this.defaultPluginDownloader = null
-        this.jarClassLoader = null
+//        this.jarClassLoader = null
         this.pluginFileBeanList.forEach {
             it.interrupt()
         }
@@ -47,9 +45,9 @@ class PluginGroupBean : BroadcastReceiver {
     fun loadPluginFileBean() {
         this.broadcastManager?.registerBroadcastReceiver(arrayOf(ACTION_PLUGIN_FILE_FINISHED), this)
         this.pluginFileBeanList.forEach {
-            it.broadcastManager = this.broadcastManager!!
-            it.jarClassLoader = this.jarClassLoader!!
-            it.pluginDownloader = this.defaultPluginDownloader!!
+            it.broadcastManager = this.broadcastManager
+            it.jarClassLoader = this.jarClassLoader
+            it.pluginDownloader = this.defaultPluginDownloader
             it.loadPluginBean()
         }
     }
@@ -78,8 +76,22 @@ class PluginGroupBean : BroadcastReceiver {
      * @param pluginFileBean
      */
     fun addPluginFileBean(pluginFileBean: PluginFileBean) {
-        pluginFileBeanList.add(pluginFileBean)
-        pluginFileBeanMap[pluginFileBean.id] = pluginFileBean
+        if (this.pluginFileBeanMap.containsKey(pluginFileBean.id)) {
+            error("plugin file id:(%s) is exists".format(pluginFileBean.id))
+        } else {
+            this.pluginFileBeanMap[pluginFileBean.id] = pluginFileBean
+            this.pluginFileBeanList.add(pluginFileBean)
+        }
+    }
+
+    /**
+     * find plugin
+     * @param pluginFileBeanId
+     * @param pluginId
+     * @return Plugin
+     */
+    fun findPlugin(pluginFileBeanId: String, pluginId: String): Plugin? {
+        return this.pluginFileBeanMap[pluginFileBeanId]?.findPlugin(pluginId)
     }
 
     /**

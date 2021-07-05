@@ -10,7 +10,7 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
-class PluginFileBean {
+class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Source = Source.LOCAL, val url: String = Constants.String.BLANK) {
 
     companion object {
         private val logger = LoggerManager.getLogger(PluginFileBean::class)
@@ -26,12 +26,8 @@ class PluginFileBean {
 
     private val pluginBeanMap: MutableMap<String, PluginBean> = ConcurrentHashMap<String, PluginBean>()
     internal var broadcastManager: BroadcastManager? = null
-    internal var jarClassLoader: JarClassLoader? = null
+    internal lateinit var jarClassLoader: JarClassLoader
 
-    var id: String = Constants.String.BLANK
-    var type = Type.SOURCE_CODE
-    var source = Source.LOCAL
-    var url: String = Constants.String.BLANK
     var saveFullFilename: String = Constants.String.BLANK
     var onLoadedListener: OnLoadedListener? = null
     var pluginDownloader: PluginDownloader? = null
@@ -50,7 +46,6 @@ class PluginFileBean {
 
     fun interrupt() {
         this.broadcastManager = null
-        this.jarClassLoader = null
         this.pluginBeanMap.forEach { (_, pluginBean) ->
             pluginBean.pluginInstance = null
         }
@@ -111,7 +106,7 @@ class PluginFileBean {
             }
             Source.LOCAL -> {
                 try {
-                    val classList: List<KClass<*>> = JarUtil.extractClassFromJarFile(this.jarClassLoader!!, this.url)
+                    val classList: List<KClass<*>> = JarUtil.extractClassFromJarFile(this.jarClassLoader!!, this.url, useCache = false)
                     for (kClass in classList) {
                         if (kClass.java.isInterfaceImplement(Plugin::class.java)) {
                             val plugin = kClass.java.newInstance() as Plugin
