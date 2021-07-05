@@ -106,10 +106,11 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
             }
             Source.LOCAL -> {
                 try {
-                    val classList: List<KClass<*>> = JarUtil.extractClassFromJarFile(this.jarClassLoader!!, this.url, useCache = false)
+                    val classList: List<KClass<*>> = JarUtil.extractClassFromJarFile(this.jarClassLoader, this.url, useCache = false)
                     for (kClass in classList) {
                         if (kClass.java.isInterfaceImplement(Plugin::class.java)) {
                             val plugin = kClass.java.newInstance() as Plugin
+                            logger.info("initializing plugin, id:%s, class:%s", plugin.id, kClass)
                             val pluginBean = PluginBean()
                             pluginBean.id = plugin.id
                             pluginBean.pluginInstance = plugin
