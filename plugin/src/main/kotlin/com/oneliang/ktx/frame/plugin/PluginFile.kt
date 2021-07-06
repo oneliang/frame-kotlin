@@ -10,10 +10,10 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
-class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Source = Source.LOCAL, val url: String = Constants.String.BLANK) {
+class PluginFile(val id: String, val type: Type = Type.JAR, val source: Source = Source.LOCAL, val url: String = Constants.String.BLANK) {
 
     companion object {
-        private val logger = LoggerManager.getLogger(PluginFileBean::class)
+        private val logger = LoggerManager.getLogger(PluginFile::class)
     }
 
     enum class Type(val value: Int) {
@@ -24,9 +24,9 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
         LOCAL(0), HTTP(1), OTHER(2)
     }
 
-    private val pluginBeanMap: MutableMap<String, PluginBean> = ConcurrentHashMap<String, PluginBean>()
+    private val pluginWrapperMap: MutableMap<String, PluginWrapper> = ConcurrentHashMap<String, PluginWrapper>()
     internal var broadcastManager: BroadcastManager? = null
-    internal lateinit var jarClassLoader: JarClassLoader
+    internal var jarClassLoader: JarClassLoader? = null
 
     var saveFullFilename: String = Constants.String.BLANK
     var onLoadedListener: OnLoadedListener? = null
@@ -36,8 +36,8 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
             field = finished
             if (isFinished) {
                 val message = Message()
-                message.actionList += PluginGroupBean.ACTION_PLUGIN_FILE_FINISHED
-                message.putObject(PluginGroupBean.KEY_PLUGIN_FILE_ID, id)
+                message.actionList += PluginGroup.ACTION_PLUGIN_FILE_FINISHED
+                message.putObject(PluginGroup.KEY_PLUGIN_FILE_ID, id)
 //                if (this::broadcastManager.isInitialized) {
                 this.broadcastManager?.sendBroadcast(message)
 //                }
@@ -46,10 +46,11 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
 
     fun destroy() {
         this.broadcastManager = null
-        this.pluginBeanMap.forEach { (_, pluginBean) ->
-            pluginBean.pluginInstance = null
+        this.jarClassLoader = null
+        this.pluginWrapperMap.forEach { (_, plugin) ->
+            plugin.pluginInstance = null
         }
-        this.pluginBeanMap.clear()
+        this.pluginWrapperMap.clear()
         this.onLoadedListener = null
         this.pluginDownloader = null
     }
@@ -61,31 +62,31 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
      */
     fun findPlugin(pluginId: String): Plugin? {
         var plugin: Plugin? = null
-        if (this.pluginBeanMap.containsKey(pluginId)) {
-            val pluginBean = this.pluginBeanMap[pluginId]
-            if (pluginBean != null) {
-                plugin = pluginBean.pluginInstance
+        if (this.pluginWrapperMap.containsKey(pluginId)) {
+            val pluginWrapper = this.pluginWrapperMap[pluginId]
+            if (pluginWrapper != null) {
+                plugin = pluginWrapper.pluginInstance
             }
         }
         return plugin
     }
 
     /**
-     * load plugin bean
+     * load plugin
      */
-    fun loadPluginBean() {
+    fun loadPlugin() {
         when (this.type) {
-            Type.SOURCE_CODE -> loadPluginBeanByCode()
-            Type.JAR -> loadPluginBeanByJar()
+            Type.SOURCE_CODE -> loadPluginByCode()
+            Type.JAR -> loadPluginByJar()
         }
     }
 
     /**
-     * load plugin bean by code
+     * load plugin by code
      */
-    private fun loadPluginBeanByCode() {
-        this.pluginBeanMap.forEach { (_, pluginBean) ->
-            val plugin = pluginBean.pluginInstance
+    private fun loadPluginByCode() {
+        this.pluginWrapperMap.forEach { (_, pluginWrapper) ->
+            val plugin = pluginWrapper.pluginInstance
             plugin?.initialize()
         }
         this.isFinished = true
@@ -95,9 +96,9 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
     }
 
     /**
-     * load plugin bean by jar
+     * load plugin by jar
      */
-    private fun loadPluginBeanByJar() {
+    private fun loadPluginByJar() {
         when (this.source) {
             Source.HTTP -> {
 //                if (this::pluginDownloader.isInitialized) {
@@ -105,16 +106,17 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
 //                }
             }
             Source.LOCAL -> {
+                val jarClassLoader = this.jarClassLoader ?: error("jar class loader is null, plugin file id:%s".format(this.id))
                 try {
-                    val classList: List<KClass<*>> = JarUtil.extractClassFromJarFile(this.jarClassLoader, this.url, useCache = false)
+                    val classList: List<KClass<*>> = JarUtil.extractClassFromJarFile(jarClassLoader, this.url, useCache = false)
                     for (kClass in classList) {
                         if (kClass.java.isInterfaceImplement(Plugin::class.java)) {
                             val plugin = kClass.java.newInstance() as Plugin
                             logger.info("initializing plugin, id:%s, class:%s", plugin.id, kClass)
-                            val pluginBean = PluginBean()
-                            pluginBean.id = plugin.id
-                            pluginBean.pluginInstance = plugin
-                            addPluginBean(pluginBean)
+                            val pluginWrapper = PluginWrapper()
+                            pluginWrapper.id = pluginWrapper.id
+                            pluginWrapper.pluginInstance = plugin
+                            addPlugin(pluginWrapper)
                             plugin.initialize()
                         }
                     }
@@ -133,23 +135,23 @@ class PluginFileBean(val id: String, val type: Type = Type.JAR, val source: Sour
     }
 
     /**
-     * @param pluginBean
+     * @param pluginWrapper
      */
-    fun addPluginBean(pluginBean: PluginBean) {
-        this.pluginBeanMap[pluginBean.id] = pluginBean
+    fun addPlugin(pluginWrapper: PluginWrapper) {
+        this.pluginWrapperMap[pluginWrapper.id] = pluginWrapper
     }
 
     /**
-     * @return the pluginBeanMap
+     * @return the pluginMap
      */
-    fun getPluginBeanMap(): Map<String, PluginBean> {
-        return this.pluginBeanMap
+    fun getPluginMap(): Map<String, PluginWrapper> {
+        return this.pluginWrapperMap
     }
 
     /**
      * @author oneliang
      */
     interface OnLoadedListener {
-        fun onLoaded(pluginFileBean: PluginFileBean)
+        fun onLoaded(pluginFile: PluginFile)
     }
 }

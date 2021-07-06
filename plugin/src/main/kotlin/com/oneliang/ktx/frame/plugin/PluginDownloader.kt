@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.plugin
 interface PluginDownloader {
     /**
      * download
-     * @param pluginFileBean
+     * @param pluginFile
      */
-    fun download(pluginFileBean: PluginFileBean)
+    fun download(pluginFile: PluginFile)
 }
