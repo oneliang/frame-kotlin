@@ -37,7 +37,7 @@ class FunctionExecutor(
             val sortedFunctionItemList = functionItemList.sortedBy { it.order }
             this.allFunctionItemMap[this.code] = sortedFunctionItemList
             sortedFunctionItemList.forEach { functionItem ->
-                this.functionEngine.eval(functionItem.javaScriptFunction)
+                this.functionEngine.eval(functionItem.script)
             }
         } finally {
             this.updateLock.unlock()

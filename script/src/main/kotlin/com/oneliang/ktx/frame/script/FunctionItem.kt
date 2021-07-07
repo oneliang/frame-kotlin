@@ -4,7 +4,7 @@ class FunctionItem(val code: String,
                    val name: String,
                    val parameter: String,
                    val parameterType: ParameterType,
-                   val javaScriptFunction: String,
+                   val script: String,
                    val returnCode: String,
                    val functionType: FunctionType,
                    val order: Int) {
