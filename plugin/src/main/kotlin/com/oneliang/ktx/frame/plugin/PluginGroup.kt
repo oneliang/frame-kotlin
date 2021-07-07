@@ -98,6 +98,14 @@ class PluginGroup(var id: String) : BroadcastReceiver {
     }
 
     /**
+     * get jar class loader
+     * @return JarClassLoader may be null
+     */
+    fun getJarClassLoader(): JarClassLoader? {
+        return this.jarClassLoader
+    }
+
+    /**
      * @author oneliang
      */
     interface OnLoadedListener {
