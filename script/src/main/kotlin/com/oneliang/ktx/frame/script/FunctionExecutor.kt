@@ -1,17 +1,24 @@
 package com.oneliang.ktx.frame.script
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.common.*
+import com.oneliang.ktx.frame.script.engine.FunctionEngineManager
+import com.oneliang.ktx.util.common.matches
+import com.oneliang.ktx.util.common.nullToBlank
+import com.oneliang.ktx.util.common.toDoubleSafely
+import com.oneliang.ktx.util.common.toFloatSafely
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
-import javax.script.Bindings
-import javax.script.Invocable
-import javax.script.ScriptEngineManager
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 import kotlin.math.abs
 
-class FunctionExecutor(private val code: String) {
+class FunctionExecutor(
+    private val code: String,
+    private val engineName: FunctionEngineManager.EngineName = FunctionEngineManager.EngineName.JS
+) {
     companion object {
         private val logger = LoggerManager.getLogger(FunctionExecutor::class)
         private const val CODE_TYPE_STABLE = "STABLE"
@@ -19,8 +26,8 @@ class FunctionExecutor(private val code: String) {
         private const val RETURN_SUFFIX = "_RESULT"
     }
 
-    private val scriptEngineManager = ScriptEngineManager()
-    private val engine = scriptEngineManager.getEngineByName("js")
+    private val functionEngineManager = FunctionEngineManager()
+    private val functionEngine = functionEngineManager.getEngineByName(this.engineName)
     private val allFunctionItemMap = ConcurrentHashMap<String, List<FunctionItem>>()
     private val updateLock = ReentrantLock()
 
@@ -30,7 +37,7 @@ class FunctionExecutor(private val code: String) {
             val sortedFunctionItemList = functionItemList.sortedBy { it.order }
             this.allFunctionItemMap[this.code] = sortedFunctionItemList
             sortedFunctionItemList.forEach { functionItem ->
-                this.engine.eval(functionItem.javaScriptFunction)
+                this.functionEngine.eval(functionItem.javaScriptFunction)
             }
         } finally {
             this.updateLock.unlock()
@@ -57,10 +64,10 @@ class FunctionExecutor(private val code: String) {
         if (allFunctionItemList.isEmpty()) {
             logger.info("Please update function item list first, function item is empty, product type code:%s", code)
         }
-        if (engine !is Invocable) {
-            logger.error("engine is not invocable")
-            return FunctionResult(false, emptyMap(), emptyMap())
-        }
+//        if (this.functionEngine !is Invocable) {
+//            logger.error("engine is not invocable")
+//            return FunctionResult(false, emptyMap(), emptyMap())
+//        }
         val functionResultItemMap = mutableMapOf<String, FunctionResultItem>()
         //mapping function result without initialize function type
         val functionResultItemMappingMap = mutableMapOf<String, FunctionResultItem>()
@@ -115,7 +122,7 @@ class FunctionExecutor(private val code: String) {
                     val (inputJson, result) = when (functionItem.parameterType) {
                         FunctionItem.ParameterType.JSON_OBJECT -> {
                             val inputJson = optimizeInputMap.toJson()
-                            inputJson to this.engine.invokeFunction(functionItemCode, inputJson)
+                            inputJson to this.functionEngine.invokeFunction(functionItemCode, inputJson)
                         }
                         FunctionItem.ParameterType.STRING -> {
                             val functionInputList = mutableListOf<String>()
@@ -142,14 +149,14 @@ class FunctionExecutor(private val code: String) {
                             }
                             val inputTypeArray = functionInputList.toTypedArray()
                             val inputJson = inputTypeArray.toJson()
-                            inputJson to this.engine.invokeFunction(functionItemCode, *(inputTypeArray))
+                            inputJson to this.functionEngine.invokeFunction(functionItemCode, *(inputTypeArray))
                         }
                     }
                     val (fixValue, resultJson) = when (result) {
                         null -> Constants.String.NULL to Constants.String.NULL
-                        is Bindings -> {
+                        is Map<*, *> -> {
                             result.forEach { (key, value) ->
-                                optimizeInputMap[key] = value?.toString().nullToBlank()
+                                optimizeInputMap[key?.toString().nullToBlank()] = value?.toString().nullToBlank()
                             }
                             Constants.String.BLANK to result.toJson()
                         }
