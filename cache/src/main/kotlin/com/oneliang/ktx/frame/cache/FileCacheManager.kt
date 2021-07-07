@@ -83,7 +83,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             ByteArray::class -> {
                 return FileUtil.readFile(cacheFullFilename) as T
             }
-            else -> logger.error("get from cache unsupport the class:%s", cacheType)
+            else -> logger.error("get from cache not support the class:%s", cacheType)
         }
         return null
     }
@@ -120,7 +120,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             ByteArray::class -> {
                 cacheFile.write(value as ByteArray)
             }
-            else -> logger.error("save to cache unsupport the class:%s", cacheType)
+            else -> logger.error("save to cache not support the class:%s", cacheType)
         }
         //update new cache
         this.cacheProperties.setProperty(keyString, cacheFullFilename)

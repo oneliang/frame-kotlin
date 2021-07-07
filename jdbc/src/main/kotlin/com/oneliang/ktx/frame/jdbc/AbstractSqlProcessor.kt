@@ -115,7 +115,7 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
                     }
                 }
                 else -> {
-                    logger.error("unsupport class type:$parameterType")
+                    logger.error("not support class type:%s", parameterType)
                 }
             }
         } catch (e: Exception) {
