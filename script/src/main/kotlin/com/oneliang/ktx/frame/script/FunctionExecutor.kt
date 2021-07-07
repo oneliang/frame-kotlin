@@ -17,7 +17,8 @@ import kotlin.math.abs
 
 class FunctionExecutor(
     private val code: String,
-    private val engineName: FunctionEngineManager.EngineName = FunctionEngineManager.EngineName.JS
+    private val engineName: FunctionEngineManager.EngineName = FunctionEngineManager.EngineName.JS,
+    private val classLoader: ClassLoader? = null
 ) {
     companion object {
         private val logger = LoggerManager.getLogger(FunctionExecutor::class)
@@ -27,7 +28,7 @@ class FunctionExecutor(
     }
 
     private val functionEngineManager = FunctionEngineManager()
-    private val functionEngine = functionEngineManager.getEngineByName(this.engineName)
+    private val functionEngine = functionEngineManager.getEngineByName(this.engineName, this.classLoader)
     private val allFunctionItemMap = ConcurrentHashMap<String, List<FunctionItem>>()
     private val updateLock = ReentrantLock()
 
