@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.script.engine
 import com.oneliang.ktx.Constants
 import java.util.concurrent.ConcurrentHashMap
 
-class KotlinFunctionEngine : FunctionEngine {
+class KotlinFunctionEngine(private val classLoader: ClassLoader? = null) : FunctionEngine {
 
     private val scriptInvokeNameMap = ConcurrentHashMap<String, Pair<String, String>>()
     private val methodNameMap = ConcurrentHashMap<String, Pair<String, String>>()
@@ -20,7 +20,11 @@ class KotlinFunctionEngine : FunctionEngine {
 
     override fun invokeFunction(name: String, vararg args: Any?): Any? {
         val (className, methodName) = this.scriptInvokeNameMap[name] ?: this.methodNameMap[name] ?: error("function does not exist, name:%s".format(name))
-        val method = Class.forName(className).getMethod(methodName)
+        val method = if (this.classLoader == null) {
+            Class.forName(className).getMethod(methodName)
+        } else {
+            this.classLoader.loadClass(className).getMethod(methodName)
+        }
         return method.invoke(null, *args)
     }
 }

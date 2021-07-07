@@ -6,13 +6,13 @@ class FunctionEngineManager {
         JS("js"), KOTLIN("kotlin")
     }
 
-    fun getEngineByName(engineName: EngineName): FunctionEngine {
+    fun getEngineByName(engineName: EngineName, classLoader: ClassLoader? = null): FunctionEngine {
         return when (engineName) {
             EngineName.JS -> {
                 JavaScriptFunctionEngine()
             }
             EngineName.KOTLIN -> {
-                KotlinFunctionEngine()
+                KotlinFunctionEngine(classLoader)
             }
         }
     }
