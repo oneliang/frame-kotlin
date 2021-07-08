@@ -39,7 +39,8 @@ class KotlinFunctionEngine(private val classLoader: ClassLoader? = null) : Funct
 
     override fun invokeFunction(name: String, vararg args: Any?): Any? {
         val (className, methodName) = this.scriptInvokeNameMap[name] ?: this.methodNameMap[name] ?: error("function does not exist, name:%s".format(name))
-        val parameterTypes = this.classMethodMap[className]!![methodName]!!
+        val methodMap = this.classMethodMap[className] ?: error("class not found, class name:%s".format(className))
+        val parameterTypes = methodMap[methodName] ?: error("method not found, class name:%s, method name:%s".format(className, methodName))
         val method = if (this.classLoader == null) {
             Class.forName(className).getMethod(methodName, *parameterTypes)
         } else {
