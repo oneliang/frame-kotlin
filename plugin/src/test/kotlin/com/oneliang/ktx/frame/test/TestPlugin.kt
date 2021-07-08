@@ -22,7 +22,7 @@ class TestPlugin : PluginGroup.OnLoadedListener, PluginFile.OnLoadedListener {
             this.pluginGroup?.initialize()
         }
         //plugin a
-        var pluginFile = PluginFile(PLUGIN_FILE_A, url = "D:/b/libraries-formula-plugin-base.jar")
+        var pluginFile = PluginFile(PLUGIN_FILE_A, url = "D:/a.jar")
 //        pluginFile.onLoadedListener = this
 //        pluginGroup.onLoadedListener = this
         this.pluginGroup?.addOrUpdatePluginFile(pluginFile)
@@ -36,14 +36,14 @@ class TestPlugin : PluginGroup.OnLoadedListener, PluginFile.OnLoadedListener {
 //        pluginGroup.onLoadedListener = null
 
 
-        pluginFile = PluginFile(PLUGIN_FILE_A, url = "D:/b/libraries-formula-plugin-base.jar")
-        this.pluginGroup?.addOrUpdatePluginFile(pluginFile)
-        System.gc()
-        this.pluginGroup?.loadPluginFile()
-        pluginA = this.pluginGroup?.findPlugin(PLUGIN_GROUP_A, PLUGIN_A)
-        pluginA?.dispatch(Plugin.Command("command_b"))
-        this.pluginGroup?.destroy()
-        System.gc()
+//        pluginFile = PluginFile(PLUGIN_FILE_A, url = "D:/b/libraries-formula-plugin-base.jar")
+//        this.pluginGroup?.addOrUpdatePluginFile(pluginFile)
+//        System.gc()
+//        this.pluginGroup?.loadPluginFile()
+//        pluginA = this.pluginGroup?.findPlugin(PLUGIN_GROUP_A, PLUGIN_A)
+//        pluginA?.dispatch(Plugin.Command("command_b"))
+//        this.pluginGroup?.destroy()
+//        System.gc()
     }
 
     override fun onLoaded(pluginGroup: PluginGroup) {
