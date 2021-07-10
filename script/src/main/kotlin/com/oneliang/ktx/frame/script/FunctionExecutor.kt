@@ -153,7 +153,7 @@ class FunctionExecutor(
                             inputJson to this.functionEngine.invokeFunction(functionItemCode, *(inputTypeArray))
                         }
                     }
-                    val (fixValue, resultJson) = when (result) {
+                    val (fixValue, resultString) = when (result) {
                         null -> Constants.String.NULL to Constants.String.NULL
                         is Map<*, *> -> {
                             result.forEach { (key, value) ->
@@ -166,7 +166,7 @@ class FunctionExecutor(
                             value to value
                         }
                     }
-                    logger.info("Function:%s(%s),result:%s, %s", functionItem.name, functionItemCode, resultJson, inputJson)
+                    logger.info("Function:%s(%s),result:%s, %s", functionItem.name, functionItemCode, resultString, inputJson)
                     val fixInputJson = if (functionItem.parameterType == FunctionItem.ParameterType.JSON_OBJECT) {
                         Constants.String.BLANK
                     } else {
