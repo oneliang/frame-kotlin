@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.script.engine
 import com.oneliang.ktx.Constants
 import java.util.concurrent.ConcurrentHashMap
 
-class KotlinFunctionEngine(private val classLoader: ClassLoader? = null) : FunctionEngine {
+class NativeFunctionEngine(private val classLoader: ClassLoader? = null) : FunctionEngine {
 
     private val scriptInvokeNameMap = ConcurrentHashMap<String, Pair<String, String>>()
     private val methodNameMap = ConcurrentHashMap<String, Pair<String, String>>()
