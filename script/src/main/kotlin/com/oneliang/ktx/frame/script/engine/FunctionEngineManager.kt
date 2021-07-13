@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.script.engine
 class FunctionEngineManager {
 
     enum class EngineName(val value: String) {
-        JS("js"), NATIVE("native")
+        JS("js"), JVM("jvm")
     }
 
     fun getEngineByName(engineName: EngineName, classLoader: ClassLoader? = null): FunctionEngine {
@@ -11,8 +11,8 @@ class FunctionEngineManager {
             EngineName.JS -> {
                 JavaScriptFunctionEngine()
             }
-            EngineName.NATIVE -> {
-                NativeFunctionEngine(classLoader)
+            EngineName.JVM -> {
+                JvmFunctionEngine(classLoader)
             }
         }
     }
