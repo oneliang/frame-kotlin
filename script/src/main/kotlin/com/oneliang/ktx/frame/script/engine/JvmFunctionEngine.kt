@@ -1,9 +1,13 @@
 package com.oneliang.ktx.frame.script.engine
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
 
 class JvmFunctionEngine(private val classLoader: ClassLoader? = null) : FunctionEngine {
+    companion object {
+        private val logger = LoggerManager.getLogger(JvmFunctionEngine::class)
+    }
 
     private val scriptInvokeNameMap = ConcurrentHashMap<String, Pair<String, String>>()
     private val methodNameMap = ConcurrentHashMap<String, Pair<String, String>>()
@@ -46,6 +50,11 @@ class JvmFunctionEngine(private val classLoader: ClassLoader? = null) : Function
         } else {
             this.classLoader.loadClass(className).getMethod(methodName, *parameterTypes)
         }
-        return method.invoke(null, *args)
+        return try {
+            method.invoke(null, *args)
+        } catch (e: Throwable) {
+            logger.error("invoke function:%s error", name)
+            throw e
+        }
     }
 }
