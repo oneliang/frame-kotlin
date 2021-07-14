@@ -53,8 +53,7 @@ class JvmFunctionEngine(private val classLoader: ClassLoader? = null) : Function
         return try {
             method.invoke(null, *args)
         } catch (e: Throwable) {
-            logger.error("invoke function:%s error", name)
-            throw e
+            throw IllegalStateException("invoke function error, class name:%s, method name:%s".format(className, methodName), e)
         }
     }
 }
