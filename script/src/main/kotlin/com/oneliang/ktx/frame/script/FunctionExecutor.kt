@@ -72,7 +72,7 @@ class FunctionExecutor(
         val functionResultItemMap = mutableMapOf<String, FunctionResultItem>()
         //mapping function result without initialize function type
         val functionResultItemMappingMap = mutableMapOf<String, FunctionResultItem>()
-        val resultList = mutableListOf<String>()
+        val functionResultList = mutableListOf<String>()
         var stableValue = 0F//固定值求和
         //stable value
         stableValueInputMap.forEach {
@@ -194,7 +194,7 @@ class FunctionExecutor(
                         return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
                     } else {
                         if (functionItemType == FunctionItem.FunctionType.RESULT) {
-                            resultList += result.toString()
+                            functionResultList += result.toString()
                             if (checkFunctionResultItem) {
                                 if (!originalFunctionResultMap.containsKey(functionReturnCode)) {
                                     logger.error("Check original function result error, miss functionReturnCode:$functionReturnCode")
@@ -215,16 +215,16 @@ class FunctionExecutor(
         if (totalResultCode.isBlank()) {//no total result
             return FunctionResult(true, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
         }
-        //has total result
-        var totalValue = 0.0
-        resultList.forEach {
-            totalValue += it.toDoubleSafely()
+        //function result total value
+        var functionResultTotalValue = 0.0
+        functionResultList.forEach {
+            functionResultTotalValue += it.toDoubleSafely()
         }
         val originalResult = originalFunctionResultMap["${totalResultCode}$RETURN_SUFFIX"]?.toDouble() ?: 0.0
-        val result = stableValue + totalValue
+        val result = stableValue + functionResultTotalValue
         val fixResult = if (result.isNaN()) 0.0 else result
         val optimizeResult = optimizeResultProcessor(fixResult)
-        logger.info("Stable value:%s, total value:", stableValue, totalValue)
+        logger.info("Stable value:%s, total value:%s", stableValue, functionResultTotalValue)
         val match = abs(fixResult - originalResult) < 10
         logger.info("Result:%.2f, fix result:%s, optimize result:%s, original result:%s, match:%s".format(result, fixResult, optimizeResult, originalResult, match))
         val totalFunctionResultItem = FunctionResultItem(totalResultCode, totalResultCode, value = optimizeResult, codeType = functionResultCode)
