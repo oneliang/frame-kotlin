@@ -10,9 +10,9 @@ fun Message.addRecipient(toAddress: ToAddress) {
     val type = toAddress.type
     val address = InternetAddress(toAddress.address)
     when (type) {
-        ToAddress.Type.TO.value -> this.addRecipient(Message.RecipientType.TO, address)
         ToAddress.Type.BCC.value -> this.addRecipient(Message.RecipientType.BCC, address)
         ToAddress.Type.CC.value -> this.addRecipient(Message.RecipientType.CC, address)
+        else -> this.addRecipient(Message.RecipientType.TO, address)
     }
 }
 
