@@ -20,9 +20,9 @@ object SqlInjectUtil {
      * @param sqlProcessor
      * @return Pair<String,List<Any>>
     </T> */
-    fun <T : Any> objectToInsertSql(instance: T, table: String, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any>> {
+    fun <T : Any> objectToInsertSql(instance: T, table: String, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any?>> {
         val sql = StringBuilder()
-        val parameterList = mutableListOf<Any>()
+        val parameterList = mutableListOf<Any?>()
         try {
             val methods = instance.javaClass.methods
             val columnNameList = mutableListOf<String>()
@@ -101,11 +101,11 @@ object SqlInjectUtil {
      * @param sqlProcessor
      * @return Pair<String, List<Any>>
     </T> */
-    fun <T : Any> objectToUpdateSql(instance: T, updateFields: Array<String> = emptyArray(), table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any>> {
+    fun <T : Any> objectToUpdateSql(instance: T, updateFields: Array<String> = emptyArray(), table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any?>> {
         try {
             val idList = mutableListOf<Any>()
             val valueList = mutableListOf<Any>()
-            val parameterList = mutableListOf<Any>()
+            val parameterList = mutableListOf<Any?>()
             val methods = instance.javaClass.methods
             val columnsAndValueList = mutableListOf<String>()
             val condition = StringBuilder()
@@ -212,9 +212,9 @@ object SqlInjectUtil {
      * @param sqlProcessor
      * @return Pair<String,List<Any>>
     </T> */
-    fun <T : Any> objectToDeleteSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any>> {
+    fun <T : Any> objectToDeleteSql(instance: T, table: String, otherCondition: String, byId: Boolean, mappingBean: MappingBean, sqlProcessor: SqlUtil.SqlProcessor): Pair<String, List<Any?>> {
         val sql: String
-        val parameterList = mutableListOf<Any>()
+        val parameterList = mutableListOf<Any?>()
         try {
             val methods = instance.javaClass.methods
             val condition = StringBuilder()
