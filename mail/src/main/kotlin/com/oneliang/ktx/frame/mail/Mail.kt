@@ -1,17 +1,11 @@
 package com.oneliang.ktx.frame.mail
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.*
 import javax.activation.*
-import javax.mail.BodyPart
-import javax.mail.Folder
-import javax.mail.Message
-import javax.mail.Multipart
-import javax.mail.Session
-import javax.mail.Store
-import javax.mail.Transport
-import javax.mail.URLName
+import javax.mail.*
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
@@ -124,7 +118,11 @@ object Mail {
         commandMap.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822")
         CommandMap.setDefaultCommandMap(commandMap)
         messageList.forEach { mimeMessage ->
-            transport.sendMessage(mimeMessage, mimeMessage.allRecipients)
+            try {
+                transport.sendMessage(mimeMessage, mimeMessage.allRecipients)
+            } catch (e: Throwable) {
+                logger.error("send mail fail, all recipients:%s", e, mimeMessage.allRecipients.toJson())
+            }
         }
         transport.close()
     }

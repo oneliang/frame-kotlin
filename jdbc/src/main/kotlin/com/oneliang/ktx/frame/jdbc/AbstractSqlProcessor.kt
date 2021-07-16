@@ -16,7 +16,7 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
         private val logger = LoggerManager.getLogger(AbstractSqlProcessor::class)
     }
 
-    var nullable: Boolean = true
+    var nullable: Boolean = false
 
     override fun statementProcess(preparedStatement: PreparedStatement, index: Int, parameter: Any?) {
         try {
