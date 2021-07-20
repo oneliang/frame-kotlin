@@ -1,7 +1,6 @@
 package com.oneliang.ktx.frame.mail
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.*
 import javax.activation.*
@@ -121,7 +120,7 @@ object Mail {
             try {
                 transport.sendMessage(mimeMessage, mimeMessage.allRecipients)
             } catch (e: Throwable) {
-                logger.error("send mail fail, all recipients:%s", e, mimeMessage.allRecipients.toJson())
+                logger.error("send mail fail, all recipients:%s", e, mimeMessage.allRecipients.joinToString { it.toString() })
             }
         }
         transport.close()
