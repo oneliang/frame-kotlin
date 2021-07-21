@@ -1,15 +1,14 @@
 package com.oneliang.ktx.frame.adjuster
 
-import com.oneliang.ktx.util.common.calculateCompose
+import com.oneliang.ktx.util.common.toMap
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
-import kotlin.math.max
 
 object Adjuster {
 
     private val logger = LoggerManager.getLogger(Adjuster::class)
 
-    fun forward(resourceList: List<Resource>, ruleList: List<Rule>): List<ForwardResult> {
+    fun forward(resourceList: List<Resource>, ruleList: List<Rule>): List<Result> {
         val ruleMap = mutableMapOf<String, Rule>()
         ruleList.forEach {
             if (ruleMap.containsKey(it.key)) {
@@ -19,77 +18,46 @@ object Adjuster {
         }
         val sortedRuleList = ruleList.sortedBy { it.order }
 
-        val forwardResultList = mutableListOf<ForwardResult>()
+        val resultList = mutableListOf<Result>()
         for (resource in resourceList) {
             val begin = resource.begin
+            val end = resource.end
+            if (end <= begin) {
+                error("end must bigger than end, begin:%s, end:%s".format(begin, end))
+            }
+            val totalCost = resource.end - resource.begin
             val itemList = resource.itemList
+            val itemMap = resource.itemList.toMap { it.key to it }
             val itemListSize = itemList.size
-            var end = begin
-            var minEnd = 0L
-            var maxEnd = 0L
-            var forwardIndex = 0
+            var minEnd = begin
+            var maxEnd = begin
+            var ruleMinEnd = begin
+            var ruleMaxEnd = begin
+            var stableCost = 0L
+            val adjustRuleList = mutableListOf<Rule>()
             for (index in sortedRuleList.indices) {
                 val rule = sortedRuleList[index]
-                if (index < itemListSize) {
-                    val item = itemList[index]
-                    if (rule.key != item.key) {
-                        error("key not match, did you miss the rule key:%s, rule order:%s, item key:%s, ".format(rule.key, rule.order, item.key))
-                    }
-                    end += item.costTime
-                    minEnd = end
-                    maxEnd = end
-                    forwardIndex = index + 1//next index
-                } else {
+                if (!itemMap.containsKey(rule.key)) {
+                    adjustRuleList += rule
                     minEnd += rule.minCostTime
                     maxEnd += rule.maxCostTime
-                }
-            }
-            val forwardResult = ForwardResult(resource, minEnd, maxEnd)
-            forwardResult.adjustRuleList = sortedRuleList.subList(forwardIndex, sortedRuleList.size)
-            forwardResultList += forwardResult
-        }
-        return forwardResultList
-    }
-
-    fun backward(resourceList: List<Resource>, ruleList: List<Rule>) {
-        val ruleMap = mutableMapOf<String, Rule>()
-        ruleList.forEach {
-            if (ruleMap.containsKey(it.key)) {
-                error("rule list have duplicate key, key:%s".format(it.key))
-            }
-            ruleMap[it.key] = it
-        }
-        val sortedRuleList = ruleList.sortedBy { it.order }
-
-        val forwardResultList = mutableListOf<ForwardResult>()
-        for (resource in resourceList) {
-            val begin = resource.begin
-            val itemList = resource.itemList
-            val itemListSize = itemList.size
-            var end = begin
-            var minEnd = 0L
-            var maxEnd = 0L
-            var forwardIndex = 0
-            for (index in sortedRuleList.indices) {
-                val rule = sortedRuleList[index]
-                if (index < itemListSize) {
-                    val item = itemList[index]
-                    if (rule.key != item.key) {
-                        error("key not match, did you miss the rule key:%s, rule order:%s, item key:%s, ".format(rule.key, rule.order, item.key))
-                    }
-                    end += item.costTime
-                    minEnd = end
-                    maxEnd = end
-                    forwardIndex = index + 1//next index
+                    ruleMinEnd += rule.minCostTime
+                    ruleMaxEnd += rule.maxCostTime
                 } else {
-                    minEnd += rule.minCostTime
-                    maxEnd += rule.maxCostTime
+                    val item = itemList[index]
+                    minEnd += item.costTime
+                    maxEnd += item.costTime
+                    stableCost += item.costTime
                 }
             }
-            val forwardResult = ForwardResult(resource, minEnd, maxEnd)
-            forwardResult.adjustRuleList = sortedRuleList.subList(forwardIndex, sortedRuleList.size)
-            forwardResultList += forwardResult
+            if (minEnd > end || maxEnd > end) {
+                error("resource end out of range, end:%s, min end:%s, max end:%s".format(end, minEnd, maxEnd))
+            }
+            val result = Result(resource, minEnd, maxEnd, stableCost)
+            result.adjustRuleList = adjustRuleList
+            resultList += result
         }
+        return resultList
     }
 
     class Rule(val order: Int, val key: String, val minCostTime: Long, val maxCostTime: Long = minCostTime)
@@ -102,7 +70,7 @@ object Adjuster {
         var itemList = emptyList<Item>()
     }
 
-    class ForwardResult(val resource: Resource, val minEnd: Long, val maxEnd: Long) {
+    class Result(val resource: Resource, val minEnd: Long, val maxEnd: Long, val stableCost: Long) {
 
         var adjustRuleList = emptyList<Rule>()
     }
@@ -110,13 +78,13 @@ object Adjuster {
 
 fun main() {
     val ruleList = listOf(
-        Adjuster.Rule(1, "K_A", 1),
-        Adjuster.Rule(2, "K_B", 2),
-        Adjuster.Rule(3, "K_C", 3)
+        Adjuster.Rule(1, "K_A", 1, 2),
+        Adjuster.Rule(2, "K_B", 2, 3),
+        Adjuster.Rule(3, "K_C", 3, 5)
     )
     val resourceList = listOf(Adjuster.Resource().apply {
-        this.begin = 0
-        this.end = 100
+        this.begin = 10
+        this.end = 20
         this.itemList = listOf(Adjuster.Item("K_A", 10))
     })
     val list = Adjuster.forward(resourceList, ruleList)
