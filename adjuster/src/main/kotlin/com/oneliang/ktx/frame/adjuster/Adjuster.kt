@@ -44,7 +44,7 @@ object Adjuster {
                     ruleMinEnd += rule.minCostTime
                     ruleMaxEnd += rule.maxCostTime
                 } else {
-                    val item = itemList[index]
+                    val item = itemMap[rule.key] ?: error("key does not exist:%s".format(rule.key))
                     minEnd += item.costTime
                     maxEnd += item.costTime
                     stableCost += item.costTime
@@ -85,7 +85,7 @@ fun main() {
     val resourceList = listOf(Adjuster.Resource().apply {
         this.begin = 10
         this.end = 20
-        this.itemList = listOf(Adjuster.Item("K_A", 10))
+        this.itemList = listOf(Adjuster.Item("K_B", 2))
     })
     val list = Adjuster.forward(resourceList, ruleList)
     println("forward result:%s".format(list.toJson()))
