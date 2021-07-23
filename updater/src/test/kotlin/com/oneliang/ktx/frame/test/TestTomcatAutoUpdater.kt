@@ -13,17 +13,17 @@ import java.util.concurrent.CountDownLatch
 import javax.swing.JOptionPane
 
 fun main() {
-    val configuration = TomcatAutoUpdater.Configuration().apply {
-        this.host = "42.192.93.32"
-        this.port = 3222
-        this.user = "root"
-        this.password = JOptionPane.showInputDialog("Enter password:${this.host}")
-        this.warArray = arrayOf(TomcatAutoUpdater.Configuration.War().apply {
-            this.remoteTomcatDirectory = "/home/wwwroot/apache-tomcat-backend"
-            this.localWarFile = "/D:/settings.zip"
-            this.remoteWarName = "a.zip"
-        })
-    }
+//    val configuration = TomcatAutoUpdater.Configuration().apply {
+//        this.host = ""
+//        this.port = 0
+//        this.user = "root"
+//        this.password = JOptionPane.showInputDialog("Enter password:${this.host}")
+//        this.warArray = arrayOf(TomcatAutoUpdater.Configuration.War().apply {
+//            this.remoteTomcatDirectory = "/home/wwwroot/apache-tomcat-backend"
+//            this.localWarFile = "/D:/settings.zip"
+//            this.remoteWarName = "a.zip"
+//        })
+//    }
 //    Ssh.connect(host = configuration.host,
 //            user = configuration.user,
 //            port = configuration.port,
@@ -37,18 +37,18 @@ fun main() {
 //        }
 //    })
 //    return
-    val configurationFile = File(Constants.String.BLANK)
+    val configurationFile = File("D:\\Dandelion\\java\\githubWorkspace\\frame-kotlin\\updater\\src\\test\\kotlin\\com\\oneliang\\ktx\\frame\\test\\configuration.json")
     val json = configurationFile.readContentIgnoreLine()
     val configurationList = json.jsonToObjectList(TomcatAutoUpdater.Configuration::class)
     val updaterExecutor = UpdaterExecutor()
     val countDownLatch = CountDownLatch(configurationList.size)
     configurationList.forEach {
-        it.password = try {
-            JOptionPane.showInputDialog("(${it.host}) Please Enter password")
-        } catch (e: Throwable) {
-            e.printStackTrace()
-            it.password
-        }
+//        it.password = try {
+//            JOptionPane.showInputDialog("(${it.host}) Please Enter password")
+//        } catch (e: Throwable) {
+//            e.printStackTrace()
+//            it.password
+//        }
         val tomcatAutoUpdater = TomcatAutoUpdater(it)
         updaterExecutor.addTomcatAutoUpdater(tomcatAutoUpdater) {
             countDownLatch.countDown()

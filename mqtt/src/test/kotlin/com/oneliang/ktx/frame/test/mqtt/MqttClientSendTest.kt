@@ -5,7 +5,7 @@ import org.fusesource.mqtt.client.QoS
 import org.fusesource.mqtt.client.Topic
 
 fun main() {
-    val host = "tcp://42.192.93.32:1883"
+    val host = ""
     val username = "test"
     val password = "test"
     MqttClient.connect(host, username, password) { connection ->
