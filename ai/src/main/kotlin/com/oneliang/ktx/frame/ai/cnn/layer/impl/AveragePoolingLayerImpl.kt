@@ -19,7 +19,7 @@ open class AveragePoolingLayerImpl(
         singleIteration(inputNeuron.size) { mapIndex ->
             outputNeuron[mapIndex] = inputNeuron[mapIndex].scaleToSmall(this.scale)
         }
-        return inputNeuron
+        return outputNeuron
     }
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float) {

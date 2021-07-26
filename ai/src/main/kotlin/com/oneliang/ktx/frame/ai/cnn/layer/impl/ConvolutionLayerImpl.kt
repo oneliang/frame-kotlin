@@ -28,6 +28,10 @@ class ConvolutionLayerImpl(
         private const val SUM_BIAS_KEY = "sumBias"
     }
 
+    init {
+//        println("" + this.previousLayerMapDepth + "," + this.mapDepth + "," + this.inX + "," + this.inY + "," + this.filterX + "," + this.filterY + "," + this.outX + "," + this.outY)
+    }
+
     private var derivedFilters = AtomicMap<String, Array<Array<Array<Array<Float>>?>>>()
     private var sumBias = AtomicMap<String, Array<Float>>()
 
@@ -47,6 +51,7 @@ class ConvolutionLayerImpl(
             //求和后的每个值进行一次sigmoid
             outputNeuron[mapIndex] = sigmoidBias(mapValuesSum!!, this.biases[mapIndex])
         }
+//        println("input data size:[%s][%s][%s]".format(inputNeuron.size, inputNeuron[0].size, inputNeuron[0][0].size))
 //        println("output data size:[%s][%s][%s]".format(outputNeuron.size, outputNeuron[0].size, outputNeuron[0][0].size))
         return outputNeuron
     }
@@ -155,6 +160,7 @@ class ConvolutionLayerImpl(
                 val loss = nextLayerLoss[mapIndex]
                 val rows = maps.size - loss.size + 1
                 val columns = maps[0].size - loss[0].size + 1
+//                println("$this,${maps.size},${loss.size},$rows,$columns")
                 val lossValues = convolutional(rows, columns, maps, loss)//loss卷积后变成误差值,尺寸跟filter一样
                 //然后将filter里面的数据进行误差计算
                 filtersLoss[previousMapIndex][mapIndex] = lossValues
@@ -167,7 +173,7 @@ class ConvolutionLayerImpl(
         val derivedWeights = this.derivedFilters[DERIVED_FILTERS_KEY] ?: emptyArray()
         singleIteration(this.mapDepth) { mapIndex ->
             singleIteration(this.previousLayerMapDepth) { previousMapIndex ->
-                val filtersLossValues = derivedWeights[this.mapDepth][this.previousLayerMapDepth]!!
+                val filtersLossValues = derivedWeights[previousMapIndex][mapIndex]!!
                 //然后将filter里面的数据进行误差计算
                 this.filters[previousMapIndex][mapIndex] = mul3(this.filters[previousMapIndex][mapIndex], div(filtersLossValues, totalDataSize), learningRate)
             }

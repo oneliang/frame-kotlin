@@ -2,11 +2,12 @@ package com.oneliang.ktx.frame.ai.cnn.layer.impl
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ai.activation.rectifiedLinearUnits
+import com.oneliang.ktx.frame.ai.activation.rectifiedLinearUnitsDerived
 import com.oneliang.ktx.frame.ai.cnn.layer.RectifiedLinearUnitsLayer
 import com.oneliang.ktx.util.common.doubleIteration
 import com.oneliang.ktx.util.common.singleIteration
 
-class RectifiedLinearUnitsLayerImpl : RectifiedLinearUnitsLayer<Array<Array<Array<Float>>>, Array<Array<Array<Float>>>>() {
+class RectifiedLinearUnitsLayerImpl : RectifiedLinearUnitsLayer<Array<Array<Array<Float>>>, Array<Array<Array<Float>>>, Array<Array<Array<Float>>>>() {
 
     override fun forwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float, training: Boolean): Array<Array<Array<Float>>> {
         if (inputNeuron.isEmpty() || inputNeuron[0].isEmpty() || inputNeuron[0][0].isEmpty()) {
@@ -23,6 +24,14 @@ class RectifiedLinearUnitsLayerImpl : RectifiedLinearUnitsLayer<Array<Array<Arra
     }
 
     override fun backwardImpl(dataId: Long, inputNeuron: Array<Array<Array<Float>>>, y: Float) {
+        val outputLoss = getNextLayerInputNeuronLoss(dataId)
+        val inputLoss = Array(inputNeuron.size) { Array(inputNeuron[0].size) { Array(inputNeuron[0][0].size) { 0.0f } } }
+        singleIteration(inputNeuron.size) { mapDepth ->
+            doubleIteration(inputNeuron[0].size, inputNeuron[0][0].size) { row, column ->
+                inputLoss[mapDepth][row][column] = rectifiedLinearUnitsDerived(outputLoss[mapDepth][row][column])
+            }
+        }
+        this.inputNeuronLoss[dataId] = inputLoss
     }
 
     override fun forwardResetImpl(dataId: Long) {
