@@ -145,7 +145,8 @@ class FunctionExecutor(
                                         val result = functionResultItemMap[parameterKey]!!.value
                                         functionInputList.add(result)
                                     }
-                                    else -> logger.error("Function:%s error, %s not found", functionItemCode, parameterKey)
+                                    else -> optimizeInputMap[parameterKey] = Constants.String.BLANK
+//                                    else -> logger.error("Function:%s error, %s not found", functionItemCode, parameterKey)
                                 }
                             }
                             val inputTypeArray = functionInputList.toTypedArray()
