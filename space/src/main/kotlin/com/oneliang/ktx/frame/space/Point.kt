@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.space
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-data class Point(val x: Double, val y: Double, val z: Double = 0.0) {
+data class Point(var x: Double, var y: Double, var z: Double = 0.0) {
 
     operator fun plus(point: Point): Point {
         return Point(this.x + point.x, this.y + point.y, this.z + point.z)
@@ -19,5 +19,17 @@ data class Point(val x: Double, val y: Double, val z: Double = 0.0) {
 
     fun maybeSamePoint(point: Point, threshold: Double): Boolean {
         return (this - point).distance() <= threshold
+    }
+
+    fun replaceFrom(point: Point) {
+        this.x = point.x
+        this.y = point.y
+        this.z = point.z
+    }
+
+    fun replaceFrom(x: Double, y: Double, z: Double = 0.0) {
+        this.x = x
+        this.y = y
+        this.z = z
     }
 }

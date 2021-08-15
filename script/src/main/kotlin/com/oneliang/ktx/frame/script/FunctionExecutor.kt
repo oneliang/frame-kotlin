@@ -2,10 +2,7 @@ package com.oneliang.ktx.frame.script
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.script.engine.FunctionEngineManager
-import com.oneliang.ktx.util.common.matches
-import com.oneliang.ktx.util.common.nullToBlank
-import com.oneliang.ktx.util.common.toDoubleSafely
-import com.oneliang.ktx.util.common.toFloatSafely
+import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
@@ -16,7 +13,6 @@ import kotlin.collections.set
 import kotlin.math.abs
 
 class FunctionExecutor(
-    private val code: String,
     private val engineName: FunctionEngineManager.EngineName = FunctionEngineManager.EngineName.JS,
     private val classLoader: ClassLoader? = null
 ) {
@@ -29,15 +25,19 @@ class FunctionExecutor(
 
     private val functionEngineManager = FunctionEngineManager()
     private val functionEngine = functionEngineManager.getEngineByName(this.engineName, this.classLoader)
-    private val allFunctionItemMap = ConcurrentHashMap<String, List<FunctionItem>>()
+    private val allFunctionItemMap = ConcurrentHashMap<String, FunctionItem>()
+
+    //    private val allFunctionItemList = CopyOnWriteArrayList<FunctionItem>()
     private val updateLock = ReentrantLock()
 
     fun updateFunctionItemListOfEngine(functionItemList: List<FunctionItem>) {
         this.updateLock.lock()
         try {
-            val sortedFunctionItemList = functionItemList.sortedBy { it.order }
-            this.allFunctionItemMap[this.code] = sortedFunctionItemList
-            sortedFunctionItemList.forEach { functionItem ->
+//            val sortedFunctionItemList = functionItemList.sortedBy { it.order }
+            this.allFunctionItemMap.clear()
+//            this.allFunctionItemList.addAll(sortedFunctionItemList)
+            functionItemList.forEach { functionItem ->
+                this.allFunctionItemMap[functionItem.code] = functionItem
                 this.functionEngine.eval(functionItem.script)
             }
         } finally {
@@ -45,30 +45,30 @@ class FunctionExecutor(
         }
     }
 
+    private fun fixCode(code: String, executeTimes: Int): String {
+        return if (executeTimes == 0) {
+            code
+        } else {
+            code + Constants.Symbol.UNDERLINE + executeTimes
+        }
+    }
+
     fun execute(
         inputMap: Map<String, String>,
         stableValueInputMap: Map<String, String> = emptyMap(),
         totalResultCode: String = Constants.String.BLANK,//no total result
-        defaultFunctionItemCodeMapping: Map<String, String>,
-        otherConditionFunctionItemCodeMappingMap: Map<Map<String, String>, Map<String, String>> = emptyMap(),
+        defaultExecuteFunctionItemCodeList: List<ExecuteFunctionItemCode>,//execute list
+        otherConditionExecuteFunctionItemCodeListMap: Map<Map<String, String>, List<ExecuteFunctionItemCode>> = emptyMap(),
         stableValueCodeType: String = CODE_TYPE_STABLE,
         functionResultCode: String = CODE_TYPE_FUNCTION,
         checkFunctionResultItem: Boolean = false,
         originalFunctionResultMap: Map<String, String> = emptyMap(),
         optimizeResultProcessor: (result: Double) -> String = { it.toString() }
     ): FunctionResult {
-        if (!allFunctionItemMap.containsKey(code)) {
-            logger.error("Please update function item list first, map not contains cache data, product type code:%s", code)
-            return FunctionResult(false, emptyMap(), emptyMap())
+        val allFunctionItemMap = this.allFunctionItemMap
+        if (allFunctionItemMap.isEmpty()) {
+            logger.info("Please update function item list first, function item is empty")
         }
-        val allFunctionItemList = allFunctionItemMap[code] ?: emptyList()
-        if (allFunctionItemList.isEmpty()) {
-            logger.info("Please update function item list first, function item is empty, product type code:%s", code)
-        }
-//        if (this.functionEngine !is Invocable) {
-//            logger.error("engine is not invocable")
-//            return FunctionResult(false, emptyMap(), emptyMap())
-//        }
         val functionResultItemMap = mutableMapOf<String, FunctionResultItem>()
         //mapping function result without initialize function type
         val functionResultItemMappingMap = mutableMapOf<String, FunctionResultItem>()
@@ -80,45 +80,46 @@ class FunctionExecutor(
             val result = it.value
             if (checkFunctionResultItem) {
                 if (!originalFunctionResultMap.containsKey(returnCode)) {
-                    logger.error("check stable value input data error, miss returnCode:$returnCode")
+                    logger.error("check stable value input data error, miss returnCode:%s", returnCode)
                     return FunctionResult(false, emptyMap(), functionResultItemMap)
                 }
                 val originalFunctionResult = originalFunctionResultMap[returnCode]
                 if (result != originalFunctionResult) {
-                    logger.error("check stable value input data error, returnCode:$returnCode, result:$result, original function result:$originalFunctionResult")
+                    logger.error("check stable value input data error, returnCode:%s, result:%s, original function result:%s", returnCode, result, originalFunctionResult)
                     return FunctionResult(false, emptyMap(), functionResultItemMap)
                 }
             }
             logger.info("Stable:%s, result:%s", returnCode, result)
             stableValue += result.toFloatSafely()
-            val functionResultItem = FunctionResultItem(returnCode, returnCode, value = result, codeType = stableValueCodeType)
+            val functionResultItem = FunctionResultItem(name = returnCode, code = returnCode, originalCode = returnCode, value = result, codeType = stableValueCodeType)
             functionResultItemMap[returnCode] = functionResultItem
             functionResultItemMappingMap[returnCode] = functionResultItem
         }
         //function input data initialize
         val optimizeInputMap = inputMap.toMutableMap()
 
-        if (defaultFunctionItemCodeMapping.isEmpty() && otherConditionFunctionItemCodeMappingMap.isEmpty()) {
-            logger.warning("default function item code mapping and other condition function item code mapping map are empty, code:%s", code)
+        if (defaultExecuteFunctionItemCodeList.isEmpty() && otherConditionExecuteFunctionItemCodeListMap.isEmpty()) {
+            logger.warning("default function item code mapping and other condition function item code mapping map are empty")
         } else {
-            var functionItemCodeMapping = defaultFunctionItemCodeMapping
+            var executeFunctionItemCodeList = defaultExecuteFunctionItemCodeList
             //if matches other condition, replace the function item code mapping
-            for ((conditionMap, codeMapping) in otherConditionFunctionItemCodeMappingMap) {
+            for ((conditionMap, codeMapping) in otherConditionExecuteFunctionItemCodeListMap) {
                 if (inputMap.matches(conditionMap)) {
-                    functionItemCodeMapping = codeMapping
+                    executeFunctionItemCodeList = codeMapping
                     break
                 }
             }
-            if (functionItemCodeMapping.isEmpty()) {
-                logger.warning("function item code mapping is empty, code:%s", code)
+            if (executeFunctionItemCodeList.isEmpty()) {
+                logger.warning("function item code list is empty")
             } else {
-                //function process and result
-                allFunctionItemList.forEach { functionItem ->
-                    val functionItemCode = functionItem.code
-                    if (!functionItemCodeMapping.containsKey(functionItemCode)) {
-                        logger.verbose("No need to execute function, code:%s", functionItemCode)
-                        return@forEach
-                    }
+                val (executeCodeList, functionItemCodeMapping) = executeFunctionItemCodeList.toKeyListAndMap({ it.code }, { it.code }, { it.categoryCode })
+                val codeExecuteTimes = mutableMapOf<String, Int>()
+                //execute function process and result
+                executeCodeList.forEach { functionItemCode ->
+                    val functionItem = allFunctionItemMap[functionItemCode] ?: error("Function does not exist, please check it, code:$functionItemCode")
+                    val executeTimesBeforeExecute = codeExecuteTimes[functionItemCode] ?: 0
+                    //update execute times after get
+                    codeExecuteTimes[functionItemCode] = executeTimesBeforeExecute + 1
                     val functionItemType = functionItem.functionType
                     val (inputJson, result) = when (functionItem.parameterType) {
                         FunctionItem.ParameterType.JSON_OBJECT -> {
@@ -134,6 +135,8 @@ class FunctionExecutor(
                                     logger.error("Function:%s has blank parameter, please check and confirm it", functionItemCode)
                                     return@parameterList
                                 }
+                                //fix code only for function result
+                                val fixParameterKey = fixCode(parameterKey, executeTimesBeforeExecute)
                                 when {
                                     optimizeInputMap.containsKey(parameterKey) -> {
                                         functionInputList.add(optimizeInputMap.getValue(parameterKey))
@@ -141,8 +144,8 @@ class FunctionExecutor(
                                     stableValueInputMap.containsKey(parameterKey) -> {
                                         functionInputList.add(stableValueInputMap.getValue(parameterKey))
                                     }
-                                    functionResultItemMap.containsKey(parameterKey) -> {
-                                        val result = functionResultItemMap[parameterKey]!!.value
+                                    functionResultItemMap.containsKey(fixParameterKey) -> {
+                                        val result = functionResultItemMap[fixParameterKey]!!.value
                                         functionInputList.add(result)
                                     }
                                     else -> optimizeInputMap[parameterKey] = Constants.String.BLANK
@@ -173,10 +176,11 @@ class FunctionExecutor(
                     } else {
                         inputJson
                     }
-                    val functionReturnCode = functionItem.returnCode
-                    functionResultItemMap[functionReturnCode] = FunctionResultItem(functionItem.name, functionReturnCode, inputJson = fixInputJson, value = fixValue, codeType = functionResultCode)
+                    val originalFunctionReturnCode = functionItem.returnCode
+                    val fixFunctionReturnCode = fixCode(functionItem.returnCode, executeTimesBeforeExecute)
+                    functionResultItemMap[fixFunctionReturnCode] = FunctionResultItem(name = functionItem.name, code = fixFunctionReturnCode, originalCode = originalFunctionReturnCode, inputJson = fixInputJson, value = fixValue, codeType = functionResultCode)
 
-                    if (functionItem.functionType != FunctionItem.FunctionType.RESULT) {
+                    if (functionItemType != FunctionItem.FunctionType.RESULT) {
                         return@forEach//continue, no need to save
                     }
 
@@ -185,7 +189,9 @@ class FunctionExecutor(
                         val functionReturnCodeMapping = functionItemCodeMapping[functionItemCode].nullToBlank()
                         if (functionReturnCodeMapping.isNotBlank()) {
                             val functionResultValue = fixValue.toDoubleSafely()
-                            val functionResultItem = functionResultItemMappingMap.getOrPut(functionReturnCodeMapping) { FunctionResultItem(functionReturnCodeMapping, functionReturnCodeMapping, Constants.String.ZERO, codeType = functionResultCode) }
+                            val functionResultItem = functionResultItemMappingMap.getOrPut(functionReturnCodeMapping) {
+                                FunctionResultItem(name = functionReturnCodeMapping, code = functionReturnCodeMapping, originalCode = functionReturnCodeMapping, value = Constants.String.ZERO, codeType = functionResultCode)
+                            }
                             val originalFunctionResultItemValue = functionResultItem.value.toDoubleSafely()
                             functionResultItem.value = "%.2f".format(originalFunctionResultItemValue + functionResultValue)
                         }
@@ -197,13 +203,13 @@ class FunctionExecutor(
                         if (functionItemType == FunctionItem.FunctionType.RESULT) {
                             functionResultList += result.toString()
                             if (checkFunctionResultItem) {
-                                if (!originalFunctionResultMap.containsKey(functionReturnCode)) {
-                                    logger.error("Check original function result error, miss functionReturnCode:$functionReturnCode")
+                                if (!originalFunctionResultMap.containsKey(fixFunctionReturnCode)) {
+                                    logger.error("Check original function result error, miss functionReturnCode:$fixFunctionReturnCode")
                                     return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
                                 }
-                                val originalFunctionResult = originalFunctionResultMap[functionReturnCode]
+                                val originalFunctionResult = originalFunctionResultMap[fixFunctionReturnCode]
                                 if (result.toString() != originalFunctionResult) {
-                                    logger.error("Check original function result error, functionReturnCode:$functionReturnCode, (result)/(originalFunctionResult):($result)/($originalFunctionResult)")
+                                    logger.error("Check original function result error, functionReturnCode:$fixFunctionReturnCode, (result)/(originalFunctionResult):($result)/($originalFunctionResult)")
 //                                return FunctionResult(false, functionResultItemMap, functionResultItemMappingMap)
                                 }
                             }
@@ -228,7 +234,7 @@ class FunctionExecutor(
         logger.info("Stable value:%s, total value:%s", stableValue, functionResultTotalValue)
         val match = abs(fixResult - originalResult) < 10
         logger.info("Result:%.2f, fix result:%s, optimize result:%s, original result:%s, match:%s".format(result, fixResult, optimizeResult, originalResult, match))
-        val totalFunctionResultItem = FunctionResultItem(totalResultCode, totalResultCode, value = optimizeResult, codeType = functionResultCode)
+        val totalFunctionResultItem = FunctionResultItem(name = totalResultCode, code = totalResultCode, originalCode = totalResultCode, value = optimizeResult, codeType = functionResultCode)
         functionResultItemMap[totalResultCode] = totalFunctionResultItem
         functionResultItemMappingMap[totalResultCode] = totalFunctionResultItem
         if (checkFunctionResultItem && !match) {
