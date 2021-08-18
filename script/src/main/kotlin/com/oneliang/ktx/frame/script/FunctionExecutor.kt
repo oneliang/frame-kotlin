@@ -148,7 +148,11 @@ class FunctionExecutor(
                                         val result = functionResultItemMap[fixParameterKey]!!.value
                                         functionInputList.add(result)
                                     }
-                                    else -> optimizeInputMap[parameterKey] = Constants.String.BLANK
+                                    else -> {
+                                        val result = Constants.String.BLANK
+                                        optimizeInputMap[parameterKey] = result
+                                        functionInputList.add(result)
+                                    }
 //                                    else -> logger.error("Function:%s error, %s not found", functionItemCode, parameterKey)
                                 }
                             }
