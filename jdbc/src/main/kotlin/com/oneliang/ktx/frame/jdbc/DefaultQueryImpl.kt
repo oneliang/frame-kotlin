@@ -402,7 +402,8 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @param page
      * @param selectColumns
      * @param table
-     * @param condition
+     * @param condition, maybe conflict with parameter orderBy
+     * @param orderBy
      * @param useStable
      * @param useDistinct
      * @param parameters

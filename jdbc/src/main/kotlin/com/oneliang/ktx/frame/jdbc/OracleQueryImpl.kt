@@ -16,7 +16,8 @@ class OracleQueryImpl : DefaultQueryImpl() {
      * @param countColumn
      * @param selectColumns
      * @param table
-     * @param condition
+     * @param condition, maybe conflict with parameter orderBy
+     * @param orderBy
      * @param useDistinct
      * @param useStable
      * @param parameters
@@ -24,7 +25,7 @@ class OracleQueryImpl : DefaultQueryImpl() {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
+    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, orderBy: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
         var tempSelectColumns = selectColumns
         var tempTable = table
         val totalRows = this.totalRows(kClass, countColumn, tempTable, condition, useStable, useDistinct, parameters)
@@ -46,7 +47,7 @@ class OracleQueryImpl : DefaultQueryImpl() {
             tempTable = mappingBean.table
         }
         tempTable = "$tempTable $tableAlias"
-        tempTable = SqlUtil.selectSql(newColumns, tempTable, condition)
+        tempTable = SqlUtil.selectSql(newColumns, tempTable, condition + Constants.String.SPACE + orderBy)
         tempTable = Constants.Symbol.BRACKET_LEFT + tempTable + Constants.Symbol.BRACKET_RIGHT
         //generate outer conditions
         val sqlConditions = StringBuilder()
