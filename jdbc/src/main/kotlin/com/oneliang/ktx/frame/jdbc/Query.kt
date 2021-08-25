@@ -281,7 +281,8 @@ interface Query : BaseQuery {
      * @param countColumn
      * @param selectColumns
      * @param table
-     * @param condition
+     * @param condition, maybe conflict with parameter orderBy
+     * @param orderBy
      * @param useDistinct
      * @param useStable
      * @param parameters
@@ -296,6 +297,7 @@ interface Query : BaseQuery {
         selectColumns: Array<String> = emptyArray(),
         table: String = Constants.String.BLANK,
         condition: String = Constants.String.BLANK,
+        orderBy: String = Constants.String.BLANK,
         useDistinct: Boolean = true,
         useStable: Boolean = true,
         parameters: Array<*> = emptyArray<Any>()

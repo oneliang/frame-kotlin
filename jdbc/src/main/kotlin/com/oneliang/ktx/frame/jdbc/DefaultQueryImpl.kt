@@ -410,13 +410,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
+    override fun <T : Any> selectObjectPaginationList(kClass: KClass<T>, page: Page, countColumn: String, selectColumns: Array<String>, table: String, condition: String, orderBy: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
         val totalRows = this.totalRows(kClass, countColumn, table, condition, useDistinct, useStable, parameters)
         val rowsPerPage = page.rowsPerPage
         page.initialize(totalRows, rowsPerPage)
         val startRow = page.pageFirstRow
         val sqlConditions = StringBuilder()
         sqlConditions.append(condition)
+        sqlConditions.append(Constants.String.SPACE + orderBy)
         sqlConditions.append(Constants.String.SPACE + Constants.Database.MySql.PAGINATION + Constants.String.SPACE)
         sqlConditions.append(startRow.toString() + Constants.Symbol.COMMA + rowsPerPage)
         return this.selectObjectList(kClass, selectColumns, table, sqlConditions.toString(), useDistinct, useStable, parameters)
