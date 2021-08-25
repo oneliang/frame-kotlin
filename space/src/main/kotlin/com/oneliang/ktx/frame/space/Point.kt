@@ -17,7 +17,7 @@ data class Point(var x: Double, var y: Double, var z: Double = 0.0) {
         return sqrt(x.pow(2) + y.pow(2) + z.pow(2))
     }
 
-    fun maybeSamePoint(point: Point, threshold: Double): Boolean {
+    fun maybeSamePoint(point: Point, threshold: Double = 0.0): Boolean {
         return (this - point).distance() <= threshold
     }
 
@@ -31,5 +31,9 @@ data class Point(var x: Double, var y: Double, var z: Double = 0.0) {
         this.x = x
         this.y = y
         this.z = z
+    }
+
+    fun maybeInSegment(p1: Point, p2: Point): Boolean {
+        return (p2 - p1).distance() == ((this - p1).distance() + (this - p2).distance())
     }
 }
