@@ -63,7 +63,7 @@ class FunctionExecutor(
         functionResultCode: String = CODE_TYPE_FUNCTION,
         checkFunctionResultItem: Boolean = false,
         originalFunctionResultMap: Map<String, String> = emptyMap(),
-        optimizeResultProcessor: (result: Double) -> String = { it.toString() }
+        optimizeResultProcessor: (resultValue: Double) -> String = { it.toString() }
     ): FunctionResult {
         val allFunctionItemMap = this.allFunctionItemMap
         if (allFunctionItemMap.isEmpty()) {
@@ -73,7 +73,7 @@ class FunctionExecutor(
         //mapping function result without initialize function type
         val functionResultItemMappingMap = mutableMapOf<String, FunctionResultItem>()
         val functionResultList = mutableListOf<String>()
-        var stableValue = 0F//固定值求和
+        var stableValue = 0.0//固定值求和
         //stable value
         stableValueInputMap.forEach {
             val returnCode = it.key + RETURN_SUFFIX
@@ -90,14 +90,23 @@ class FunctionExecutor(
                 }
             }
             logger.info("Stable:%s, result:%s", returnCode, result)
-            stableValue += result.toFloatSafely()
+            stableValue += result.toDoubleSafely()
             val functionResultItem = FunctionResultItem(name = returnCode, code = returnCode, originalCode = returnCode, value = result, codeType = stableValueCodeType)
             functionResultItemMap[returnCode] = functionResultItem
             functionResultItemMappingMap[returnCode] = functionResultItem
         }
         //function input data initialize
         val optimizeInputMap = inputMap.toMutableMap()
-
+        val supportTotalResult = totalResultCode.isNotBlank()
+        var functionResultTotalValue = 0.0//函数值求和
+        var totalFunctionResultItem = FunctionResultItem()
+        var totalResultValue = 0.0
+        if (supportTotalResult) {
+            //initialize total function result item
+            totalFunctionResultItem = FunctionResultItem(name = totalResultCode, code = totalResultCode, originalCode = totalResultCode, value = Constants.String.ZERO, codeType = functionResultCode)
+            functionResultItemMap[totalResultCode] = totalFunctionResultItem
+            functionResultItemMappingMap[totalResultCode] = totalFunctionResultItem
+        }
         if (defaultExecuteFunctionItemCodeList.isEmpty() && otherConditionExecuteFunctionItemCodeListMap.isEmpty()) {
             logger.warning("default function item code mapping and other condition function item code mapping map are empty")
         } else {
@@ -205,7 +214,13 @@ class FunctionExecutor(
                         return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
                     } else {
                         if (functionItemType == FunctionItem.FunctionType.RESULT) {
-                            functionResultList += result.toString()
+                            functionResultTotalValue += result.toString().toFloatSafely()
+                            //update the total result in process
+                            if (supportTotalResult) {
+                                totalResultValue = stableValue + functionResultTotalValue
+                                val tempTotalFunctionResultItem = functionResultItemMap[totalResultCode] ?: error("it is impossible, maybe logic error, supportTotalResult:%s".format(supportTotalResult))
+                                tempTotalFunctionResultItem.value = totalResultValue.toString()
+                            }
                             if (checkFunctionResultItem) {
                                 if (!originalFunctionResultMap.containsKey(fixFunctionReturnCode)) {
                                     logger.error("Check original function result error, miss functionReturnCode:$fixFunctionReturnCode")
@@ -222,25 +237,15 @@ class FunctionExecutor(
                 }
             }
         }
-
-        if (totalResultCode.isBlank()) {//no total result
+        if (!supportTotalResult) {//no total result
             return FunctionResult(true, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
         }
-        //function result total value
-        var functionResultTotalValue = 0.0
-        functionResultList.forEach {
-            functionResultTotalValue += it.toDoubleSafely()
-        }
-        val originalResult = originalFunctionResultMap["${totalResultCode}$RETURN_SUFFIX"]?.toDouble() ?: 0.0
-        val result = stableValue + functionResultTotalValue
-        val fixResult = if (result.isNaN()) 0.0 else result
-        val optimizeResult = optimizeResultProcessor(fixResult)
-        logger.info("Stable value:%s, total value:%s", stableValue, functionResultTotalValue)
-        val match = abs(fixResult - originalResult) < 10
-        logger.info("Result:%.2f, fix result:%s, optimize result:%s, original result:%s, match:%s".format(result, fixResult, optimizeResult, originalResult, match))
-        val totalFunctionResultItem = FunctionResultItem(name = totalResultCode, code = totalResultCode, originalCode = totalResultCode, value = optimizeResult, codeType = functionResultCode)
-        functionResultItemMap[totalResultCode] = totalFunctionResultItem
-        functionResultItemMappingMap[totalResultCode] = totalFunctionResultItem
+        val originalResultValue = originalFunctionResultMap["${totalResultCode}$RETURN_SUFFIX"]?.toDouble() ?: 0.0
+        val fixTotalResultValue = if (totalResultValue.isNaN()) 0.0 else totalResultValue
+        val optimizeResult = optimizeResultProcessor(fixTotalResultValue)
+        logger.info("Stable value:%s, function result total value:%s", stableValue, functionResultTotalValue)
+        val match = abs(fixTotalResultValue - originalResultValue) < 10
+        logger.info("Total result value:%.2f, fix total result value:%s, optimize result:%s, original result:%s, match:%s".format(totalResultValue, fixTotalResultValue, optimizeResult, originalResultValue, match))
         if (checkFunctionResultItem && !match) {
             return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap, totalFunctionResultItem)
         }
