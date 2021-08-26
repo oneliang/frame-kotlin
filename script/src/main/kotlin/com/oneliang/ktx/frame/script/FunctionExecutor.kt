@@ -2,7 +2,10 @@ package com.oneliang.ktx.frame.script
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.script.engine.FunctionEngineManager
-import com.oneliang.ktx.util.common.*
+import com.oneliang.ktx.util.common.matches
+import com.oneliang.ktx.util.common.nullToBlank
+import com.oneliang.ktx.util.common.toDoubleSafely
+import com.oneliang.ktx.util.common.toKeyListAndMap
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
@@ -214,7 +217,7 @@ class FunctionExecutor(
                         return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
                     } else {
                         if (functionItemType == FunctionItem.FunctionType.RESULT) {
-                            functionResultTotalValue += result.toString().toFloatSafely()
+                            functionResultTotalValue += result.toString().toDoubleSafely()
                             //update the total result in process
                             if (supportTotalResult) {
                                 totalResultValue = stableValue + functionResultTotalValue
@@ -239,11 +242,17 @@ class FunctionExecutor(
         }
         if (!supportTotalResult) {//no total result
             return FunctionResult(true, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
+        } else {//replace again, through it is right
+            totalResultValue = stableValue + functionResultTotalValue
         }
         val originalResultValue = originalFunctionResultMap["${totalResultCode}$RETURN_SUFFIX"]?.toDouble() ?: 0.0
         val fixTotalResultValue = if (totalResultValue.isNaN()) 0.0 else totalResultValue
         val optimizeResult = optimizeResultProcessor(fixTotalResultValue)
         logger.info("Stable value:%s, function result total value:%s", stableValue, functionResultTotalValue)
+        if (supportTotalResult) {//update total function result item value
+            val tempTotalFunctionResultItem = functionResultItemMap[totalResultCode] ?: error("it is impossible, maybe logic error, supportTotalResult:%s".format(supportTotalResult))
+            tempTotalFunctionResultItem.value = optimizeResult
+        }
         val match = abs(fixTotalResultValue - originalResultValue) < 10
         logger.info("Total result value:%.2f, fix total result value:%s, optimize result:%s, original result:%s, match:%s".format(totalResultValue, fixTotalResultValue, optimizeResult, originalResultValue, match))
         if (checkFunctionResultItem && !match) {
