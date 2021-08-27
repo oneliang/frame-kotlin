@@ -216,6 +216,7 @@ class FunctionExecutor(
                         logger.error("Error, result is null, did you forget the keyword 'return'")
                         return FunctionResult(false, optimizeInputMap, functionResultItemMap, functionResultItemMappingMap)
                     } else {
+                        //double check the if logic, maybe unused
                         if (functionItemType == FunctionItem.FunctionType.RESULT) {
                             functionResultTotalValue += result.toString().toDoubleSafely()
                             //update the total result in process
@@ -235,6 +236,8 @@ class FunctionExecutor(
 //                                return FunctionResult(false, functionResultItemMap, functionResultItemMappingMap)
                                 }
                             }
+                        } else {
+                            //maybe no else
                         }
                     }
                 }
