@@ -1,9 +1,11 @@
 package com.oneliang.ktx.frame.servlet.filter
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.replaceAllLines
 import com.oneliang.ktx.util.common.replaceAllSpace
+import com.oneliang.ktx.util.common.toFile
 import com.oneliang.ktx.util.http.HttpUtil
 import com.oneliang.ktx.util.json.JsonArray
 import com.oneliang.ktx.util.logging.LoggerManager
@@ -20,6 +22,7 @@ class HeaderFilter : Filter {
         private const val HEADER_KEY = "key"
         private const val HEADER_VALUE = "value"
         private const val ACCESS_CONTROL = "accessControl"
+        private const val ACCESS_CONTROL_FILE = "accessControlFile"
     }
 
     private val headerList = mutableListOf<HttpUtil.HttpNameValue>()
@@ -29,7 +32,7 @@ class HeaderFilter : Filter {
      * Method: public void init(FilterConfig filterConfig) throws ServletException
      * @param filterConfig
      * @throws ServletException
-     * This method will be initial the key 'encoding' and 'ignore' in web.xml
+     * This method will be initial in web.xml
      */
     @Throws(ServletException::class)
     override fun init(filterConfig: FilterConfig) {
@@ -50,12 +53,28 @@ class HeaderFilter : Filter {
                 logger.error("init exception", e)
             }
         }
-
+        //access control step one
+        this.accessControlSet.clear()
         val accessControl = filterConfig.getInitParameter(ACCESS_CONTROL).nullToBlank()
         if (accessControl.isNotBlank()) {
-            this.accessControlSet.clear()
             accessControl.split(Constants.Symbol.COMMA).forEach {
                 this.accessControlSet += it.trim()
+            }
+        }
+        //access control step two
+        val accessControlFile = filterConfig.getInitParameter(ACCESS_CONTROL_FILE).nullToBlank()
+        if (accessControlFile.isNotBlank()) {
+            val fixAccessControlFile = accessControlFile.trim()
+            val accessControlFullFilename = ConfigurationContainer.rootConfigurationContext.classesRealPath + fixAccessControlFile
+            logger.info("access control full filename:%s", accessControlFullFilename)
+            try {
+                accessControlFullFilename.toFile().readLines().forEach {
+                    if (it.isNotBlank()) {
+                        this.accessControlSet += it.trim()
+                    }
+                }
+            } catch (e: Throwable) {
+                logger.error(Constants.String.EXCEPTION, e)
             }
         }
     }
@@ -81,7 +100,7 @@ class HeaderFilter : Filter {
             if (httpHeaderOrigin.isNotBlank() && accessControlSet.contains(httpHeaderOrigin)) {
                 httpServletResponse.setHeader(Constants.Http.HeaderKey.ACCESS_CONTROL_ALLOW_ORIGIN, httpHeaderOrigin)
             } else {
-                logger.error("header[Origin] is not support for %s", if (httpHeaderOrigin.isBlank()) "blank" else httpHeaderOrigin)
+                logger.error("header[Origin] is not support for %s", httpHeaderOrigin.ifBlank { "blank" })
             }
         }
         filterChain.doFilter(servletRequest, servletResponse)
