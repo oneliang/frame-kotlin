@@ -7,45 +7,57 @@ fun main() {
     println(c.distance())
     println(a.maybeSamePoint(b, 1.0))
 
-    val shape1 = Shape(arrayOf(Point(1.0, 1.0), Point(1.0, 2.0), Point(2.0, 2.0), Point(2.0, 1.0)))
-    val shape2 = shape1.copy().apply { move(y = 2.0) }
-    val point = Point(1.5, 1.0)
-    println(shape1)
+    val shape1 = Shape(arrayOf(Point(0.0, 0.0), Point(0.0, 1.0), Point(1.0, 1.0), Point(1.0, 0.0)))
+    println(shape1.calculateSuitableRotation(Point(1.5, 0.5)))
+    val shape1Copy = shape1.copy().apply { rotateClockwiseRoundTheCenterPoint(68.0f) }
+    MainFrame().show(listOf(shape1, shape1Copy))
+    return
+//    println("before rotate:$shape1")
+    shape1.rotateClockwiseRoundTheCenterPoint(360.0f)
+//    println("after rotate:$shape1")
+
+    val shape2 = Shape(arrayOf(Point(0.0, 0.0), Point(0.0, 1.0), Point(1.0, 0.0)))//shape1.copy().apply { move(y = 2.0) }
+    val shape3 = Shape(arrayOf(Point(0.5, 0.5), Point(0.5, 1.5), Point(1.5, 0.5)))//shape1.copy().apply { move(y = 2.0) }
+    val point = Point(0.0, 1.0)
+//    println(shape1)
 //    println(shape2)
 //    println(point.maybeInSegment(a, b))
-    println(shape1.maybeInner(point))
-//    println(shape2.maybeCoincide(shape1))
+//    println(shape3.maybeInner(point))
+//    println(shape3.maybeCoincide(shape2))
 //    return
     val list = listOf(
-        Shape(arrayOf(Point(1.0, 1.0), Point(1.0, 2.0), Point(2.0, 2.0), Point(2.0, 1.0))),
-        Shape(arrayOf(Point(2.5, 1.0), Point(2.5, 2.0), Point(3.5, 2.0), Point(3.5, 1.0))),
-        Shape(arrayOf(Point(4.0, 1.0), Point(4.0, 2.0), Point(5.0, 2.0), Point(5.0, 1.0))),
-        Shape(arrayOf(Point(5.5, 1.0), Point(5.5, 2.0), Point(6.5, 2.0), Point(6.5, 1.0))),
-        Shape(arrayOf(Point(7.0, 1.0), Point(7.5, 2.0), Point(8.0, 2.0), Point(8.0, 1.0))),
-        Shape(arrayOf(Point(8.5, 1.0), Point(8.5, 2.0), Point(9.5, 2.0), Point(9.5, 1.0)))
+        Shape(arrayOf(Point(0.0, 0.0), Point(0.0, 1.0), Point(1.0, 0.0)))
     )
-    val testShape = Shape(arrayOf(Point(0.0, 1.5), Point(0.0, 2.5), Point(1.0, 2.5), Point(1.0, 1.5)))
+    val testShape = Shape(arrayOf(Point(1.0, 1.0), Point(1.0, 2.0), Point(2.0, 1.0)))
     for (i in list) {
 //        println("test shape:" + testShape.maybeCoincide(i))
     }
 
 //    return
-    val baseShape = Shape(arrayOf(Point(1.0, 1.0), Point(1.0, 2.0), Point(2.0, 2.0), Point(2.0, 1.0)))
-    val step = 0.5
-    val width = 10
-    val height = 4
+//    val baseShape = Shape(arrayOf(Point(1.0, 1.0), Point(1.0, 2.0), Point(2.0, 2.0), Point(2.0, 1.0)))
+    val baseShape = Shape(arrayOf(Point(1.0, 1.0), Point(1.0, 2.0), Point(2.0, 1.0)))
+    val step = 0.1
+    val width = 2.5
+    val height = 2.5
     val shapeList = mutableListOf<Shape>()
-    shapeList += baseShape
+//    shapeList += baseShape
 
     var nextShape: Shape? = null
     while (true) {
         if (nextShape == null) {
             nextShape = baseShape.copy()
+            nextShape.moveXToZero()
+            nextShape.moveYToZero()
         }
+//        if (shapeList.isEmpty()) {//reset the first shape to edge
+//        nextShape.moveXToZero()
+//        nextShape.moveYToZero()
+//        }
         var allShapeSuccess = true
         for (shape in shapeList) {
-            val result = nextShape.maybeCoincide(shape)
-            if (result) {
+            val nextShapePointCheck = nextShape.maybeCoincide(shape)
+            val shapePointCheck = shape.maybeCoincide(nextShape)
+            if (nextShapePointCheck || shapePointCheck) {
                 allShapeSuccess = false
                 break
             }
@@ -57,14 +69,17 @@ fun main() {
             nextShape = null
             continue//will generate next shape
         } else {//move next shape
-            if (nextShape.maxX() > width) {
+//            println("before move:" + nextShape)
+            if ((nextShape.maxX() + step) > width) {
                 nextShape.moveXToZero()
                 nextShape.move(y = step)
+//                println("1 after move:" + nextShape)
                 if (nextShape.maxY() > height) {
                     break//break it
                 }
-            } else if (nextShape.maxX() <= width) {
+            } else {
                 nextShape.move(step)
+//                println("2 after move:" + nextShape)
                 continue
             }
         }
@@ -73,4 +88,5 @@ fun main() {
     for ((index, shape) in shapeList.withIndex()) {
         println("index:%s, shape:%s".format(index, shape))
     }
+    MainFrame().show(shapeList)
 }

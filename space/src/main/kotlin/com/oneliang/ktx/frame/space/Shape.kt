@@ -1,6 +1,29 @@
 package com.oneliang.ktx.frame.space
 
-class Shape(private val points: Array<Point>) {
+import com.oneliang.ktx.util.common.roundToFix
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+
+class Shape(val points: Array<Point>) {
+
+    init {
+        if (this.points.isEmpty()) error("you must have some points in shape, now it is empty")
+    }
+
+    val centerPoint: Point
+        get() {
+            var x = 0.0
+            var y = 0.0
+            var z = 0.0
+            for (point in this.points) {
+                x += point.x
+                y += point.y
+                z += point.z
+            }
+            val size = this.points.size
+            return Point(x / size, y / size, z / size)
+        }
 
     fun move(x: Double = 0.0, y: Double = 0.0, z: Double = 0.0) {
         for (point in this.points) {
@@ -44,12 +67,12 @@ class Shape(private val points: Array<Point>) {
         return false
     }
 
-    fun moveXToZero() {
-        this.move(x = -this.minX())
+    fun moveXToZero(offset: Double = 0.0) {
+        this.move(x = -this.minX() + offset)
     }
 
-    fun moveYToZero() {
-        this.move(x = 0.0, y = -this.minY())
+    fun moveYToZero(offset: Double = 0.0) {
+        this.move(x = 0.0, y = -this.minY() + offset)
     }
 
     fun maybeInner(point: Point): Boolean {
@@ -158,15 +181,22 @@ class Shape(private val points: Array<Point>) {
                     if (x == point.x) {//self is cross point
                         specialInner = true
                         break//will return true at last
-                    } else if (x < point.x) {
-                        leftCrossCount++
                     } else {
-                        rightCrossCount++
+                        val crossPoint = Point(x, y)
+                        if (crossPoint.maybeInSegment(p1, p2)) {//true cross
+                            if (x < point.x) {
+                                leftCrossCount++
+                            } else {
+                                rightCrossCount++
+                            }
+                        } else {
+                            //false cross
+                        }
                     }
                 }
 //                println("index:$index, cross point:($x,$y)")
             }
-//            println("left cross count:$leftCrossCount, right cross count:$rightCrossCount")
+//            println("left cross count:$leftCrossCount, right cross count:$rightCrossCount, special inner:$specialInner")
             //odd number is inner, even number is outer not include zero, zero is inner
             if (specialInner) {//in segment, or the point is vertex
                 return true
@@ -176,5 +206,51 @@ class Shape(private val points: Array<Point>) {
 //            }
             return !(leftCrossCount % 2 == 0 && rightCrossCount % 2 == 0)
         }
+    }
+
+    /**
+     * x=x1+(x2-x1)cosb+(y2-y1)sinb
+     * y=y1+(y2-y1)cosb-(x2-x1)sinb
+     * a round is 360, equal a period 2*PI
+     */
+    fun rotateClockwiseRoundTheCenterPoint(angle: Float) {
+        if (angle < 0) {
+            error("angle must be bigger than 0, input angle is:%s".format(angle))
+        }
+        val centerPoint = this.centerPoint
+        val angleToNumber = angle / 360 * 2 * PI
+        for (index in 0..this.points.lastIndex) {
+            val point = this.points[index]
+            val x = (centerPoint.x + (point.x - centerPoint.x) * cos(angleToNumber) + (point.y - centerPoint.y) * sin(angleToNumber)).roundToFix(2).toDouble()
+            val y = (centerPoint.y + (point.y - centerPoint.y) * cos(angleToNumber) - (point.x - centerPoint.x) * sin(angleToNumber)).roundToFix(2).toDouble()
+//            println("$x,$y,${cos(angleToNumber)},${sin(angleToNumber)}")
+            point.replaceFrom(x, y)
+        }
+    }
+
+    fun calculateSuitableRotation(outerPoint: Point): Float {
+        val newShape = this.copy()
+        var min = 0.0
+        var rotation = 0
+        for (i in 0 until 360) {
+            newShape.rotateClockwiseRoundTheCenterPoint(i.toFloat())
+            var sum = 0.0
+            for (point in newShape.points) {
+                sum += (point - outerPoint).distance()
+            }
+            if (min == 0.0) {
+                min = sum
+                rotation = i
+            } else {
+                if (sum < min) {
+                    min = sum
+                    rotation = i
+                } else {
+                    //no need to update min
+                }
+            }
+            println("rotation:$i, sum:$sum")
+        }
+        return rotation.toFloat()
     }
 }
