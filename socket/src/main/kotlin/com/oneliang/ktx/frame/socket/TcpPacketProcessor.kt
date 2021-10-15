@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.socket
 import com.oneliang.ktx.util.common.readWithBuffer
 import com.oneliang.ktx.util.common.toInt
 import com.oneliang.ktx.util.common.writeWithBuffer
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -40,6 +41,14 @@ class TcpPacketProcessor(private val typeByteArrayLength: Int = 4, private val b
 
     @Throws(Throwable::class)
     fun receiveTcpPacket(inputStream: InputStream): TcpPacket {
+        val type = receiveType(inputStream)
+        val bodyByteArray = this.receiveBody(inputStream)
+        return TcpPacket(type, bodyByteArray)
+    }
+
+    @Throws(Throwable::class)
+    fun receiveTcpPacket(byteArray: ByteArray): TcpPacket {
+        val inputStream = ByteArrayInputStream(byteArray)
         val type = receiveType(inputStream)
         val bodyByteArray = this.receiveBody(inputStream)
         return TcpPacket(type, bodyByteArray)

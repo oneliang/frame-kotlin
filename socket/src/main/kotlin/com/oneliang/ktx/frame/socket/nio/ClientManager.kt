@@ -39,12 +39,10 @@ class ClientManager(private val host: String, private val port: Int) : LoopThrea
     }
 
     fun send(byteArray: ByteArray) {
-        logger.info("aaa")
         if (this.clientArray.isEmpty()) {
             return
         }
-        logger.info("bbb")
         val client = this.clientArray[byteArray.hashCode() % this.clientArray.size]
-        client.send("123".toByteArray())
+        client.send(byteArray)
     }
 }
