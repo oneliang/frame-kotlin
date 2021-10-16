@@ -33,10 +33,13 @@ object Mail {
     /**
      * send mail
      * @param sendMailConfiguration
+     * @param sendMailMessageList
+     * @param sessionPropertyMap
      * @throws Exception
+     * @return SendMailResult
      */
     @Throws(Exception::class)
-    fun send(sendMailConfiguration: SendMailConfiguration, sendMailMessageList: List<SendMailMessage>, sessionPropertyMap: Map<String, Any> = emptyMap()) {
+    fun send(sendMailConfiguration: SendMailConfiguration, sendMailMessageList: List<SendMailMessage>, sessionPropertyMap: Map<String, Any> = emptyMap()): SendMailResult {
         val user = sendMailConfiguration.user
         val host = sendMailConfiguration.host
         val port = sendMailConfiguration.port
@@ -102,7 +105,7 @@ object Mail {
         }
         if (messageList.isEmpty()) {
             logger.warning("mail message list is empty, please check it.")
-            return
+            return SendMailResult()
         }
         // get transport
         val transport: Transport = session.getTransport(protocol)
@@ -116,14 +119,21 @@ object Mail {
         commandMap.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed")
         commandMap.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822")
         CommandMap.setDefaultCommandMap(commandMap)
+        val errorAddressList = mutableListOf<String>()
         messageList.forEach { mimeMessage ->
             try {
                 transport.sendMessage(mimeMessage, mimeMessage.allRecipients)
             } catch (e: Throwable) {
-                logger.error("send mail fail, all recipients:%s", e, mimeMessage.allRecipients.joinToString { it.toString() })
+                val message = mimeMessage.allRecipients.joinToString {
+                    val errorAddress = it.toString()
+                    errorAddressList += errorAddress
+                    errorAddress
+                }
+                logger.error("send mail fail, all recipients:%s", e, message)
             }
         }
         transport.close()
+        return SendMailResult(errorAddressList)
     }
 
     /**
@@ -171,4 +181,6 @@ object Mail {
         var ssl = false
         var protocol = SMTP
     }
+
+    class SendMailResult(val errorAddressList: List<String> = emptyList())
 }

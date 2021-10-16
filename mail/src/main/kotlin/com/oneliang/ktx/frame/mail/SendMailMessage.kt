@@ -1,7 +1,6 @@
 package com.oneliang.ktx.frame.mail
 
 import com.oneliang.ktx.Constants
-import java.util.concurrent.CopyOnWriteArrayList
 
 class SendMailMessage {
     var fromAddress = Constants.String.BLANK
