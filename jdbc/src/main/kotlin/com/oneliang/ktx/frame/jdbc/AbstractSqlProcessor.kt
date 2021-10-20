@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.jdbc
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.KotlinClassUtil
+import com.oneliang.ktx.util.common.fixNaN
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.math.BigDecimal
 import java.sql.PreparedStatement
@@ -31,8 +32,8 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
                         KotlinClassUtil.ClassType.KOTLIN_SHORT -> preparedStatement.setShort(index, java.lang.Short.parseShort(value))
                         KotlinClassUtil.ClassType.KOTLIN_INTEGER -> preparedStatement.setInt(index, Integer.parseInt(value))
                         KotlinClassUtil.ClassType.KOTLIN_LONG -> preparedStatement.setLong(index, java.lang.Long.parseLong(value))
-                        KotlinClassUtil.ClassType.KOTLIN_FLOAT -> preparedStatement.setFloat(index, java.lang.Float.parseFloat(value))
-                        KotlinClassUtil.ClassType.KOTLIN_DOUBLE -> preparedStatement.setDouble(index, java.lang.Double.parseDouble(value))
+                        KotlinClassUtil.ClassType.KOTLIN_FLOAT -> preparedStatement.setFloat(index, java.lang.Float.parseFloat(value).fixNaN())
+                        KotlinClassUtil.ClassType.KOTLIN_DOUBLE -> preparedStatement.setDouble(index, java.lang.Double.parseDouble(value).fixNaN())
                         KotlinClassUtil.ClassType.KOTLIN_BOOLEAN -> preparedStatement.setBoolean(index, java.lang.Boolean.parseBoolean(value))
                         KotlinClassUtil.ClassType.JAVA_UTIL_DATE -> preparedStatement.setTimestamp(index, Timestamp((parameter as Date).time))
                         KotlinClassUtil.ClassType.JAVA_MATH_BIG_DECIMAL -> preparedStatement.setBigDecimal(index, BigDecimal(value))
