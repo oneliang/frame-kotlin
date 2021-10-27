@@ -1,12 +1,15 @@
 package com.oneliang.ktx.frame.cache
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.storage.ConfigFileStorage
 import com.oneliang.ktx.util.common.*
-import com.oneliang.ktx.util.file.*
+import com.oneliang.ktx.util.file.FileUtil
+import com.oneliang.ktx.util.file.createFileIncludeDirectory
+import com.oneliang.ktx.util.file.saveTo
+import com.oneliang.ktx.util.file.write
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.io.UnsupportedEncodingException
-import java.util.*
 import kotlin.reflect.KClass
 
 class FileCacheManager constructor(private var cacheDirectory: String, private val depth: Int = 0, private val defaultCacheRefreshTime: Long = 0L) : CacheManager {
@@ -15,22 +18,16 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
         private const val CACHE_PROPERTIES_NAME = "cache.txt"
     }
 
-    private var cachePropertiesFile: File
-    private var cacheProperties: Properties
-
     init {
-        if (cacheDirectory.isBlank()) {
-            error("parameter(cacheDirectory) can not be blank, only can be directory or exists directory.")
-        }
-        val cacheDirectoryFile = File(this.cacheDirectory)
-        if (cacheDirectoryFile.exists() && cacheDirectoryFile.isFile) {
+        val directoryFile = File(this.cacheDirectory)
+        if (directoryFile.exists() && directoryFile.isFile) {
             error("parameter(cacheDirectory) can not be exists file, only can be directory or exists directory.")
         }
-        this.cacheDirectory = cacheDirectoryFile.absolutePath
+        this.cacheDirectory = directoryFile.absolutePath
         logger.info("Cache directory:%s", this.cacheDirectory)
-        this.cachePropertiesFile = File(this.cacheDirectory, CACHE_PROPERTIES_NAME)
-        this.cacheProperties = cachePropertiesFile.toPropertiesAutoCreate()
     }
+
+    private val configFileStorage = ConfigFileStorage(this.cacheDirectory, CACHE_PROPERTIES_NAME)
 
     /**
      * generate cache relative filename
@@ -94,12 +91,13 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
      * @param value
      * @param cacheRefreshTime
      */
-    override fun <T : Any> saveToCache(key: Any, value: T, cacheRefreshTime: Long) {
+    override fun <T : Any> saveToCache(key: Any, value:
+    T, cacheRefreshTime: Long) {
         //first try to delete old cache, maybe old and new cache file is the same
         val keyString = key.toString()
-        val oldCacheFullFilename = this.cacheProperties.getProperty(keyString)
+        val oldCacheFullFilename = this.configFileStorage.configProperties.getProperty(keyString)
         if (!oldCacheFullFilename.isNullOrBlank()) {
-            this.cacheProperties.remove(keyString)
+            this.configFileStorage.configProperties.remove(keyString)
             val oldCacheFile = File(oldCacheFullFilename)
             oldCacheFile.delete()
         }
@@ -123,7 +121,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             else -> logger.error("save to cache not support the class:%s", cacheType)
         }
         //update new cache
-        this.cacheProperties.setProperty(keyString, cacheFullFilename)
-        this.cacheProperties.saveTo(this.cachePropertiesFile)
+        this.configFileStorage.configProperties.setProperty(keyString, cacheFullFilename)
+        this.configFileStorage.configProperties.saveTo(this.configFileStorage.configPropertiesFile)
     }
 }
