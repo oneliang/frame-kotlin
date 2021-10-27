@@ -11,6 +11,7 @@ import com.oneliang.ktx.util.concurrent.ResourceQueueThread
 import com.oneliang.ktx.util.concurrent.atomic.LRUCacheMap
 import com.oneliang.ktx.util.file.saveTo
 import com.oneliang.ktx.util.file.toPropertiesAutoCreate
+import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
@@ -128,21 +129,34 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         val relativeFilename = generateRelativeFilename(key)
         val keyFullFilename = generateKeyFullFilename(relativeFilename)
         val keyFile = File(keyFullFilename)
-        val (_, keyProperties) = this.keyPropertiesMap.operate(relativeFilename, create = {
+        val (_, propertiesItem, lastUsedTime, count) = this.keyPropertiesMap.operate(relativeFilename, create = {
             //not in cache, than read from cache
             logger.debug("Auto create key file or cache, key:%s, key index full filename:%s", key, relativeFilename)
-            PropertiesItem(keyFile, keyFile.toPropertiesAutoCreate())
+            val properties = keyFile.toPropertiesAutoCreate()
+            val value = properties.getProperty(key, Constants.String.BLANK)
+            if (value.isNullOrBlank()) {
+                PropertiesItem(keyFile, keyFile.toPropertiesAutoCreate()) to LRUCacheMap.InitializeItemCounter()
+            } else {
+                val propertyValue = value.jsonToObject(PropertyValue::class)
+                PropertiesItem(keyFile, keyFile.toPropertiesAutoCreate()) to LRUCacheMap.InitializeItemCounter(propertyValue.lastUsedTime, propertyValue.count)
+            }
         }, removeWhenFull = { itemCounter ->
 //            logger.debug("key file size:%s, key remove item:%s", this.keyPropertiesMap.size, itemCounter.toJson())
             val (removeFile, removeProperties) = itemCounter.value
             saveProperties(removeFile, removeProperties)
         }) ?: error("it is impossible logic, please check, key:$relativeFilename")
-
-        var keyValueRelativeFilename = keyProperties.getProperty(key)
-        if (keyValueRelativeFilename.isNullOrBlank()) {
-            keyValueRelativeFilename = generateKeyValueRelativeFilename(relativeFilename, key)
-            keyProperties.setProperty(key, keyValueRelativeFilename)
+        val keyProperties = propertiesItem.properties
+        val value = keyProperties.getProperty(key, Constants.String.BLANK)
+        val propertyValue = if (value.isNullOrBlank()) {
+            PropertyValue()
+        } else {
+            value.jsonToObject(PropertyValue::class)
         }
+        var keyValueRelativeFilename = propertyValue.value
+        if (keyValueRelativeFilename.isBlank()) {
+            keyValueRelativeFilename = generateKeyValueRelativeFilename(relativeFilename, key)
+        }
+        keyProperties.setProperty(key, PropertyValue(keyValueRelativeFilename, lastUsedTime, count).toJson())
         return Triple(keyValueRelativeFilename, keyFile, keyProperties)
     }
 
@@ -150,28 +164,35 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         val valueFile = File(this.directory, keyValueRelativeFilename)
         val valueMd5 = value.MD5String()
 
-        val (_, valueProperties) = this.valuePropertiesMap.operate(keyValueRelativeFilename, create = {
+        val (_, propertiesItem, lastUsedTime, count) = this.valuePropertiesMap.operate(keyValueRelativeFilename, create = {
             //not in cache, than read from cache
             logger.debug("Auto create value file or cache, key:%s, value full filename:%s", keyValueRelativeFilename, keyValueRelativeFilename)
-            PropertiesItem(valueFile, valueFile.toPropertiesAutoCreate())
+            val properties = valueFile.toPropertiesAutoCreate()
+            val savedValue = properties.getProperty(valueMd5, Constants.String.BLANK)
+            if (savedValue.isNullOrBlank()) {
+                PropertiesItem(valueFile, valueFile.toPropertiesAutoCreate()) to LRUCacheMap.InitializeItemCounter()
+            } else {
+                val propertyValue = savedValue.jsonToObject(PropertyValue::class)
+                PropertiesItem(valueFile, valueFile.toPropertiesAutoCreate()) to LRUCacheMap.InitializeItemCounter(propertyValue.lastUsedTime, propertyValue.count)
+            }
         }, removeWhenFull = { itemCounter ->
 //            logger.debug("value file size:%s, value remove item:%s", this.valuePropertiesMap.size, itemCounter.hashCode().toString() + itemCounter.toJson())
             val (removeFile, removeProperties) = itemCounter.value
             saveProperties(removeFile, removeProperties)
         }) ?: error("it is impossible logic, please check, key:$keyValueRelativeFilename")
+        val valueProperties = propertiesItem.properties
         if (value.isBlank()) {
             return Pair(valueFile, valueProperties)
         }
-        val content = valueProperties.getProperty(valueMd5)
-        if (content.isNullOrBlank()) {
-            valueProperties.setProperty(valueMd5, value)
-        }
+        valueProperties.setProperty(valueMd5, PropertyValue(value, lastUsedTime, count).toJson())
         return Pair(valueFile, valueProperties)
     }
 
     override fun search(key: String): List<String> {
-        val (keyValueRelativeFilename, _, _) = readKeyPropertiesAutoCreate(key)
-        val valueProperties = readValuePropertiesAutoCreate(keyValueRelativeFilename, Constants.String.BLANK).second
+        val (keyValueRelativeFilename, keyFile, keyProperties) = readKeyPropertiesAutoCreate(key)
+        val (valueFile, valueProperties) = readValuePropertiesAutoCreate(keyValueRelativeFilename, Constants.String.BLANK)
+        saveProperties(keyFile, keyProperties)
+        saveProperties(valueFile, valueProperties)
         return valueProperties.values.map { it.toString() }
     }
 
@@ -206,11 +227,19 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
             return this.properties
         }
     }
+
+    class PropertyValue(var value: String = Constants.String.BLANK, var lastUsedTime: Long = 0L, var count: Int = 0) {
+        constructor() : this(Constants.String.BLANK, 0L, 0)
+    }
 }
 
 private fun benchMark() {
     val fileStorage = FileStorage("/D:/temp", cacheMaxSize = 10)
     fileStorage.initialize()
+    fileStorage.add("A", "A")
+    println(fileStorage.search("A"))
+
+    return
     val array = arrayOf("A", "B", "C", "D", "E")
     var totalSize = 0
     val set = mutableListOf<String>()
