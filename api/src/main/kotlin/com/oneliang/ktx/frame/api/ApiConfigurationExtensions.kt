@@ -13,7 +13,7 @@ import java.io.FileWriter
 fun ConfigurationContext.outputApi(outputFilename: String) {
     val apiClassList = AnnotationApiContext.apiClassList
     val apiDocumentObjectMap = AnnotationApiContext.apiDocumentObjectMap
-    val bufferedWriter = BufferedWriter(FileWriter(File(this.projectRealPath, outputFilename), true))
+    val bufferedWriter = BufferedWriter(FileWriter(File(this.projectRealPath, outputFilename)))
     bufferedWriter.use {
         apiClassList.forEach { apiClass ->
             if (apiClass.java.isAnnotationPresent(Api::class.java)) {

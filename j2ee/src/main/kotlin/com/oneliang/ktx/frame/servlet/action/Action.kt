@@ -10,7 +10,13 @@ annotation class Action {
     @MustBeDocumented
     @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class RequestMapping(val value: String, val interceptors: Array<Interceptor> = [], val statics: Array<Static> = [], val httpRequestMethods: Array<Constants.Http.RequestMethod> = []) {
+    annotation class RequestMapping(
+        val value: String,
+        val level: Level = Level.PRIVATE,
+        val interceptors: Array<Interceptor> = [],
+        val statics: Array<Static> = [],
+        val httpRequestMethods: Array<Constants.Http.RequestMethod> = []
+    ) {
 
         @MustBeDocumented
         @Target(AnnotationTarget.ANNOTATION_CLASS)
@@ -30,5 +36,10 @@ annotation class Action {
         @Target(AnnotationTarget.VALUE_PARAMETER)
         @Retention(AnnotationRetention.RUNTIME)
         annotation class RequestParameter(val value: String)
+
+        enum class Level {
+            PRIVATE, PUBLIC
+        }
+
     }
 }

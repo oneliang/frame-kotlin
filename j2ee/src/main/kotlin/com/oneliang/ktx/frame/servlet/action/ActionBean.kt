@@ -9,6 +9,10 @@ open class ActionBean {
         private const val REGEX = "\\{([\\w]*)\\}"
         const val TAG_ACTION = "action"
     }
+
+    enum class Level(val value: String) {
+        PRIVATE("private"), PUBLIC("public")
+    }
     /**
      * @return the id
      */
@@ -22,7 +26,7 @@ open class ActionBean {
     /**
      * @param type the type to set
      */
-    var type: String? = null
+    var type: String = Constants.String.BLANK
     /**
      * @return the path
      */
@@ -30,6 +34,11 @@ open class ActionBean {
      * @param path the path to set
      */
     var path: String = Constants.String.BLANK
+
+    /**
+     * action level
+     */
+    var level: String = Level.PRIVATE.value
     /**
      * @return the httpRequestMethods
      */
@@ -55,6 +64,7 @@ open class ActionBean {
                 }
             }
         }
+
     /**
      * @return the httpRequestMethodsCode
      */

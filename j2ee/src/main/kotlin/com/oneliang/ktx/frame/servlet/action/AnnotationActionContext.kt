@@ -35,10 +35,14 @@ class AnnotationActionContext : ActionContext() {
                         continue
                     }
                     val returnType = method.returnType
-                    if (returnType != null && returnType == String::class.java) {
+                    if (returnType == String::class.java) {
                         val annotationActionBean = AnnotationActionBean()
                         val requestMappingAnnotation = method.getAnnotation(Action.RequestMapping::class.java)
                         annotationActionBean.type = kClass.java.name
+                        annotationActionBean.level = when (requestMappingAnnotation.level) {
+                            Action.RequestMapping.Level.PUBLIC -> ActionBean.Level.PUBLIC.value
+                            else -> ActionBean.Level.PRIVATE.value
+                        }
                         val annotationHttpRequestMethods = requestMappingAnnotation.httpRequestMethods
                         val httpRequestMethods = if (annotationHttpRequestMethods.isNotEmpty()) {
                             annotationHttpRequestMethods

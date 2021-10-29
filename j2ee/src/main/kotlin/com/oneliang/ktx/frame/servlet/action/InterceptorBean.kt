@@ -2,7 +2,6 @@ package com.oneliang.ktx.frame.servlet.action
 
 import com.oneliang.ktx.Constants
 
-
 class InterceptorBean {
 
     companion object {
@@ -21,7 +20,7 @@ class InterceptorBean {
     /**
      * @param type the type to set
      */
-    var type: String? = null
+    var type: String = Constants.String.BLANK
     /**
      * @return the interceptorInstance
      */

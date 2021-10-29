@@ -8,7 +8,7 @@ import javax.servlet.ServletResponse
 
 object StaticFilePathUtil {
 
-    private const val RESPONSE_STATIC_CONTENTTYPE = "text/html;charset=" + Constants.Encoding.UTF8
+    private const val RESPONSE_STATIC_CONTENT_TYPE = "text/html;charset=" + Constants.Encoding.UTF8
 
     /**
      * key:uri,value:
@@ -60,7 +60,7 @@ object StaticFilePathUtil {
      * @return boolean
      */
     internal fun staticize(path: String, staticFilePath: String, request: ServletRequest, response: ServletResponse): Boolean {
-        response.contentType = RESPONSE_STATIC_CONTENTTYPE
+        response.contentType = RESPONSE_STATIC_CONTENT_TYPE
         val result = ActionUtil.includeJspAndSave(path, staticFilePath, request, response)
         return result
     }
