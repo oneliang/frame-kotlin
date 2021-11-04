@@ -1,6 +1,5 @@
 package com.oneliang.ktx.frame.socket
 
-import com.oneliang.ktx.util.common.perform
 import com.oneliang.ktx.util.concurrent.LoopThread
 import com.oneliang.ktx.util.concurrent.ThreadPool
 import com.oneliang.ktx.util.logging.LoggerManager

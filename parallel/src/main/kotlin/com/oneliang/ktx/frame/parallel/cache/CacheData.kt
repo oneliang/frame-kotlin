@@ -1,7 +1,9 @@
 package com.oneliang.ktx.frame.parallel.cache
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.json.*
+import com.oneliang.ktx.util.json.DefaultJsonKotlinClassProcessor
+import com.oneliang.ktx.util.json.jsonToMap
+import com.oneliang.ktx.util.json.jsonToObject
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
@@ -12,7 +14,7 @@ class CacheData {
                 return CacheData()
             }
             return json.jsonToObject(CacheData::class, object : DefaultJsonKotlinClassProcessor() {
-                override fun <T : Any> changeClassProcess(kClass: KClass<T>, values: Array<String>, fieldName: String): Any? {
+                override fun <T : Any, SP> changeClassProcess(kClass: KClass<T>, values: Array<String>, fieldName: String, specialParameter: SP?): Any? {
                     if (fieldName == "sourceDataMap" || fieldName == "sinkDataMap") {
                         val map = values[0].jsonToMap()
                         val dataMap = ConcurrentHashMap<String, Data>()
@@ -21,7 +23,7 @@ class CacheData {
                         }
                         return dataMap
                     }
-                    return super.changeClassProcess(kClass, values, fieldName)
+                    return super.changeClassProcess(kClass, values, fieldName, specialParameter)
                 }
             })
         }
