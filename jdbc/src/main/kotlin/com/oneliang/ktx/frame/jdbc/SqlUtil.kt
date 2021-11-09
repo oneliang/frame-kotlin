@@ -299,11 +299,11 @@ object SqlUtil {
             if (fieldName.isBlank()) {
                 continue
             }
-            val isId = mappingBean.isId(fieldName)
             val columnName = mappingBean.getColumn(fieldName)
             if (columnName.isBlank()) {
                 continue
             }
+            val isId = mappingBean.isId(fieldName)
             if (isId) {
                 when (deleteType) {
                     DeleteType.SINGLE_ROW -> condition.append(" AND " + sqlProcessor.keywordSymbolLeft + columnName + sqlProcessor.keywordSymbolRight + "='" + ids[0] + "'")
@@ -339,11 +339,11 @@ object SqlUtil {
                 if (fieldName.isBlank()) {
                     continue
                 }
-                val isId = mappingBean.isId(fieldName)
                 val columnName = mappingBean.getColumn(fieldName)
                 if (columnName.isBlank()) {
                     continue
                 }
+                val isId = mappingBean.isId(fieldName)
                 if (!isId) {
                     continue
                 }
@@ -468,11 +468,11 @@ object SqlUtil {
                 if (fieldName.isBlank()) {
                     continue
                 }
-                val isId = mappingBean.isId(fieldName)
                 val columnName = mappingBean.getColumn(fieldName)
                 if (columnName.isBlank()) {
                     continue
                 }
+                val isId = mappingBean.isId(fieldName)
                 if (byId && isId || !byId && !isId) {
                     val type = method.returnType
                     val value = method.invoke(instance)

@@ -43,7 +43,7 @@ open class MappingBean {
     }
 
     /**
-     * judge the field is id or not
+     * judge the field is id or not, use getColumn to check it before use isId
      * @param field
      * @return is id
      */
