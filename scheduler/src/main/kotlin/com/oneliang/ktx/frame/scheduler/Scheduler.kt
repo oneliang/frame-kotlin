@@ -12,17 +12,23 @@ class Scheduler(minThreads: Int, maxThreads: Int) {
     private var threadPool = ThreadPool()
 
     init {
+        if (minThreads <= 0 || maxThreads < minThreads) {
+            error("param(minThreads) must be lager than 0, and param(maxThreads) must be lager than or equal param(minThreads)")
+        }
         this.threadPool.minThreads = minThreads
         this.threadPool.maxThreads = maxThreads
     }
 
-    private val timer = Timer()
+    private var timer: Timer? = null
 
     fun start() {
         this.threadPool.start()
+        this.timer = Timer()
     }
 
     fun interrupt() {
+        this.timer?.cancel()
+        this.timer = null
         this.threadPool.interrupt()
     }
 
@@ -32,12 +38,12 @@ class Scheduler(minThreads: Int, maxThreads: Int) {
                 threadPool.addThreadTask({
                     val begin = System.currentTimeMillis()
                     task(threadPool)
-                    logger.info("task finished， cost:%s", (System.currentTimeMillis() - begin))
+                    logger.info("task finished, cost:%s", (System.currentTimeMillis() - begin))
                 }, failure = {
                     logger.error("execute task error", it)
                 })
             }
         }
-        this.timer.schedule(timerTask, startDate, intervalTime)
+        this.timer?.schedule(timerTask, startDate, intervalTime)
     }
 }
