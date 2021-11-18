@@ -6,18 +6,18 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class AlarmClock<T : AlarmClock.ExpiredItem>(private val intervalTime: Long, expiredItemCallback: (expired: T) -> Unit) {
+class AlarmClock<T : AlarmClock.Item>(private val intervalTime: Long, expiredItemCallback: (item: T) -> Unit) {
     companion object {
         private val logger = LoggerManager.getLogger(AlarmClock::class)
     }
 
-    private val expiredItemMap = ConcurrentHashMap<String, T>()
+    private val itemMap = ConcurrentHashMap<String, T>()
     private val checkExpiredQueueThread = ResourceQueueThread(object : ResourceQueueThread.ResourceProcessor<Long> {
         override fun process(resource: Long) {
-            this@AlarmClock.expiredItemMap.forEach { (key, item) ->
+            this@AlarmClock.itemMap.forEach { (key, item) ->
                 if (resource >= item.expiredTime) {//resource is current time large than expiredTime, so expired
                     expiredItemCallback(item)
-                    this@AlarmClock.expiredItemMap.remove(key)
+                    this@AlarmClock.itemMap.remove(key)
                 }
             }
         }
@@ -39,22 +39,35 @@ class AlarmClock<T : AlarmClock.ExpiredItem>(private val intervalTime: Long, exp
     fun interrupt() {
         this.timer?.cancel()
         this.timer = null
-        this.expiredItemMap.clear()
+        this.itemMap.clear()
         this.checkExpiredQueueThread.interrupt()
     }
 
-    fun addExpiredItem(expiredItem: T) {
-        if (this.expiredItemMap.containsKey(expiredItem.key)) {
-            error("key exists, key:%s".format(expiredItem.key))
+    fun addItem(item: T) {
+        if (this.itemMap.containsKey(item.key)) {
+            error("key exists, key:%s".format(item.key))
         }
-        this.expiredItemMap[expiredItem.key] = expiredItem
+        this.itemMap[item.key] = item
     }
 
-    fun removeExpiredItem(key: String): T? {
-        return this.expiredItemMap.remove(key)
+    fun updateItem(item: T): Boolean {
+        return if (this.itemMap.containsKey(item.key)) {
+            this.itemMap[item.key] = item
+            true
+        } else {
+            false
+        }
     }
 
-    interface ExpiredItem {
+    fun removeItem(key: String): T? {
+        return this.itemMap.remove(key)
+    }
+
+    fun getItem(key: String): T? {
+        return this.itemMap[key]
+    }
+
+    interface Item {
         val key: String
         val expiredTime: Long
     }
