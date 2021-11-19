@@ -15,8 +15,8 @@ class AlarmClock(private val onTimeItemCallback: (item: Item) -> Unit) {
         this.alarmManager = AlarmManager(FREQUENCY) {
             if (it.period > 0) {
                 addItem(it)
-                onTimeItemCallback(it)
             }
+            this@AlarmClock.onTimeItemCallback(it)
         }
         this.alarmManager?.start()
     }
