@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.clock
 
+import com.oneliang.ktx.util.common.getSecondZeroTime
 import com.oneliang.ktx.util.logging.LoggerManager
 
 class AlarmClock(private val onTimeItemCallback: (item: Item) -> Unit) {
@@ -34,8 +35,7 @@ class AlarmClock(private val onTimeItemCallback: (item: Item) -> Unit) {
                 //normal
             }
         } else {//when time.period>0, update expiredTime
-            var beginTime = System.currentTimeMillis()
-            beginTime -= beginTime % 1000
+            val beginTime = System.currentTimeMillis().getSecondZeroTime()
             item.expiredTime = beginTime + item.period
         }
         this.alarmManager?.addItem(item)
