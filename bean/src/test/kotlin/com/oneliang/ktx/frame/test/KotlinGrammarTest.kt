@@ -1,5 +1,8 @@
 package com.oneliang.ktx.frame.test
 
+import com.oneliang.ktx.util.common.toFormatString
+import com.oneliang.ktx.util.common.toUtilDate
+import java.util.*
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
 
@@ -35,6 +38,9 @@ class ByForMap(map: Map<String, *>) {
 }
 
 fun main(args: Array<String>) {
+    println(Date().toFormatString("MMM dd, yyyy", Locale.ENGLISH))
+    println("Feb 15, 2020".toUtilDate("MMM dd, yyyy", Locale.ENGLISH))
+    return
     val byForField = ByForField()
     byForField.field = "1"//original value:1, need to set value:1
     println(byForField.field)
