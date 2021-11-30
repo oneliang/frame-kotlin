@@ -203,6 +203,8 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
                     val tomcatPidListAfterStartup = findTomcatProcessPid(session, it)
                     logger.info("after tomcat start up, tomcat pid list size:%s, tomcat:[%s]", tomcatPidListAfterStartup.size, it.remoteTomcatDirectory)
                 } else {
+                    startupTomcat(session, it)
+                    logger.info("upload failure, just restart tomcat, tomcat:[%s]", it.remoteTomcatDirectory)
                     return@forEach
                 }
             }
