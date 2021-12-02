@@ -3,7 +3,11 @@ package com.oneliang.ktx.frame.jdbc
 import com.oneliang.ktx.Constants
 
 private fun <T> sqlConditionTransform(instance: T): String {
-    return Constants.Symbol.SINGLE_QUOTE + instance.toString() + Constants.Symbol.SINGLE_QUOTE
+    return if (instance is Boolean) {
+        instance.toString()
+    } else {
+        Constants.Symbol.SINGLE_QUOTE + instance.toString() + Constants.Symbol.SINGLE_QUOTE
+    }
 }
 
 fun <T> Iterable<T>.toSqlCondition(transform: (T) -> String = { it.toString() }): String {
