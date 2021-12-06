@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.jdbc
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.bean.Page
 import com.oneliang.ktx.frame.configuration.ConfigurationContainer
+import com.oneliang.ktx.pojo.BooleanWrapper
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.resource.ResourcePool
 import java.io.IOException
@@ -706,7 +707,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
                     } catch (e: Throwable) {
                         throw QueryException(e)
                     } finally {
-                        TransactionManager.customTransactionSign.set(false)//must set false before release resource(connection)
+                        TransactionManager.customTransactionSign.remove()//must set false before release resource(connection)
                     }
                 }
             }

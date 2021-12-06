@@ -48,7 +48,7 @@ class ConnectionPool : ResourcePool<Connection>() {
         if (!customTransaction) {
             super.releaseResource(resource, destroy)
             if (TransactionManager.customTransactionConnection.get() != null) {
-                TransactionManager.customTransactionConnection.set(null)
+                TransactionManager.customTransactionConnection.remove()
             }
         }
     }
