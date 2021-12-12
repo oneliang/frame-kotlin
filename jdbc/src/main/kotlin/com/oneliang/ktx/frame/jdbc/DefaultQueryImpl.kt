@@ -3,12 +3,12 @@ package com.oneliang.ktx.frame.jdbc
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.bean.Page
 import com.oneliang.ktx.frame.configuration.ConfigurationContainer
-import com.oneliang.ktx.pojo.BooleanWrapper
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.resource.ResourcePool
 import java.io.IOException
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.SQLRecoverableException
 import kotlin.reflect.KClass
 
 /**
@@ -33,7 +33,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
         return try {
             connection = this.connectionPool.resource
             block(connection)
-        } catch (e: IOException) {
+        } catch (e: SQLRecoverableException) {
             this.connectionPool.releaseResource(connection, true)
             throw QueryException(e)
         } catch (e: Exception) {
@@ -53,7 +53,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
         return try {
             connection = this.connectionPool.stableResource
             block(connection)
-        } catch (e: IOException) {
+        } catch (e: SQLRecoverableException) {
             this.connectionPool.releaseStableResource(connection, true)
             throw QueryException(e)
         } catch (e: Exception) {
