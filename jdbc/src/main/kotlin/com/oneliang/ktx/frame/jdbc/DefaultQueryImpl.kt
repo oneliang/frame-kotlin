@@ -5,7 +5,6 @@ import com.oneliang.ktx.frame.bean.Page
 import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.resource.ResourcePool
-import java.io.IOException
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLRecoverableException
