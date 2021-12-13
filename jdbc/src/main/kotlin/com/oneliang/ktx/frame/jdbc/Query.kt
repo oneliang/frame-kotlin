@@ -10,17 +10,19 @@ interface Query : BaseQuery {
 
     /**
      * use connection
+     * @param recoverable only occur SQLRecoverableException can effect
      * @param block
      */
     @Throws(QueryException::class)
-    fun <R> useConnection(block: (connection: Connection) -> R): R
+    fun <R> useConnection(recoverable: Boolean = false, block: (connection: Connection) -> R): R
 
     /**
      * use stable connection
+     * @param recoverable only occur SQLRecoverableException can effect
      * @param block
      */
     @Throws(QueryException::class)
-    fun <R> useStableConnection(block: (connection: Connection) -> R): R
+    fun <R> useStableConnection(recoverable: Boolean = false, block: (connection: Connection) -> R): R
 
     /**
      * Method: delete object,by table condition just by object id,sql binding

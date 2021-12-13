@@ -24,17 +24,30 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
 
     /**
      * use connection
+     * @param recoverable only occur SQLRecoverableException can effect
      * @param block
      */
     @Throws(QueryException::class)
-    override fun <R> useConnection(block: (connection: Connection) -> R): R {
+    override fun <R> useConnection(recoverable: Boolean, block: (connection: Connection) -> R): R {
         var connection: Connection? = null
         return try {
             connection = this.connectionPool.resource
             block(connection)
         } catch (e: SQLRecoverableException) {
             this.connectionPool.releaseResource(connection, true)
-            throw QueryException(e)
+            if (recoverable) {
+                logger.error("connection need to recoverable, ready to retry it.", e)
+                try {
+                    connection = this.connectionPool.resource
+                    block(connection)
+                } catch (e: Exception) {
+                    throw QueryException(e)
+                } finally {
+                    this.connectionPool.releaseResource(connection)
+                }
+            } else {
+                throw QueryException(e)
+            }
         } catch (e: Exception) {
             throw QueryException(e)
         } finally {
@@ -44,21 +57,47 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
 
     /**
      * use stable connection
+     * @param recoverable only occur SQLRecoverableException can effect
      * @param block
      */
     @Throws(QueryException::class)
-    override fun <R> useStableConnection(block: (connection: Connection) -> R): R {
+    override fun <R> useStableConnection(recoverable: Boolean, block: (connection: Connection) -> R): R {
         var connection: Connection? = null
         return try {
             connection = this.connectionPool.stableResource
             block(connection)
         } catch (e: SQLRecoverableException) {
             this.connectionPool.releaseStableResource(connection, true)
+            if (recoverable) {
+                logger.error("connection need to recoverable, ready to retry it.", e)
+                try {
+                    connection = this.connectionPool.stableResource
+                    block(connection)
+                } catch (e: Exception) {
+                    throw QueryException(e)
+                } finally {
+                    this.connectionPool.releaseStableResource(connection)
+                }
+            }
             throw QueryException(e)
         } catch (e: Exception) {
             throw QueryException(e)
         } finally {
             this.connectionPool.releaseStableResource(connection)
+        }
+    }
+
+    /**
+     * use suitable connection
+     * @param useStable
+     * @param stableBlock
+     * @param nonStableBlock
+     */
+    private fun <R> useSuitableConnection(useStable: Boolean, stableBlock: (connection: Connection) -> R, nonStableBlock: (connection: Connection) -> R): R {
+        return if (useStable) {
+            useStableConnection(false, stableBlock)
+        } else {
+            useConnection(false, nonStableBlock)
         }
     }
 
@@ -289,15 +328,10 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T> */
     @Throws(QueryException::class)
     override fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType, useDistinct: Boolean, useStable: Boolean): T? {
-        return if (useStable) {
-            useStableConnection {
-                this.executeQueryById(it, kClass, id, useDistinct)
-            }
-        } else {
-            useConnection {
-                this.executeQueryById(it, kClass, id, useDistinct)
-            }
+        val block: (connection: Connection) -> T? = {
+            this.executeQueryById(it, kClass, id, useDistinct)
         }
+        return useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -312,15 +346,10 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T> */
     @Throws(QueryException::class)
     override fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>, useDistinct: Boolean, useStable: Boolean): List<T> {
-        return if (useStable) {
-            useStableConnection {
-                this.executeQueryByIds(it, kClass, ids, useDistinct)
-            }
-        } else {
-            useConnection {
-                this.executeQueryByIds(it, kClass, ids, useDistinct)
-            }
+        val block: (connection: Connection) -> List<T> = {
+            this.executeQueryByIds(it, kClass, ids, useDistinct)
         }
+        return this.useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -361,15 +390,10 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T></T> */
     @Throws(QueryException::class)
     override fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
-        return if (useStable) {
-            useStableConnection {
-                this.executeQuery(it, kClass, selectColumns, table, condition, useDistinct, parameters)
-            }
-        } else {
-            useConnection {
-                this.executeQuery(it, kClass, selectColumns, table, condition, useDistinct, parameters)
-            }
+        val block: (connection: Connection) -> List<T> = {
+            this.executeQuery(it, kClass, selectColumns, table, condition, useDistinct, parameters)
         }
+        return useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -384,15 +408,10 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T></T> */
     @Throws(QueryException::class)
     override fun <T : Any> selectObjectListBySql(kClass: KClass<T>, sql: String, useStable: Boolean, parameters: Array<*>): List<T> {
-        return if (useStable) {
-            useStableConnection {
-                this.executeQueryBySql(it, kClass, sql, parameters)
-            }
-        } else {
-            useConnection {
-                this.executeQueryBySql(it, kClass, sql, parameters)
-            }
+        val block: (connection: Connection) -> List<T> = {
+            this.executeQueryBySql(it, kClass, sql, parameters)
         }
+        return useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -447,15 +466,10 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      */
     @Throws(QueryException::class)
     override fun executeQueryBySql(sql: String, useStable: Boolean, parameters: Array<*>): ResultSet {
-        return if (useStable) {
-            useStableConnection {
-                this.executeQueryBySql(it, sql, parameters)
-            }
-        } else {
-            useConnection {
-                this.executeQueryBySql(it, sql, parameters)
-            }
+        val block: (connection: Connection) -> ResultSet = {
+            this.executeQueryBySql(it, sql, parameters)
         }
+        return this.useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -468,15 +482,10 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @throws QueryException
      */
     override fun executeQueryBySqlForMap(sql: String, columnDataCollection: Collection<BaseQuery.ColumnData>, useStable: Boolean, parameters: Array<*>): List<Map<String, *>> {
-        return if (useStable) {
-            useStableConnection {
-                this.executeQueryBySqlForMap(it, sql, columnDataCollection, parameters)
-            }
-        } else {
-            useConnection {
-                this.executeQueryBySqlForMap(it, sql, columnDataCollection, parameters)
-            }
+        val block: (connection: Connection) -> List<Map<String, *>> = {
+            this.executeQueryBySqlForMap(it, sql, columnDataCollection, parameters)
         }
+        return useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -682,7 +691,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
         val isFirstIn = !TransactionManager.isCustomTransaction()//first time is not custom transaction, second time is
         return if (isFirstIn) {
             TransactionManager.customTransactionSign.set(true)//must set true before get resource(connection)
-            useConnection {
+            useConnection(recoverable = true) {
                 try {
                     it.autoCommit = false
                     val result = transaction()
@@ -696,15 +705,15 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
                     try {
                         it.rollback()
                     } catch (e: Throwable) {
-                        throw QueryException(e)
+                        throw e
                     }
-                    throw QueryException(e)
+                    throw e
                 } finally {
                     //endTransaction
                     try {
                         it.autoCommit = true
                     } catch (e: Throwable) {
-                        throw QueryException(e)
+                        throw e
                     } finally {
                         TransactionManager.customTransactionSign.remove()//must set false before release resource(connection)
                     }
@@ -722,9 +731,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
                     try {
                         it.rollback()
                     } catch (e: Throwable) {
-                        throw QueryException(e)
+                        throw e
                     }
-                    throw QueryException(e)
+                    throw e
                 }
             }
         }
