@@ -5,8 +5,8 @@ import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import com.oneliang.ktx.frame.configuration.ConfigurationContext
 import com.oneliang.ktx.frame.servlet.action.ActionBean
 import com.oneliang.ktx.frame.servlet.action.ActionContext
+import com.oneliang.ktx.frame.servlet.action.GlobalInterceptorBean
 import com.oneliang.ktx.frame.servlet.action.InterceptorContext
-import com.oneliang.ktx.frame.servlet.action.InterceptorInterface
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.file.saveTo
 import com.oneliang.ktx.util.file.toPropertiesAutoCreate
@@ -14,29 +14,29 @@ import java.io.File
 import java.util.*
 
 /**
- * before global interceptor list
+ * before global interceptor iterable
  */
-val ConfigurationContext.beforeGlobalInterceptorList: List<InterceptorInterface>
+val ConfigurationContext.beforeGlobalInterceptorBeanIterable: Iterable<GlobalInterceptorBean>
     get() {
-        var beforeGlobalInterceptorList: List<InterceptorInterface> = emptyList()
+        var beforeGlobalInterceptorBeanIterable: Iterable<GlobalInterceptorBean> = emptyList()
         val interceptorContext = this.findContext(InterceptorContext::class)
         if (interceptorContext != null) {
-            beforeGlobalInterceptorList = interceptorContext.getBeforeGlobalInterceptorList()
+            beforeGlobalInterceptorBeanIterable = interceptorContext.getBeforeGlobalInterceptorBeanIterable()
         }
-        return beforeGlobalInterceptorList
+        return beforeGlobalInterceptorBeanIterable
     }
 
 /**
- * after global interceptor list
+ * after global interceptor iterable
  */
-val ConfigurationContext.afterGlobalInterceptorList: List<InterceptorInterface>
+val ConfigurationContext.afterGlobalInterceptorBeanIterable: Iterable<GlobalInterceptorBean>
     get() {
-        var afterGlobalInterceptorList: List<InterceptorInterface> = emptyList()
+        var afterGlobalInterceptorBeanIterable: Iterable<GlobalInterceptorBean> = emptyList()
         val interceptorContext = this.findContext(InterceptorContext::class)
         if (interceptorContext != null) {
-            afterGlobalInterceptorList = interceptorContext.getAfterGlobalInterceptorList()
+            afterGlobalInterceptorBeanIterable = interceptorContext.getAfterGlobalInterceptorBeanIterable()
         }
-        return afterGlobalInterceptorList
+        return afterGlobalInterceptorBeanIterable
     }
 
 /**

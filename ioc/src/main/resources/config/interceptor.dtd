@@ -4,6 +4,7 @@
 <!ATTLIST global-interceptor id ID #REQUIRED>
 <!ATTLIST global-interceptor type CDATA #REQUIRED>
 <!ATTLIST global-interceptor mode (before|after) #REQUIRED>
+<!ATTLIST global-interceptor order CDATA #IMPLIED>
 <!ELEMENT interceptor EMPTY>
 <!ATTLIST interceptor id CDATA #REQUIRED>
 <!ATTLIST interceptor type CDATA #REQUIRED>

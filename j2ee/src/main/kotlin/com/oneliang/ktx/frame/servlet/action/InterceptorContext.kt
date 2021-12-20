@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.servlet.action
 import com.oneliang.ktx.exception.InitializeException
 import com.oneliang.ktx.frame.context.AbstractContext
 import com.oneliang.ktx.util.common.JavaXmlUtil
+import com.oneliang.ktx.util.concurrent.atomic.AtomicTreeSet
 import com.oneliang.ktx.util.logging.LoggerManager
 
 open class InterceptorContext : AbstractContext() {
@@ -11,8 +12,8 @@ open class InterceptorContext : AbstractContext() {
         private val logger = LoggerManager.getLogger(InterceptorContext::class)
         internal val globalInterceptorBeanMap = mutableMapOf<String, GlobalInterceptorBean>()
         internal val interceptorBeanMap = mutableMapOf<String, InterceptorBean>()
-        internal val beforeGlobalInterceptorList = mutableListOf<InterceptorInterface>()
-        internal val afterGlobalInterceptorList = mutableListOf<InterceptorInterface>()
+        internal val beforeGlobalInterceptorBeanIterable = AtomicTreeSet<GlobalInterceptorBean> { o1, o2 -> o1.order.compareTo(o2.order) }
+        internal val afterGlobalInterceptorBeanIterable = AtomicTreeSet<GlobalInterceptorBean> { o1, o2 -> o1.order.compareTo(o2.order) }
     }
 
     /**
@@ -43,9 +44,9 @@ open class InterceptorContext : AbstractContext() {
                     objectMap[globalInterceptorBean.id] = interceptorInstance
                     val mode = globalInterceptorBean.mode
                     if (mode == GlobalInterceptorBean.INTERCEPTOR_MODE_BEFORE) {
-                        beforeGlobalInterceptorList.add(interceptorInstance)
+                        beforeGlobalInterceptorBeanIterable += globalInterceptorBean
                     } else if (mode == GlobalInterceptorBean.INTERCEPTOR_MODE_AFTER) {
-                        afterGlobalInterceptorList.add(interceptorInstance)
+                        afterGlobalInterceptorBeanIterable += globalInterceptorBean
                     }
                 }
             }
@@ -80,21 +81,21 @@ open class InterceptorContext : AbstractContext() {
     override fun destroy() {
         globalInterceptorBeanMap.clear()
         interceptorBeanMap.clear()
-        beforeGlobalInterceptorList.clear()
-        afterGlobalInterceptorList.clear()
+        beforeGlobalInterceptorBeanIterable.clear()
+        afterGlobalInterceptorBeanIterable.clear()
     }
 
     /**
-     * @return the beforeGlobalInterceptorList
+     * @return the beforeGlobalInterceptorBeanIterable
      */
-    fun getBeforeGlobalInterceptorList(): List<InterceptorInterface> {
-        return beforeGlobalInterceptorList
+    fun getBeforeGlobalInterceptorBeanIterable(): Iterable<GlobalInterceptorBean> {
+        return beforeGlobalInterceptorBeanIterable
     }
 
     /**
-     * @return the afterGlobalInterceptorList
+     * @return the afterGlobalInterceptorBeanIterable
      */
-    fun getAfterGlobalInterceptorList(): List<InterceptorInterface> {
-        return afterGlobalInterceptorList
+    fun getAfterGlobalInterceptorBeanIterable(): Iterable<GlobalInterceptorBean> {
+        return afterGlobalInterceptorBeanIterable
     }
 }

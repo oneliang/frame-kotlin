@@ -1,6 +1,5 @@
 package com.oneliang.ktx.frame.servlet.action
 
-import com.oneliang.ktx.Constants
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 
@@ -17,7 +16,7 @@ interface InterceptorInterface {
 
     class Result(val type: Type = Type.NEXT, val message: ByteArray = ByteArray(0)) {
         enum class Type {
-            NEXT, ERROR
+            NEXT, STOP, ERROR
         }
     }
 

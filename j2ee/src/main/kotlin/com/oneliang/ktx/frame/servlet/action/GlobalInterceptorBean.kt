@@ -38,5 +38,7 @@ class GlobalInterceptorBean {
     /**
      * @param interceptorInstance the interceptorInstance to set
      */
-    var interceptorInstance: InterceptorInterface? = null
+    lateinit var interceptorInstance: InterceptorInterface
+
+    var order: Int = 0
 }

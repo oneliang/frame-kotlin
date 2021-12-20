@@ -5,7 +5,7 @@ import com.oneliang.ktx.Constants
 @MustBeDocumented
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
-annotation class Interceptor(val id: String = Constants.String.BLANK, val mode: Mode = Mode.SINGLE_ACTION) {
+annotation class Interceptor(val id: String = Constants.String.BLANK, val mode: Mode = Mode.SINGLE_ACTION, /*only active in global mode*/val order: Int = 0) {
 
     enum class Mode {
         GLOBAL_ACTION_BEFORE, GLOBAL_ACTION_AFTER, SINGLE_ACTION

@@ -268,8 +268,8 @@ class ActionListener : HttpServlet() {
      */
     private fun doBeforeGlobalInterceptor(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
         //global interceptor doIntercept
-        val beforeGlobalInterceptorList = ConfigurationContainer.rootConfigurationContext.beforeGlobalInterceptorList
-        val beforeGlobalInterceptorResult = doGlobalInterceptorList(beforeGlobalInterceptorList, httpServletRequest, httpServletResponse)
+        val beforeGlobalInterceptorBeanIterable = ConfigurationContainer.rootConfigurationContext.beforeGlobalInterceptorBeanIterable
+        val beforeGlobalInterceptorResult = doGlobalInterceptorBeanIterable(beforeGlobalInterceptorBeanIterable, httpServletRequest, httpServletResponse)
 
         //through the interceptor
         if (beforeGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
@@ -294,7 +294,10 @@ class ActionListener : HttpServlet() {
         //action interceptor doIntercept
         val beforeActionBeanInterceptorList = actionBean.beforeActionInterceptorBeanList
         val beforeActionInterceptorResult = doActionInterceptorBeanList(beforeActionBeanInterceptorList, httpServletRequest, httpServletResponse)
-        if (beforeActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
+        if (beforeActionInterceptorResult.type == InterceptorInterface.Result.Type.STOP) {
+            logger.info("Stopping through the before action interceptors! Maybe special use, like request forward. The request name:%s", uri)
+            return false
+        } else if (beforeActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("Can not through the before action interceptors! The request name:%s", uri)
             httpServletResponse.status = Constants.Http.StatusCode.FORBIDDEN
             httpServletResponse.outputStream.write(beforeActionInterceptorResult.message)
@@ -533,7 +536,10 @@ class ActionListener : HttpServlet() {
     private fun doAfterActionInterceptor(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
         val afterActionBeanInterceptorList = actionBean.afterActionInterceptorBeanList
         val afterActionInterceptorResult = doActionInterceptorBeanList(afterActionBeanInterceptorList, httpServletRequest, httpServletResponse)
-        if (afterActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
+        if (afterActionInterceptorResult.type == InterceptorInterface.Result.Type.STOP) {
+            logger.info("Stopping through the before action interceptors! Maybe special use, like request forward. The request name:%s", uri)
+            return false
+        } else if (afterActionInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("Can not through the after action interceptors! The request name:%s", uri)
             return false
         }
@@ -549,8 +555,8 @@ class ActionListener : HttpServlet() {
      * @return boolean
      */
     private fun doAfterGlobalInterceptor(uri: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): Boolean {
-        val afterGlobalInterceptorList = ConfigurationContainer.rootConfigurationContext.afterGlobalInterceptorList
-        val afterGlobalInterceptorResult = doGlobalInterceptorList(afterGlobalInterceptorList, httpServletRequest, httpServletResponse)
+        val afterGlobalInterceptorBeanIterable = ConfigurationContainer.rootConfigurationContext.afterGlobalInterceptorBeanIterable
+        val afterGlobalInterceptorResult = doGlobalInterceptorBeanIterable(afterGlobalInterceptorBeanIterable, httpServletRequest, httpServletResponse)
         if (afterGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("Can not through the after global interceptors! The request name:%s", uri)
             return false
@@ -632,17 +638,17 @@ class ActionListener : HttpServlet() {
 
     /**
      * do global interceptor list,include global(before,after)
-     * @param interceptorList
+     * @param globalInterceptorBeanIterable
      * @param httpServletRequest
      * @param httpServletResponse
      * @return InterceptorInterface.Result
      */
-    private fun doGlobalInterceptorList(interceptorList: List<InterceptorInterface>, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): InterceptorInterface.Result {
+    private fun doGlobalInterceptorBeanIterable(globalInterceptorBeanIterable: Iterable<GlobalInterceptorBean>, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): InterceptorInterface.Result {
         try {
-            for (globalInterceptor in interceptorList) {
-                val result = globalInterceptor.intercept(httpServletRequest, httpServletResponse)
+            for (globalInterceptorBean in globalInterceptorBeanIterable) {
+                val result = globalInterceptorBean.interceptorInstance.intercept(httpServletRequest, httpServletResponse)
                 val sign = result.type
-                logger.info("Global interceptor, through:%s, interceptor:%s", sign, globalInterceptor)
+                logger.info("Global interceptor, through:%s, interceptor:%s", sign, globalInterceptorBean)
                 if (sign != InterceptorInterface.Result.Type.NEXT) {
                     return result
                 }

@@ -26,6 +26,7 @@ class AnnotationInterceptorContext : InterceptorContext() {
                 }
                 val interceptorAnnotation = kClass.java.getAnnotation(Interceptor::class.java)
                 val interceptorMode = interceptorAnnotation.mode
+                val interceptorOrder = interceptorAnnotation.order
                 var id = interceptorAnnotation.id
                 if (id.isBlank()) {
                     id = kClass.java.simpleName
@@ -43,8 +44,9 @@ class AnnotationInterceptorContext : InterceptorContext() {
                         globalBeforeInterceptor.mode = GlobalInterceptorBean.INTERCEPTOR_MODE_BEFORE
                         globalBeforeInterceptor.interceptorInstance = interceptorInstance
                         globalBeforeInterceptor.type = kClass.java.name
+                        globalBeforeInterceptor.order = interceptorOrder
                         globalInterceptorBeanMap[globalBeforeInterceptor.id] = globalBeforeInterceptor
-                        beforeGlobalInterceptorList.add(interceptorInstance)
+                        beforeGlobalInterceptorBeanIterable += globalBeforeInterceptor
                     }
                     Interceptor.Mode.GLOBAL_ACTION_AFTER -> {
                         val globalAfterInterceptor = GlobalInterceptorBean()
@@ -52,8 +54,9 @@ class AnnotationInterceptorContext : InterceptorContext() {
                         globalAfterInterceptor.mode = GlobalInterceptorBean.INTERCEPTOR_MODE_AFTER
                         globalAfterInterceptor.interceptorInstance = interceptorInstance
                         globalAfterInterceptor.type = kClass.java.name
+                        globalAfterInterceptor.order = interceptorOrder
                         globalInterceptorBeanMap[globalAfterInterceptor.id] = globalAfterInterceptor
-                        afterGlobalInterceptorList.add(interceptorInstance)
+                        afterGlobalInterceptorBeanIterable += globalAfterInterceptor
                     }
                     Interceptor.Mode.SINGLE_ACTION -> {
                         val interceptor = InterceptorBean()
