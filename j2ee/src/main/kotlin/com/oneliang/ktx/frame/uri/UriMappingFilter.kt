@@ -16,7 +16,7 @@ class UriMappingFilter : Filter {
 
     @Throws(ServletException::class)
     override fun init(filterConfig: FilterConfig) {
-        logger.info("initialize filter:${this::class}")
+        logger.info("initialize filter:%s", this::class)
     }
 
     @Throws(IOException::class, ServletException::class)
@@ -24,17 +24,17 @@ class UriMappingFilter : Filter {
         val httpServletRequest = servletRequest as HttpServletRequest
         val requestUri = httpServletRequest.requestURI
         val front = httpServletRequest.contextPath.length
-        logger.info("Doing filter, request uri:$requestUri")
+        logger.info("Doing filter, request uri:%s", requestUri)
         val uriFrom = requestUri.substring(front, requestUri.length)
         if (uriMappingCache.containsKey(uriFrom)) {
             val uriTo = uriMappingCache[uriFrom]
-            logger.info("Uri mapping, find uri in cache, uri from:$uriFrom, uri to:$uriTo")
+            logger.info("Uri mapping, find uri in cache, uri from:%s, uri to:%s", uriFrom, uriTo)
             servletRequest.getRequestDispatcher(uriTo).forward(servletRequest, servletResponse)
         } else {
             val uriTo = UriMappingContext.findUriTo(uriFrom)
             if (uriTo.isNotBlank()) {
                 uriMappingCache[uriFrom] = uriTo
-                logger.info("Uri mapping, find uri in context, uri from:$uriFrom, uri to:$uriTo")
+                logger.info("Uri mapping, find uri in context, uri from:%s, uri to:%s", uriFrom, uriTo)
                 servletRequest.getRequestDispatcher(uriTo).forward(servletRequest, servletResponse)
             } else {
                 logger.info("Uri mapping, uri to is not found, because uri to is blank")

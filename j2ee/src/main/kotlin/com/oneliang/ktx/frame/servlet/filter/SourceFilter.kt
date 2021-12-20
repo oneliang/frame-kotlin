@@ -19,7 +19,6 @@ class SourceFilter : Filter {
         private val logger = LoggerManager.getLogger(SourceFilter::class)
         private const val EXCLUDE_PATH = "excludePath"
         private const val ERROR_FORWARD = "errorForward"
-        private const val COMMA_SPLIT = ","
     }
 
     private var excludePathArray: Array<String> = emptyArray()
@@ -34,7 +33,7 @@ class SourceFilter : Filter {
         val excludePaths = filterConfig.getInitParameter(EXCLUDE_PATH).nullToBlank()
         this.errorForward = filterConfig.getInitParameter(ERROR_FORWARD).nullToBlank()
         if (excludePaths.isNotBlank()) {
-            val excludePathArray = excludePaths.split(COMMA_SPLIT)
+            val excludePathArray = excludePaths.split(Constants.Symbol.COMMA)
             this.excludePathArray = Array(excludePathArray.size) { Constants.String.BLANK }
             for ((i, excludePath) in excludePathArray.withIndex()) {
                 this.excludePathArray[i] = excludePath.trim()
