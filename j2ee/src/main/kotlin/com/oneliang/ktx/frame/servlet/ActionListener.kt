@@ -272,7 +272,10 @@ class ActionListener : HttpServlet() {
         val beforeGlobalInterceptorResult = doGlobalInterceptorBeanIterable(beforeGlobalInterceptorBeanIterable, httpServletRequest, httpServletResponse)
 
         //through the interceptor
-        if (beforeGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
+        if (beforeGlobalInterceptorResult.type == InterceptorInterface.Result.Type.STOP) {
+            logger.info("Stopping through the before global interceptors! Maybe special use, like request forward. The request name:%s", uri)
+            return false
+        } else if (beforeGlobalInterceptorResult.type == InterceptorInterface.Result.Type.ERROR) {
             logger.error("Can not through the before global interceptors! The request name:%s", uri)
             httpServletResponse.status = Constants.Http.StatusCode.FORBIDDEN
             httpServletResponse.outputStream.write(beforeGlobalInterceptorResult.message)
