@@ -90,14 +90,13 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     /**
      * use suitable connection
      * @param useStable
-     * @param stableBlock
-     * @param nonStableBlock
+     * @param block
      */
-    private fun <R> useSuitableConnection(useStable: Boolean, stableBlock: (connection: Connection) -> R, nonStableBlock: (connection: Connection) -> R): R {
+    private fun <R> useSuitableConnection(useStable: Boolean, block: (connection: Connection) -> R): R {
         return if (useStable) {
-            useStableConnection(false, stableBlock)
+            useStableConnection(false, block)
         } else {
-            useConnection(false, nonStableBlock)
+            useConnection(false, block)
         }
     }
 
@@ -328,10 +327,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T> */
     @Throws(QueryException::class)
     override fun <T : Any, IdType : Any> selectObjectById(kClass: KClass<T>, id: IdType, useDistinct: Boolean, useStable: Boolean): T? {
-        val block: (connection: Connection) -> T? = {
+        return useSuitableConnection(useStable) {
             this.executeQueryById(it, kClass, id, useDistinct)
         }
-        return useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -346,10 +344,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T> */
     @Throws(QueryException::class)
     override fun <T : Any, IdType : Any> selectObjectListByIds(kClass: KClass<T>, ids: Array<IdType>, useDistinct: Boolean, useStable: Boolean): List<T> {
-        val block: (connection: Connection) -> List<T> = {
+        return this.useSuitableConnection(useStable) {
             this.executeQueryByIds(it, kClass, ids, useDistinct)
         }
-        return this.useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -390,10 +387,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T></T> */
     @Throws(QueryException::class)
     override fun <T : Any> selectObjectList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
-        val block: (connection: Connection) -> List<T> = {
+        return useSuitableConnection(useStable) {
             this.executeQuery(it, kClass, selectColumns, table, condition, useDistinct, parameters)
         }
-        return useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -408,10 +404,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     </T></T> */
     @Throws(QueryException::class)
     override fun <T : Any> selectObjectListBySql(kClass: KClass<T>, sql: String, useStable: Boolean, parameters: Array<*>): List<T> {
-        val block: (connection: Connection) -> List<T> = {
+        return useSuitableConnection(useStable) {
             this.executeQueryBySql(it, kClass, sql, parameters)
         }
-        return useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -466,10 +461,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      */
     @Throws(QueryException::class)
     override fun executeQueryBySql(sql: String, useStable: Boolean, parameters: Array<*>): ResultSet {
-        val block: (connection: Connection) -> ResultSet = {
+        return this.useSuitableConnection(useStable) {
             this.executeQueryBySql(it, sql, parameters)
         }
-        return this.useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
@@ -482,10 +476,9 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @throws QueryException
      */
     override fun executeQueryBySqlForMap(sql: String, columnDataCollection: Collection<BaseQuery.ColumnData>, useStable: Boolean, parameters: Array<*>): List<Map<String, *>> {
-        val block: (connection: Connection) -> List<Map<String, *>> = {
+        return useSuitableConnection(useStable) {
             this.executeQueryBySqlForMap(it, sql, columnDataCollection, parameters)
         }
-        return useSuitableConnection(useStable, stableBlock = block, nonStableBlock = block)
     }
 
     /**
