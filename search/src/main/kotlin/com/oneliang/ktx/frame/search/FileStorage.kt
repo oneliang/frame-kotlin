@@ -196,6 +196,13 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         return valueProperties.values.map { it.toString() }
     }
 
+    override fun hit(key: String, value: String) {
+        val (keyValueRelativeFilename, keyFile, keyProperties) = readKeyPropertiesAutoCreate(key)
+        val (valueFile, valueProperties) = readValuePropertiesAutoCreate(keyValueRelativeFilename, value)
+        saveProperties(keyFile, keyProperties)
+        saveProperties(valueFile, valueProperties)
+    }
+
     private fun delete(key: String, value: String, autoSave: Boolean) {
         val (keyValueRelativeFilename, keyFile, keyProperties) = readKeyPropertiesAutoCreate(key)
         val (valueFile, valueProperties) = readValuePropertiesAutoCreate(keyValueRelativeFilename, value)
@@ -237,7 +244,14 @@ private fun benchMark() {
     val fileStorage = FileStorage("/D:/temp", cacheMaxSize = 10)
     fileStorage.initialize()
     fileStorage.add("A", "A")
-    println(fileStorage.search("A"))
+    fileStorage.add("A", "B")
+    val repeatTime = 10
+    for (i in 0..repeatTime) {
+        val begin = System.currentTimeMillis()
+        println(fileStorage.search("A").toJson() + ", cost:" + (System.currentTimeMillis() - begin))
+    }
+    fileStorage.hit("A", "A")
+    fileStorage.hit("A", "A")
 
     return
     val array = arrayOf("A", "B", "C", "D", "E")

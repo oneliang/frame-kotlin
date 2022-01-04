@@ -29,4 +29,11 @@ interface Storage {
      * @param newValue
      */
     fun update(key: String, originalValue: String, newValue: String)
+
+    /**
+     * hit the key with actual value, always use it after search
+     * @param key
+     * @param value
+     */
+    fun hit(key: String, value: String)
 }
