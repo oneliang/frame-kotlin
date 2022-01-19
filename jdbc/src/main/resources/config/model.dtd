@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT models (model*)>
+<!ELEMENT model (import*, column*)>
+<!ATTLIST model packageName ID #REQUIRED>
+<!ATTLIST model className CDATA #REQUIRED>
+<!ATTLIST model schema CDATA #IMPLIED>
+<!ATTLIST model table CDATA #IMPLIED>
+<!ELEMENT import EMPTY>
+<!ATTLIST import value CDATA #REQUIRED>
+<!ELEMENT column EMPTY>
+<!ATTLIST column field CDATA #REQUIRED>
+<!ATTLIST column column CDATA #REQUIRED>
+<!ATTLIST column idFlag (false|true) #IMPLIED>
+<!ATTLIST column nullable (false|true) #IMPLIED>
+<!ATTLIST column type (STRING|INT|LONG|FLOAT|DOUBLE|DATE) #IMPLIED>
+<!ATTLIST column defaultValue CDATA #IMPLIED>

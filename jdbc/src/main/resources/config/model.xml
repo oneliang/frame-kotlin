@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE models SYSTEM "model.dtd">
+<models>
+    <model packageName="com.oneliang.platform.test.tester" className="User" schema="privilege" table="t_user">
+        <import value="java.util.*"/>
+        <import value="com.oneliang.ktx.Constants"/>
+        <column field="id" column="id" idFlag="true" type="STRING"/>
+        <column field="name" column="name" type="STRING"/>
+        <column field="nickname" column="nickname" type="STRING"/>
+        <column field="username" column="username" type="STRING"/>
+        <column field="password" column="password" type="STRING"/>
+        <column field="modifyTime" column="modify_time" type="DATE" defaultValue="Constants.Date.DEFAULT"/>
+        <column field="createTime" column="create_time" type="DATE" defaultValue="Constants.Date.DEFAULT"/>
+    </model>
+</models>

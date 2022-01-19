@@ -1,0 +1,49 @@
+package <%=packageName%>
+
+import com.oneliang.ktx.frame.jdbc.Table
+<%for(var i=0;i<importArray.length;i++){%><%var importName=importArray[i];%>
+import <%=importName%>
+<%}%>
+
+@Table(
+    schema = "<%=schema%>", table = "<%=table%>", columns = [
+<%for(var i=0;i<columnArray.length;i++){%><%var columnBean=columnArray[i];%>
+    <%if (i == columnArray.length - 1) {%>
+        <%if (columnBean.idFlag == true) {%>
+        Table.Column(field = "<%=columnBean.field%>", column = "<%=columnBean.column%>", isId = <%=columnBean.idFlag%>)
+        <%} else {%>
+        Table.Column(field = "<%=columnBean.field%>", column = "<%=columnBean.column%>")
+        <%}%>
+    <%} else {%>
+        <%if (columnBean.idFlag == true) {%>
+        Table.Column(field = "<%=columnBean.field%>", column = "<%=columnBean.column%>", isId = <%=columnBean.idFlag%>),
+        <%} else {%>
+        Table.Column(field = "<%=columnBean.field%>", column = "<%=columnBean.column%>"),
+        <%}%>
+    <%}%>
+<%}%>
+    ]
+)
+class <%=className%> {
+    companion object {
+<%for(var i=0;i<columnArray.length;i++){%><%var columnBean = columnArray[i];%><%var type = columnBean.type;%><%var nullable = columnBean.nullable;%><%var nullableString = (nullable? "?": "");%>
+        const val COLUMN_<%=columnBean.field.toUpperCase()%> = "{<%=className%>.<%=columnBean.field%>}"
+<%}%>
+    }
+
+<%for(var i=0;i<columnArray.length;i++){%><%var columnBean = columnArray[i];%><%var type = columnBean.type;%><%var nullable = columnBean.nullable;%><%var nullableString = (nullable? "?": "");%>
+    <%if (type == 0){%>
+    var <%=columnBean.field%>: String<%=nullableString%> = "<%=columnBean.defaultValue%>"
+    <%} else if (type == 1) {%>
+    var <%=columnBean.field%>: Int<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%} else if (type == 2) {%>
+    var <%=columnBean.field%>: Long<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%} else if (type == 3) {%>
+    var <%=columnBean.field%>: Float<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%} else if (type == 4) {%>
+    var <%=columnBean.field%>: Double<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%} else if (type == 5) {%>
+    var <%=columnBean.field%>: Date<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%}%>
+<%}%>
+}
