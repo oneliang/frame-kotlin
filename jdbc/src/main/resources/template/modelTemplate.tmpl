@@ -26,6 +26,7 @@ import <%=importName%>
 )
 open class <%=className%> {
     companion object {
+        const val TABLE = "{<%=className%>}"
 <%for(var i=0;i<columnArray.length;i++){%><%var columnBean = columnArray[i];%><%var type = columnBean.type;%><%var nullable = columnBean.nullable;%><%var nullableString = (nullable? "?": "");%>
         const val COLUMN_<%=columnBean.field.toUpperCase()%> = "{<%=className%>.<%=columnBean.field%>}"
 <%}%>
