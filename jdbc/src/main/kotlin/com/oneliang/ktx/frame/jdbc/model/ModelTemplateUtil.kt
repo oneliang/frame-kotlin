@@ -31,6 +31,7 @@ object ModelTemplateUtil {
             modelTemplateBean.table = modelAttributeMap.getNamedItem(ModelTemplateBean.TAG_TABLE)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
             val importList = mutableListOf<String>()
             val columnList = mutableListOf<ModelTemplateBean.Column>()
+            val codeInClassList = mutableListOf<String>()
             val modelChildNodeList = modelNode.childNodes
             for (modelChildNodeIndex in 0 until modelChildNodeList.length) {
                 val modelChildNode = modelChildNodeList.item(modelChildNodeIndex)
@@ -73,10 +74,14 @@ object ModelTemplateUtil {
                         column.defaultValue = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.TAG_MODEL_COLUMN_DEFAULT_VALUE)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
                         columnList += column
                     }
+                    ModelTemplateBean.TAG_MODEL_CODE_IN_CLASS -> {
+                        codeInClassList += modelChildNode.textContent
+                    }
                 }
             }
             modelTemplateBean.importArray = importList.toTypedArray()
             modelTemplateBean.columnArray = columnList.toTypedArray()
+            modelTemplateBean.codeInClassArray = codeInClassList.toTypedArray()
 
             modelTemplateBeanList += modelTemplateBean
         }

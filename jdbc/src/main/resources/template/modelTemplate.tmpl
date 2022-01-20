@@ -49,4 +49,7 @@ open class <%=className%> {
     var <%=columnBean.field%>: Date<%=nullableString%> = <%=columnBean.defaultValue%>
     <%}%>
 <%}%>
+<%for(var i=0;i<codeInClassArray.length;i++){%><%var codeInClass = codeInClassArray[i];%>
+<%=codeInClass%>
+<%}%>
 }

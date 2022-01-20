@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!ELEMENT models (model*)>
-<!ELEMENT model (import*, column*)>
+<!ELEMENT model (import*, column*,codeInClass*)>
 <!ATTLIST model packageName ID #REQUIRED>
 <!ATTLIST model className CDATA #REQUIRED>
 <!ATTLIST model schema CDATA #IMPLIED>
@@ -14,3 +14,4 @@
 <!ATTLIST column nullable (false|true) #IMPLIED>
 <!ATTLIST column type (STRING|INT|LONG|FLOAT|DOUBLE|DATE) #IMPLIED>
 <!ATTLIST column defaultValue CDATA #IMPLIED>
+<!ELEMENT codeInClass ANY>

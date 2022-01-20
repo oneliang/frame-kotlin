@@ -1,9 +1,6 @@
 package com.oneliang.ktx.frame.jdbc.model
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.common.nullToBlank
-import com.oneliang.ktx.util.common.parseXml
-import com.oneliang.ktx.util.common.toFile
 
 class ModelTemplateBean {
     companion object {
@@ -22,13 +19,17 @@ class ModelTemplateBean {
         const val TAG_MODEL_COLUMN_TYPE = "type"
         const val TAG_MODEL_COLUMN_NULLABLE = "nullable"
         const val TAG_MODEL_COLUMN_DEFAULT_VALUE = "defaultValue"
+
+        const val TAG_MODEL_CODE_IN_CLASS = "codeInClass"
     }
+
     var packageName = Constants.String.BLANK
     var importArray = emptyArray<String>()
     var className = Constants.String.BLANK
     var schema = Constants.String.BLANK
     var table = Constants.String.BLANK
     var columnArray = emptyArray<Column>()
+    var codeInClassArray = emptyArray<String>()
 
     class Column {
         enum class Type(val label: String, val value: Int) {
