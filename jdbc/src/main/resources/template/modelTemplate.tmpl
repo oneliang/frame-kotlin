@@ -24,16 +24,19 @@ import <%=importName%>
 <%}%>
     ]
 )
-class <%=className%> {
+open class <%=className%> {
     companion object {
 <%for(var i=0;i<columnArray.length;i++){%><%var columnBean = columnArray[i];%><%var type = columnBean.type;%><%var nullable = columnBean.nullable;%><%var nullableString = (nullable? "?": "");%>
         const val COLUMN_<%=columnBean.field.toUpperCase()%> = "{<%=className%>.<%=columnBean.field%>}"
 <%}%>
     }
 
-<%for(var i=0;i<columnArray.length;i++){%><%var columnBean = columnArray[i];%><%var type = columnBean.type;%><%var nullable = columnBean.nullable;%><%var nullableString = (nullable? "?": "");%>
+<%for(var i=0;i<columnArray.length;i++){%><%var columnBean = columnArray[i];%>
+    <%var type = columnBean.type;%>
+    <%var nullable = columnBean.nullable;%>
+    <%var nullableString = (nullable? "?": "");%>
     <%if (type == 0){%>
-    var <%=columnBean.field%>: String<%=nullableString%> = "<%=columnBean.defaultValue%>"
+    var <%=columnBean.field%>: String<%=nullableString%> = <%=columnBean.defaultValue%>
     <%} else if (type == 1) {%>
     var <%=columnBean.field%>: Int<%=nullableString%> = <%=columnBean.defaultValue%>
     <%} else if (type == 2) {%>
