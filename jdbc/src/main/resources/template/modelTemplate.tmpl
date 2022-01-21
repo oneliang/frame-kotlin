@@ -39,7 +39,7 @@ open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames
     <%var nullableString = (nullable? "?": "");%>
     <%var defaultValue = fieldBean.defaultValue;%>
     <%if (type == 0){%>
-    <%=overrideString%>var <%=fieldBean.name%>: String<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "")%>
+    <%=overrideString%>var <%=fieldBean.name%>: String<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "\"\"")%>
     <%} else if (type == 1) {%>
     <%=overrideString%>var <%=fieldBean.name%>: Int<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%>
     <%} else if (type == 2) {%>
