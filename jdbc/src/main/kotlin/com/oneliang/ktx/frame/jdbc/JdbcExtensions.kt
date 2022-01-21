@@ -21,3 +21,47 @@ fun <T> Array<T>.toSqlCondition(transform: (T) -> String = { it.toString() }): S
         sqlConditionTransform(transform(it))
     }
 }
+
+fun String.toSqlEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
+    return "$this=$value"
+}
+
+fun String.toSqlNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
+    return "$this!=$value"
+}
+
+fun String.toSqlAndEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
+    return " AND $this=$value"
+}
+
+fun String.toSqlAndNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
+    return " AND $this!=$value"
+}
+
+fun String.toSqlOrEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
+    return " OR $this=$value"
+}
+
+fun String.toSqlOrNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
+    return " OR $this!=$value"
+}
+
+fun String.toSqlAndLike(value: String = Constants.Symbol.QUESTION_MARK): String {
+    return " AND $this LIKE $value"
+}
+
+fun String.toSqlOrLike(value: String = Constants.Symbol.QUESTION_MARK): String {
+    return " OR $this LIKE $value"
+}
+
+fun String.toSqlIn(subSql: String = Constants.String.BLANK): String {
+    return "$this IN ($subSql)"
+}
+
+fun String.toSqlAndIn(subSql: String = Constants.String.BLANK): String {
+    return " AND $this IN ($subSql)"
+}
+
+fun String.toSqlOrIn(subSql: String = Constants.String.BLANK): String {
+    return " OR $this IN ($subSql)"
+}
