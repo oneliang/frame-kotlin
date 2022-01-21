@@ -5,10 +5,10 @@
         <import value="java.util.*"/>
         <import value="com.oneliang.ktx.Constants"/>
 
-        <column field="id" column="id" idFlag="true" defaultValue="Constants.String.BLANK"/>
-        <column field="name" column="name" defaultValue="Constants.String.BLANK"/>
-        <column field="modifyTime" column="modify_time" type="DATE" defaultValue="Constants.Date.DEFAULT"/>
-        <column field="createTime" column="create_time" type="DATE" defaultValue="Constants.Date.DEFAULT"/>
+        <field name="id" column="id" idFlag="true" defaultValue="Constants.String.BLANK"/>
+        <field name="name" column="name" defaultValue="Constants.String.BLANK"/>
+        <field name="modifyTime" column="modify_time" type="DATE" defaultValue="Constants.Date.DEFAULT"/>
+        <field name="createTime" column="create_time" type="DATE" defaultValue="Constants.Date.DEFAULT"/>
         <codeInClass>
             <![CDATA[
     enum class Name(val value: String) {

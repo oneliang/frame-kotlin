@@ -7,47 +7,49 @@ import <%=importName%>
 
 @Table(
     schema = "<%=schema%>", table = "<%=table%>", columns = [
-<%for(var i=0;i<columnArray.length;i++){%><%var columnBean=columnArray[i];%>
-    <%if (i == columnArray.length - 1) {%>
-        <%if (columnBean.idFlag == true) {%>
-        Table.Column(field = "<%=columnBean.field%>", column = "<%=columnBean.column%>", isId = <%=columnBean.idFlag%>)
+<%for(var i=0;i<fieldArray.length;i++){%><%var fieldBean=fieldArray[i];%>
+    <%if (i == fieldArray.length - 1) {%>
+        <%if (fieldBean.idFlag == true) {%>
+        Table.Column(field = "<%=fieldBean.name%>", column = "<%=fieldBean.column%>", isId = <%=fieldBean.idFlag%>)
         <%} else {%>
-        Table.Column(field = "<%=columnBean.field%>", column = "<%=columnBean.column%>")
+        Table.Column(field = "<%=fieldBean.name%>", column = "<%=fieldBean.column%>")
         <%}%>
     <%} else {%>
-        <%if (columnBean.idFlag == true) {%>
-        Table.Column(field = "<%=columnBean.field%>", column = "<%=columnBean.column%>", isId = <%=columnBean.idFlag%>),
+        <%if (fieldBean.idFlag == true) {%>
+        Table.Column(field = "<%=fieldBean.name%>", column = "<%=fieldBean.column%>", isId = <%=fieldBean.idFlag%>),
         <%} else {%>
-        Table.Column(field = "<%=columnBean.field%>", column = "<%=columnBean.column%>"),
+        Table.Column(field = "<%=fieldBean.name%>", column = "<%=fieldBean.column%>"),
         <%}%>
     <%}%>
 <%}%>
     ]
 )
-open class <%=className%> {
+open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames : "")%> {
     companion object {
         const val TABLE = "{<%=className%>}"
-<%for(var i=0;i<columnArray.length;i++){%><%var columnBean = columnArray[i];%><%var type = columnBean.type;%><%var nullable = columnBean.nullable;%><%var nullableString = (nullable? "?": "");%>
-        const val COLUMN_<%=columnBean.field.toUpperCase()%> = "{<%=className%>.<%=columnBean.field%>}"
+<%for(var i=0;i<fieldArray.length;i++){%><%var fieldBean = fieldArray[i];%><%var type = fieldBean.type;%><%var nullable = fieldBean.nullable;%><%var nullableString = (nullable? "?": "");%>
+        const val COLUMN_<%=fieldBean.name.toUpperCase()%> = "{<%=className%>.<%=fieldBean.name%>}"
 <%}%>
     }
 
-<%for(var i=0;i<columnArray.length;i++){%><%var columnBean = columnArray[i];%>
-    <%var type = columnBean.type;%>
-    <%var nullable = columnBean.nullable;%>
+<%for(var i=0;i<fieldArray.length;i++){%><%var fieldBean = fieldArray[i];%>
+    <%var overrideString = (fieldBean.override ? "override " : "");%>
+    <%var type = fieldBean.type;%>
+    <%var nullable = fieldBean.nullable;%>
     <%var nullableString = (nullable? "?": "");%>
+    <%var defaultValue = fieldBean.defaultValue;%>
     <%if (type == 0){%>
-    var <%=columnBean.field%>: String<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%=overrideString%>var <%=fieldBean.name%>: String<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "")%>
     <%} else if (type == 1) {%>
-    var <%=columnBean.field%>: Int<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%=overrideString%>var <%=fieldBean.name%>: Int<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%>
     <%} else if (type == 2) {%>
-    var <%=columnBean.field%>: Long<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%=overrideString%>var <%=fieldBean.name%>: Long<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%>
     <%} else if (type == 3) {%>
-    var <%=columnBean.field%>: Float<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%=overrideString%>var <%=fieldBean.name%>: Float<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
     <%} else if (type == 4) {%>
-    var <%=columnBean.field%>: Double<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%=overrideString%>var <%=fieldBean.name%>: Double<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
     <%} else if (type == 5) {%>
-    var <%=columnBean.field%>: Date<%=nullableString%> = <%=columnBean.defaultValue%>
+    <%=overrideString%>var <%=fieldBean.name%>: Date<%=nullableString%> = <%=defaultValue%>
     <%}%>
 <%}%>
 <%for(var i=0;i<codeInClassArray.length;i++){%><%var codeInClass = codeInClassArray[i];%>

@@ -25,12 +25,13 @@ object ModelTemplateUtil {
             val modelTemplateBean = ModelTemplateBean()
             val modelNode = modelElementList.item(index)
             val modelAttributeMap = modelNode.attributes
-            modelTemplateBean.packageName = modelAttributeMap.getNamedItem(ModelTemplateBean.TAG_PACKAGE_NAME)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-            modelTemplateBean.className = modelAttributeMap.getNamedItem(ModelTemplateBean.TAG_CLASS_NAME)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-            modelTemplateBean.schema = modelAttributeMap.getNamedItem(ModelTemplateBean.TAG_SCHEMA)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-            modelTemplateBean.table = modelAttributeMap.getNamedItem(ModelTemplateBean.TAG_TABLE)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+            modelTemplateBean.packageName = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_PACKAGE_NAME)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+            modelTemplateBean.className = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_CLASS_NAME)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+            modelTemplateBean.superClassNames = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SUPER_CLASS_NAMES)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+            modelTemplateBean.schema = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SCHEMA)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+            modelTemplateBean.table = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_TABLE)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
             val importList = mutableListOf<String>()
-            val columnList = mutableListOf<ModelTemplateBean.Column>()
+            val columnList = mutableListOf<ModelTemplateBean.Field>()
             val codeInClassList = mutableListOf<String>()
             val modelChildNodeList = modelNode.childNodes
             for (modelChildNodeIndex in 0 until modelChildNodeList.length) {
@@ -38,41 +39,46 @@ object ModelTemplateUtil {
                 val modelChildNodeAttributeMap = modelChildNode.attributes
                 when (modelChildNode.nodeName) {
                     ModelTemplateBean.TAG_MODEL_IMPORT -> {
-                        importList += modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.TAG_MODEL_IMPORT_VALUE).nodeValue
+                        importList += modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_IMPORT_VALUE).nodeValue
                     }
-                    ModelTemplateBean.TAG_MODEL_COLUMN -> {
-                        val column = ModelTemplateBean.Column()
-                        column.field = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.TAG_MODEL_COLUMN_FIELD)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-                        column.column = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.TAG_MODEL_COLUMN_COLUMN)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-                        val idFlagNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.TAG_MODEL_COLUMN_ID_FLAG)
-                        column.idFlag = idFlagNode?.nodeValue?.toBoolean() ?: false
-                        val typeNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.TAG_MODEL_COLUMN_TYPE)
+                    ModelTemplateBean.TAG_MODEL_FIELD -> {
+                        //model field
+                        val field = ModelTemplateBean.Field()
+                        val overrideNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_OVERRIDE)
+                        field.override = overrideNode?.nodeValue?.toBoolean() ?: false
+                        field.name = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_NAME)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+                        val typeNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_TYPE)
                         if (typeNode != null) {
-                            column.type = when (typeNode.nodeValue) {
-                                ModelTemplateBean.Column.Type.INT.label -> {
-                                    ModelTemplateBean.Column.Type.INT.value
+                            field.type = when (typeNode.nodeValue) {
+                                ModelTemplateBean.Field.Type.INT.label -> {
+                                    ModelTemplateBean.Field.Type.INT.value
                                 }
-                                ModelTemplateBean.Column.Type.LONG.label -> {
-                                    ModelTemplateBean.Column.Type.LONG.value
+                                ModelTemplateBean.Field.Type.LONG.label -> {
+                                    ModelTemplateBean.Field.Type.LONG.value
                                 }
-                                ModelTemplateBean.Column.Type.FLOAT.label -> {
-                                    ModelTemplateBean.Column.Type.FLOAT.value
+                                ModelTemplateBean.Field.Type.FLOAT.label -> {
+                                    ModelTemplateBean.Field.Type.FLOAT.value
                                 }
-                                ModelTemplateBean.Column.Type.DOUBLE.label -> {
-                                    ModelTemplateBean.Column.Type.DOUBLE.value
+                                ModelTemplateBean.Field.Type.DOUBLE.label -> {
+                                    ModelTemplateBean.Field.Type.DOUBLE.value
                                 }
-                                ModelTemplateBean.Column.Type.DATE.label -> {
-                                    ModelTemplateBean.Column.Type.DATE.value
+                                ModelTemplateBean.Field.Type.DATE.label -> {
+                                    ModelTemplateBean.Field.Type.DATE.value
                                 }
                                 else -> {
-                                    ModelTemplateBean.Column.Type.STRING.value
+                                    ModelTemplateBean.Field.Type.STRING.value
                                 }
                             }
                         }
-                        val nullableNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.TAG_MODEL_COLUMN_NULLABLE)
-                        column.nullable = nullableNode?.nodeValue?.toBoolean() ?: false
-                        column.defaultValue = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.TAG_MODEL_COLUMN_DEFAULT_VALUE)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-                        columnList += column
+                        val nullableNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_NULLABLE)
+                        field.nullable = nullableNode?.nodeValue?.toBoolean() ?: false
+                        field.defaultValue = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_DEFAULT_VALUE)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+                        //db mapping attribute
+                        field.column = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COLUMN)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+                        val idFlagNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_ID_FLAG)
+                        field.idFlag = idFlagNode?.nodeValue?.toBoolean() ?: false
+
+                        columnList += field
                     }
                     ModelTemplateBean.TAG_MODEL_CODE_IN_CLASS -> {
                         codeInClassList += modelChildNode.textContent
@@ -80,7 +86,7 @@ object ModelTemplateUtil {
                 }
             }
             modelTemplateBean.importArray = importList.toTypedArray()
-            modelTemplateBean.columnArray = columnList.toTypedArray()
+            modelTemplateBean.fieldArray = columnList.toTypedArray()
             modelTemplateBean.codeInClassArray = codeInClassList.toTypedArray()
 
             modelTemplateBeanList += modelTemplateBean

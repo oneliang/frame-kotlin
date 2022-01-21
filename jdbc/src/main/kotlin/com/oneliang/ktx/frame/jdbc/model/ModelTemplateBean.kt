@@ -5,20 +5,22 @@ import com.oneliang.ktx.Constants
 class ModelTemplateBean {
     companion object {
         const val TAG_MODEL = "model"
-        const val TAG_PACKAGE_NAME = "packageName"
-        const val TAG_CLASS_NAME = "className"
-        const val TAG_SCHEMA = "schema"
-        const val TAG_TABLE = "table"
+        const val ATTRIBUTE_MODEL_PACKAGE_NAME = "packageName"
+        const val ATTRIBUTE_MODEL_CLASS_NAME = "className"
+        const val ATTRIBUTE_MODEL_SUPER_CLASS_NAMES = "superClassNames"
+        const val ATTRIBUTE_MODEL_SCHEMA = "schema"
+        const val ATTRIBUTE_MODEL_TABLE = "table"
 
         const val TAG_MODEL_IMPORT = "import"
-        const val TAG_MODEL_IMPORT_VALUE = "value"
-        const val TAG_MODEL_COLUMN = "column"
-        const val TAG_MODEL_COLUMN_FIELD = "field"
-        const val TAG_MODEL_COLUMN_COLUMN = "column"
-        const val TAG_MODEL_COLUMN_ID_FLAG = "idFlag"
-        const val TAG_MODEL_COLUMN_TYPE = "type"
-        const val TAG_MODEL_COLUMN_NULLABLE = "nullable"
-        const val TAG_MODEL_COLUMN_DEFAULT_VALUE = "defaultValue"
+        const val ATTRIBUTE_MODEL_IMPORT_VALUE = "value"
+        const val TAG_MODEL_FIELD = "field"
+        const val ATTRIBUTE_MODEL_FIELD_OVERRIDE = "override"
+        const val ATTRIBUTE_MODEL_FIELD_NAME = "name"
+        const val ATTRIBUTE_MODEL_FIELD_TYPE = "type"
+        const val ATTRIBUTE_MODEL_FIELD_NULLABLE = "nullable"
+        const val ATTRIBUTE_MODEL_FIELD_DEFAULT_VALUE = "defaultValue"
+        const val ATTRIBUTE_MODEL_FIELD_COLUMN = "column"
+        const val ATTRIBUTE_MODEL_FIELD_ID_FLAG = "idFlag"
 
         const val TAG_MODEL_CODE_IN_CLASS = "codeInClass"
     }
@@ -26,12 +28,13 @@ class ModelTemplateBean {
     var packageName = Constants.String.BLANK
     var importArray = emptyArray<String>()
     var className = Constants.String.BLANK
+    var superClassNames = Constants.String.BLANK
     var schema = Constants.String.BLANK
     var table = Constants.String.BLANK
-    var columnArray = emptyArray<Column>()
+    var fieldArray = emptyArray<Field>()
     var codeInClassArray = emptyArray<String>()
 
-    class Column {
+    class Field {
         enum class Type(val label: String, val value: Int) {
             STRING("STRING", 0),
             INT("INT", 1),
@@ -41,11 +44,12 @@ class ModelTemplateBean {
             DATE("DATE", 5)
         }
 
-        var field: String = Constants.String.BLANK
-        var column: String = Constants.String.BLANK
-        var idFlag: Boolean = false
+        var override: Boolean = false
+        var name: String = Constants.String.BLANK
         var type: Int = Type.STRING.value
         var nullable: Boolean = false
         var defaultValue: String = Constants.String.BLANK
+        var column: String = Constants.String.BLANK
+        var idFlag: Boolean = false
     }
 }
