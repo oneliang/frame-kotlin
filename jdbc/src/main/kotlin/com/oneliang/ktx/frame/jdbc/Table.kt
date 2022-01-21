@@ -12,5 +12,5 @@ annotation class Table(val schema: String = Constants.String.BLANK, val table: S
     @MustBeDocumented
     @Target(AnnotationTarget.FIELD, AnnotationTarget.ANNOTATION_CLASS)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class Column(val field: String = Constants.String.BLANK, val column: String, val isId: Boolean = false, val condition: String = Constants.String.BLANK)
+    annotation class Column(val field: String = Constants.String.BLANK, val column: String, val idFlag: Boolean = false, val condition: String = Constants.String.BLANK)
 }

@@ -33,7 +33,7 @@ class AnnotationMappingContext : MappingContext() {
                     val annotationMappingColumnBean = AnnotationMappingColumnBean()
                     annotationMappingColumnBean.field = columnAnnotation.field
                     annotationMappingColumnBean.column = columnAnnotation.column
-                    annotationMappingColumnBean.isId = columnAnnotation.isId
+                    annotationMappingColumnBean.idFlag = columnAnnotation.idFlag
                     annotationMappingColumnBean.condition = columnAnnotation.condition
                     annotationMappingBean.addMappingColumnBean(annotationMappingColumnBean)
                 }
@@ -45,7 +45,7 @@ class AnnotationMappingContext : MappingContext() {
                             val annotationMappingColumnBean = AnnotationMappingColumnBean()
                             annotationMappingColumnBean.field = field.name
                             annotationMappingColumnBean.column = columnAnnotation.column
-                            annotationMappingColumnBean.isId = columnAnnotation.isId
+                            annotationMappingColumnBean.idFlag = columnAnnotation.idFlag
                             annotationMappingColumnBean.condition = columnAnnotation.condition
                             annotationMappingBean.addMappingColumnBean(annotationMappingColumnBean)
                         }

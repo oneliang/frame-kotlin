@@ -50,7 +50,7 @@ open class MappingBean {
     fun isId(field: String): Boolean {
         val mappingColumnBean = mappingColumnBeanMap[field]
         mappingColumnBean ?: error("mapping column bean not found, field:$field")
-        return mappingColumnBean.isId
+        return mappingColumnBean.idFlag
     }
 
     /**

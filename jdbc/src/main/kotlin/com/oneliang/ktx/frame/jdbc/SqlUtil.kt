@@ -508,7 +508,7 @@ object SqlUtil {
                 if (mappingColumnBean is AnnotationMappingColumnBean) {
                     createTableSql.append(sqlProcessor.keywordSymbolLeft + mappingColumnBean.column + sqlProcessor.keywordSymbolRight)
                     createTableSql.append(" " + mappingColumnBean.condition + Constants.Symbol.COMMA)
-                    if (mappingColumnBean.isId) {
+                    if (mappingColumnBean.idFlag) {
                         createTableSql.append("PRIMARY KEY (" + mappingColumnBean.column + ")")
                         createTableSql.append(Constants.Symbol.COMMA)
                     }

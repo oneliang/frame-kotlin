@@ -24,7 +24,7 @@ open class MappingColumnBean {
      * @return the isId
      */
     /**
-     * @param isId the isId to set
+     * @param idFlag the idFlag to set
      */
-    var isId = false
+    var idFlag = false
 }
