@@ -41,7 +41,8 @@ class ModelTemplateBean {
             LONG("LONG", 2),
             FLOAT("FLOAT", 3),
             DOUBLE("DOUBLE", 4),
-            DATE("DATE", 5)
+            DATE("DATE", 5),
+            BIG_DECIMAL("BIG_DECIMAL", 6),
         }
 
         var override: Boolean = false

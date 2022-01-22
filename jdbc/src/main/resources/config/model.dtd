@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!ELEMENT models (model*)>
 <!ELEMENT model (import*, field*,codeInClass*)>
-<!ATTLIST model packageName ID #REQUIRED>
-<!ATTLIST model className CDATA #REQUIRED>
+<!ATTLIST model packageName CDATA #REQUIRED>
+<!ATTLIST model className ID #REQUIRED>
 <!ATTLIST model superClassNames CDATA #IMPLIED>
 <!ATTLIST model schema CDATA #IMPLIED>
 <!ATTLIST model table CDATA #IMPLIED>
@@ -14,6 +14,6 @@
 <!ATTLIST field column CDATA #REQUIRED>
 <!ATTLIST field idFlag (false|true) #IMPLIED>
 <!ATTLIST field nullable (false|true) #IMPLIED>
-<!ATTLIST field type (STRING|INT|LONG|FLOAT|DOUBLE|DATE) #IMPLIED>
+<!ATTLIST field type (STRING|INT|LONG|FLOAT|DOUBLE|DATE|BIG_DECIMAL) #IMPLIED>
 <!ATTLIST field defaultValue CDATA #IMPLIED>
 <!ELEMENT codeInClass ANY>

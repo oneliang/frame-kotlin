@@ -1,6 +1,5 @@
 package <%=packageName%>
 
-import com.oneliang.ktx.frame.jdbc.Table
 <%for(var i=0;i<importArray.length;i++){%><%var importName=importArray[i];%>
 import <%=importName%>
 <%}%>
@@ -50,6 +49,8 @@ open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames
     <%=overrideString%>var <%=fieldBean.name%>: Double<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
     <%} else if (type == 5) {%>
     <%=overrideString%>var <%=fieldBean.name%>: Date<%=nullableString%> = <%=defaultValue%>
+    <%} else if (type == 6) {%>
+    <%=overrideString%>var <%=fieldBean.name%>: BigDecimal<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "BigDecimal(0)")%>
     <%}%>
 <%}%>
 <%for(var i=0;i<codeInClassArray.length;i++){%><%var codeInClass = codeInClassArray[i];%>
