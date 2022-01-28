@@ -3,7 +3,10 @@ package com.oneliang.ktx.frame.jdbc.model
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.jdbc.SqlUtil
 import com.oneliang.ktx.frame.jdbc.Table
-import com.oneliang.ktx.util.common.*
+import com.oneliang.ktx.util.common.nullToBlank
+import com.oneliang.ktx.util.common.parseXml
+import com.oneliang.ktx.util.common.toFile
+import com.oneliang.ktx.util.common.toIntSafely
 import java.io.File
 import java.math.BigDecimal
 import java.util.*
@@ -106,30 +109,6 @@ object ModelTemplateUtil {
         } else {
             sqlProcessor.keywordSymbolLeft + schema + sqlProcessor.keywordSymbolRight + Constants.Symbol.DOT + sqlProcessor.keywordSymbolLeft + table + sqlProcessor.keywordSymbolRight
         }
-    }
-
-    fun dropTableSql(modelTemplateBean: ModelTemplateBean, sqlProcessor: SqlUtil.SqlProcessor): String {
-        val schemaTable = fixSchemaTable(modelTemplateBean.schema, modelTemplateBean.table, sqlProcessor)
-        return "DROP TABLE IF EXISTS $schemaTable ${Constants.Symbol.SEMICOLON}"
-    }
-
-    fun createTableSql(modelTemplateBean: ModelTemplateBean, sqlProcessor: SqlUtil.SqlProcessor): String {
-        val schemaTable = fixSchemaTable(modelTemplateBean.schema, modelTemplateBean.table, sqlProcessor)
-        val columnDefinitionSqlList = mutableListOf<String>()
-        val columnIndexSqlList = mutableListOf<String>()
-        modelTemplateBean.fieldArray.forEach {
-            columnDefinitionSqlList += sqlProcessor.createTableColumnDefinitionProcess(it.column, SqlUtil.ColumnType.valueOf(it.type), it.idFlag, it.length, it.precision, it.nullable, it.columnDefaultValue, it.comment)
-            if (it.idFlag) {
-                columnIndexSqlList += sqlProcessor.createTableIndexProcess(it.idFlag, arrayOf(it.column), Constants.String.BLANK)
-            }
-        }
-        modelTemplateBean.tableIndexArray.forEach {
-            val columnList = it.columns.split(Constants.Symbol.COMMA)
-            val columnArray = columnList.toArray { column -> sqlProcessor.keywordSymbolLeft + column.trim() + sqlProcessor.keywordSymbolRight }
-            columnIndexSqlList += sqlProcessor.createTableIndexProcess(false, columnArray, it.otherCommands)
-        }
-        val columnDefinitionSql = (columnDefinitionSqlList + columnIndexSqlList).joinToString(Constants.Symbol.COMMA + Constants.String.NEW_LINE)
-        return SqlUtil.createTableSql(schemaTable, columnDefinitionSql, Constants.String.BLANK)
     }
 }
 
