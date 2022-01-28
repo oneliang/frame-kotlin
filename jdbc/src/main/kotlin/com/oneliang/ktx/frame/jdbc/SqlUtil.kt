@@ -522,13 +522,13 @@ object SqlUtil {
         return sqlList.toTypedArray()
     }
 
-    fun createSql(schemaTable: String, columnDefinitionSql: String, otherCommands: String): String {
+    fun createTableSql(schemaTable: String, columnDefinitionSql: String, otherCommands: String): String {
         val stringBuilder = StringBuilder()
         stringBuilder.append("CREATE TABLE $schemaTable (")
         stringBuilder.append(Constants.String.NEW_LINE)
         stringBuilder.append(columnDefinitionSql)
         stringBuilder.append(Constants.String.NEW_LINE)
-        stringBuilder.append(") $otherCommands")
+        stringBuilder.append(") ${otherCommands}${Constants.Symbol.SEMICOLON}")
         return stringBuilder.toString()
     }
 

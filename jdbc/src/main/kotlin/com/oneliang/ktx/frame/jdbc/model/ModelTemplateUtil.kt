@@ -97,8 +97,13 @@ object ModelTemplateUtil {
         return modelTemplateBeanList
     }
 
-    fun createSql(modelTemplateBean: ModelTemplateBean, sqlProcessor: SqlUtil.SqlProcessor): String {
-        val tempTable = sqlProcessor.keywordSymbolLeft + modelTemplateBean.schema + sqlProcessor.keywordSymbolRight + Constants.Symbol.DOT + sqlProcessor.keywordSymbolLeft + modelTemplateBean.table + sqlProcessor.keywordSymbolRight
+    fun dropTableSql(modelTemplateBean: ModelTemplateBean, sqlProcessor: SqlUtil.SqlProcessor): String {
+        val schemaTable = sqlProcessor.keywordSymbolLeft + modelTemplateBean.schema + sqlProcessor.keywordSymbolRight + Constants.Symbol.DOT + sqlProcessor.keywordSymbolLeft + modelTemplateBean.table + sqlProcessor.keywordSymbolRight
+        return "DROP TABLE IF EXISTS $schemaTable ${Constants.Symbol.SEMICOLON}"
+    }
+
+    fun createTableSql(modelTemplateBean: ModelTemplateBean, sqlProcessor: SqlUtil.SqlProcessor): String {
+        val schemaTable = sqlProcessor.keywordSymbolLeft + modelTemplateBean.schema + sqlProcessor.keywordSymbolRight + Constants.Symbol.DOT + sqlProcessor.keywordSymbolLeft + modelTemplateBean.table + sqlProcessor.keywordSymbolRight
         val columnDefinitionSqlList = mutableListOf<String>()
         val columnIndexSqlList = mutableListOf<String>()
         modelTemplateBean.fieldArray.forEach {
@@ -113,7 +118,7 @@ object ModelTemplateUtil {
             columnIndexSqlList += sqlProcessor.createTableIndexProcess(false, columnArray, it.otherCommands)
         }
         val columnDefinitionSql = (columnDefinitionSqlList + columnIndexSqlList).joinToString(Constants.Symbol.COMMA + Constants.String.NEW_LINE)
-        return SqlUtil.createSql(tempTable, columnDefinitionSql, Constants.String.BLANK)
+        return SqlUtil.createTableSql(schemaTable, columnDefinitionSql, Constants.String.BLANK)
     }
 }
 
