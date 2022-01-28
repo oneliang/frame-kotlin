@@ -37,19 +37,19 @@ open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames
     <%var nullable = fieldBean.nullable;%>
     <%var nullableString = (nullable? "?": "");%>
     <%var defaultValue = fieldBean.defaultValue;%>
-    <%if (type == 0){%>
+    <%if (type == 'STRING'){%>
     <%=overrideString%>var <%=fieldBean.name%>: String<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "\"\"")%>
-    <%} else if (type == 1) {%>
+    <%} else if (type == 'INT') {%>
     <%=overrideString%>var <%=fieldBean.name%>: Int<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%>
-    <%} else if (type == 2) {%>
+    <%} else if (type == 'LONG') {%>
     <%=overrideString%>var <%=fieldBean.name%>: Long<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%>
-    <%} else if (type == 3) {%>
+    <%} else if (type == 'FLOAT') {%>
     <%=overrideString%>var <%=fieldBean.name%>: Float<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
-    <%} else if (type == 4) {%>
+    <%} else if (type == 'DOUBLE') {%>
     <%=overrideString%>var <%=fieldBean.name%>: Double<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
-    <%} else if (type == 5) {%>
+    <%} else if (type == 'DATE') {%>
     <%=overrideString%>var <%=fieldBean.name%>: Date<%=nullableString%> = <%=defaultValue%>
-    <%} else if (type == 6) {%>
+    <%} else if (type == 'BIG_DECIMAL') {%>
     <%=overrideString%>var <%=fieldBean.name%>: BigDecimal<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "BigDecimal(0)")%>
     <%}%>
 <%}%>

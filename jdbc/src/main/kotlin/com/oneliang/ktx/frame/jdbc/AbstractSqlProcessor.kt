@@ -124,4 +124,31 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
         }
         return value
     }
+
+    /**
+     * create table column process
+     * @param column
+     * @param type
+     * @param idFlag
+     * @param length
+     * @param precision
+     * @param nullable
+     * @param defaultValue
+     * @param comment
+     * @return String
+     */
+    override fun createTableColumnDefinitionProcess(column: String, type: SqlUtil.ColumnType, idFlag: Boolean, length: Int, precision: Int, nullable: Boolean, defaultValue: String?, comment: String): String {
+        TODO("Not yet implemented")
+    }
+
+    /**
+     * create table index process
+     * @param primary
+     * @param columns
+     * @param condition
+     * @return String
+     */
+    override fun createTableIndexProcess(primary: Boolean, columns: Array<String>, condition: String): String {
+        TODO("Not yet implemented")
+    }
 }

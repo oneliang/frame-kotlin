@@ -78,4 +78,115 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
             }
         }
     }
+
+    /**
+     * create table column process
+     * @param column
+     * @param type
+     * @param idFlag
+     * @param length
+     * @param precision
+     * @param nullable
+     * @param defaultValue
+     * @param comment
+     * @return String
+     */
+    override fun createTableColumnDefinitionProcess(column: String, type: SqlUtil.ColumnType, idFlag: Boolean, length: Int, precision: Int, nullable: Boolean, defaultValue: String?, comment: String): String {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append(this.keywordSymbolLeft + column + this.keywordSymbolRight)
+        stringBuilder.append(Constants.String.SPACE)
+        var optimizeDefaultValue = defaultValue
+        stringBuilder.append(
+            when (type) {
+                SqlUtil.ColumnType.STRING -> {
+                    optimizeDefaultValue = Constants.String.BLANK
+                    if (length <= 0) {//custom default value
+                        "TEXT"
+                    } else {
+                        "VARCHAR($length)"
+                    }
+                }
+                SqlUtil.ColumnType.INT -> {
+                    optimizeDefaultValue = Constants.String.ZERO
+                    if (length <= 0) {//mysql default value
+                        "INT(11)"
+                    } else {
+                        "INT($length)"
+                    }
+                }
+                SqlUtil.ColumnType.LONG -> {
+                    optimizeDefaultValue = Constants.String.ZERO
+                    if (length <= 0) {
+                        error("length:$length error, column:$column, column type:$type")
+                    }
+                    "BIGINT($length)"
+                }
+                SqlUtil.ColumnType.FLOAT -> {
+                    optimizeDefaultValue = "0.0"
+                    if (length <= 0 || precision <= 0) {//mysql default value
+                        "FLOAT"
+                    } else {
+                        "FLOAT($length, $precision)"
+                    }
+                }
+                SqlUtil.ColumnType.DOUBLE -> {
+                    optimizeDefaultValue = "0.0"
+                    if (length <= 0 || precision <= 0) {//mysql default value
+                        "DOUBLE"
+                    } else {
+                        "DOUBLE($length, $precision)"
+                    }
+                }
+                SqlUtil.ColumnType.DATE -> {
+                    optimizeDefaultValue = Constants.Date.DEFAULT.toFormatString()
+                    "DATETIME"
+                }
+                SqlUtil.ColumnType.BIG_DECIMAL -> {
+                    if (length <= 0) {//mysql default value
+                        "DECIMAL(10, 2)"
+                    } else {
+                        "DECIMAL($length, $precision)"
+                    }
+                }
+            }
+        )
+        if (!nullable) {
+            stringBuilder.append(Constants.String.SPACE)
+            stringBuilder.append("NOT NULL")
+        }
+        if (idFlag) {
+            stringBuilder.append(Constants.String.SPACE)
+            stringBuilder.append("AUTO_INCREMENT")
+        } else {//not id add default value
+            if (defaultValue != null) {
+                stringBuilder.append(Constants.String.SPACE)
+                stringBuilder.append("DEFAULT ${Constants.Symbol.SINGLE_QUOTE}${defaultValue.ifBlank { optimizeDefaultValue }}${Constants.Symbol.SINGLE_QUOTE}")
+            }
+        }
+        if (comment.isNotBlank()) {
+            stringBuilder.append(Constants.String.SPACE)
+            stringBuilder.append("COMMENT ${Constants.Symbol.SINGLE_QUOTE}$comment${Constants.Symbol.SINGLE_QUOTE}")
+        }
+        return stringBuilder.toString()
+    }
+
+    /**
+     * create table index process
+     * @param primary
+     * @param columns
+     * @param condition
+     * @return String
+     */
+    override fun createTableIndexProcess(primary: Boolean, columns: Array<String>, condition: String): String {
+        val stringBuilder = StringBuilder()
+        if (primary) {
+            val columnsString = columns.joinToString { Constants.Symbol.ACCENT + it + Constants.Symbol.ACCENT }
+            stringBuilder.append("PRIMARY KEY($columnsString)${condition.ifBlank { " USING BTREE" }}")
+        } else {
+            val indexName = columns.joinToString(Constants.Symbol.UNDERLINE) { it.uppercase() } + "_INDEX"
+            val columnsString = columns.joinToString { Constants.Symbol.ACCENT + it + Constants.Symbol.ACCENT }
+            stringBuilder.append("KEY $indexName($columnsString)")
+        }
+        return stringBuilder.toString()
+    }
 }

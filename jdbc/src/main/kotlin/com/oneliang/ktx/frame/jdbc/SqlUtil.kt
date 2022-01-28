@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.jdbc
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.exception.MappingNotFoundException
 import com.oneliang.ktx.util.common.ObjectUtil
+import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.json.toJson
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -215,7 +216,6 @@ object SqlUtil {
      * @return String
     </T> */
     private fun <T : Any, IdType : Any> classToSelectIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor, selectIdType: SelectIdType): String {
-        val methods = kClass.java.methods
         val condition = StringBuilder()
         for (mappingColumnBean in mappingBean.mappingColumnBeanList) {
             val fieldName = mappingColumnBean.field
@@ -516,10 +516,20 @@ object SqlUtil {
             }
             createTableSql.delete(createTableSql.length - 1, createTableSql.length)
         }
-        createTableSql.append(") " + annotationMappingBean.condition!!)
+        createTableSql.append(") " + annotationMappingBean.condition.nullToBlank())
         createTableSql.append(Constants.Symbol.SEMICOLON)
         sqlList.add(createTableSql.toString())
         return sqlList.toTypedArray()
+    }
+
+    fun createSql(schemaTable: String, columnDefinitionSql: String, otherCommands: String): String {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("CREATE TABLE $schemaTable (")
+        stringBuilder.append(Constants.String.NEW_LINE)
+        stringBuilder.append(columnDefinitionSql)
+        stringBuilder.append(Constants.String.NEW_LINE)
+        stringBuilder.append(") $otherCommands")
+        return stringBuilder.toString()
     }
 
     class SqlUtilException(cause: Throwable) : RuntimeException(cause)
@@ -576,6 +586,29 @@ object SqlUtil {
          * @return String
         </T> */
         fun <T : Any> beforeDeleteProcess(kClass: KClass<T>, isId: Boolean, columnName: String, value: Any?): String
+
+        /**
+         * create table column definition process
+         * @param column
+         * @param type
+         * @param idFlag
+         * @param length
+         * @param precision
+         * @param nullable
+         * @param defaultValue
+         * @param comment
+         * @return String
+         */
+        fun createTableColumnDefinitionProcess(column: String, type: ColumnType, idFlag: Boolean, length: Int = 0, precision: Int = 0, nullable: Boolean, defaultValue: String? = null, comment: String = Constants.String.BLANK): String
+
+        /**
+         * create table index process
+         * @param primary
+         * @param columns
+         * @param command
+         * @return String
+         */
+        fun createTableIndexProcess(primary: Boolean, columns: Array<String>, command: String = Constants.String.BLANK): String
     }
 
     private enum class DeleteType {
@@ -584,5 +617,15 @@ object SqlUtil {
 
     private enum class SelectIdType {
         SINGLE_ID, MULTIPLE_ID
+    }
+
+    enum class ColumnType(val value: String) {
+        STRING("STRING"),
+        INT("INT"),
+        LONG("LONG"),
+        FLOAT("FLOAT"),
+        DOUBLE("DOUBLE"),
+        DATE("DATE"),
+        BIG_DECIMAL("BIG_DECIMAL"),
     }
 }

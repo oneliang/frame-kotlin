@@ -1,10 +1,9 @@
 package com.oneliang.ktx.frame.jdbc.model
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.jdbc.SqlUtil
 import com.oneliang.ktx.frame.jdbc.Table
-import com.oneliang.ktx.util.common.nullToBlank
-import com.oneliang.ktx.util.common.parseXml
-import com.oneliang.ktx.util.common.toFile
+import com.oneliang.ktx.util.common.*
 import java.io.File
 import java.math.BigDecimal
 import java.util.*
@@ -28,15 +27,16 @@ object ModelTemplateUtil {
             val modelTemplateBean = ModelTemplateBean()
             val modelNode = modelElementList.item(index)
             val modelAttributeMap = modelNode.attributes
-            modelTemplateBean.packageName = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_PACKAGE_NAME)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-            modelTemplateBean.className = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_CLASS_NAME)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-            modelTemplateBean.superClassNames = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SUPER_CLASS_NAMES)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-            modelTemplateBean.schema = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SCHEMA)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-            modelTemplateBean.table = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_TABLE)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+            modelTemplateBean.packageName = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_PACKAGE_NAME)?.nodeValue ?: Constants.String.BLANK
+            modelTemplateBean.className = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_CLASS_NAME)?.nodeValue ?: Constants.String.BLANK
+            modelTemplateBean.superClassNames = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SUPER_CLASS_NAMES)?.nodeValue ?: Constants.String.BLANK
+            modelTemplateBean.schema = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SCHEMA)?.nodeValue ?: Constants.String.BLANK
+            modelTemplateBean.table = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_TABLE)?.nodeValue ?: Constants.String.BLANK
             val importHashSet = hashSetOf<String>().apply {
                 this += Table::class.qualifiedName.nullToBlank()
             }
             val columnList = mutableListOf<ModelTemplateBean.Field>()
+            val tableIndexList = mutableListOf<ModelTemplateBean.TableIndex>()
             val codeInClassList = mutableListOf<String>()
             val modelChildNodeList = modelNode.childNodes
             for (modelChildNodeIndex in 0 until modelChildNodeList.length) {
@@ -51,44 +51,36 @@ object ModelTemplateUtil {
                         val field = ModelTemplateBean.Field()
                         val overrideNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_OVERRIDE)
                         field.override = overrideNode?.nodeValue?.toBoolean() ?: false
-                        field.name = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_NAME)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
-                        val typeNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_TYPE)
-                        if (typeNode != null) {
-                            field.type = when (typeNode.nodeValue) {
-                                ModelTemplateBean.Field.Type.INT.label -> {
-                                    ModelTemplateBean.Field.Type.INT.value
-                                }
-                                ModelTemplateBean.Field.Type.LONG.label -> {
-                                    ModelTemplateBean.Field.Type.LONG.value
-                                }
-                                ModelTemplateBean.Field.Type.FLOAT.label -> {
-                                    ModelTemplateBean.Field.Type.FLOAT.value
-                                }
-                                ModelTemplateBean.Field.Type.DOUBLE.label -> {
-                                    ModelTemplateBean.Field.Type.DOUBLE.value
-                                }
-                                ModelTemplateBean.Field.Type.DATE.label -> {
-                                    importHashSet += Date::class.qualifiedName.nullToBlank()
-                                    ModelTemplateBean.Field.Type.DATE.value
-                                }
-                                ModelTemplateBean.Field.Type.BIG_DECIMAL.label -> {
-                                    importHashSet += BigDecimal::class.qualifiedName.nullToBlank()
-                                    ModelTemplateBean.Field.Type.BIG_DECIMAL.value
-                                }
-                                else -> {
-                                    ModelTemplateBean.Field.Type.STRING.value
-                                }
+                        field.name = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_NAME)?.nodeValue ?: Constants.String.BLANK
+                        val type = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_TYPE)?.nodeValue ?: field.type
+                        field.type = type
+                        when (type) {
+                            SqlUtil.ColumnType.DATE.value -> {
+                                importHashSet += Date::class.qualifiedName.nullToBlank()
+                            }
+                            SqlUtil.ColumnType.BIG_DECIMAL.value -> {
+                                importHashSet += BigDecimal::class.qualifiedName.nullToBlank()
                             }
                         }
                         val nullableNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_NULLABLE)
                         field.nullable = nullableNode?.nodeValue?.toBoolean() ?: false
                         field.defaultValue = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_DEFAULT_VALUE)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
                         //db mapping attribute
-                        field.column = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COLUMN)?.nodeValue?.nullToBlank() ?: Constants.String.BLANK
+                        field.column = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COLUMN)?.nodeValue ?: Constants.String.BLANK
                         val idFlagNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_ID_FLAG)
                         field.idFlag = idFlagNode?.nodeValue?.toBoolean() ?: false
+                        field.columnDefaultValue = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COLUMN_DEFAULT_VALUE)?.nodeValue ?: Constants.String.BLANK
+                        field.length = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_LENGTH)?.nodeValue.toIntSafely()
+                        field.precision = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_PRECISION)?.nodeValue.toIntSafely()
+                        field.comment = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COMMENT)?.nodeValue ?: Constants.String.BLANK
 
                         columnList += field
+                    }
+                    ModelTemplateBean.TAG_MODEL_TABLE_INDEX -> {
+                        val tableIndex = ModelTemplateBean.TableIndex()
+                        tableIndex.columns = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_TABLE_INDEX_COLUMNS)?.nodeValue ?: Constants.String.BLANK
+                        tableIndex.otherCommands = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_TABLE_INDEX_OTHER_COMMANDS)?.nodeValue ?: Constants.String.BLANK
+                        tableIndexList += tableIndex
                     }
                     ModelTemplateBean.TAG_MODEL_CODE_IN_CLASS -> {
                         codeInClassList += modelChildNode.textContent
@@ -97,11 +89,31 @@ object ModelTemplateUtil {
             }
             modelTemplateBean.importArray = importHashSet.toTypedArray()
             modelTemplateBean.fieldArray = columnList.toTypedArray()
+            modelTemplateBean.tableIndexArray = tableIndexList.toTypedArray()
             modelTemplateBean.codeInClassArray = codeInClassList.toTypedArray()
 
             modelTemplateBeanList += modelTemplateBean
         }
         return modelTemplateBeanList
+    }
+
+    fun createSql(modelTemplateBean: ModelTemplateBean, sqlProcessor: SqlUtil.SqlProcessor): String {
+        val tempTable = sqlProcessor.keywordSymbolLeft + modelTemplateBean.schema + sqlProcessor.keywordSymbolRight + Constants.Symbol.DOT + sqlProcessor.keywordSymbolLeft + modelTemplateBean.table + sqlProcessor.keywordSymbolRight
+        val columnDefinitionSqlList = mutableListOf<String>()
+        val columnIndexSqlList = mutableListOf<String>()
+        modelTemplateBean.fieldArray.forEach {
+            columnDefinitionSqlList += sqlProcessor.createTableColumnDefinitionProcess(it.column, SqlUtil.ColumnType.valueOf(it.type), it.idFlag, it.length, it.precision, it.nullable, it.columnDefaultValue, it.comment)
+            if (it.idFlag) {
+                columnIndexSqlList += sqlProcessor.createTableIndexProcess(it.idFlag, arrayOf(it.column), Constants.String.BLANK)
+            }
+        }
+        modelTemplateBean.tableIndexArray.forEach {
+            val columnList = it.columns.split(Constants.Symbol.COMMA)
+            val columnArray = columnList.toArray { column -> sqlProcessor.keywordSymbolLeft + column.trim() + sqlProcessor.keywordSymbolRight }
+            columnIndexSqlList += sqlProcessor.createTableIndexProcess(false, columnArray, it.otherCommands)
+        }
+        val columnDefinitionSql = (columnDefinitionSqlList + columnIndexSqlList).joinToString(Constants.Symbol.COMMA + Constants.String.NEW_LINE)
+        return SqlUtil.createSql(tempTable, columnDefinitionSql, Constants.String.BLANK)
     }
 }
 
