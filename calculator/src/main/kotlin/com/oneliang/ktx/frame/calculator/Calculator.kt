@@ -13,7 +13,7 @@ object Calculator {
         FULLADDITION_ADDITION_DISCOUNT(5),
     }
 
-    fun calculate(itemList: List<Item>, discount: BigDecimal = BigDecimal.ONE, addition: BigDecimal = BigDecimal.ZERO, fullAddition: Pair<BigDecimal, BigDecimal> = Pair(BigDecimal.ZERO, BigDecimal.ZERO), discountOrder: DiscountOrder = DiscountOrder.DISCOUNT_ADDITION_FULLADDITION): List<ResultItem> {
+    fun calculate(itemList: List<Item>, discount: BigDecimal = BigDecimal.ONE, addition: BigDecimal = BigDecimal.ZERO, fullAddition: Triple<BigDecimal, BigDecimal, Boolean> = Triple(BigDecimal.ZERO, BigDecimal.ZERO, false), discountOrder: DiscountOrder = DiscountOrder.DISCOUNT_ADDITION_FULLADDITION): List<ResultItem> {
         val resultItemList = mutableListOf<ResultItem>()
         var total = BigDecimal.ZERO
         itemList.forEach {
@@ -34,18 +34,27 @@ object Calculator {
         var unitPrice: BigDecimal,
         var discount: BigDecimal = BigDecimal.ONE,//折扣
         var addition: BigDecimal = BigDecimal.ZERO,//优惠券,一次性加减
-        var fullAddition: Pair<BigDecimal, BigDecimal> = Pair(BigDecimal.ZERO, BigDecimal.ZERO),//满加减
+        var fullAddition: Triple<BigDecimal, BigDecimal, Boolean> = Triple(BigDecimal.ZERO, BigDecimal.ZERO, false),//满加减, true每满减, false仅一次满减
         var discountOrder: DiscountOrder = DiscountOrder.DISCOUNT_ADDITION_FULLADDITION
     ) {
 
-        private fun fullAdditionCalculate(total: BigDecimal, fullAddition: Pair<BigDecimal, BigDecimal>): BigDecimal {
+        private fun fullAdditionCalculate(total: BigDecimal, fullAddition: Triple<BigDecimal, BigDecimal, Boolean>): BigDecimal {
             val full = fullAddition.first
             val addition = fullAddition.second
+            val sign = fullAddition.third
             return if (full.compareTo(BigDecimal.ZERO) == 0) {
                 total
             } else {
-                val fullAdditionCount = total.divide(full.abs(), 0, RoundingMode.FLOOR)
-                total + (fullAdditionCount * addition)
+                val fullAdditionCount = total.divide(full.abs(), 0, RoundingMode.FLOOR)//0时不足满减条件
+                if (sign) {
+                    total + (fullAdditionCount * addition)
+                } else {
+                    if (fullAdditionCount >= BigDecimal.ONE) {
+                        total + (BigDecimal.ONE * addition)
+                    } else {
+                        total
+                    }
+                }
             }
         }
 
@@ -84,7 +93,7 @@ object Calculator {
         unitPrice: BigDecimal,
         discount: BigDecimal = BigDecimal.ZERO,//折扣
         addition: BigDecimal = BigDecimal.ZERO,//优惠券,一次性加减
-        fullAddition: Pair<BigDecimal, BigDecimal> = Pair(BigDecimal.ZERO, BigDecimal.ZERO),//满加减
+        fullAddition: Triple<BigDecimal, BigDecimal, Boolean> = Triple(BigDecimal.ZERO, BigDecimal.ZERO, false),//满加减, true每满减, false仅一次满减
         discountOrder: DiscountOrder = DiscountOrder.DISCOUNT_ADDITION_FULLADDITION
     ) : Item(
         code, count, unitPrice, discount, addition, fullAddition, discountOrder

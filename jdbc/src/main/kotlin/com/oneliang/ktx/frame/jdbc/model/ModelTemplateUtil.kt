@@ -99,17 +99,6 @@ object ModelTemplateUtil {
         }
         return modelTemplateBeanList
     }
-
-    private fun fixSchemaTable(schema: String, table: String, sqlProcessor: SqlUtil.SqlProcessor): String {
-        if (table.isBlank()) {
-            error("table can not be blank, please input the table")
-        }
-        return if (schema.isBlank()) {
-            sqlProcessor.keywordSymbolLeft + table + sqlProcessor.keywordSymbolRight
-        } else {
-            sqlProcessor.keywordSymbolLeft + schema + sqlProcessor.keywordSymbolRight + Constants.Symbol.DOT + sqlProcessor.keywordSymbolLeft + table + sqlProcessor.keywordSymbolRight
-        }
-    }
 }
 
 fun main() {

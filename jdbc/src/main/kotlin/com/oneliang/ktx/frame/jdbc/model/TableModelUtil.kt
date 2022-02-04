@@ -35,7 +35,7 @@ object TableModelUtil {
         }
         tableModel.indexArray.forEach {
             val columnList = it.columns.split(Constants.Symbol.COMMA)
-            val columnArray = columnList.toArray { column -> sqlProcessor.keywordSymbolLeft + column.trim() + sqlProcessor.keywordSymbolRight }
+            val columnArray = columnList.toArray { column -> column.trim() }
             columnIndexSqlList += sqlProcessor.createTableIndexProcess(false, columnArray, it.otherCommands)
         }
         val columnDefinitionSql = (columnDefinitionSqlList + columnIndexSqlList).joinToString(Constants.Symbol.COMMA + Constants.String.NEW_LINE)
