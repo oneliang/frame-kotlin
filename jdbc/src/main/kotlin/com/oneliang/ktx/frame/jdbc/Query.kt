@@ -8,6 +8,12 @@ import kotlin.reflect.KClass
 
 interface Query : BaseQuery {
 
+    enum class Comparator(val value: String) {
+        EQUAL(Constants.Symbol.EQUAL),
+        GREATER_THAN(Constants.Symbol.GREATER_THAN),
+        LESS_THAN(Constants.Symbol.LESS_THAN)
+    }
+
     /**
      * use connection
      * @param recoverable only occur SQLRecoverableException can effect
@@ -300,6 +306,40 @@ interface Query : BaseQuery {
         table: String = Constants.String.BLANK,
         condition: String = Constants.String.BLANK,
         orderBy: String = Constants.String.BLANK,
+        useDistinct: Boolean = true,
+        useStable: Boolean = true,
+        parameters: Array<*> = emptyArray<Any>()
+    ): List<T>
+
+    /**
+     * Method: select object pagination list,has implement,it is sql binding
+     * @param <T>
+     * @param kClass
+     * @param selectColumns
+     * @param table
+     * @param condition, maybe conflict with parameter orderBy
+     * @param sequenceKey
+     * @param startSequence
+     * @param comparator
+     * @param orderBy
+     * @param rowPerPage
+     * @param useDistinct
+     * @param useStable
+     * @param parameters
+     * @return List<T>
+     * @throws QueryException
+    </T></T> */
+    @Throws(QueryException::class)
+    fun <T : Any> selectObjectFlowList(
+        kClass: KClass<T>,
+        selectColumns: Array<String> = emptyArray(),
+        table: String = Constants.String.BLANK,
+        condition: String = Constants.String.BLANK,
+        sequenceKey: String,
+        startSequence: String,
+        comparator: Comparator = Comparator.GREATER_THAN,
+        orderBy: String = Constants.String.BLANK,
+        rowPerPage: Int = Page.DEFAULT_ROWS,
         useDistinct: Boolean = true,
         useStable: Boolean = true,
         parameters: Array<*> = emptyArray<Any>()

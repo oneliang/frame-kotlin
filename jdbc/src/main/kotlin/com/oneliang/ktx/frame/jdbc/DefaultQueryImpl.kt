@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.jdbc
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.bean.Page
 import com.oneliang.ktx.frame.configuration.ConfigurationContainer
+import com.oneliang.ktx.frame.jdbc.mysql.MySqlUtil
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.resource.ResourcePool
 import java.sql.Connection
@@ -436,6 +437,29 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
         sqlConditions.append(Constants.String.SPACE + Constants.Database.MySql.PAGINATION + Constants.String.SPACE)
         sqlConditions.append(startRow.toString() + Constants.Symbol.COMMA + rowsPerPage)
         return this.selectObjectList(kClass, selectColumns, table, sqlConditions.toString(), useDistinct, useStable, parameters)
+    }
+
+    /**
+     * Method: select object pagination list,has implement,it is sql binding
+     * @param <T>
+     * @param kClass
+     * @param selectColumns
+     * @param table
+     * @param condition, maybe conflict with parameter orderBy
+     * @param sequenceKey
+     * @param startSequence
+     * @param comparator
+     * @param orderBy
+     * @param rowPerPage
+     * @param useDistinct
+     * @param useStable
+     * @param parameters
+     * @return List<T>
+     * @throws QueryException
+    </T></T> */
+    override fun <T : Any> selectObjectFlowList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, sequenceKey: String, startSequence: String, comparator: Query.Comparator, orderBy: String, rowPerPage: Int, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
+        val sql = MySqlUtil.selectPaginationSql(selectColumns, table, condition, sequenceKey, startSequence, comparator, orderBy, rowPerPage, useDistinct)
+        return this.selectObjectListBySql(kClass, sql, useStable, parameters)
     }
 
     /**
