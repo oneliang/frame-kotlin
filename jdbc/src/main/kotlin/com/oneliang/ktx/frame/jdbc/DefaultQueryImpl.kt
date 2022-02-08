@@ -442,6 +442,7 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
     /**
      * Method: select object pagination list,has implement,it is sql binding
      * @param <T>
+     * @param <SequenceType>
      * @param kClass
      * @param selectColumns
      * @param table
@@ -457,8 +458,8 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @return List<T>
      * @throws QueryException
     </T></T> */
-    override fun <T : Any> selectObjectFlowList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, sequenceKey: String, startSequence: String, comparator: Query.Comparator, orderBy: String, rowPerPage: Int, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
-        val sql = MySqlUtil.selectPaginationSql(selectColumns, table, condition, sequenceKey, startSequence, comparator, orderBy, rowPerPage, useDistinct)
+    override fun <T : Any, SequenceType : Any> selectObjectFlowList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, sequenceKey: String, startSequence: SequenceType, comparator: Query.Comparator, orderBy: String, rowPerPage: Int, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
+        val sql = MySqlUtil.selectPaginationSql(selectColumns, table, condition, sequenceKey, startSequence.toString(), comparator, orderBy, rowPerPage, useDistinct)
         return this.selectObjectListBySql(kClass, sql, useStable, parameters)
     }
 

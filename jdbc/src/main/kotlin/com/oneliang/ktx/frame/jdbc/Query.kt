@@ -314,6 +314,7 @@ interface Query : BaseQuery {
     /**
      * Method: select object pagination list,has implement,it is sql binding
      * @param <T>
+     * @param <SequenceType>
      * @param kClass
      * @param selectColumns
      * @param table
@@ -330,13 +331,13 @@ interface Query : BaseQuery {
      * @throws QueryException
     </T></T> */
     @Throws(QueryException::class)
-    fun <T : Any> selectObjectFlowList(
+    fun <T : Any, SequenceType : Any> selectObjectFlowList(
         kClass: KClass<T>,
         selectColumns: Array<String> = emptyArray(),
         table: String = Constants.String.BLANK,
         condition: String = Constants.String.BLANK,
         sequenceKey: String,
-        startSequence: String,
+        startSequence: SequenceType,
         comparator: Comparator = Comparator.GREATER_THAN,
         orderBy: String = Constants.String.BLANK,
         rowPerPage: Int = Page.DEFAULT_ROWS,
