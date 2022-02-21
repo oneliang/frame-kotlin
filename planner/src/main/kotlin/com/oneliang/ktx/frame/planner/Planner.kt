@@ -7,13 +7,17 @@ import com.oneliang.ktx.util.logging.LoggerManager
 object Planner {
     private val logger = LoggerManager.getLogger(Planner::class)
 
+    /**
+     * @param planLineGroupList
+     * @param planTaskList sorted by outside will effect the result
+     */
     fun plan(planLineGroupList: List<PlanLineGroup>, planTaskList: List<PlanTask>) {
         //1.find the single step task
         val planLineGroupMap = planLineGroupList.toMap { it.key to it }
         val planLineGroupAllPlanStepCostMap = mutableMapOf<String, Long>()
 //        val singleStepPlanTaskList = mutableListOf<PlanTask>()
 //        val multiStepPlanTaskList = mutableListOf<PlanTask>()
-        val sortedPlanTaskList = planTaskList.sortedByDescending { it.getTotalPlanCostTime() }
+        val sortedPlanTaskList = planTaskList//.sortedByDescending { it.getTotalPlanCostTime() }
         sortedPlanTaskList.forEach { planTask ->
             //            if (planTask.isSingleStepTask()) {
 //                singleStepPlanTaskList += planTask
