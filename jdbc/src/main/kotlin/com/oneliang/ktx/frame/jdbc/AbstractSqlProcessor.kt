@@ -145,10 +145,10 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
      * create table index process
      * @param primary
      * @param columns
-     * @param condition
+     * @param command
      * @return String
      */
-    override fun createTableIndexProcess(primary: Boolean, columns: Array<String>, condition: String): String {
+    override fun createTableIndexProcess(primary: Boolean, columns: Array<String>, command: String): String {
         TODO("Not yet implemented")
     }
 }
