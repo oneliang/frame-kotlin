@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.jdbc
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.util.common.generateZeroString
 import com.oneliang.ktx.util.common.toFormatString
 import java.util.*
 import kotlin.reflect.KClass
@@ -122,10 +123,11 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
                     "BIGINT($length)"
                 }
                 SqlUtil.ColumnType.FLOAT -> {
-                    optimizeDefaultValue = "0.0"
                     if (length <= 0 || precision <= 0) {//mysql default value
+                        optimizeDefaultValue = "0.0"
                         "FLOAT"
                     } else {
+                        optimizeDefaultValue = "0." + generateZeroString(precision)
                         "FLOAT($length, $precision)"
                     }
                 }
@@ -143,8 +145,10 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
                 }
                 SqlUtil.ColumnType.BIG_DECIMAL -> {
                     if (length <= 0) {//mysql default value
+                        optimizeDefaultValue = "0." + generateZeroString(2)
                         "DECIMAL(10, 2)"
                     } else {
+                        optimizeDefaultValue = "0." + generateZeroString(precision)
                         "DECIMAL($length, $precision)"
                     }
                 }
@@ -173,14 +177,14 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
      * create table index process
      * @param primary
      * @param columns
-     * @param condition
+     * @param command
      * @return String
      */
-    override fun createTableIndexProcess(primary: Boolean, columns: Array<String>, condition: String): String {
+    override fun createTableIndexProcess(primary: Boolean, columns: Array<String>, command: String): String {
         val stringBuilder = StringBuilder()
         if (primary) {
             val columnsString = columns.joinToString { Constants.Symbol.ACCENT + it + Constants.Symbol.ACCENT }
-            stringBuilder.append("PRIMARY KEY($columnsString)${condition.ifBlank { " USING BTREE" }}")
+            stringBuilder.append("PRIMARY KEY($columnsString)${command.ifBlank { " USING BTREE" }}")
         } else {
             val indexName = columns.joinToString(Constants.Symbol.UNDERLINE) { it.uppercase() } + "_INDEX"
             val columnsString = columns.joinToString { Constants.Symbol.ACCENT + it + Constants.Symbol.ACCENT }
