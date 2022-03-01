@@ -138,12 +138,6 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
     }
 
     class Configuration {
-        companion object {
-            fun fromJson(json: String): Configuration {
-                return json.jsonToObject(Configuration::class)
-            }
-        }
-
         var host = Constants.String.BLANK
         var port = 22
         var user = Constants.String.BLANK
