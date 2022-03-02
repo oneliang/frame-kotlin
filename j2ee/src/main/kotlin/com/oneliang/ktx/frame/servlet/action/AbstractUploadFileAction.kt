@@ -1,10 +1,10 @@
 package com.oneliang.ktx.frame.servlet.action
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.StaticVar
 import com.oneliang.ktx.frame.servlet.ActionUtil
 import com.oneliang.ktx.util.upload.FileUpload
 import com.oneliang.ktx.util.upload.FileUploadResult
+import java.io.File
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 
@@ -30,7 +30,7 @@ abstract class AbstractUploadFileAction : BaseAction() {
             }
             val inputStream = request.inputStream
             val fileUpload = FileUpload()
-            val filePath = StaticVar.UPLOAD_FOLDER
+            val filePath = File(Constants.String.BLANK).absolutePath
             fileUpload.saveFilePath = filePath
             // make sure content type is multipart/form-data,form file use
 

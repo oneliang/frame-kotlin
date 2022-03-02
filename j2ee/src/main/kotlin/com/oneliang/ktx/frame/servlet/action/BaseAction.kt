@@ -1,7 +1,6 @@
 package com.oneliang.ktx.frame.servlet.action
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.StaticVar
 import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import com.oneliang.ktx.frame.i18n.MessageContext
 import com.oneliang.ktx.frame.servlet.ActionUtil
@@ -284,7 +283,7 @@ open class BaseAction {
         if (contentType != null) {
             val fileUpload = FileUpload()
             if (tempFilePath.isBlank()) {
-                tempFilePath = StaticVar.UPLOAD_FOLDER
+                tempFilePath = File(Constants.String.BLANK).absolutePath
             }
             //filePath=new File(filePath).getAbsolutePath()
             FileUtil.createDirectory(tempFilePath)
@@ -316,7 +315,7 @@ open class BaseAction {
         if (contentType != null) {
             val fileUpload = FileUpload()
             if (tempFilePath.isBlank()) {
-                tempFilePath = StaticVar.UPLOAD_FOLDER
+                tempFilePath = File(Constants.String.BLANK).absolutePath
             }
             FileUtil.createDirectory(tempFilePath)
             fileUpload.saveFilePath = tempFilePath
