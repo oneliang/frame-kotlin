@@ -27,6 +27,8 @@ val dependencies by extra {
         "jexcelapi-jxl" to "net.sourceforge.jexcelapi:jxl:2.6.10",
         "jcraft-jsch" to "com.jcraft:jsch:0.1.54",
         "jcraft-jzlib" to "com.jcraft:jzlib:1.1.3",
-        "org-fusesource-mqtt-client" to "org.fusesource.mqtt-client:mqtt-client:1.16"
+        "org-fusesource-mqtt-client" to "org.fusesource.mqtt-client:mqtt-client:1.16",
+        // https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core
+        "tomcat-embed-core" to "org.apache.tomcat.embed:tomcat-embed-core:9.0.58"
     )
 }
