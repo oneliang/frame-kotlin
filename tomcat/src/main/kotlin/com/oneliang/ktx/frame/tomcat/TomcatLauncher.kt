@@ -36,6 +36,9 @@ class TomcatLauncher(private val configuration: Configuration) {
                 var documentBaseFilename = documentBaseFile.name
                 documentBaseFilename = documentBaseFilename.substring(0, documentBaseFilename.lastIndexOf(Constants.Symbol.DOT))
                 val documentBaseDirectory = File(documentBaseFile.parentFile, documentBaseFilename)
+                if (documentBaseDirectory.exists()) {
+                    documentBaseDirectory.deleteRecursively()
+                }
                 documentBaseDirectory.createDirectory()
                 documentBaseFile.unZip(documentBaseDirectory)
                 documentBaseDirectory.absolutePath

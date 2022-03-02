@@ -3,5 +3,6 @@ apply from: "${rootDir}/gradle/maven-publish.gradle"
 
 dependencies {
     implementation rootProject.ext.dependencies["tomcat-embed-core"]
+    implementation rootProject.ext.dependencies["tomcat-embed-jasper"]
 }
 
