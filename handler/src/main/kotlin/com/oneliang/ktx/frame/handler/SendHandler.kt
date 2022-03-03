@@ -1,40 +1,30 @@
 package com.oneliang.ktx.frame.handler
 
-import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.concurrent.ThreadPool
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.util.logging.LoggerManager
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 
 class SendHandler<T : Any>(
-    private val threadCount: Int = 1,
-    private val initialize: () -> T
+    threadCount: Int = 1,
+    initialize: () -> T
 ) {
     companion object {
         private val logger = LoggerManager.getLogger(SendHandler::class)
     }
 
-    private val threadPool = ThreadPool()
+    private val coroutine = Coroutine(Executors.newFixedThreadPool(threadCount).asCoroutineDispatcher())
     private lateinit var resource: T
 
-    @Synchronized
-    fun start() {
+    init {
         if (!this::resource.isInitialized) {
-            this.resource = this.initialize()
+            this.resource = initialize()
         }
-        this.threadPool.minThreads = 1
-        this.threadPool.maxThreads = this.threadCount
-        this.threadPool.start()
     }
 
     fun execute(handle: (T) -> Unit) {
-        this.threadPool.addThreadTask({
+        this.coroutine.launch {
             handle(this.resource)
-        }, failure = {
-            logger.error(Constants.String.EXCEPTION, it)
-        })
-    }
-
-    @Synchronized
-    fun interrupt() {
-        this.threadPool.interrupt()
+        }
     }
 }

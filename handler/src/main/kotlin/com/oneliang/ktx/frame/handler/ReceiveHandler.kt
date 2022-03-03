@@ -1,31 +1,27 @@
 package com.oneliang.ktx.frame.handler
 
-import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.util.concurrent.LoopThread
-import com.oneliang.ktx.util.concurrent.ThreadPool
 import com.oneliang.ktx.util.logging.LoggerManager
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 
 class ReceiveHandler<T : Any>(
-    private val threadCount: Int = 1,
-    private val initialize: () -> T,
+    threadCount: Int = 1,
+    initialize: () -> T,
     private val loopingProcessor: LoopingProcessor<T>
 ) : LoopThread() {
     companion object {
         private val logger = LoggerManager.getLogger(ReceiveHandler::class)
     }
 
-    private val threadPool = ThreadPool()
+    private val coroutine = Coroutine(Executors.newFixedThreadPool(threadCount).asCoroutineDispatcher())
     private lateinit var resource: T
 
-    @Synchronized
-    override fun start() {
+    init {
         if (!this::resource.isInitialized) {
-            this.resource = this.initialize()
+            this.resource = initialize()
         }
-        this.threadPool.minThreads = 1
-        this.threadPool.maxThreads = this.threadCount
-        this.threadPool.start()
-        super.start()
     }
 
     override fun looping() {
@@ -34,17 +30,9 @@ class ReceiveHandler<T : Any>(
     }
 
     fun execute(task: (T) -> Unit) {
-        this.threadPool.addThreadTask({
+        this.coroutine.launch {
             task.invoke(this.resource)
-        }, failure = {
-            logger.error(Constants.String.EXCEPTION, it)
-        })
-    }
-
-    @Synchronized
-    override fun interrupt() {
-        this.threadPool.interrupt()
-        super.interrupt()
+        }
     }
 
     interface LoopingProcessor<T : Any> {
