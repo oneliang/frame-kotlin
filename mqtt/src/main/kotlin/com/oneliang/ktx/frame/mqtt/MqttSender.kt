@@ -16,7 +16,6 @@ class MqttSender(host: String, username: String, password: String, threadCount: 
 
     init {
         logger.info("send handler starting")
-        this.sendHandler.start()
     }
 
     fun send(topic: String, data: ByteArray, retain: Boolean) {

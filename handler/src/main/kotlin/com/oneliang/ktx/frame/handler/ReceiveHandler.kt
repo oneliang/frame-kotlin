@@ -10,7 +10,7 @@ class ReceiveHandler<T : Any>(
     threadCount: Int = 1,
     initialize: () -> T,
     private val loopingProcessor: LoopingProcessor<T>
-) : LoopThread() {
+) : LoopThread(), Handler<T> {
     companion object {
         private val logger = LoggerManager.getLogger(ReceiveHandler::class)
     }
@@ -29,7 +29,7 @@ class ReceiveHandler<T : Any>(
         execute(task)
     }
 
-    fun execute(task: (T) -> Unit) {
+    override fun execute(task: (T) -> Unit) {
         this.coroutine.launch {
             task.invoke(this.resource)
         }

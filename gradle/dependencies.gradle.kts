@@ -21,15 +21,21 @@ val dependencies by extra {
         "kotlin-reflect" to "org.jetbrains.kotlin:kotlin-reflect:${Constants.kotlinVersion}",
         "kotlin-stdlib-js" to "org.jetbrains.kotlin:kotlin-stdlib-js:${Constants.kotlinVersion}",
         "javaee-api" to "javax:javaee-api:8.0",
+        //kotlin-test
         "kotlin-test" to "org.jetbrains.kotlin:kotlin-test",
         "kotlin-test-junit" to "org.jetbrains.kotlin:kotlin-test-junit",
+        //kotlin-coroutines
         "kotlinx-coroutines-core" to "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Constants.kotlinxCoroutinesVersion}",
+        //jxl about excel
         "jexcelapi-jxl" to "net.sourceforge.jexcelapi:jxl:2.6.10",
+        //jcraft about ssh
         "jcraft-jsch" to "com.jcraft:jsch:0.1.54",
         "jcraft-jzlib" to "com.jcraft:jzlib:1.1.3",
         "org-fusesource-mqtt-client" to "org.fusesource.mqtt-client:mqtt-client:1.16",
-        // https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core
+        //tomcat-embed
         "tomcat-embed-core" to "org.apache.tomcat.embed:tomcat-embed-core:9.0.58",
-        "tomcat-embed-jasper" to "org.apache.tomcat.embed:tomcat-embed-jasper:9.0.58"
+        "tomcat-embed-jasper" to "org.apache.tomcat.embed:tomcat-embed-jasper:9.0.58",
+        //netty asynchronize event-driven network application framework
+        "netty-all" to "io.netty:netty-all:4.1.47.Final"
     )
 }

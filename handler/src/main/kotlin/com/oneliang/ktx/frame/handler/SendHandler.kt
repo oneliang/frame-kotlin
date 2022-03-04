@@ -8,7 +8,7 @@ import java.util.concurrent.Executors
 class SendHandler<T : Any>(
     threadCount: Int = 1,
     initialize: () -> T
-) {
+) : Handler<T> {
     companion object {
         private val logger = LoggerManager.getLogger(SendHandler::class)
     }
@@ -22,9 +22,9 @@ class SendHandler<T : Any>(
         }
     }
 
-    fun execute(handle: (T) -> Unit) {
+    override fun execute(task: (T) -> Unit) {
         this.coroutine.launch {
-            handle(this.resource)
+            task(this.resource)
         }
     }
 }
