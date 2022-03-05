@@ -2,38 +2,38 @@ package com.oneliang.ktx.frame.mqtt
 
 import com.oneliang.ktx.frame.handler.ReceiveHandler
 import com.oneliang.ktx.util.logging.LoggerManager
-import org.fusesource.mqtt.client.BlockingConnection
+import org.fusesource.mqtt.client.FutureConnection
 import org.fusesource.mqtt.client.QoS
 import org.fusesource.mqtt.client.Topic
 import java.util.concurrent.ConcurrentHashMap
 
-class MqttReceiver(host: String, username: String, password: String, threadCount: Int = 2) : ReceiveHandler.LoopingProcessor<BlockingConnection> {
+class MqttReceiver(host: String, username: String, password: String, threadCount: Int = 2) : ReceiveHandler.LoopingProcessor<FutureConnection> {
     companion object {
         private val logger = LoggerManager.getLogger(MqttReceiver::class)
     }
 
-    private lateinit var connection: BlockingConnection
-    private val receiveHandler = ReceiveHandler(threadCount, initialize = {
-        val blockingConnection = MqttClient.connect(host, username, password)
-        this.connection = blockingConnection
-        blockingConnection
+    private lateinit var connection: FutureConnection
+    private val receiveHandler: ReceiveHandler<FutureConnection> = ReceiveHandler(threadCount, initialize = {
+        val futureConnection = MqttClient.connect(host, username, password)
+        this.connection = futureConnection
+        futureConnection
     }, this)
 
     init {
-        logger.info("receive handler starting")
+        logger.verbose("receive handler starting")
         this.receiveHandler.start()
     }
 
     private val topicTaskMap = ConcurrentHashMap<String, (String) -> Unit>()
 
     @Suppress("UNCHECKED_CAST")
-    override fun process(resource: BlockingConnection): (BlockingConnection) -> Unit {
-        val message = resource.receive()
+    override fun process(resource: FutureConnection): (FutureConnection) -> Unit {
+        val message = resource.receive().await()
         message.ack()
         return {
             val topic = message.topic
             val payload = String(message.payload)
-            logger.info("topic:%s, payload:%s", topic, payload)
+            logger.verbose("topic:%s, payload:%s", topic, payload)
             this.topicTaskMap[topic]?.invoke(payload)
         }
     }
