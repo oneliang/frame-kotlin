@@ -18,10 +18,10 @@ class MqttSender(host: String, username: String, password: String, threadCount: 
         logger.verbose("send handler starting")
     }
 
-    fun send(topic: String, data: ByteArray, retain: Boolean = true) {
+    fun send(topic: String, data: ByteArray, qos: QoS = QoS.EXACTLY_ONCE, retain: Boolean = true) {
         this.sendHandler.execute {
             logger.verbose("topic:%s, data size:%s", topic, data.size)
-            it.publish(topic, data, QoS.EXACTLY_ONCE, retain).await()
+            it.publish(topic, data, qos, retain).await()
         }
     }
 }
