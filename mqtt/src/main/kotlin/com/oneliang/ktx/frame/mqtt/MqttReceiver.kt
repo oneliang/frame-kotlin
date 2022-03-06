@@ -24,7 +24,7 @@ class MqttReceiver(host: String, username: String, password: String, threadCount
         this.receiveHandler.start()
     }
 
-    private val topicTaskMap = ConcurrentHashMap<String, (String) -> Unit>()
+    private val topicTaskMap = ConcurrentHashMap<String, (topic: String, payload: ByteArray) -> Unit>()
 
     @Suppress("UNCHECKED_CAST")
     override fun process(resource: FutureConnection): (FutureConnection) -> Unit {
@@ -32,13 +32,13 @@ class MqttReceiver(host: String, username: String, password: String, threadCount
         message.ack()
         return {
             val topic = message.topic
-            val payload = String(message.payload)
+            val payload = message.payload
             logger.verbose("topic:%s, payload:%s", topic, payload)
-            this.topicTaskMap[topic]?.invoke(payload)
+            this.topicTaskMap[topic]?.invoke(topic, payload)
         }
     }
 
-    fun addReceiveTask(topic: String, task: (String) -> Unit) {
+    fun addReceiveTask(topic: String, task: (topic: String, payload: ByteArray) -> Unit) {
         this.topicTaskMap[topic] = task
         if (this::connection.isInitialized) {
             this.connection.subscribe(arrayOf(Topic(topic, QoS.EXACTLY_ONCE)))

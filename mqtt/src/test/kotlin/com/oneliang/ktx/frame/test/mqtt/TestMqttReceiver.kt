@@ -7,13 +7,13 @@ fun main() {
     val username = "test"
     val password = "test"
     val mqttReceiver = MqttReceiver(host, username, password)
-    mqttReceiver.addReceiveTask("mqtt/example/publish") {
-        println("after receive:$it")
+    mqttReceiver.addReceiveTask("mqtt/example/publish") { topic, payload ->
+        println("after receive, topic:$topic, payload:${String(payload)}")
     }
-    mqttReceiver.addReceiveTask("test/test") {
-        println("after receive:$it")
+    mqttReceiver.addReceiveTask("test/test") { topic, payload ->
+        println("after receive, topic:$topic, payload:${String(payload)}")
     }
-    mqttReceiver.addReceiveTask("foo/1/bar") {
-        println("after receive:$it")
+    mqttReceiver.addReceiveTask("foo/1/bar") { topic, payload ->
+        println("after receive, topic:$topic, payload:${String(payload)}")
     }
 }
