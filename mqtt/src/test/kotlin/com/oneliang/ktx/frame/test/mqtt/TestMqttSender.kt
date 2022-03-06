@@ -9,6 +9,6 @@ fun main() {
     val mqttSender = MqttSender(host, username, password)
     for (i in 1..10) {
         mqttSender.send("mqtt/example/publish", "payload:$i".toByteArray())
-        Thread.sleep(1000)
+//        Thread.sleep(1000)
     }
 }
