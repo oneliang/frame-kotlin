@@ -4,7 +4,7 @@ import com.oneliang.ktx.exception.InitializeException
 import com.oneliang.ktx.frame.context.AbstractContext
 import com.oneliang.ktx.frame.context.Context
 import com.oneliang.ktx.util.common.JavaXmlUtil
-import com.oneliang.ktx.util.common.ObjectUtil
+import com.oneliang.ktx.util.common.isEntity
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.Map.Entry
@@ -17,6 +17,7 @@ class ConfigurationContext : AbstractContext() {
     }
 
     private val selfConfigurationBeanMap = ConcurrentHashMap<String, ConfigurationBean>()
+
     /**
      * @return the initialized
      */
@@ -49,13 +50,15 @@ class ConfigurationContext : AbstractContext() {
             if (configurationList != null) {
                 val length = configurationList.length
                 for (index in 0 until length) {
+                    //initialize configuration bean
                     val configurationBean = ConfigurationBean()
                     val configurationNode = configurationList.item(index)
                     val configurationAttributesMap = configurationNode.attributes
                     JavaXmlUtil.initializeFromAttributeMap(configurationBean, configurationAttributesMap)
+                    //use configuration bean
                     val context = this.classLoader.loadClass(configurationBean.contextClass).newInstance() as Context
                     val configurationBeanId = configurationBean.id
-                    logger.info("Context:" + context.javaClass.name + ",id:" + configurationBeanId + " is initializing.")
+                    logger.info("Context:%s, id:%s is initializing.", context.javaClass.name, configurationBeanId)
                     if (context is AbstractContext) {
                         context.projectRealPath = this.projectRealPath
                         context.classesRealPath = this.classesRealPath
@@ -122,7 +125,7 @@ class ConfigurationContext : AbstractContext() {
         var contextInstance: T? = null
         for ((_, value) in configurationBeanMap) {
             val context = value.contextInstance
-            if (ObjectUtil.isEntity(context as Any, kClass.java)) {
+            if (context != null && context.isEntity(kClass.java)) {
                 contextInstance = context as T
                 break
             }
