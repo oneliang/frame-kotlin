@@ -15,7 +15,7 @@ fun main() {
         host,
         username,
         password,
-        topicArray = arrayOf("mqtt/example/publish"),
+        topicArray = arrayOf("mqtt/#"),
         receiveCallback = receiveCallback
     )
 }
