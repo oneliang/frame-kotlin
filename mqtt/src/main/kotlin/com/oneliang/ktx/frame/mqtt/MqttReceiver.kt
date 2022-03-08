@@ -12,20 +12,16 @@ class MqttReceiver(
     username: String = Constants.String.BLANK,
     password: String = Constants.String.BLANK,
     option: MqttClient.Option? = null,
-    threadCount: Int = 2,
-    private val topicArray: Array<String> = emptyArray(),
-    private val receiveCallback: ReceiveCallback? = null
+    threadCount: Int = 2
 ) : ReceiveHandler.LoopingProcessor<FutureConnection> {
     companion object {
         private val logger = LoggerManager.getLogger(MqttReceiver::class)
     }
 
+    lateinit var receiveCallback: ReceiveCallback
+
     private val receiveHandler: ReceiveHandler<FutureConnection> = ReceiveHandler(threadCount, initialize = {
-        MqttClient.connect(host, username, password, option).also {
-            for (topic in topicArray) {
-                it.subscribe(arrayOf(Topic(topic, QoS.EXACTLY_ONCE)))
-            }
-        }
+        MqttClient.connect(host, username, password, option)
     }, this)
 
     init {
@@ -41,13 +37,21 @@ class MqttReceiver(
             val topic = message.topic
             val payload = message.payload
             logger.verbose("topic:%s, payload:%s", topic, payload)
-            receiveCallback?.afterReceived(topic, payload)
+            if (this::receiveCallback.isInitialized) {
+                this.receiveCallback.afterReceived(topic, payload)
+            }
         }
     }
 
     fun subscribe(topic: String) {
+        this.subscribe(arrayOf(topic))
+    }
+
+    fun subscribe(topicArray: Array<String>) {
         this.receiveHandler.execute {
-            it.subscribe(arrayOf(Topic(topic, QoS.EXACTLY_ONCE)))
+            for (topic in topicArray) {
+                it.subscribe(arrayOf(Topic(topic, QoS.EXACTLY_ONCE)))
+            }
         }
     }
 
