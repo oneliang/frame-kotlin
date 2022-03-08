@@ -12,13 +12,12 @@ class MqttReceiver(
     username: String = Constants.String.BLANK,
     password: String = Constants.String.BLANK,
     option: MqttClient.Option? = null,
-    threadCount: Int = 2
+    threadCount: Int = 2,
+    private val receiveCallback: ReceiveCallback? = null
 ) : ReceiveHandler.LoopingProcessor<FutureConnection> {
     companion object {
         private val logger = LoggerManager.getLogger(MqttReceiver::class)
     }
-
-    lateinit var receiveCallback: ReceiveCallback
 
     private val receiveHandler: ReceiveHandler<FutureConnection> = ReceiveHandler(threadCount, initialize = {
         MqttClient.connect(host, username, password, option)
@@ -37,9 +36,7 @@ class MqttReceiver(
             val topic = message.topic
             val payload = message.payload
             logger.verbose("topic:%s, payload:%s", topic, payload)
-            if (this::receiveCallback.isInitialized) {
-                this.receiveCallback.afterReceived(topic, payload)
-            }
+            this.receiveCallback?.afterReceived(topic, payload)
         }
     }
 

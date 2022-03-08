@@ -11,7 +11,6 @@ fun main() {
             println("after receive, topic:$topic, payload:${String(payload)}")
         }
     }
-    val mqttReceiver = MqttReceiver(host, username, password)
-    mqttReceiver.receiveCallback = receiveCallback
+    val mqttReceiver = MqttReceiver(host, username, password, receiveCallback = receiveCallback)
     mqttReceiver.subscribe("mqtt/#")
 }
