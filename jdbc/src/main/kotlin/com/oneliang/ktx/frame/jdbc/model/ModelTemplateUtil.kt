@@ -4,9 +4,9 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.jdbc.SqlUtil
 import com.oneliang.ktx.frame.jdbc.Table
 import com.oneliang.ktx.util.common.nullToBlank
-import com.oneliang.ktx.util.common.parseXml
 import com.oneliang.ktx.util.common.toFile
 import com.oneliang.ktx.util.common.toIntSafely
+import com.oneliang.ktx.util.common.toJavaXmlDocument
 import java.io.File
 import java.math.BigDecimal
 import java.util.*
@@ -22,7 +22,7 @@ object ModelTemplateUtil {
         if (!modelXmlFile.exists() || !modelXmlFile.isFile) {
             error("xml does not exists or is not a file, input file [%s]".format(modelXmlFile.absolutePath))
         }
-        val document = modelXmlFile.parseXml()
+        val document = modelXmlFile.toJavaXmlDocument()
         val root = document.documentElement
         val modelElementList = root.getElementsByTagName(ModelTemplateBean.TAG_MODEL)
         val modelTemplateBeanList = mutableListOf<ModelTemplateBean>()

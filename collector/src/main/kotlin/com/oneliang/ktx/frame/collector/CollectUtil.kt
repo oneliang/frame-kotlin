@@ -68,9 +68,9 @@ object CollectUtil {
      * @return ByteArrayOutputStream
      */
     fun collectFromHttpWithCache(httpUrl: String, method: String = Constants.Http.RequestMethod.GET.value, cacheKey: String = Constants.String.BLANK, httpHeaderList: List<HttpNameValue> = emptyList(), requestByteArray: ByteArray = ByteArray(0), fileCacheManager: FileCacheManager? = null, cacheRefreshTime: Long = -1L): ByteArray {
-        val newCacheKey = if (cacheKey.isBlank()) {
+        val newCacheKey = cacheKey.ifBlank {
             httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, Constants.Symbol.POUND_KEY)
-        } else cacheKey
+        }
         var cacheByteArray = fileCacheManager?.getFromCache(newCacheKey, ByteArray::class, cacheRefreshTime)
         if (cacheByteArray == null) {
             logger.debug("collect from http:%s", httpUrl)
@@ -106,7 +106,17 @@ object CollectUtil {
      * use for collect rule
      * @return T
      */
-    fun <T> collectFromHttpWithCache(httpUrl: String, method: String = Constants.Http.RequestMethod.GET.value, cacheKey: String = Constants.String.BLANK, httpHeaderList: List<HttpNameValue> = emptyList(), requestByteArray: ByteArray = ByteArray(0), fileCacheManager: FileCacheManager? = null, cacheRefreshTime: Long = -1L, collectRuleList: List<CollectRule> = emptyList(), collectDataTransformer: CollectDataTransformer<T>): T {
+    fun <T> collectFromHttpWithCache(
+        httpUrl: String,
+        method: String = Constants.Http.RequestMethod.GET.value,
+        cacheKey: String = Constants.String.BLANK,
+        httpHeaderList: List<HttpNameValue> = emptyList(),
+        requestByteArray: ByteArray = ByteArray(0),
+        fileCacheManager: FileCacheManager? = null,
+        cacheRefreshTime: Long = -1L,
+        collectRuleList: List<CollectRule> = emptyList(),
+        collectDataTransformer: CollectDataTransformer<T>
+    ): T {
         logger.info("collecting http url:%s", httpUrl)
         val responseByteArray = collectFromHttpWithCache(httpUrl, method, cacheKey, httpHeaderList, requestByteArray, fileCacheManager, cacheRefreshTime)
         val responseString = String(responseByteArray)
@@ -155,12 +165,6 @@ object CollectUtil {
 
     private fun parseByXPath(content: String): List<String> {
         return emptyList()
-    }
-
-    class CollectUtilException : RuntimeException {
-        constructor(message: String) : super(message)
-        constructor(cause: Throwable) : super(cause)
-        constructor(message: String, cause: Throwable) : super(message, cause)
     }
 
     class CollectRule(val type: Int = Type.CONTENT.value) {

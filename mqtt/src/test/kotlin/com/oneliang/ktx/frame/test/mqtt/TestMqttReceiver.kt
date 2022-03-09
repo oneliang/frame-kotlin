@@ -13,4 +13,5 @@ fun main() {
     }
     val mqttReceiver = MqttReceiver(host, username, password, receiveCallback = receiveCallback)
     mqttReceiver.subscribe("mqtt/#")
+    mqttReceiver.subscribe("\$SYS/brokers/+/clients/#")
 }
