@@ -1,0 +1,2 @@
+method design principle
+when method parameter is always mutable, please use List<T>, if not, please use Array<T>

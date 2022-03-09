@@ -1,0 +1,5 @@
+class Query is short for Structured Query Language(SQL)
+
+SqlUtil
+SqlInjectUtil
+when method parameter is always mutable, please use List<T>, if not, please use Array<T>
