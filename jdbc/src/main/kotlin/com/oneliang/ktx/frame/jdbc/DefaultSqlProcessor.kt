@@ -160,6 +160,7 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
         }
         if (idFlag && type == SqlUtil.ColumnType.INT) {
             stringBuilder.append(Constants.String.SPACE)
+            stringBuilder.append("AUTO_INCREMENT")
         } else {//not id add default value
             if (defaultValue != null) {
                 stringBuilder.append(Constants.String.SPACE)
