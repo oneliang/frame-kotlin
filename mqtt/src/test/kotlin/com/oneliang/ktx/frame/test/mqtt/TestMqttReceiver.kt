@@ -11,7 +11,15 @@ fun main() {
             println("after receive, topic:$topic, payload:${String(payload)}")
         }
     }
-    val mqttReceiver = MqttReceiver(host, username, password, receiveCallback = receiveCallback)
-    mqttReceiver.subscribe("mqtt/#")
-    mqttReceiver.subscribe("\$SYS/brokers/+/clients/#")
+    val mqttReceiver = MqttReceiver(host, username, password)
+    mqttReceiver.subscribe("device/+/+", "^device/([\\w]+)/([\\w]+)\$", object : MqttReceiver.ReceiveCallback {
+        override fun afterReceived(topic: String, payload: ByteArray) {
+            println("$topic,$payload")
+        }
+    })
+    mqttReceiver.subscribe("\$SYS/brokers/+/clients/#", "^\\\$SYS/brokers/[\\S]+/clients/[\\S]+\$", object : MqttReceiver.ReceiveCallback {
+        override fun afterReceived(topic: String, payload: ByteArray) {
+            println("$topic,$payload")
+        }
+    })
 }

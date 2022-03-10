@@ -8,7 +8,7 @@ fun main() {
     val password = "test"
     val mqttSender = MqttSender(host, username, password)
     for (i in 1..10) {
-        mqttSender.send("mqtt/example/publish", "payload:$i".toByteArray())
+        mqttSender.send("device/1/1", "payload:$i".toByteArray())
         Thread.sleep(1000)
     }
 }
