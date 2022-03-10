@@ -38,7 +38,7 @@ class MqttReceiver(
         return {
             val topic = message.topic
             val payload = message.payload
-            logger.verbose("topic:%s, payload:%s", topic, payload)
+            logger.debug("topic:%s, payload:%s", topic, payload)
             topicMatchRegexReceiveCallbackMap.forEach { (topicMatchRegex, receiveCallback) ->
                 if (topic.matches(topicMatchRegex)) {
                     receiveCallback.onReceived(topic, payload)
