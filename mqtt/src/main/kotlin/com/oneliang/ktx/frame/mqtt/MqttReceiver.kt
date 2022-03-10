@@ -41,7 +41,7 @@ class MqttReceiver(
             logger.verbose("topic:%s, payload:%s", topic, payload)
             topicMatchRegexReceiveCallbackMap.forEach { (topicMatchRegex, receiveCallback) ->
                 if (topic.matches(topicMatchRegex)) {
-                    receiveCallback.afterReceived(topic, payload)
+                    receiveCallback.onReceived(topic, payload)
                 }
             }
         }
@@ -68,6 +68,6 @@ class MqttReceiver(
     }
 
     interface ReceiveCallback {
-        fun afterReceived(topic: String, payload: ByteArray)
+        fun onReceived(topic: String, payload: ByteArray)
     }
 }
