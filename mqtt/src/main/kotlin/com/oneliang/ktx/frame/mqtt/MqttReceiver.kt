@@ -60,8 +60,9 @@ class MqttReceiver(
         }
     }
 
-    fun unsubscribe(topic: String) {
+    fun unsubscribe(topic: String, topicMatchRegex: String) {
         this.receiveHandler.execute {
+            this.topicMatchRegexReceiveCallbackMap.remove(topicMatchRegex)
             it.unsubscribe(arrayOf(topic))
         }
     }
