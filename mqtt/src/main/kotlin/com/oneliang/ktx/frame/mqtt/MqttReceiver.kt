@@ -41,7 +41,15 @@ class MqttReceiver(
             logger.debug("topic:%s, payload:%s", topic, payload)
             topicMatchRegexReceiveCallbackMap.forEach { (topicMatchRegex, receiveCallback) ->
                 if (topic.matches(topicMatchRegex)) {
-                    receiveCallback.onReceived(topic, payload)
+                    try {
+                        receiveCallback.onReceived(topic, payload)
+                    } catch (throwable: Throwable) {
+                        try {//will have exception in onError, so use try catch with it
+                            receiveCallback.onError(throwable)
+                        } catch (t: Throwable) {
+                            logger.error("exception on receiveCallback.onError()", t)
+                        }
+                    }
                 }
             }
         }
@@ -69,5 +77,7 @@ class MqttReceiver(
 
     interface ReceiveCallback {
         fun onReceived(topic: String, payload: ByteArray)
+
+        fun onError(throwable: Throwable) {}
     }
 }
