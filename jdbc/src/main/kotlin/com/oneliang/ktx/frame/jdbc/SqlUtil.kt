@@ -626,6 +626,7 @@ object SqlUtil {
         FLOAT("FLOAT"),
         DOUBLE("DOUBLE"),
         DATE("DATE"),
+        DATETIME("DATETIME"),
         BIG_DECIMAL("BIG_DECIMAL"),
     }
 }

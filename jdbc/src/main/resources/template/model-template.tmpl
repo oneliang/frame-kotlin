@@ -1,3 +1,4 @@
+/** Automatically generated file. DO NOT MODIFY */
 package <%=packageName%>
 
 <%for(var i=0;i<importArray.length;i++){%><%var importName=importArray[i];%>
@@ -47,7 +48,7 @@ open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames
     <%=overrideString%>var <%=fieldBean.name%>: Float<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
     <%} else if (type == 'DOUBLE') {%>
     <%=overrideString%>var <%=fieldBean.name%>: Double<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
-    <%} else if (type == 'DATE') {%>
+    <%} else if (type == 'DATE' || type == 'DATETIME') {%>
     <%=overrideString%>var <%=fieldBean.name%>: Date<%=nullableString%> = <%=defaultValue%>
     <%} else if (type == 'BIG_DECIMAL') {%>
     <%=overrideString%>var <%=fieldBean.name%>: BigDecimal<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "BigDecimal(0)")%>

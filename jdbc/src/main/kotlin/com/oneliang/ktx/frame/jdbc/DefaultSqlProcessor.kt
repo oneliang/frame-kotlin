@@ -140,6 +140,10 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
                     }
                 }
                 SqlUtil.ColumnType.DATE -> {
+                    optimizeDefaultValue = Constants.Date.DEFAULT.toFormatString(Constants.Time.YEAR_MONTH_DAY)
+                    "DATE"
+                }
+                SqlUtil.ColumnType.DATETIME -> {
                     optimizeDefaultValue = Constants.Date.DEFAULT.toFormatString()
                     "DATETIME"
                 }
