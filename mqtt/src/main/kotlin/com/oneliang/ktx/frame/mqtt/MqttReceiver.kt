@@ -44,6 +44,7 @@ class MqttReceiver(
                     try {
                         receiveCallback.onReceived(topic, payload)
                     } catch (throwable: Throwable) {
+                        logger.error("exception on receiveCallback.onReceived(), you can handle it in override receiveCallback.onError() method", throwable)
                         try {//will have exception in onError, so use try catch with it
                             receiveCallback.onError(throwable)
                         } catch (t: Throwable) {
