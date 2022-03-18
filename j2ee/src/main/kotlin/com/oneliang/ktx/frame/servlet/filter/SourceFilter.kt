@@ -21,7 +21,7 @@ class SourceFilter : Filter {
         private const val ERROR_FORWARD = "errorForward"
     }
 
-    private var excludePathArray: Array<String> = emptyArray()
+    private var excludePaths: Array<String> = emptyArray()
     private var errorForward: String = Constants.String.BLANK
 
     /**
@@ -34,9 +34,9 @@ class SourceFilter : Filter {
         this.errorForward = filterConfig.getInitParameter(ERROR_FORWARD).nullToBlank()
         if (excludePaths.isNotBlank()) {
             val excludePathArray = excludePaths.split(Constants.Symbol.COMMA)
-            this.excludePathArray = Array(excludePathArray.size) { Constants.String.BLANK }
+            this.excludePaths = Array(excludePathArray.size) { Constants.String.BLANK }
             for ((i, excludePath) in excludePathArray.withIndex()) {
-                this.excludePathArray[i] = excludePath.trim()
+                this.excludePaths[i] = excludePath.trim()
             }
         }
     }
@@ -55,8 +55,8 @@ class SourceFilter : Filter {
         val projectPath = httpRequest.contextPath
         val requestUri = httpRequest.requestURI
         var excludePathThrough = false
-        if (this.excludePathArray.isNotEmpty()) {
-            for (excludePath in this.excludePathArray) {
+        if (this.excludePaths.isNotEmpty()) {
+            for (excludePath in this.excludePaths) {
                 val path = projectPath + excludePath
                 if (requestUri.matchesPattern(path)) {
                     excludePathThrough = true
@@ -73,7 +73,7 @@ class SourceFilter : Filter {
     }
 
     override fun destroy() {
-        this.excludePathArray = emptyArray()
+        this.excludePaths = emptyArray()
         this.errorForward = Constants.String.BLANK
     }
 }

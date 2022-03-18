@@ -25,8 +25,8 @@ class SessionFilter : Filter {
         private val AND_ENCODE = Encoder.escape("&")
     }
 
-    private var sessionKeyArray: Array<String> = emptyArray()
-    private var excludePathArray: Array<String> = emptyArray()
+    private var sessionKeys: Array<String> = emptyArray()
+    private var excludePaths: Array<String> = emptyArray()
     private var errorForward: String = Constants.String.BLANK
 
     /**
@@ -40,16 +40,16 @@ class SessionFilter : Filter {
         this.errorForward = filterConfig.getInitParameter(ERROR_FORWARD)
         if (sessionKeys != null) {
             val sessionKeyArray = sessionKeys.split(Constants.Symbol.COMMA)
-            this.sessionKeyArray = Array(sessionKeyArray.size) { Constants.String.BLANK }
+            this.sessionKeys = Array(sessionKeyArray.size) { Constants.String.BLANK }
             for ((i, sessionKey) in sessionKeyArray.withIndex()) {
-                this.sessionKeyArray[i] = sessionKey.trim()
+                this.sessionKeys[i] = sessionKey.trim()
             }
         }
         if (excludePaths != null) {
             val excludePathArray = excludePaths.split(Constants.Symbol.COMMA)
-            this.excludePathArray = Array(excludePathArray.size) { Constants.String.BLANK }
+            this.excludePaths = Array(excludePathArray.size) { Constants.String.BLANK }
             for ((i, excludePath) in excludePathArray.withIndex()) {
-                this.excludePathArray[i] = excludePath.trim()
+                this.excludePaths[i] = excludePath.trim()
             }
         }
     }
@@ -66,8 +66,8 @@ class SessionFilter : Filter {
         val requestUri = httpRequest.requestURI
         var excludePathThrough = false
         var sessionThrough = false
-        if (this.excludePathArray.isNotEmpty()) {
-            for (excludePath in this.excludePathArray) {
+        if (this.excludePaths.isNotEmpty()) {
+            for (excludePath in this.excludePaths) {
                 val path = webRoot + excludePath
                 if (requestUri.matchesPattern(path)) {
                     excludePathThrough = true
@@ -75,8 +75,8 @@ class SessionFilter : Filter {
                 }
             }
         }
-        if (this.sessionKeyArray.isNotEmpty()) {
-            for (sessionKey in this.sessionKeyArray) {
+        if (this.sessionKeys.isNotEmpty()) {
+            for (sessionKey in this.sessionKeys) {
                 val instance = httpSession.getAttribute(sessionKey)
                 if (instance != null) {
                     sessionThrough = true
@@ -121,8 +121,8 @@ class SessionFilter : Filter {
     }
 
     override fun destroy() {
-        this.sessionKeyArray = emptyArray()
-        this.excludePathArray = emptyArray()
+        this.sessionKeys = emptyArray()
+        this.excludePaths = emptyArray()
         this.errorForward = Constants.String.BLANK
     }
 }

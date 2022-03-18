@@ -183,10 +183,10 @@ object AnnotationContextUtil {
         return classesRealPath + Constants.Symbol.COMMA + searchClassPath
     }
 
-    fun findMatchAnnotationClassList(directoryList: List<String>, fileSuffixArray: Array<String>, annotationClassNameArray: Array<String>): Map<String, List<String>> {
+    fun findMatchAnnotationClassList(directoryList: List<String>, fileSuffixs: Array<String>, annotationClassNames: Array<String>): Map<String, List<String>> {
         val annotationClassNameMap = mutableMapOf<String, MutableList<String>>()
         directoryList.forEach {
-            val subAnnotationClassNameMap = findMatchAnnotationClassList(it, fileSuffixArray, annotationClassNameArray)
+            val subAnnotationClassNameMap = findMatchAnnotationClassList(it, fileSuffixs, annotationClassNames)
             subAnnotationClassNameMap.forEach { (key, list) ->
                 val annotationClassNameList = annotationClassNameMap.getOrPut(key) { mutableListOf() }
                 annotationClassNameList += list
@@ -195,16 +195,16 @@ object AnnotationContextUtil {
         return annotationClassNameMap
     }
 
-    fun findMatchAnnotationClassList(directory: String, fileSuffixArray: Array<String>, annotationClassNameArray: Array<String>): Map<String, List<String>> {
+    fun findMatchAnnotationClassList(directory: String, fileSuffixs: Array<String>, annotationClassNames: Array<String>): Map<String, List<String>> {
         val matchOption = FileUtil.MatchOption()
         val annotationClassNameMap = mutableMapOf<String, MutableList<String>>()
-        annotationClassNameArray.forEach { name ->
+        annotationClassNames.forEach { name ->
             annotationClassNameMap[name] = mutableListOf()
         }
         File(directory).findMatchFile(matchOption) {
             val fullFilename = it.absolutePath
             var currentFileSuffix = Constants.String.BLANK
-            fileSuffixArray.forEach { fileSuffix ->
+            fileSuffixs.forEach { fileSuffix ->
                 if (!fullFilename.endsWith(fileSuffix)) {
                     return@findMatchFile it.absolutePath
                 }
@@ -220,7 +220,7 @@ object AnnotationContextUtil {
                     packageName = packageName.replace("package ", Constants.String.BLANK).replace(Constants.Symbol.SEMICOLON, Constants.String.BLANK)
                 } else if (trimLine.startsWith("@")) {
                     run loop@{
-                        annotationClassNameArray.forEach { name ->
+                        annotationClassNames.forEach { name ->
                             if (trimLine.startsWith(name)) {
                                 annotationClassName = name
                                 return@loop//break

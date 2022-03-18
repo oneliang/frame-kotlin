@@ -1,9 +1,7 @@
 package com.oneliang.ktx.frame.test.ai.mnist
 
-import com.oneliang.ktx.frame.ai.base.matrix.multiply
 import com.oneliang.ktx.frame.ai.cnn.MnistNeuralNetwork
 import com.oneliang.ktx.frame.ai.dnn.Trainer
-import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.*
 import java.io.File
 
@@ -17,7 +15,7 @@ object TestMnist {
 //        val fileRoot = "/Users/oneliang/data"
         val mnistLabelFullFilename = "$fileRoot/mnist/t10k-labels-idx1-ubyte"
         val mnistImageFullFilename = "$fileRoot/mnist/t10k-images-idx3-ubyte"
-        val modelFullFilename = "$fileRoot/cnn_model.txt"
+        val modelFullFilename = "$fileRoot/cnn_model_float.txt"
         val batching = TestMnistBatching(mnistLabelFullFilename, mnistImageFullFilename, batchSize)
         val neuralNetwork = MnistNeuralNetwork
         val trainer = Trainer()

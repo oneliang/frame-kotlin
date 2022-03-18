@@ -1,9 +1,9 @@
 package com.oneliang.ktx.frame.ai.activation
 
-fun minMaxNormalization(xArray: Array<Double>): Array<Double> {
+fun minMaxNormalization(doubles: Array<Double>): Array<Double> {
     var min = 0.0
     var max = 0.0
-    for (x in xArray) {
+    for (x in doubles) {
         if (min == 0.0) {
             min = x
         }
@@ -21,8 +21,8 @@ fun minMaxNormalization(xArray: Array<Double>): Array<Double> {
     if (gap == 0.0) {
         error("min equal max, all value are same. max:$max, min:$min")
     }
-    val resultArray = Array(xArray.size) { 0.0 }
-    xArray.forEachIndexed { index, value ->
+    val resultArray = Array(doubles.size) { 0.0 }
+    doubles.forEachIndexed { index, value ->
         resultArray[index] = (value - min) / gap
     }
     return resultArray

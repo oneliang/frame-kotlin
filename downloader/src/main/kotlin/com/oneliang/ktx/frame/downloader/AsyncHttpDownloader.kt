@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.downloader
 import com.oneliang.ktx.util.concurrent.ThreadPool
 import com.oneliang.ktx.util.http.HttpUtil
 
-class AsyncHttpDownloader(private val minThreads: Int, private val maxThreads: Int) {
+class AsyncHttpDownloader(minThreads: Int, maxThreads: Int) {
 
     companion object {
         private const val DEFAULT_MIN_THREADS = 1

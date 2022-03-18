@@ -4,78 +4,78 @@ import com.oneliang.ktx.util.common.sumByDoubleIndexed
 import com.oneliang.ktx.util.common.sumByFloatIndexed
 import com.oneliang.ktx.util.math.matrix.multiply
 
-fun linear(xArray: Array<Float>, weightArray: Array<Float> = emptyArray()): Float {
-    if (xArray.isEmpty()) {
+fun linear(xDatas: Array<Float>, weights: Array<Float> = emptyArray()): Float {
+    if (xDatas.isEmpty()) {
         error("x array can not be empty, it have one x at least")
     }
     val fixWeightArray = when {
-        weightArray.isEmpty() -> {
-            Array(xArray.size) { 0.0f }
+        weights.isEmpty() -> {
+            Array(xDatas.size) { 0.0f }
         }
-        xArray.size == weightArray.size -> {
-            weightArray
+        xDatas.size == weights.size -> {
+            weights
         }
         else -> {
-            error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xArray.size, weightArray.size))
+            error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xDatas.size, weights.size))
         }
     }
-    return xArray.sumByFloatIndexed { index, item ->
+    return xDatas.sumByFloatIndexed { index, item ->
         fixWeightArray[index] * item
     }
 }
 
-fun linear(xArray: Array<Double>, weightArray: Array<Double> = emptyArray()): Double {
-    if (xArray.isEmpty()) {
+fun linear(xDatas: Array<Double>, weights: Array<Double> = emptyArray()): Double {
+    if (xDatas.isEmpty()) {
         error("x array can not be empty, it have one x at least")
     }
     val fixWeightArray = when {
-        weightArray.isEmpty() -> {
-            Array(xArray.size) { 0.0 }
+        weights.isEmpty() -> {
+            Array(xDatas.size) { 0.0 }
         }
-        xArray.size == weightArray.size -> {
-            weightArray
+        xDatas.size == weights.size -> {
+            weights
         }
         else -> {
-            error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xArray.size, weightArray.size))
+            error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xDatas.size, weights.size))
         }
     }
-    return xArray.sumByDoubleIndexed { index, item ->
+    return xDatas.sumByDoubleIndexed { index, item ->
         fixWeightArray[index] * item
     }
 }
 
-fun linear(xArray: Array<Float>, weightArray: Array<Array<Float>>): Array<Float> {
-    if (xArray.isEmpty()) {
+fun linear(xDatas: Array<Float>, weights: Array<Array<Float>>): Array<Float> {
+    if (xDatas.isEmpty()) {
         error("x array can not be empty, it have one x at least")
     }
-    if (weightArray.isEmpty()) {
+    if (weights.isEmpty()) {
         error("weight array can not be empty, it have one weight at least")
     }
-    val fixWeightArray = when (xArray.size) {
-        weightArray.size -> {
-            weightArray
+    val fixWeightArray = when (xDatas.size) {
+        weights.size -> {
+            weights
         }
         else -> {
-            error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xArray.size, weightArray.size))
+            error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xDatas.size, weights.size))
         }
     }
-    return xArray.multiply(fixWeightArray)
+    return xDatas.multiply(fixWeightArray)
 }
 
-fun linear(xArray: Array<Double>, weightArray: Array<Array<Double>>): Array<Double> {
-    if (xArray.isEmpty()) {
+fun linear(xDatas: Array<Double>, weights: Array<Array<Double>>): Array<Double> {
+    if (xDatas.isEmpty()) {
         error("x array can not be empty, it have one x at least")
     }
-    if (weightArray.isEmpty()) {
+    if (weights.isEmpty()) {
         error("weight array can not be empty, it have one weight at least")
     }
-    val fixWeightArray = when (xArray.size) {
-        weightArray.size -> {
-            weightArray
+    val fixWeights = when (xDatas.size) {
+        weights.size -> {
+            weights
         }
         else -> {
-            error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xArray.size, weightArray.size))
+            error("x array size must be equal weight array size, x array size:%s, weight array size:%s".format(xDatas.size, weights.size))
         }
     }
-    return xArray.multiply(fixWeightArray)
+    return xDatas.multiply(fixWeights)
 }

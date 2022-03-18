@@ -1,7 +1,6 @@
 package com.oneliang.ktx.frame.expression
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.util.common.perform
 import com.oneliang.ktx.util.common.toUtilDate
 import java.util.*
 import kotlin.math.pow
@@ -167,21 +166,21 @@ object Expression {
     /**
      * calculate node
      * @param type type
-     * @param dataArray size may be one or two
+     * @param datas size may be one or two
      * @return Any, in fact is boolean or double or string or INVALID_EVAL_RESULT
      */
-    private fun calculate(type: ExpressionNode.Type, dataArray: Array<Any>): Any {
-        if (!(dataArray.size == 1 || dataArray.size == 2)) {
+    private fun calculate(type: ExpressionNode.Type, datas: Array<Any>): Any {
+        if (!(datas.size == 1 || datas.size == 2)) {
             return INVALID_EVAL_RESULT
         }
-        val dataOne = dataArray[0]
-        val dataTwo = dataArray.getOrElse(1) { INVALID_DATA }
+        val dataOne = datas[0]
+        val dataTwo = datas.getOrElse(1) { INVALID_DATA }
         var stringOne = dataOne.toString()
         var stringTwo = dataTwo.toString()
         val dateFlag = ExpressionNode.isDatetime(stringOne) || ExpressionNode.isDatetime(stringTwo)
-        val stringFlag = stringOne.contains("\"") || stringTwo.contains("\"")
-        stringOne = stringOne.replace("\"", Constants.String.BLANK)
-        stringTwo = stringTwo.replace("\"", Constants.String.BLANK)
+        val stringFlag = stringOne.contains(Constants.Symbol.DOUBLE_QUOTE) || stringTwo.contains(Constants.Symbol.DOUBLE_QUOTE)
+        stringOne = stringOne.replace(Constants.Symbol.DOUBLE_QUOTE, Constants.String.BLANK)
+        stringTwo = stringTwo.replace(Constants.Symbol.DOUBLE_QUOTE, Constants.String.BLANK)
         when (type) {
             ExpressionNode.Type.PLUS -> {
                 if (!stringFlag) {

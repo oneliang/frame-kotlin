@@ -5,14 +5,14 @@ import com.oneliang.ktx.util.common.sumByFloat
 import com.oneliang.ktx.util.json.toJson
 import kotlin.math.ln
 
-fun informationEntropy(xArray: Array<Float>): Float {
-    return -xArray.sumByFloat {
+fun informationEntropy(floats: Array<Float>): Float {
+    return -floats.sumByFloat {
         it * ln(it)
     }
 }
 
-fun informationEntropy(xArray: Array<Double>): Double {
-    return -xArray.sumByDouble {
+fun informationEntropy(doubles: Array<Double>): Double {
+    return -doubles.sumByDouble {
         it * ln(it)
     }
 }

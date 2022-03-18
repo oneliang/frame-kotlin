@@ -6,20 +6,20 @@ import com.oneliang.ktx.frame.ai.regression.LinearMachine
 
 fun main() {
 //    val weightArray = Array(3) { 0.0 }
-    val weightArray = Array(2) { Array(1) { 0.0f } }
+    val weights = Array(2) { Array(1) { 0.0f } }
 //    val learningRate = 0.00000000001
     val learningRate = 0.01f
     val times = 10000
     val batching = TestLogisticRegressionBatching(100)
 //    val batching = TestStableDataBatching(100)
-    val activationFunction: (xArray: Array<Float>, newWeightArray: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray ->
-        val calculateY = linear(xArray, newWeightArray)
+    val activationFunction: (xDatas: Array<Float>, newWeights: Array<Array<Float>>) -> Array<Float> = { xDatas, newWeightArray ->
+        val calculateY = linear(xDatas, newWeightArray)
         calculateY.forEachIndexed { index, d ->
             calculateY[index] = sigmoid(d)
         }
         calculateY
     }
-    val newWeightArray = LinearMachine.study(batching, weightArray, learningRate, times, 100, activationFunction = activationFunction)
+    val newWeights = LinearMachine.study(batching, weights, learningRate, times, 100, activationFunction = activationFunction)
     batching.reset()
-    LinearMachine.test(batching, newWeightArray, activationFunction)
+    LinearMachine.test(batching, newWeights, activationFunction)
 }

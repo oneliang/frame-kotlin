@@ -17,7 +17,7 @@ fun main() {
     for (type in 0 until typeCount) {
         correctProbability[type][type] = 1.0f
     }
-    val activationFunction: (xArray: Array<Float>, newWeightArray: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray ->
+    val activationFunction: (xDatas: Array<Float>, newWeights: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray ->
         softmax(xArray, newWeightArray)
     }
     val newWeightArray = LinearMachine.study(batching, weightArray, learningRate, times, 100,

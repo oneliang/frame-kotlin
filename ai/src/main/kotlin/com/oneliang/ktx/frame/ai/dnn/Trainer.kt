@@ -160,8 +160,8 @@ class Trainer {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun forward(inputLayer: Layer<Any, Any>, dataId: Long, xArray: Array<Float>, y: Float, training: Boolean) {
-        inputLayer.doForward(dataId, xArray, y, training)
+    private fun forward(inputLayer: Layer<Any, Any>, dataId: Long, xDatas: Array<Float>, y: Float, training: Boolean) {
+        inputLayer.doForward(dataId, xDatas, y, training)
     }
 
     @Suppress("UNCHECKED_CAST")

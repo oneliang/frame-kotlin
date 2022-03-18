@@ -1,14 +1,11 @@
 package com.oneliang.ktx.frame.ai.activation
 
-import com.oneliang.ktx.pojo.DoubleWrapper
-import com.oneliang.ktx.pojo.FloatWrapper
-import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.math.matrix.multiply
 import kotlin.math.exp
 
-fun softmax(xArray: Array<Double>, weightArray: Array<Array<Double>>, negative: Boolean = false): Array<Double> {
+fun softmax(xDatas: Array<Double>, weights: Array<Array<Double>>, negative: Boolean = false): Array<Double> {
     var totalValue = 0.0
-    val valueMatrix = xArray.multiply(weightArray, false, transform = {
+    val valueMatrix = xDatas.multiply(weights, false, transform = {
         val value = exp(it)
         totalValue += value
         value
@@ -20,9 +17,9 @@ fun softmax(xArray: Array<Double>, weightArray: Array<Array<Double>>, negative: 
     return valueMatrix
 }
 
-fun softmax(xArray: Array<Float>, weightArray: Array<Array<Float>>, negative: Boolean = false): Array<Float> {
+fun softmax(xDatas: Array<Float>, weights: Array<Array<Float>>, negative: Boolean = false): Array<Float> {
     var totalValue = 0.0f
-    val valueMatrix = xArray.multiply(weightArray, false, transform = {
+    val valueMatrix = xDatas.multiply(weights, false, transform = {
         val value = exp(it)
         totalValue += value
         value

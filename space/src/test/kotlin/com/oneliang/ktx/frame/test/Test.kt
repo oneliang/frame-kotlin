@@ -644,7 +644,7 @@ object Test {
 
     }
 
-    fun GetLocation(best_solution: Point, use4thAnchor: Int, anchorArray: Array<Point>, distanceArray: Array<Int>): Int {
+    fun GetLocation(best_solution: Point, use4thAnchor: Int, anchors: Array<Point>, distances: Array<Int>): Int {
 
         val o1: Point = Point(0.0, 0.0, 0.0)
         val o2: Point = Point(0.0, 0.0, 0.0)
@@ -664,67 +664,67 @@ object Test {
 
         if (use4thAnchor == 0)//3基站定位
         {
-            if (distanceArray[3] == 0)//A3无效 A0 A1 A2有效，执行3基站定位
+            if (distances[3] == 0)//A3无效 A0 A1 A2有效，执行3基站定位
             {
                 /* Anchors coordinate */
-                p1.replaceFrom(anchorArray[0].x, anchorArray[0].y, anchorArray[0].z)
-                p2.replaceFrom(anchorArray[1].x, anchorArray[1].y, anchorArray[1].z)
-                p3.replaceFrom(anchorArray[2].x, anchorArray[2].y, anchorArray[2].z)
+                p1.replaceFrom(anchors[0].x, anchors[0].y, anchors[0].z)
+                p2.replaceFrom(anchors[1].x, anchors[1].y, anchors[1].z)
+                p3.replaceFrom(anchors[2].x, anchors[2].y, anchors[2].z)
                 p4.replaceFrom(p1.x, p1.y, p1.z)
 
-                r1 = distanceArray[0] / 1000.0
-                r2 = distanceArray[1] / 1000.0
-                r3 = distanceArray[2] / 1000.0
+                r1 = distances[0] / 1000.0
+                r2 = distances[1] / 1000.0
+                r3 = distances[2] / 1000.0
                 r4 = r1
-            } else if (distanceArray[0] == 0)//A0无效 A1 A2 A3有效，执行3基站定位
+            } else if (distances[0] == 0)//A0无效 A1 A2 A3有效，执行3基站定位
             {
                 /* Anchors coordinate */
-                p1.replaceFrom(anchorArray[1].x, anchorArray[1].y, anchorArray[1].z)
-                p2.replaceFrom(anchorArray[2].x, anchorArray[2].y, anchorArray[2].z)
-                p3.replaceFrom(anchorArray[3].x, anchorArray[3].y, anchorArray[3].z)
+                p1.replaceFrom(anchors[1].x, anchors[1].y, anchors[1].z)
+                p2.replaceFrom(anchors[2].x, anchors[2].y, anchors[2].z)
+                p3.replaceFrom(anchors[3].x, anchors[3].y, anchors[3].z)
                 p4.replaceFrom(p1.x, p1.y, p1.z)
 
-                r1 = distanceArray[1] / 1000.0
-                r2 = distanceArray[2] / 1000.0
-                r3 = distanceArray[3] / 1000.0
+                r1 = distances[1] / 1000.0
+                r2 = distances[2] / 1000.0
+                r3 = distances[3] / 1000.0
                 r4 = r1
-            } else if (distanceArray[1] == 0)//A1无效 A0 A2 A3有效，执行3基站定位
+            } else if (distances[1] == 0)//A1无效 A0 A2 A3有效，执行3基站定位
             {
                 /* Anchors coordinate */
-                p1.replaceFrom(anchorArray[0].x, anchorArray[0].y, anchorArray[0].z)
-                p2.replaceFrom(anchorArray[2].x, anchorArray[2].y, anchorArray[2].z)
-                p3.replaceFrom(anchorArray[3].x, anchorArray[3].y, anchorArray[3].z)
+                p1.replaceFrom(anchors[0].x, anchors[0].y, anchors[0].z)
+                p2.replaceFrom(anchors[2].x, anchors[2].y, anchors[2].z)
+                p3.replaceFrom(anchors[3].x, anchors[3].y, anchors[3].z)
                 p4.replaceFrom(p1.x, p1.y, p1.z)
 
-                r1 = distanceArray[0] / 1000.0
-                r2 = distanceArray[2] / 1000.0
-                r3 = distanceArray[3] / 1000.0
+                r1 = distances[0] / 1000.0
+                r2 = distances[2] / 1000.0
+                r3 = distances[3] / 1000.0
                 r4 = r1
-            } else if (distanceArray[2] == 0)//A2无效 A0 A1 A3有效，执行3基站定位
+            } else if (distances[2] == 0)//A2无效 A0 A1 A3有效，执行3基站定位
             {
                 /* Anchors coordinate */
-                p1.replaceFrom(anchorArray[0].x, anchorArray[0].y, anchorArray[0].z)
-                p2.replaceFrom(anchorArray[1].x, anchorArray[1].y, anchorArray[1].z)
-                p3.replaceFrom(anchorArray[3].x, anchorArray[3].y, anchorArray[3].z)
+                p1.replaceFrom(anchors[0].x, anchors[0].y, anchors[0].z)
+                p2.replaceFrom(anchors[1].x, anchors[1].y, anchors[1].z)
+                p3.replaceFrom(anchors[3].x, anchors[3].y, anchors[3].z)
                 p4.replaceFrom(p1.x, p1.y, p1.z)
 
-                r1 = distanceArray[0] / 1000.0
-                r2 = distanceArray[1] / 1000.0
-                r3 = distanceArray[3] / 1000.0
+                r1 = distances[0] / 1000.0
+                r2 = distances[1] / 1000.0
+                r3 = distances[3] / 1000.0
                 r4 = r1
             }
         } else//4基站定位
         {
             /* Anchors coordinate */
-            p1.replaceFrom(anchorArray[0].x, anchorArray[0].y, anchorArray[0].z)
-            p2.replaceFrom(anchorArray[1].x, anchorArray[1].y, anchorArray[1].z)
-            p3.replaceFrom(anchorArray[2].x, anchorArray[2].y, anchorArray[2].z)
-            p4.replaceFrom(anchorArray[3].x, anchorArray[3].y, anchorArray[3].z)
+            p1.replaceFrom(anchors[0].x, anchors[0].y, anchors[0].z)
+            p2.replaceFrom(anchors[1].x, anchors[1].y, anchors[1].z)
+            p3.replaceFrom(anchors[2].x, anchors[2].y, anchors[2].z)
+            p4.replaceFrom(anchors[3].x, anchors[3].y, anchors[3].z)
 
-            r1 = distanceArray[0] / 1000.0
-            r2 = distanceArray[1] / 1000.0
-            r3 = distanceArray[2] / 1000.0
-            r4 = distanceArray[3] / 1000.0
+            r1 = distances[0] / 1000.0
+            r2 = distances[1] / 1000.0
+            r3 = distances[2] / 1000.0
+            r4 = distances[3] / 1000.0
 
         }
 

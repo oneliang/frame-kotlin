@@ -13,18 +13,18 @@ object LinearMachine {
 
     fun study(
         batching: Batching<Pair<Float, Array<Float>>>,
-        weightArray: Array<Array<Float>>,
+        weights: Array<Array<Float>>,
         learningRate: Float,
         times: Int,
         printPeriod: Int = 500,
-        activationFunction: (xArray: Array<Float>, newWeightArray: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
+        activationFunction: (xDatas: Array<Float>, newWeights: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
         lossFunction: (calculateY: Array<Float>, y: Float) -> Float = { calculateY, y -> ordinaryLeastSquares(calculateY[0], y) },
         gradientFunction: (x: Float, calculateY: Array<Float>, y: Float, typeIndex: Int) -> Float = { x, calculateY, y, _ -> ordinaryLeastSquaresDerived(x, calculateY[0], y) }
     ): Array<Array<Float>> {
-        if (weightArray.isEmpty()) {
+        if (weights.isEmpty()) {
             error("weight array is empty")
         }
-        val newWeightArray = weightArray.copyOf()
+        val newWeightArray = weights.copyOf()
         for (count in 1..times) {
             var totalDataSize = 0L
             val weightGrad = Array(newWeightArray.size) { Array(newWeightArray[0].size) { 0.0f } }
@@ -65,8 +65,8 @@ object LinearMachine {
     }
 
     fun test(
-        batching: Batching<Pair<Float, Array<Float>>>, weightArray: Array<Array<Float>>,
-        activationFunction: (xArray: Array<Float>, newWeightArray: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
+        batching: Batching<Pair<Float, Array<Float>>>, weights: Array<Array<Float>>,
+        activationFunction: (xDatas: Array<Float>, newWeights: Array<Array<Float>>) -> Array<Float> = { xArray, newWeightArray -> linear(xArray, newWeightArray) },
         loggerMessageFunction: (calculateY: Array<Float>, y: Float) -> String = { calculateY, y -> "calculate y:%s, real y:%s".format(calculateY.toJson(), y) }
     ) {
         while (true) {
@@ -78,7 +78,7 @@ object LinearMachine {
             val inputDataList = result.dataList
             inputDataList.forEach { item ->
                 val (y, xArray) = item
-                val calculateY = activationFunction(xArray, weightArray)
+                val calculateY = activationFunction(xArray, weights)
                 logger.debug(loggerMessageFunction(calculateY, y))
             }
         }

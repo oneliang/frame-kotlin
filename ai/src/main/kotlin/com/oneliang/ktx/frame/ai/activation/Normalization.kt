@@ -9,30 +9,30 @@ private enum class NormalizationType(val value: Int) {
     L2(1)
 }
 
-private fun normalization(xArray: Array<Float>, normalizationType: NormalizationType): Array<Float> {
+private fun normalization(xDatas: Array<Float>, normalizationType: NormalizationType): Array<Float> {
     val (sum, denominator) = when (normalizationType) {
         NormalizationType.L1 -> {
             var sum = 0.0f
-            for (x in xArray) {
+            for (x in xDatas) {
                 sum += abs(x)
             }
             sum to sum
         }
         NormalizationType.L2 -> {
             var sum = 0.0f
-            for (x in xArray) {
+            for (x in xDatas) {
                 sum += abs(x)
             }
             sum to sqrt(sum)
         }
     }
-    val resultArray = Array(xArray.size) { 0.0f }
-    xArray.forEachIndexed { index, value ->
+    val resultArray = Array(xDatas.size) { 0.0f }
+    xDatas.forEachIndexed { index, value ->
         resultArray[index] = value / denominator
     }
     return resultArray
 }
 
-fun l1Normalization(xArray: Array<Float>): Array<Float> = normalization(xArray, NormalizationType.L1)
+fun l1Normalization(xDatas: Array<Float>): Array<Float> = normalization(xDatas, NormalizationType.L1)
 
-fun l2Normalization(xArray: Array<Float>): Array<Float> = normalization(xArray, NormalizationType.L2)
+fun l2Normalization(xDatas: Array<Float>): Array<Float> = normalization(xDatas, NormalizationType.L2)

@@ -83,10 +83,10 @@ class TaskEngine(private val mode: Mode, minThreads: Int, maxThreads: Int) {
             }
             taskNodeList.add(taskNode)
         }
-        val depthArray: Array<Int> = depthList.toTypedArray()
-        Arrays.sort(depthArray)
+        val depths: Array<Int> = depthList.toTypedArray()
+        Arrays.sort(depths)
         val hasAddThreadTaskMap = mutableMapOf<String, TaskNode>()
-        for (depth in depthArray) {
+        for (depth in depths) {
             var taskNodeList: List<TaskNode> = taskNodeDepthMap[depth]!!
             if (this.autoSort) {
                 taskNodeList = sort(taskNodeList)

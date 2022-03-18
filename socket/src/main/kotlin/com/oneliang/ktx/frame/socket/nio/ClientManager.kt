@@ -13,7 +13,7 @@ class ClientManager(private val host: String, private val port: Int) : LoopThrea
     var readProcessor: (byteArray: ByteArray) -> Unit = {}
     private val threadCount = Runtime.getRuntime().availableProcessors()
     private val threadPool = ThreadPool()
-    private var clientArray: Array<Client> = emptyArray()
+    private var clients: Array<Client> = emptyArray()
 
     @Throws(Throwable::class)
     override fun looping() {
@@ -26,12 +26,12 @@ class ClientManager(private val host: String, private val port: Int) : LoopThrea
         this.threadPool.minThreads = 1
         this.threadPool.maxThreads = this.threadCount
         this.threadPool.start()
-        this.clientArray = Array(this.threadCount) {
+        this.clients = Array(this.threadCount) {
             Client(this.host, this.port, Selector.open()).also {
                 it.readProcessor = this.readProcessor
             }
         }
-        this.clientArray.forEach {
+        this.clients.forEach {
             this.threadPool.addThreadTask {
                 it.run()
             }
@@ -39,10 +39,10 @@ class ClientManager(private val host: String, private val port: Int) : LoopThrea
     }
 
     fun send(byteArray: ByteArray) {
-        if (this.clientArray.isEmpty()) {
+        if (this.clients.isEmpty()) {
             return
         }
-        val client = this.clientArray[byteArray.hashCode() % this.clientArray.size]
+        val client = this.clients[byteArray.hashCode() % this.clients.size]
         client.send(byteArray)
     }
 }

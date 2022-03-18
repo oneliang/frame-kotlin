@@ -60,9 +60,9 @@ class MqttReceiver(
         this.subscribe(arrayOf(topic to topicMatchRegex), receiveCallback)
     }
 
-    fun subscribe(topicAndTopicMatchRegexArray: Array<Pair<String, String>>, receiveCallback: ReceiveCallback) {
+    fun subscribe(topicAndTopicMatchRegexs: Array<Pair<String, String>>, receiveCallback: ReceiveCallback) {
         this.receiveHandler.execute {
-            for ((topic, topicMatchRegex) in topicAndTopicMatchRegexArray) {
+            for ((topic, topicMatchRegex) in topicAndTopicMatchRegexs) {
                 this.topicMatchRegexReceiveCallbackMap[topicMatchRegex] = receiveCallback
                 it.subscribe(arrayOf(Topic(topic, QoS.EXACTLY_ONCE)))
             }
