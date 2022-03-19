@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.jdbc
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.exception.MappingNotFoundException
 import com.oneliang.ktx.frame.bean.Page
 import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import com.oneliang.ktx.frame.jdbc.mysql.MySqlUtil
@@ -459,8 +460,14 @@ open class DefaultQueryImpl : BaseQueryImpl(), Query {
      * @throws QueryException
     </T></T> */
     override fun <T : Any, SequenceType : Any> selectObjectFlowList(kClass: KClass<T>, selectColumns: Array<String>, table: String, condition: String, sequenceKey: String, startSequence: SequenceType, comparator: Query.Comparator, orderBy: String, rowPerPage: Int, useDistinct: Boolean, useStable: Boolean, parameters: Array<*>): List<T> {
-        val sql = MySqlUtil.selectPaginationSql(selectColumns, table, condition, sequenceKey, startSequence.toString(), comparator, orderBy, rowPerPage, useDistinct)
-        return this.selectObjectListBySql(kClass, sql, useStable, parameters)
+        try {
+            val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
+            val fixTable = SqlUtil.fixTable(table, mappingBean, this.sqlProcessor)
+            val sql = MySqlUtil.selectPaginationSql(selectColumns, fixTable, condition, sequenceKey, startSequence.toString(), comparator, orderBy, rowPerPage, useDistinct)
+            return this.selectObjectListBySql(kClass, sql, useStable, parameters)
+        } catch (e: Throwable) {
+            throw QueryException(e)
+        }
     }
 
     /**

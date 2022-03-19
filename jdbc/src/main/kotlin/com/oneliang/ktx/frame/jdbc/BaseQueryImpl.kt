@@ -151,10 +151,10 @@ open class BaseQueryImpl : BaseQuery {
             val mappingBean = ConfigurationContainer.rootConfigurationContext.findMappingBean(kClass) ?: throw MappingNotFoundException("Mapping is not found, class:$kClass")
             val sql: String
             if (singleId) {
-                sql = SqlUtil.classToSelectSingleIdSql(kClass, mappingBean, this.sqlProcessor)
+                sql = SqlUtil.mappingBeanToSelectSingleIdSql(mappingBean, this.sqlProcessor, useDistinct)
                 resultSet = this.executeQueryBySql(connection, sql, ids)
             } else {
-                sql = SqlUtil.classToSelectMultipleIdSql(kClass, ids, mappingBean, this.sqlProcessor)
+                sql = SqlUtil.mappingBeanToSelectMultipleIdSql(ids, mappingBean, this.sqlProcessor, useDistinct)
                 resultSet = this.executeQueryBySql(connection, sql)
             }
             list = SqlUtil.resultSetToObjectList(resultSet, kClass, mappingBean, this.sqlProcessor)

@@ -181,41 +181,41 @@ object SqlUtil {
     }
 
     /**
-     * Method: class to select single id sql
+     * Method: mapping bean to select single id sql
      * @param <T>
-     * @param kClass
      * @param mappingBean
      * @param sqlProcessor
+     * @param useDistinct default true
      * @return String
     </T> */
-    fun <T : Any> classToSelectSingleIdSql(kClass: KClass<T>, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
-        return classToSelectIdSql(kClass, emptyArray(), mappingBean, sqlProcessor, SelectIdType.SINGLE_ID)
+    fun mappingBeanToSelectSingleIdSql(mappingBean: MappingBean, sqlProcessor: SqlProcessor, useDistinct: Boolean = true): String {
+        return mappingBeanToSelectIdSql(emptyArray(), mappingBean, sqlProcessor, SelectIdType.SINGLE_ID, useDistinct)
     }
 
     /**
-     * Method: class to select multiple id sql, only for single id column
+     * Method: mapping bean to select multiple id sql, only for single id column
      * @param <T>
-     * @param kClass
      * @param ids
      * @param mappingBean
      * @param sqlProcessor
+     * @param useDistinct default true
      * @return String
     </T> */
-    fun <T : Any, IdType : Any> classToSelectMultipleIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor): String {
-        return classToSelectIdSql(kClass, ids, mappingBean, sqlProcessor, SelectIdType.MULTIPLE_ID)
+    fun <IdType : Any> mappingBeanToSelectMultipleIdSql(ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor, useDistinct: Boolean = true): String {
+        return mappingBeanToSelectIdSql(ids, mappingBean, sqlProcessor, SelectIdType.MULTIPLE_ID, useDistinct)
     }
 
     /**
-     * Method: class to select id sql, only for single id column
-     * @param <T>
-     * @param kClass
+     * Method: mapping bean to select id sql, only for single id column
+     * @param <IdType>
      * @param ids
      * @param mappingBean
      * @param sqlProcessor
      * @param selectIdType
+     * @param useDistinct default true
      * @return String
     </T> */
-    private fun <T : Any, IdType : Any> classToSelectIdSql(kClass: KClass<T>, ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor, selectIdType: SelectIdType): String {
+    private fun <IdType : Any> mappingBeanToSelectIdSql(ids: Array<IdType>, mappingBean: MappingBean, sqlProcessor: SqlProcessor, selectIdType: SelectIdType, useDistinct: Boolean = true): String {
         val condition = StringBuilder()
         for (mappingColumnBean in mappingBean.mappingColumnBeanList) {
             val fieldName = mappingColumnBean.field
@@ -243,7 +243,7 @@ object SqlUtil {
             }
         }
         val table = fixTable(Constants.String.BLANK, mappingBean, sqlProcessor)
-        return selectSql(emptyArray(), table, condition.toString())
+        return selectSql(emptyArray(), table, condition.toString(), useDistinct)
     }
 
     /**
