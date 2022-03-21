@@ -65,3 +65,7 @@ fun String.toSqlAndIn(subSql: String = Constants.String.BLANK): String {
 fun String.toSqlOrIn(subSql: String = Constants.String.BLANK): String {
     return " OR $this IN ($subSql)"
 }
+
+fun String.toSqlAs(columnAlias: String): String {
+    return "$this AS $columnAlias"
+}
