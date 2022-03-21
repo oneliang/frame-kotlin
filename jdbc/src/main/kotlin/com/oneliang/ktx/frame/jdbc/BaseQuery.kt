@@ -291,5 +291,5 @@ interface BaseQuery {
 
     class BatchObject(val instance: Any, val condition: String = Constants.String.BLANK, val executeType: ExecuteType)
 
-    class ColumnData(val columnName: String, val dataKey: String, val kClass: KClass<*> = String::class)
+    class ColumnData(val columnName: String, val dataKey: String = columnName, val kClass: KClass<*> = String::class)
 }
