@@ -22,35 +22,35 @@ fun <T> Array<T>.toSqlCondition(transform: (T) -> String = { it.toString() }): S
     }
 }
 
-fun String.toSqlEqual(value: Any = Constants.Symbol.QUESTION_MARK): String {
+fun String.toSqlEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
     return "$this=$value"
 }
 
-fun String.toSqlNotEqual(value: Any = Constants.Symbol.QUESTION_MARK): String {
+fun String.toSqlNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
     return "$this!=$value"
 }
 
-fun String.toSqlAndEqual(value: Any = Constants.Symbol.QUESTION_MARK): String {
+fun String.toSqlAndEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
     return " AND $this=$value"
 }
 
-fun String.toSqlAndNotEqual(value: Any = Constants.Symbol.QUESTION_MARK): String {
+fun String.toSqlAndNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
     return " AND $this!=$value"
 }
 
-fun String.toSqlOrEqual(value: Any = Constants.Symbol.QUESTION_MARK): String {
+fun String.toSqlOrEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
     return " OR $this=$value"
 }
 
-fun String.toSqlOrNotEqual(value: Any = Constants.Symbol.QUESTION_MARK): String {
+fun String.toSqlOrNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
     return " OR $this!=$value"
 }
 
-fun String.toSqlAndLike(value: Any = Constants.Symbol.QUESTION_MARK): String {
+fun String.toSqlAndLike(value: String = Constants.Symbol.QUESTION_MARK): String {
     return " AND $this LIKE $value"
 }
 
-fun String.toSqlOrLike(value: Any = Constants.Symbol.QUESTION_MARK): String {
+fun String.toSqlOrLike(value: String = Constants.Symbol.QUESTION_MARK): String {
     return " OR $this LIKE $value"
 }
 
@@ -68,4 +68,12 @@ fun String.toSqlOrIn(subSql: String = Constants.String.BLANK): String {
 
 fun String.toSqlAs(columnAlias: String): String {
     return "$this AS $columnAlias"
+}
+
+fun String.toSqlLeftJoin(subSql: String): String {
+    return "$this LEFT JOIN $subSql"
+}
+
+fun String.toSqlOnEqual(value: String): String {
+    return " ON $this=$value"
 }
