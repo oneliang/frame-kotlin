@@ -30,4 +30,16 @@ class Coroutine(coroutineContext: CoroutineContext = EmptyCoroutineContext) {
             block()
         }
     }
+
+    fun sync(block: suspend Coroutine.() -> Unit) {
+        runBlocking {
+            block(this)
+        }
+    }
+
+    fun async(block: suspend Coroutine.() -> Unit): Job {
+        return launch {
+            block(this)
+        }
+    }
 }
