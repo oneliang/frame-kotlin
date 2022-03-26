@@ -135,6 +135,6 @@ class Message<O : Any, I : Any> {
      * @return String
      */
     fun toJson(jsonProcessor: JsonUtil.JsonProcessor = JsonUtil.DEFAULT_JSON_PROCESSOR): String {
-        return JsonUtil.objectToJson(this, emptyArray(), jsonProcessor)
+        return JsonUtil.objectToJson(this, emptyArray(), emptyMap(), jsonProcessor)
     }
 }

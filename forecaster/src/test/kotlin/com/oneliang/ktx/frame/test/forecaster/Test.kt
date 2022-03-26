@@ -171,7 +171,7 @@ private fun writeExcel(resourceOutputItemList: List<ResourceOutputItem>) {
             it.actualDifferent,
         )
     }
-    "C:/Users/Administrator/Desktop/test_out.xls".toFile().writeSimpleExcel(headerArray = headerArray, iterable = iterable)
+    "C:/Users/Administrator/Desktop/test_out.xls".toFile().writeSimpleExcel(headers = headerArray, iterable = iterable)
 }
 
 fun main() {
