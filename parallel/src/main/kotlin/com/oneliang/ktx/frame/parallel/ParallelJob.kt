@@ -2,7 +2,6 @@ package com.oneliang.ktx.frame.parallel
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.cache.CacheManager
-import com.oneliang.ktx.frame.cache.CacheRefreshCycle
 import com.oneliang.ktx.frame.cache.FileCacheManager
 import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.frame.parallel.cache.*
@@ -12,7 +11,7 @@ import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.CountDownLatch
 
-class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfiguration: ParallelJobConfiguration = ParallelJobConfiguration()) {
+class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfiguration: ParallelJobConfiguration = ParallelJobConfiguration.DEFAULT) {
     companion object {
         private val logger = LoggerManager.getLogger(ParallelJob::class)
     }
@@ -127,9 +126,9 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
         } else null
     }
 
-    internal fun updateSourceData(key: String, data: CacheData.Data) {
+    internal fun updateSourceData(key: String, sourceData: CacheData.Data) {
         if (this.parallelJobConfiguration.useCache) {
-            this.cacheData?.updateSourceData(key, data)
+            this.cacheData?.updateSourceData(key, sourceData)
         }
     }
 

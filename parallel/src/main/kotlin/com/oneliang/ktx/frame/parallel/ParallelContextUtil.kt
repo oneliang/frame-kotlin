@@ -23,7 +23,7 @@ internal object ParallelContextUtil {
                 }
             }
             parallelJobStep.isParallelSinkProcessor() -> {
-                logger.info("sink processor, value:%s, parent context action:%s", value.toJson(), parentParallelContextAction)
+                logger.info("sink processor, value:%s, parent context action:%s", value, parentParallelContextAction)
                 for (parallelSinkProcessor in parallelJobStep.parallelSinkProcessorList) {
                     if (parallelJob.parallelJobConfiguration.async) {
                         coroutine.launch {
