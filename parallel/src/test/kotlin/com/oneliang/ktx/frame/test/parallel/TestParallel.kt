@@ -3,18 +3,23 @@ package com.oneliang.ktx.frame.test.parallel
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.parallel.*
 import com.oneliang.ktx.frame.parallel.cache.CacheData
+import com.oneliang.ktx.frame.parallel.processor.QueueParallelSourceProcessor
 import com.oneliang.ktx.util.common.toIntSafely
+import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.locks.ReentrantLock
 
 class SourceProcessor : ParallelSourceProcessor<String> {
-    private val lock = ReentrantLock()
-    private val condition = lock.newCondition()
+    companion object {
+        private const val NEED_TO_FETCH = "NEED_TO_FETCH"
+    }
+
+    private val awaitAndSignal = AwaitAndSignal()
     private val quit = AtomicBoolean(false)
     private var sequence = 0
+
     override fun initialize(sourceCacheData: CacheData.Data?) {
         if (sourceCacheData != null) {
             sequence = sourceCacheData.data.toIntSafely()
@@ -41,14 +46,11 @@ class SourceProcessor : ParallelSourceProcessor<String> {
                 }
                 Thread.sleep(1000)
             }
-            try{
-                this.lock.lock()
-                condition.await()
-                println("1111111111")
-            }finally {
-                println("2222222222")
-                this.lock.unlock()
-            }
+            this.awaitAndSignal.await(NEED_TO_FETCH, {
+                println(Thread.currentThread().id.toString() + ":0000000000")
+            }, {
+                println(Thread.currentThread().id.toString() + ":1111111111")
+            })
 //            synchronized(this.lock){
 //                this.lock.wait()
 //            }
@@ -58,14 +60,12 @@ class SourceProcessor : ParallelSourceProcessor<String> {
 
     fun trigger() {
         this.quit.compareAndSet(false, true)
-        try{
-            this.lock.lock()
-            condition.signal()
-            println("3333333333")
-        }finally {
-            println("4444444444")
-            this.lock.unlock()
-        }
+
+        this.awaitAndSignal.signal(NEED_TO_FETCH, {
+            println(Thread.currentThread().id.toString() + ":3333333333")
+        }, {
+            println(Thread.currentThread().id.toString() + ":4444444444")
+        })
 //        synchronized(this.lock){
 //            this.lock.notify()
 //        }
@@ -87,8 +87,10 @@ fun main() {
 //        this.cacheDirectory = "/D:/cache"
 //    })
     val parallelJob = ParallelJob<String>("testParallel")
-    val sourceProcessor = SourceProcessor()
-    parallelJob.addParallelSourceProcessor(sourceProcessor)
+//    val sourceProcessor = SourceProcessor()
+//    parallelJob.addParallelSourceProcessor(sourceProcessor)
+    val queueParallelSourceProcessor = QueueParallelSourceProcessor<String>()
+    parallelJob.addParallelSourceProcessor(queueParallelSourceProcessor)
     parallelJob.generateFirstParallelJobStep().addParallelTransformProcessor(object : ParallelTransformProcessor<String, String> {
         override suspend fun process(value: String, parallelContext: ParallelContext<String>) {
             if (value.isBlank()) {
@@ -132,8 +134,11 @@ fun main() {
 //        }
 //    })
     GlobalScope.launch {
-        Thread.sleep(10000)
-        sourceProcessor.trigger()
+        Thread.sleep(1000)
+//        sourceProcessor.trigger()
+        repeat(10) {
+            queueParallelSourceProcessor.addResource(it.toString())
+        }
     }
     parallelExecutor.execute(parallelJob)
 //    parallelExecutor.execute(parallelJob)
