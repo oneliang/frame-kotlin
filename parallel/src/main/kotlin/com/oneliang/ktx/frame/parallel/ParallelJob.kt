@@ -22,7 +22,8 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
     private lateinit var cacheManager: CacheManager
     private var cacheData: CacheData? = null
 
-    private val coroutine = Coroutine()
+    private val mainCoroutine = Coroutine()//for source processor use, source processor maybe looping
+    private val processCoroutine = Coroutine()
 
     fun addParallelSourceProcessor(parallelSourceProcessor: ParallelSourceProcessor<IN>) {
         this.parallelSourceProcessorSet += parallelSourceProcessor
@@ -51,7 +52,7 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
         }
         logInfo("execute")
         this.countDownLatch = CountDownLatch(this.parallelSourceProcessorSet.size)
-        this.coroutine.runBlocking {
+        this.mainCoroutine.runBlocking {
             if (this.parallelJobConfiguration.useCache) {
                 val json = this.cacheManager.getFromCache(this.jobName, String::class).nullToBlank()
                 this.cacheData = CacheData.fromJson(json)
@@ -71,9 +72,9 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
                 }
                 val sourceData = this.cacheData?.getSourceData(sourceCacheKey)
                 parallelSourceProcessor.initialize(sourceData)
-                this.coroutine.launch {
+                this.mainCoroutine.launch {
                     val parallelJob = this as ParallelJob<Any>
-                    val parallelSourceContext = DefaultParallelSourceContext(this.coroutine, parallelSourceProcessor, this.firstParallelJobStepList, parallelJob)
+                    val parallelSourceContext = DefaultParallelSourceContext(this.processCoroutine, parallelSourceProcessor, this.firstParallelJobStepList, parallelJob)
                     parallelSourceProcessor.process(parallelSourceContext)
                 }
             }
