@@ -386,7 +386,7 @@ object Expression {
         Constants.String.BLANK
     }
 
-    fun evalThreeOperand(expression: String): Any? {
+    fun evalThreeOperand(expression: String): Any {
         var index = expression.indexOf("?")
         if (index > -1) {
             val stringOne = expression.substring(0, index)
