@@ -28,10 +28,16 @@ class DatabaseContext : AbstractContext() {
                 if (index >= 0) {
                     val id = key.substring(0, index)
                     val propertyName = key.substring(index + 1, key.length)
-                    val connectionPool = connectionPoolMap.getOrPut(id) { ConnectionPool() }
-                    connectionPool.resourcePoolName = id
-                    val connectionSource = resourceSourceMap.getOrPut(id) { ConnectionSource() }
-                    connectionPool.setResourceSource(connectionSource)
+                    val connectionPool = connectionPoolMap.getOrPut(id) {
+                        ConnectionPool().also {
+                            it.resourcePoolName = id
+                        }
+                    }
+                    val connectionSource = resourceSourceMap.getOrPut(id) {
+                        ConnectionSource().also {
+                            connectionPool.setResourceSource(it)
+                        }
+                    }
                     when (propertyName) {
                         ConnectionSource.CONNECTION_SOURCE_NAME -> connectionSource.connectionSourceName = value
                         ConnectionSource.DRIVER -> connectionSource.driver = value
@@ -45,17 +51,18 @@ class DatabaseContext : AbstractContext() {
                         ConnectionPool.MAX_STABLE_RESOURCE_SIZE -> connectionPool.maxStableResourceSize = value.toInt()
                     }
                 }
-                connectionPoolMap.forEach { (id, connectionPool) ->
-                    val query: Query = DefaultQueryImpl().apply {
-                        this.setConnectionPool(connectionPool)
-                        this.setSqlProcessor(DefaultSqlProcessor())
-                    }
-                    connectionPool.initialize()
-                    if (id.isBlank()) {
-                        objectMap["query"] = query
-                    } else {
-                        objectMap[id + "Query"] = query
-                    }
+            }
+            logger.info("connection pool size:%s".format(connectionPoolMap.size))
+            connectionPoolMap.forEach { (id, connectionPool) ->
+                val query: Query = DefaultQueryImpl().apply {
+                    this.setConnectionPool(connectionPool)
+                    this.setSqlProcessor(DefaultSqlProcessor())
+                }
+                connectionPool.initialize()
+                if (id.isBlank()) {
+                    objectMap["query"] = query
+                } else {
+                    objectMap[id + "Query"] = query
                 }
             }
         } catch (e: Throwable) {
