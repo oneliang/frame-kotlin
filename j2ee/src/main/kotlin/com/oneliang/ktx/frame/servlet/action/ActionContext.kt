@@ -86,7 +86,9 @@ open class ActionContext : AbstractContext() {
                             }//forwardList
                         }
                     }
-                    val actionInstance = objectMap.getOrPut(actionBean.id) { this.classLoader.loadClass(actionBean.type).newInstance() as ActionInterface }
+                    val actionInstance = objectMap.getOrPut(actionBean.id) {
+                        ObjectBean(this.classLoader.loadClass(actionBean.type).newInstance() as ActionInterface, ObjectBean.Level.REFERENCE)
+                    }
                     actionBean.actionInstance = actionInstance
                     actionBeanMap[actionBean.id] = actionBean
                     val actionBeanList = pathActionBeanMap.getOrPut(actionBean.path) { mutableListOf() }
@@ -116,8 +118,9 @@ open class ActionContext : AbstractContext() {
         actionBeanMap.forEach { (_, actionBean) ->
             val actionInterceptorBeanList = actionBean.actionInterceptorBeanList
             for (actionInterceptorBean in actionInterceptorBeanList) {
-                if (objectMap.containsKey(actionInterceptorBean.id)) {
-                    val interceptorInstance = objectMap[actionInterceptorBean.id] as InterceptorInterface
+                val objectBean = objectMap[actionInterceptorBean.id]
+                if (objectBean != null) {
+                    val interceptorInstance = objectBean.instance as InterceptorInterface
                     actionInterceptorBean.interceptorInstance = interceptorInstance
                 } else {
                     throw InitializeException("class:%s, action interceptor id not found in object map, interceptor id:%s".format(actionBean.type, actionInterceptorBean.id))
@@ -137,11 +140,11 @@ open class ActionContext : AbstractContext() {
 
     /**
      * find action
-     * @param beanId
+     * @param id
      * @return action object
      */
-    fun findAction(beanId: String): ActionInterface? {
-        return objectMap[beanId] as ActionInterface?
+    fun findAction(id: String): ActionInterface? {
+        return objectMap[id]?.instance as ActionInterface?
     }
 
     /**

@@ -66,7 +66,7 @@ class AnnotationInterceptorContext : InterceptorContext() {
                         interceptorBeanMap[interceptor.id] = interceptor
                     }
                 }
-                objectMap[id] = interceptorInstance
+                objectMap[id] = ObjectBean(interceptorInstance, ObjectBean.Level.REFERENCE)
             }
         } catch (e: Throwable) {
             logger.error("parameter:%s", e, fixParameters)

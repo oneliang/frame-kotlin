@@ -330,7 +330,7 @@ class TaskEngine(private val mode: Mode, minThreads: Int, maxThreads: Int) {
                     }
                 }
             } else {
-                throw RuntimeException("TaskEngine.isAllTaskNodeFinished() is invalid for server mode.")
+                error("TaskEngine.isAllTaskNodeFinished() is invalid for server mode.")
             }
             return result
         }

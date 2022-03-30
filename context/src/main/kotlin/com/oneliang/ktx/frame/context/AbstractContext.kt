@@ -10,8 +10,14 @@ import java.util.concurrent.ConcurrentHashMap
 
 abstract class AbstractContext : Context {
     companion object {
-        val objectMap = ConcurrentHashMap<String, Any>()
+        val objectMap = ConcurrentHashMap<String, ObjectBean>()
         var jarClassLoader = JarClassLoader(Thread.currentThread().contextClassLoader)
+    }
+
+    class ObjectBean(val instance: Any, val level: Level) {
+        enum class Level {
+            REFERENCE, BE_REFERENCED, REFERENCE_BOTH
+        }
     }
 
     protected var classLoader: ClassLoader = Thread.currentThread().contextClassLoader
@@ -25,7 +31,7 @@ abstract class AbstractContext : Context {
             if (value.isNotBlank()) {
                 field = File(value).absolutePath
             } else {
-                throw RuntimeException("classesRealPath can not be blank.")
+                error("classesRealPath can not be blank.")
             }
         }
 
@@ -39,7 +45,7 @@ abstract class AbstractContext : Context {
      */
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> findBean(id: String): T? {
-        return objectMap[id] as T?
+        return objectMap[id]?.instance as T?
     }
 
     protected fun fixParameters(parameters: String): String {

@@ -184,9 +184,10 @@ open class IocContext : AbstractContext() {
         var beanInstance = iocBean.beanInstance
         if (beanInstance == null) {
             val iocBeanId = iocBean.id
-            if (objectMap.containsKey(iocBeanId)) {//object map contain,prove duplicate config in ioc,copy to ioc bean
+            val objectBean = objectMap[iocBeanId]
+            if (objectBean != null) {//object map contain, prove duplicate config in ioc,copy to ioc bean
                 logger.warning("object map contains id:%s", iocBeanId)
-                beanInstance = objectMap[iocBeanId]
+                beanInstance = objectMap[iocBeanId]?.instance
                 iocBean.beanInstance = beanInstance
                 iocBean.proxyInstance = beanInstance
             } else {//normal config
@@ -241,12 +242,26 @@ open class IocContext : AbstractContext() {
         //inject
         val objectInjectType = iocConfigurationBean.objectInjectType
         if (objectInjectType == IocConfigurationBean.INJECT_TYPE_AUTO_BY_ID) {
-            objectMap.forEach { (id, instance) ->
-                this.autoInjectObjectById(id, instance)
+            objectMap.forEach { (id, objectBean) ->
+                when (objectBean.level) {
+                    ObjectBean.Level.REFERENCE, ObjectBean.Level.REFERENCE_BOTH -> {
+                        this.autoInjectObjectById(id, objectBean.instance)
+                    }
+                    else -> {
+                        error("Auto injecting by id error, object id:%s, can not reference other object".format(id))
+                    }
+                }
             }
         } else if (objectInjectType == IocConfigurationBean.INJECT_TYPE_AUTO_BY_TYPE) {
-            objectMap.forEach { (id, instance) ->
-                this.autoInjectObjectByType(id, instance)
+            objectMap.forEach { (id, objectBean) ->
+                when (objectBean.level) {
+                    ObjectBean.Level.REFERENCE, ObjectBean.Level.REFERENCE_BOTH -> {
+                        this.autoInjectObjectByType(id, objectBean.instance)
+                    }
+                    else -> {
+                        error("Auto injecting by type error, object id:%s, can not reference other object".format(id))
+                    }
+                }
             }
         }
         iocBeanMap.forEach { (_, iocBean) ->
@@ -259,7 +274,7 @@ open class IocContext : AbstractContext() {
                 IocBean.INJECT_TYPE_MANUAL -> this.manualInject(iocBean)
             }
             if (!objectMap.containsKey(iocBeanId)) {
-                objectMap[iocBeanId] = iocBean.proxyInstance!!
+                objectMap[iocBeanId] = ObjectBean(iocBean.proxyInstance!!, ObjectBean.Level.REFERENCE_BOTH)
             } else {
                 logger.warning("inject, object map contains the ioc bean id:%s", iocBeanId)
             }
@@ -325,17 +340,33 @@ open class IocContext : AbstractContext() {
             }
             val fieldName = ObjectUtil.methodNameToFieldName(Constants.Method.PREFIX_SET, methodName)
             val instanceClassName = instance.javaClass.name
-            val referenceIocBean = iocBeanMap[fieldName]
-            if (referenceIocBean == null) {
-                logger.warning("Auto injecting by id error, can not find the reference instance, instance id:%s, instance class name:%s, field name:%s", id, instanceClassName, fieldName)
-                continue
+            val referenceObjectBean = objectMap[fieldName]
+            var realType: String
+            val proxyInstance = if (referenceObjectBean != null) {
+                when (referenceObjectBean.level) {
+                    ObjectBean.Level.BE_REFERENCED, ObjectBean.Level.REFERENCE_BOTH -> {
+                        val referenceInstance = referenceObjectBean.instance
+                        realType = referenceInstance.javaClass.name
+                        referenceInstance
+                    }
+                    else -> {
+                        error("Auto injecting by id error, reference object id:%s, can not be referenced by this object id:%s".format(fieldName, id))
+                    }
+                }
+            } else {
+                val referenceIocBean = iocBeanMap[fieldName]
+                if (referenceIocBean == null) {
+                    logger.warning("Auto injecting by id error, can not find the reference instance, instance id:%s, instance class name:%s, field name:%s", id, instanceClassName, fieldName)
+                    continue
+                }
+                realType = referenceIocBean.type
+                logger.info("Auto injecting by id, instance id:%s, reference instance id:%s, method name:%s, %s <- %s", id, fieldName, methodName, instanceClassName, realType)
+                referenceIocBean.proxyInstance
             }
-            val proxyInstance = referenceIocBean.proxyInstance
-            logger.info("Auto injecting by id, instance id:%s, reference instance id:%s, method name:%s, %s <- %s", id, fieldName, methodName, instanceClassName, referenceIocBean.type)
             try {
                 method.invoke(instance, proxyInstance)
             } catch (e: Throwable) {
-                logger.error("Auto injecting by id error, instance id:%s, instance class name:%s, field name:%s, reference type:%s, real type:%s", e, id, instanceClassName, fieldName, types[0], referenceIocBean.type)
+                logger.error("Auto injecting by id error, instance id:%s, instance class name:%s, field name:%s, reference type:%s, real type:%s", e, id, instanceClassName, fieldName, types[0], realType)
                 throw e
             }
         }

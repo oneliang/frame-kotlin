@@ -20,13 +20,14 @@ class AnnotationActionContext : ActionContext() {
             val kClassList = AnnotationContextUtil.parseAnnotationContextParameterAndSearchClass(fixParameters, classLoader, classesRealPath, jarClassLoader, Action::class)
             for (kClass in kClassList) {
                 logger.debug("Annotation action class:%s", kClass)
-                val classId = kClass.java.name
+                val id = kClass.java.name
                 val actionInstance: Any
-                if (!objectMap.containsKey(classId)) {
+                val objectBean = objectMap[id]
+                if (objectBean == null) {
                     actionInstance = kClass.java.newInstance()
-                    objectMap[classId] = actionInstance
+                    objectMap[id] = ObjectBean(actionInstance, ObjectBean.Level.REFERENCE)
                 } else {
-                    logger.warning("Annotation action class has been instantiated, class:%s, id:%s", kClass, classId)
+                    logger.warning("Annotation action class has been instantiated, class:%s, id:%s", kClass, id)
                     continue
                 }
                 val methods = kClass.java.methods
@@ -60,13 +61,13 @@ class AnnotationActionContext : ActionContext() {
                             annotationActionBean.httpRequestMethods = stringBuilder.toString()
                         }
                         val httpRequestMethodsCode = annotationActionBean.httpRequestMethodsCode
-                        val id = classId + Constants.Symbol.DOT + method.name + Constants.Symbol.COMMA + httpRequestMethodsCode
-                        annotationActionBean.id = id
+                        val idWithMethodAndHttpRequestMethod = id + Constants.Symbol.DOT + method.name + Constants.Symbol.COMMA + httpRequestMethodsCode
+                        annotationActionBean.id = idWithMethodAndHttpRequestMethod
                         val requestPath = requestMappingAnnotation.value
                         annotationActionBean.path = requestPath
                         annotationActionBean.method = method
                         annotationActionBean.actionInstance = actionInstance
-                        actionBeanMap[id] = annotationActionBean
+                        actionBeanMap[idWithMethodAndHttpRequestMethod] = annotationActionBean
                         val actionBeanList = pathActionBeanMap.getOrPut(requestPath) { mutableListOf() }
                         actionBeanList.add(annotationActionBean)
                         //interceptor

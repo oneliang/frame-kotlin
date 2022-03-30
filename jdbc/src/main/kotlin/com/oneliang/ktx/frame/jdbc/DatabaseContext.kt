@@ -60,9 +60,9 @@ class DatabaseContext : AbstractContext() {
                 }
                 connectionPool.initialize()
                 if (id.isBlank()) {
-                    objectMap["query"] = query
+                    objectMap["query"] = ObjectBean(query, ObjectBean.Level.REFERENCE_BOTH)
                 } else {
-                    objectMap[id + "Query"] = query
+                    objectMap[id + "Query"] = ObjectBean(query, ObjectBean.Level.REFERENCE_BOTH)
                 }
             }
         } catch (e: Throwable) {
@@ -74,7 +74,5 @@ class DatabaseContext : AbstractContext() {
     /**
      * destroy
      */
-    override fun destroy() {
-
-    }
+    override fun destroy() {}
 }

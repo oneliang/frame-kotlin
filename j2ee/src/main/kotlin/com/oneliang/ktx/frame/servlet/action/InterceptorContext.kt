@@ -41,7 +41,7 @@ open class InterceptorContext : AbstractContext() {
                     val interceptorInstance: InterceptorInterface = this.classLoader.loadClass(globalInterceptorBean.type).newInstance() as InterceptorInterface
                     globalInterceptorBean.interceptorInstance = interceptorInstance
                     globalInterceptorBeanMap[globalInterceptorBean.id] = globalInterceptorBean
-                    objectMap[globalInterceptorBean.id] = interceptorInstance
+                    objectMap[globalInterceptorBean.id] = ObjectBean(interceptorInstance, ObjectBean.Level.REFERENCE)
                     val mode = globalInterceptorBean.mode
                     if (mode == GlobalInterceptorBean.INTERCEPTOR_MODE_BEFORE) {
                         beforeGlobalInterceptorBeanIterable += globalInterceptorBean
@@ -66,7 +66,7 @@ open class InterceptorContext : AbstractContext() {
                     val interceptorInstance = this.classLoader.loadClass(interceptor.type).newInstance() as InterceptorInterface
                     interceptor.interceptorInstance = interceptorInstance
                     interceptorBeanMap[interceptor.id] = interceptor
-                    objectMap[interceptor.id] = interceptorInstance
+                    objectMap[interceptor.id] = ObjectBean(interceptorInstance, ObjectBean.Level.REFERENCE)
                 }
             }
         } catch (e: Throwable) {

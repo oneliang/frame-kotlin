@@ -3,8 +3,6 @@ package com.oneliang.ktx.frame.websocket
 import com.oneliang.ktx.exception.InitializeException
 import com.oneliang.ktx.frame.context.AbstractContext
 import com.oneliang.ktx.frame.context.AnnotationContextUtil
-import com.oneliang.ktx.frame.servlet.action.InterceptorContext
-import com.oneliang.ktx.frame.servlet.action.InterceptorInterface
 import com.oneliang.ktx.util.common.ObjectUtil
 import com.oneliang.ktx.util.logging.LoggerManager
 
@@ -52,7 +50,7 @@ class AnnotationWebSocketInterceptorContext : AbstractContext() {
                         beforeGlobalWebSocketInterceptorList.add(webSocketInterceptorInstance)
                     }
                 }
-                objectMap[id] = webSocketInterceptorInstance
+                objectMap[id] = ObjectBean(webSocketInterceptorInstance, ObjectBean.Level.REFERENCE)
             }
         } catch (e: Throwable) {
             logger.error("parameter:%s", e, fixParameters)

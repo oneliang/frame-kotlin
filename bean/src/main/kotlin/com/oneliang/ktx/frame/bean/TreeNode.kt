@@ -65,7 +65,7 @@ class TreeNode<T : Any>(val instance: T) {
     </T> */
     fun addTreeNode(treeNode: TreeNode<T>): TreeNode<T> {
         if (this == treeNode) {
-            throw RuntimeException("it can not add itself!")
+            error("it can not add itself!")
         }
         childNodeList.add(treeNode)
         return this
@@ -79,7 +79,7 @@ class TreeNode<T : Any>(val instance: T) {
     </T> */
     fun removeTreeNode(treeNode: TreeNode<T>): TreeNode<T> {
         if (this == treeNode) {
-            throw RuntimeException("it can not remove itself!")
+            error("it can not remove itself!")
         }
         childNodeList.remove(treeNode)
         return this
