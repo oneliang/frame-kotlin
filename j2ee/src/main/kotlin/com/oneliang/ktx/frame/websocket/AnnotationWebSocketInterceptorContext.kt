@@ -50,7 +50,7 @@ class AnnotationWebSocketInterceptorContext : AbstractContext() {
                         beforeGlobalWebSocketInterceptorList.add(webSocketInterceptorInstance)
                     }
                 }
-                objectMap[id] = ObjectBean(webSocketInterceptorInstance, ObjectBean.Level.REFERENCE)
+                objectMap[id] = ObjectBean(webSocketInterceptorInstance, ObjectBean.Type.REFERENCE)
             }
         } catch (e: Throwable) {
             logger.error("parameter:%s", e, fixParameters)

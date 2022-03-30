@@ -25,7 +25,7 @@ class AnnotationActionContext : ActionContext() {
                 val objectBean = objectMap[id]
                 if (objectBean == null) {
                     actionInstance = kClass.java.newInstance()
-                    objectMap[id] = ObjectBean(actionInstance, ObjectBean.Level.REFERENCE)
+                    objectMap[id] = ObjectBean(actionInstance, ObjectBean.Type.REFERENCE)
                 } else {
                     logger.warning("Annotation action class has been instantiated, class:%s, id:%s", kClass, id)
                     continue

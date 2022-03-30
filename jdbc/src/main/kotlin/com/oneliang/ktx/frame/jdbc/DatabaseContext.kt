@@ -60,9 +60,9 @@ class DatabaseContext : AbstractContext() {
                 }
                 connectionPool.initialize()
                 if (id.isBlank()) {
-                    objectMap["query"] = ObjectBean(query, ObjectBean.Level.REFERENCE_BOTH)
+                    objectMap["query"] = ObjectBean(query, ObjectBean.Type.REFERENCE_BOTH)
                 } else {
-                    objectMap[id + "Query"] = ObjectBean(query, ObjectBean.Level.REFERENCE_BOTH)
+                    objectMap[id + "Query"] = ObjectBean(query, ObjectBean.Type.REFERENCE_BOTH)
                 }
             }
         } catch (e: Throwable) {

@@ -87,7 +87,7 @@ open class ActionContext : AbstractContext() {
                         }
                     }
                     val actionInstance = objectMap.getOrPut(actionBean.id) {
-                        ObjectBean(this.classLoader.loadClass(actionBean.type).newInstance() as ActionInterface, ObjectBean.Level.REFERENCE)
+                        ObjectBean(this.classLoader.loadClass(actionBean.type).newInstance() as ActionInterface, ObjectBean.Type.REFERENCE)
                     }
                     actionBean.actionInstance = actionInstance
                     actionBeanMap[actionBean.id] = actionBean

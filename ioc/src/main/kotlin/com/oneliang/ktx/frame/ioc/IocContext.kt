@@ -243,8 +243,8 @@ open class IocContext : AbstractContext() {
         val objectInjectType = iocConfigurationBean.objectInjectType
         if (objectInjectType == IocConfigurationBean.INJECT_TYPE_AUTO_BY_ID) {
             objectMap.forEach { (id, objectBean) ->
-                when (objectBean.level) {
-                    ObjectBean.Level.REFERENCE, ObjectBean.Level.REFERENCE_BOTH -> {
+                when (objectBean.type) {
+                    ObjectBean.Type.REFERENCE, ObjectBean.Type.REFERENCE_BOTH -> {
                         this.autoInjectObjectById(id, objectBean.instance)
                     }
                     else -> {
@@ -254,8 +254,8 @@ open class IocContext : AbstractContext() {
             }
         } else if (objectInjectType == IocConfigurationBean.INJECT_TYPE_AUTO_BY_TYPE) {
             objectMap.forEach { (id, objectBean) ->
-                when (objectBean.level) {
-                    ObjectBean.Level.REFERENCE, ObjectBean.Level.REFERENCE_BOTH -> {
+                when (objectBean.type) {
+                    ObjectBean.Type.REFERENCE, ObjectBean.Type.REFERENCE_BOTH -> {
                         this.autoInjectObjectByType(id, objectBean.instance)
                     }
                     else -> {
@@ -274,7 +274,7 @@ open class IocContext : AbstractContext() {
                 IocBean.INJECT_TYPE_MANUAL -> this.manualInject(iocBean)
             }
             if (!objectMap.containsKey(iocBeanId)) {
-                objectMap[iocBeanId] = ObjectBean(iocBean.proxyInstance!!, ObjectBean.Level.REFERENCE_BOTH)
+                objectMap[iocBeanId] = ObjectBean(iocBean.proxyInstance!!, ObjectBean.Type.REFERENCE_BOTH)
             } else {
                 logger.warning("inject, object map contains the ioc bean id:%s", iocBeanId)
             }
@@ -343,8 +343,8 @@ open class IocContext : AbstractContext() {
             val referenceObjectBean = objectMap[fieldName]
             var realType: String
             val proxyInstance = if (referenceObjectBean != null) {
-                when (referenceObjectBean.level) {
-                    ObjectBean.Level.BE_REFERENCED, ObjectBean.Level.REFERENCE_BOTH -> {
+                when (referenceObjectBean.type) {
+                    ObjectBean.Type.BE_REFERENCED, ObjectBean.Type.REFERENCE_BOTH -> {
                         val referenceInstance = referenceObjectBean.instance
                         realType = referenceInstance.javaClass.name
                         referenceInstance

@@ -14,8 +14,8 @@ abstract class AbstractContext : Context {
         var jarClassLoader = JarClassLoader(Thread.currentThread().contextClassLoader)
     }
 
-    class ObjectBean(val instance: Any, val level: Level) {
-        enum class Level {
+    class ObjectBean(val instance: Any, val type: Type) {
+        enum class Type {
             REFERENCE, BE_REFERENCED, REFERENCE_BOTH
         }
     }
