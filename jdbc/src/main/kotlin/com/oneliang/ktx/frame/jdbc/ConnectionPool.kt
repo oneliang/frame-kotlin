@@ -12,10 +12,11 @@ import java.sql.Connection
  */
 class ConnectionPool : ResourcePool<Connection>() {
     companion object {
-        const val INITIAL_CONNECTIONS = "initialConnections"
+        const val MIN_CONNECTIONS = "minConnections"
         const val MAX_CONNECTIONS = "maxConnections"
         const val CONNECTION_ALIVE_TIME = "connectionAliveTime"
         const val THREAD_SLEEP_TIME = "threadSleepTime"
+        const val MAX_STABLE_RESOURCE_SIZE = "maxStableResourceSize"
     }
 
     private var connectionPoolProcessor: ConnectionPoolProcessor? = null
