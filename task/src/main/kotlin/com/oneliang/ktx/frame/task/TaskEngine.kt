@@ -192,7 +192,7 @@ class TaskEngine(private val mode: Mode, minThreads: Int, maxThreads: Int) {
      */
     fun stop() {
         saveTaskNodeTime()
-        this.threadPool.interrupt()
+        this.threadPool.stop()
     }
 
     /**

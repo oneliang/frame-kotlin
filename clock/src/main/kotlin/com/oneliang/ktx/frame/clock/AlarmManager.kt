@@ -42,7 +42,7 @@ class AlarmManager<T : AlarmManager.Item>(private val frequency: Long, expiredIt
         this.timer?.cancel()
         this.timer = null
         this.itemMap.clear()
-        this.checkExpiredQueueThread.interrupt()
+        this.checkExpiredQueueThread.stop()//can use stopNow
     }
 
     operator fun plusAssign(item: T) {

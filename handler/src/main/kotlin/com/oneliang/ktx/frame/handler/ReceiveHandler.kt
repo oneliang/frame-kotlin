@@ -15,7 +15,8 @@ class ReceiveHandler<T : Any>(
         private val logger = LoggerManager.getLogger(ReceiveHandler::class)
     }
 
-    private val coroutine = Coroutine(Executors.newFixedThreadPool(threadCount).asCoroutineDispatcher())
+    private val executorService = Executors.newFixedThreadPool(threadCount)
+    private val coroutine = Coroutine(this.executorService.asCoroutineDispatcher())
     private lateinit var resource: T
 
     init {
@@ -33,6 +34,11 @@ class ReceiveHandler<T : Any>(
         this.coroutine.launch {
             task.invoke(this.resource)
         }
+    }
+
+    override fun stop() {
+        this.executorService.shutdown()
+        super.stop()
     }
 
     interface LoopingProcessor<T : Any> {

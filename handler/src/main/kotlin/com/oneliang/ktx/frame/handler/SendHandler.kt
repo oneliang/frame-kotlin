@@ -13,7 +13,8 @@ class SendHandler<T : Any>(
         private val logger = LoggerManager.getLogger(SendHandler::class)
     }
 
-    private val coroutine = Coroutine(Executors.newFixedThreadPool(threadCount).asCoroutineDispatcher())
+    private val executorService = Executors.newFixedThreadPool(threadCount)
+    private val coroutine = Coroutine(executorService.asCoroutineDispatcher())
     private lateinit var resource: T
 
     init {
@@ -26,5 +27,9 @@ class SendHandler<T : Any>(
         this.coroutine.launch {
             task(this.resource)
         }
+    }
+
+    fun shutdown() {
+        this.executorService.shutdown()
     }
 }

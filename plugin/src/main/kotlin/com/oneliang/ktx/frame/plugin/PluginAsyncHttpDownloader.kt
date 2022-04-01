@@ -10,8 +10,8 @@ class PluginAsyncHttpDownloader : PluginDownloader {
         this.asyncHttpDownloader?.start()
     }
 
-    fun interrupt() {
-        this.asyncHttpDownloader?.interrupt()
+    fun stop() {
+        this.asyncHttpDownloader?.stop()
         this.asyncHttpDownloader = null
     }
 

@@ -78,10 +78,10 @@ class Server(private val host: String, private val port: Int) : LoopThread() {
     /**
      * interrupt
      */
-    override fun interrupt() {
-        super.interrupt()
+    override fun stop() {
+        super.stop()
         this.acceptSelector.wakeup()
-        this.threadPool.interrupt()
+        this.threadPool.stop()
         this.selectorThreadTask = emptyArray()
     }
 }

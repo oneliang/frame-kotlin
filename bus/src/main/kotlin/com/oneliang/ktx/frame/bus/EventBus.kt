@@ -5,9 +5,10 @@ import com.oneliang.ktx.util.concurrent.ResourceQueueThread
 import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 
-class EventBus(private val threadCount: Int = 1) {
+class EventBus(threadCount: Int = 1) {
 
-    private val coroutine = Coroutine(Executors.newFixedThreadPool(threadCount).asCoroutineDispatcher())
+    private val executorService = Executors.newFixedThreadPool(threadCount)
+    private val coroutine = Coroutine(this.executorService.asCoroutineDispatcher())
     private val resourceQueueThread = ResourceQueueThread(object : ResourceQueueThread.ResourceProcessor<EventMessage> {
         override fun process(resource: EventMessage) {
             coroutine.launch {
@@ -32,7 +33,8 @@ class EventBus(private val threadCount: Int = 1) {
     }
 
     @Synchronized
-    fun interrupt() {
-        this.resourceQueueThread.interrupt()
+    fun stop() {
+        this.resourceQueueThread.stop()
+        this.executorService.shutdown()
     }
 }

@@ -29,8 +29,8 @@ class AsyncHttpDownloader(minThreads: Int, maxThreads: Int) {
     /**
      * interrupt
      */
-    fun interrupt() {
-        this.threadPool.interrupt()
+    fun stop() {
+        this.threadPool.stop()
     }
 
     /**

@@ -17,6 +17,6 @@ class UpdaterExecutor(private val revert: Boolean = false) {
     }
 
     fun stop() {
-        this.threadPool.interrupt()
+        this.threadPool.stop()
     }
 }

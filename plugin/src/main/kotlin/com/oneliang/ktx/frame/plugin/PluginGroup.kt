@@ -30,9 +30,9 @@ class PluginGroup(var id: String) : BroadcastReceiver {
 
     @Synchronized
     fun destroy() {
-        this.broadcastManager?.interrupt()
+        this.broadcastManager?.stop()
         this.broadcastManager = null
-        this.defaultPluginDownloader?.interrupt()
+        this.defaultPluginDownloader?.stop()
         this.defaultPluginDownloader = null
         this.jarClassLoader = null
         this.pluginFileMap.forEach { (_, pluginFile) ->

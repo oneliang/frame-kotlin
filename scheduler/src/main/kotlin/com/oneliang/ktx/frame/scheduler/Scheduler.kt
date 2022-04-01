@@ -26,10 +26,10 @@ class Scheduler(minThreads: Int, maxThreads: Int) {
         this.timer = Timer()
     }
 
-    fun interrupt() {
+    fun stop() {
         this.timer?.cancel()
         this.timer = null
-        this.threadPool.interrupt()
+        this.threadPool.stop()
     }
 
     fun addTimerTask(startDate: Date, intervalTime: Long, task: (threadPool: ThreadPool) -> Unit) {

@@ -68,8 +68,8 @@ class BroadcastManager() : LoopThread(), BroadcastSender {
         }
     }
 
-    override fun interrupt() {
-        super.interrupt()
+    override fun stop() {
+        super.stop()
         this.broadcastReceiverMap.clear()
         this.messageQueue.clear()
     }

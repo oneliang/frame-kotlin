@@ -58,7 +58,7 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
     fun destroy() {
         this.keyPropertiesMap.clear()
         this.valuePropertiesMap.clear()
-        this.autoSaveThread.interrupt()
+        this.autoSaveThread.stop()
     }
 
     private fun saveProperties(file: File, properties: Properties) {
