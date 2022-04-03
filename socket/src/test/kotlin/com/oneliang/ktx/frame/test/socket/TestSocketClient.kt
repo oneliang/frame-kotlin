@@ -1,21 +1,20 @@
 package com.oneliang.ktx.frame.test.socket
 
-import com.oneliang.ktx.frame.socket.TcpPacketProcessor
 import com.oneliang.ktx.frame.socket.SocketClientPool
 import com.oneliang.ktx.frame.socket.SocketClientSource
 import com.oneliang.ktx.frame.socket.TcpPacket
+import com.oneliang.ktx.frame.socket.TcpPacketProcessor
 import com.oneliang.ktx.util.common.toByteArray
 import com.oneliang.ktx.util.common.toHexString
 import java.net.Socket
 
-
 fun main() {
     val socketClientPool = SocketClientPool()
-    socketClientPool.resourceSource = SocketClientSource().also {
+    socketClientPool.setResourceSource(SocketClientSource().also {
         it.host = "localhost"
         it.port = 9999
         it.setTcpPacketProcessor(TcpPacketProcessor())
-    }
+    })
     socketClientPool.initialize()
     object : Thread() {
         override fun run() {
