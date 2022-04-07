@@ -15,7 +15,7 @@ class SocketClientPool : ResourcePool<SocketClient>() {
     }
 
     fun <R> useSocketClient(block: (socketClient: SocketClient) -> R?): R? {
-        val socketClient = this.stableResource ?: return null
+        val socketClient = this.stableResource
         return try {
             val result = block(socketClient)
             this.releaseStableResource(socketClient)

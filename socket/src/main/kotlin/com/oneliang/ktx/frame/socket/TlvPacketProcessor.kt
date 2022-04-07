@@ -8,11 +8,11 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 
-class TcpPacketProcessor(private val typeByteArrayLength: Int = 4, private val bodyLengthByteArrayLength: Int = 4) {
+class TlvPacketProcessor(private val typeByteArrayLength: Int = 4, private val bodyLengthByteArrayLength: Int = 4) {
 
     @Throws(Throwable::class)
-    fun sendTcpPacket(outputStream: OutputStream, tcpPacket: TcpPacket) {
-        send(outputStream, tcpPacket.toByteArray())
+    fun sendTlvPacket(outputStream: OutputStream, tlvPacket: TlvPacket) {
+        send(outputStream, tlvPacket.toByteArray())
     }
 
     @Throws(Throwable::class)
@@ -40,17 +40,17 @@ class TcpPacketProcessor(private val typeByteArrayLength: Int = 4, private val b
     }
 
     @Throws(Throwable::class)
-    fun receiveTcpPacket(inputStream: InputStream): TcpPacket {
+    fun receiveTlvPacket(inputStream: InputStream): TlvPacket {
         val type = receiveType(inputStream)
         val bodyByteArray = this.receiveBody(inputStream)
-        return TcpPacket(type, bodyByteArray)
+        return TlvPacket(type, bodyByteArray)
     }
 
     @Throws(Throwable::class)
-    fun receiveTcpPacket(byteArray: ByteArray): TcpPacket {
+    fun receiveTlvPacket(byteArray: ByteArray): TlvPacket {
         val inputStream = ByteArrayInputStream(byteArray)
         val type = receiveType(inputStream)
         val bodyByteArray = this.receiveBody(inputStream)
-        return TcpPacket(type, bodyByteArray)
+        return TlvPacket(type, bodyByteArray)
     }
 }

@@ -10,4 +10,5 @@ fun main() {
             println(event)
         }
     })
+    eventBus.stop()
 }

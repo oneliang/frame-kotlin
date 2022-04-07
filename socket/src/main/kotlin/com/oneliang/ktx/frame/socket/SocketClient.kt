@@ -1,9 +1,10 @@
 package com.oneliang.ktx.frame.socket
 
-import com.oneliang.ktx.util.common.perform
+import com.oneliang.ktx.util.concurrent.atomic.OperationLock
 import com.oneliang.ktx.util.logging.LoggerManager
+import java.io.InputStream
+import java.io.OutputStream
 import java.net.Socket
-import java.util.concurrent.locks.ReentrantLock
 
 class SocketClient(private val host: String, private val port: Int) {
     companion object {
@@ -11,33 +12,35 @@ class SocketClient(private val host: String, private val port: Int) {
     }
 
     private val socket = Socket(this.host, this.port)
-    private val lock = ReentrantLock()
+    private val operationLock = OperationLock()
 
-    private lateinit var tcpPacketProcessor: TcpPacketProcessor
+    fun <R> receive(receiveBlock: (inputStream: InputStream) -> R): R? {
+        return try {
+            val inputStream = this.socket.getInputStream()
+            receiveBlock(inputStream)
+        } catch (e: Throwable) {
+            logger.error("receive tlv package exception", e)
+            null
+        }
+    }
 
     /**
      * blocking method, when concurrent send
      */
-    fun send(tcpPacket: TcpPacket): TcpPacket {
-        this.lock.lock()
+    fun <R> send(sendBlock: (outputStream: OutputStream, inputStream: InputStream) -> R): R? {
         return try {
-            val outputStream = this.socket.getOutputStream()
-            val inputStream = this.socket.getInputStream()
-            this.tcpPacketProcessor.sendTcpPacket(outputStream, tcpPacket)
-            this.tcpPacketProcessor.receiveTcpPacket(inputStream)
+            this.operationLock.operate {
+                val outputStream = this.socket.getOutputStream()
+                val inputStream = this.socket.getInputStream()
+                sendBlock(outputStream, inputStream)
+            }
         } catch (e: Throwable) {
-            logger.error("send tcp package exception", e)
-            TcpPacket()
-        } finally {
-            this.lock.unlock()
+            logger.error("send tlv package exception", e)
+            null
         }
     }
 
     fun close() {
         this.socket.close()
-    }
-
-    fun setTcpPacketProcessor(tcpPacketProcessor: TcpPacketProcessor) {
-        this.tcpPacketProcessor = tcpPacketProcessor
     }
 }
