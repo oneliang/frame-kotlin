@@ -17,7 +17,7 @@ class ClientManager(
     @Volatile
     private var hasBeenInitialized = false
     private val initializeLock = ReentrantLock()
-    private val threadCount = 1//Runtime.getRuntime().availableProcessors()
+    private val threadCount = Runtime.getRuntime().availableProcessors()
     private val threadPool = ThreadPool()
     private var clients: Array<Client> = emptyArray()
 
