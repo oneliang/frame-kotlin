@@ -2,7 +2,6 @@ package com.oneliang.ktx.frame.jdbc.model
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.jdbc.SqlUtil
-import com.oneliang.ktx.frame.jdbc.Table
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.toFile
 import com.oneliang.ktx.util.common.toIntSafely
@@ -35,9 +34,7 @@ object ModelTemplateUtil {
             modelTemplateBean.superClassNames = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SUPER_CLASS_NAMES)?.nodeValue ?: Constants.String.BLANK
             modelTemplateBean.schema = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SCHEMA)?.nodeValue ?: Constants.String.BLANK
             modelTemplateBean.table = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_TABLE)?.nodeValue ?: Constants.String.BLANK
-            val importHashSet = hashSetOf<String>().apply {
-                this += Table::class.qualifiedName.nullToBlank()
-            }
+            val importHashSet = hashSetOf<String>()
             val columnList = mutableListOf<ModelTemplateBean.Field>()
             val tableIndexList = mutableListOf<ModelTemplateBean.TableIndex>()
             val codeInClassList = mutableListOf<String>()

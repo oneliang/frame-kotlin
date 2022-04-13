@@ -4,6 +4,7 @@ package <%=packageName%>
 <%for(var i=0;i<importArray.length;i++){%><%var importName=importArray[i];%>
 import <%=importName%>
 <%}%>
+import com.oneliang.ktx.frame.jdbc.Table
 
 @Table(
     schema = "<%=schema%>", table = "<%=table%>", columns = [
