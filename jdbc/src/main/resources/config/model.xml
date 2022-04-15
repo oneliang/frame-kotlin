@@ -7,8 +7,8 @@
 
         <field name="id" column="id" idFlag="true" defaultValue="Constants.String.BLANK"/>
         <field name="name" column="name" defaultValue="Constants.String.BLANK"/>
-        <field name="modifyTime" column="modify_time" type="DATE" defaultValue="Constants.Date.DEFAULT"/>
-        <field name="createTime" column="create_time" type="DATE" defaultValue="Constants.Date.DEFAULT"/>
+        <field name="modifyTime" column="modify_time" type="DATETIME" defaultValue="Constants.Date.DEFAULT"/>
+        <field name="createTime" column="create_time" type="DATETIME" defaultValue="Constants.Date.DEFAULT"/>
         <codeInClass>
             <![CDATA[
     enum class Name(val value: String) {
