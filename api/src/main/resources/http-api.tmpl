@@ -1,0 +1,34 @@
+/** Automatically generated file. DO NOT MODIFY */
+package <%=packageName%>
+
+import com.oneliang.ktx.util.http.HttpUtil
+import com.oneliang.ktx.util.json.jsonToObject
+import com.oneliang.ktx.util.json.toJson
+
+object <%=className%>HttpApi {
+
+<%for(var index=0;index<list.length;index++){%><%var item=list[index];%>
+
+    <%var apiClassName = className + item.key.substring(0, 1).toUpperCase() + item.key.substring(1);%>
+    fun <%=item.key%>(host: String, api<%=apiClassName%>Request: Api<%=apiClassName%>Request): Api<%=apiClassName%>Response {
+        val httpUrl = "$host<%=item.uri%>"
+        val httpHeaderList = mutableListOf<HttpUtil.HttpNameValue>()
+    <%for(var i=0;i<item.headers.length;i++){%><%var header=item.headers[i];%>
+        httpHeaderList += HttpUtil.HttpNameValue("<%=header.key%>", "<%=header.value%>")
+    <%}%>
+        httpHeaderList += HttpUtil.HttpNameValue("Content-Type", "<%=item.contentType%>")
+        <%if (item.contentType == 'application/x-www-form-urlencoded') {%>
+        val httpParameterList = mutableListOf<HttpUtil.HttpNameValue>()
+            <%for(var i=0;i<item.requestParameters.length;i++){%><%var requestParameter=item.requestParameters[i];%>
+                <%var fieldName=requestParameter.key;%>
+        httpParameterList += HttpUtil.HttpNameValue("<%=fieldName%>", api<%=apiClassName%>Request.<%=fieldName%>)
+            <%}%>
+        val responseJson = HttpUtil.sendRequestPost(httpUrl, httpHeaderList = httpHeaderList, httpParameterList = httpParameterList)
+        <%} else {%>
+        //application/json
+        val responseJson = HttpUtil.sendRequestPostWithBytes(httpUrl, httpHeaderList = httpHeaderList, byteArray = api<%=apiClassName%>Request.toJson().toByteArray())
+        <%}%>
+        return responseJson.jsonToObject(Api<%=apiClassName%>Response::class)
+    }
+<%}%>
+}

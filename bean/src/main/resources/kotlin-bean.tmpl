@@ -1,0 +1,38 @@
+/** Automatically generated file. DO NOT MODIFY */
+package <%=packageName%>
+
+class <%=className%> {
+<%for(var i=0;i<fields.length;i++){%>
+    <%var field=fields[i];%>
+    <%var fieldName=field.key;%>
+    <%var fieldType=field.value.toUpperCase();%>
+    <%if (fieldType == 'STRING'){%>
+    var <%=fieldName%>: String = ""//<%=field.description%>
+    <%} else if (fieldType == 'INT') {%>
+    var <%=fieldName%>: Int = 0//<%=field.description%>
+    <%} else if (fieldType == 'CLASS') {%>
+    <%var subClassName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);;%>
+    var <%=fieldName%>: <%=subClassName%>Bean? = null//<%=field.description%>
+    <%}%>
+<%}%>
+    <%for(var i=0;i<fields.length;i++){%><%var field=fields[i];%>
+    <%var fieldType=field.value.toUpperCase();%>
+        <%if (fieldType == 'CLASS') {%>
+            <%var subClassName = field.key.substring(0, 1).toUpperCase() + field.key.substring(1);;%>
+    class <%=subClassName%>Bean {
+        <%if (field.subFields!=null){%>
+            <%for(var j=0;j<field.subFields.length;j++){%>
+                <%var subClassField=field.subFields[j];%>
+                <%var subClassFieldName=subClassField.key;%>
+                <%var subClassFieldType=subClassField.value.toUpperCase();%>
+                <%if (subClassFieldType == 'STRING'){%>
+        var <%=subClassFieldName%>: String = ""//<%=subClassField.description%>
+                <%} else if (subClassFieldType == 'INT') {%>
+        var <%=subClassFieldName%>: Int = 0//<%=subClassField.description%>
+                <%}%>
+            <%}%>
+        <%}%>
+    }
+        <%}%>
+    <%}%>
+}

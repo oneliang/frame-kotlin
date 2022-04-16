@@ -1,0 +1,15 @@
+/** Automatically generated file. DO NOT MODIFY */
+package <%=packageName%>
+<%var apiClassName = className + key.substring(0, 1).toUpperCase() + key.substring(1);%>
+class Api<%=apiClassName%>Response {
+<%for(var i=0;i<responseDatas.length;i++){%>
+    <%var responseData=responseDatas[i];%>
+    <%var fieldName=responseData.key;%>
+    <%var fieldType=responseData.value.toUpperCase();%>
+    <%if (fieldType == 'STRING'){%>
+    var <%=fieldName%>: String = ""//<%=responseData.description%>
+    <%} else if (fieldType == 'INT') {%>
+    var <%=fieldName%>: Int = 0//<%=responseData.description%>
+    <%}%>
+<%}%>
+}
