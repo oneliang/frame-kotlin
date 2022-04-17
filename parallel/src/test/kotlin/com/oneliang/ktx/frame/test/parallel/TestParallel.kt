@@ -16,7 +16,7 @@ class SourceProcessor : ParallelSourceProcessor<String> {
         private const val NEED_TO_FETCH = "NEED_TO_FETCH"
     }
 
-    private val awaitAndSignal = AwaitAndSignal()
+    private val awaitAndSignal = AwaitAndSignal<String>()
     private val quit = AtomicBoolean(false)
     private var sequence = 0
 
