@@ -4,11 +4,16 @@ package <%=packageName%>
 import com.oneliang.ktx.util.http.HttpUtil
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
-
+<%for(var index=0;index<list.length;index++){%>
+    <%var item=list[index];%>
+    <%var apiClassName = className + item.key.substring(0, 1).toUpperCase() + item.key.substring(1);%>
+import <%=apiModelPackageName%>.Api<%=apiClassName%>Request
+import <%=apiModelPackageName%>.Api<%=apiClassName%>Response
+<%}%>
 object <%=className%>HttpApi {
 
-<%for(var index=0;index<list.length;index++){%><%var item=list[index];%>
-
+<%for(var index=0;index<list.length;index++){%>
+    <%var item=list[index];%>
     <%var apiClassName = className + item.key.substring(0, 1).toUpperCase() + item.key.substring(1);%>
     fun <%=item.key%>(host: String, api<%=apiClassName%>Request: Api<%=apiClassName%>Request): Api<%=apiClassName%>Response {
         val httpUrl = "$host<%=item.uri%>"

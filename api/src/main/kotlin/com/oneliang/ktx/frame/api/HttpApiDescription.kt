@@ -9,14 +9,14 @@ import java.io.FileNotFoundException
 class HttpApiDescription {
     companion object {
         const val BEGIN = "begin:"
-        const val NAME = "name:"
-        const val KEY = "key:"
-        const val URI = "uri:"
-        const val METHOD = "method:"
-        const val HEADERS = "headers:"
-        const val CONTENT_TYPE = "contentType:"
-        const val REQUEST_PARAMETERS = "requestParameters:"
-        const val RESPONSE_DATAS = "responseDatas:"
+        private const val NAME = "name:"
+        private const val KEY = "key:"
+        private const val URI = "uri:"
+        private const val METHOD = "method:"
+        private const val HEADERS = "headers:"
+        private const val CONTENT_TYPE = "contentType:"
+        private const val REQUEST_PARAMETERS = "requestParameters:"
+        private const val RESPONSE_DATAS = "responseDatas:"
         const val FLAG_NAME = 1 shl 0
         const val FLAG_KEY = 1 shl 1
         const val FLAG_URI = 1 shl 2
@@ -26,6 +26,16 @@ class HttpApiDescription {
         const val FLAG_REQUEST_PARAMETERS = 1 shl 6
         const val FLAG_REQUEST_PARAMETERS_SUB_CLASS_1 = 1 shl 7
         const val FLAG_RESPONSE_DATAS = 1 shl 10
+        internal val keywordMap = mapOf(
+            NAME to FLAG_NAME,
+            KEY to FLAG_KEY,
+            URI to FLAG_URI,
+            METHOD to FLAG_METHOD,
+            HEADERS to FLAG_HEADERS,
+            CONTENT_TYPE to FLAG_CONTENT_TYPE,
+            REQUEST_PARAMETERS to FLAG_REQUEST_PARAMETERS,
+            RESPONSE_DATAS to FLAG_RESPONSE_DATAS
+        )
     }
 
     var name = Constants.String.BLANK
@@ -62,7 +72,7 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Pair<S
         var currentFlag = 0
         file.readContentIgnoreLine {
             val line = it.trim()
-            if (line.isBlank()) {
+            if (line.isBlank() || line.startsWith(Constants.Symbol.POUND_KEY)) {
                 return@readContentIgnoreLine true//continue
             }
             when {
@@ -71,39 +81,20 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Pair<S
                     httpApiDescriptionList += newHttpApiDescription
                     httpApiDescription = newHttpApiDescription
                 }
-                line.startsWith(NAME) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_NAME
-                }
-                line.startsWith(KEY) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_KEY
-                }
-                line.startsWith(URI) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_URI
-                }
-                line.startsWith(METHOD) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_METHOD
-                }
-                line.startsWith(HEADERS) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_HEADERS
-                }
-                line.startsWith(CONTENT_TYPE) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_CONTENT_TYPE
-                }
-                line.startsWith(REQUEST_PARAMETERS) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_REQUEST_PARAMETERS
-                }
-                line.startsWith(RESPONSE_DATAS) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_RESPONSE_DATAS
-                }
                 else -> {
+                    //keyword process
+                    var keywordSign = false
+                    for (key in keywordMap.keys) {
+                        if (line.startsWith(key)) {
+                            currentFlag = 0//reset
+                            currentFlag = currentFlag or keywordMap[key]!!
+                            keywordSign = true
+                            break
+                        }
+                    }
+                    if (keywordSign) {
+                        return@readContentIgnoreLine true
+                    }
                     val currentHttpApiDescription = httpApiDescription ?: return@readContentIgnoreLine true
                     when {
                         currentFlag and FLAG_NAME == FLAG_NAME -> {

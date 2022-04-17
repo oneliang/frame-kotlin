@@ -9,13 +9,18 @@ import java.io.FileNotFoundException
 class BeanDescription {
     companion object {
         const val BEGIN = "begin:"
-        const val PACKAGE_NAME = "packageName:"
-        const val CLASS_NAME = "className:"
-        const val FIELDS = "fields:"
+        private const val PACKAGE_NAME = "packageName:"
+        private const val CLASS_NAME = "className:"
+        private const val FIELDS = "fields:"
         const val FLAG_PACKAGE_NAME = 1 shl 0
         const val FLAG_CLASS_NAME = 1 shl 1
         const val FLAG_FIELDS = 1 shl 5
         const val FLAG_FIELDS_SUB_CLASS_1 = 1 shl 6
+        internal val keywordMap = mapOf(
+            PACKAGE_NAME to FLAG_PACKAGE_NAME,
+            CLASS_NAME to FLAG_CLASS_NAME,
+            FIELDS to FLAG_FIELDS
+        )
     }
 
     var packageName = Constants.String.BLANK
@@ -45,7 +50,7 @@ fun BeanDescription.Companion.buildListFromFile(fullFilename: String): List<Bean
         var currentFlag = 0
         file.readContentIgnoreLine {
             val line = it.trim()
-            if (line.isBlank()) {
+            if (line.isBlank() || line.startsWith(Constants.Symbol.POUND_KEY)) {
                 return@readContentIgnoreLine true//continue
             }
             when {
@@ -54,19 +59,21 @@ fun BeanDescription.Companion.buildListFromFile(fullFilename: String): List<Bean
                     beanDescriptionList += newBeanDescription
                     beanDescription = newBeanDescription
                 }
-                line.startsWith(PACKAGE_NAME) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_PACKAGE_NAME
-                }
-                line.startsWith(CLASS_NAME) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_CLASS_NAME
-                }
-                line.startsWith(FIELDS) -> {
-                    currentFlag = 0//reset
-                    currentFlag = currentFlag or FLAG_FIELDS
-                }
                 else -> {
+                    //keyword process
+                    var keywordSign = false
+                    for (key in keywordMap.keys) {
+                        if (line.startsWith(key)) {
+                            currentFlag = 0//reset
+                            currentFlag = currentFlag or keywordMap[key]!!
+                            keywordSign = true
+                            break
+                        }
+                    }
+                    if (keywordSign) {
+                        return@readContentIgnoreLine true
+                    }
+                    //data process
                     val currentBeanDescription = beanDescription ?: return@readContentIgnoreLine true
                     when {
                         currentFlag and FLAG_PACKAGE_NAME == FLAG_PACKAGE_NAME -> {
