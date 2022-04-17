@@ -54,7 +54,7 @@ fun BeanDescription.Companion.buildListFromFile(fullFilename: String): List<Bean
                 return@readContentIgnoreLine true//continue
             }
             when {
-                line.startsWith(BEGIN) -> {
+                line.startsWith(BEGIN, true) -> {
                     val newBeanDescription = BeanDescription()
                     beanDescriptionList += newBeanDescription
                     beanDescription = newBeanDescription
@@ -63,7 +63,7 @@ fun BeanDescription.Companion.buildListFromFile(fullFilename: String): List<Bean
                     //keyword process
                     var keywordSign = false
                     for (key in keywordMap.keys) {
-                        if (line.startsWith(key)) {
+                        if (line.startsWith(key, true)) {
                             currentFlag = 0//reset
                             currentFlag = currentFlag or keywordMap[key]!!
                             keywordSign = true

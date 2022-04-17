@@ -72,7 +72,7 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Pair<S
         var currentFlag = 0
         file.readContentIgnoreLine {
             val line = it.trim()
-            if (line.isBlank() || line.startsWith(Constants.Symbol.POUND_KEY)) {
+            if (line.isBlank() || line.startsWith(Constants.Symbol.POUND_KEY, true)) {
                 return@readContentIgnoreLine true//continue
             }
             when {
@@ -85,7 +85,7 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Pair<S
                     //keyword process
                     var keywordSign = false
                     for (key in keywordMap.keys) {
-                        if (line.startsWith(key)) {
+                        if (line.startsWith(key, true)) {
                             currentFlag = 0//reset
                             currentFlag = currentFlag or keywordMap[key]!!
                             keywordSign = true
