@@ -43,8 +43,10 @@ object HttpApiGenerator {
                 apiRequestTemplateFullFilename.ifNotBlank {
                     Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "Api${className}${httpApiDescription.key.toUpperCaseRange(0, 1)}Request.kt", option)
                 }
-                apiResponseTemplateFullFilename.ifNotBlank {
-                    Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "Api${className}${httpApiDescription.key.toUpperCaseRange(0, 1)}Response.kt", option)
+                if (httpApiDescription.responseDatas.isNotEmpty()) {
+                    apiResponseTemplateFullFilename.ifNotBlank {
+                        Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "Api${className}${httpApiDescription.key.toUpperCaseRange(0, 1)}Response.kt", option)
+                    }
                 }
             }
             option.instance = mapOf<String, Any>("list" to httpApiDescriptionList)//replace it
