@@ -10,20 +10,24 @@ class BeanDescription {
     companion object {
         const val BEGIN = "begin:"
         private const val PACKAGE_NAME = "packageName:"
+        private const val IMPORTS = "imports:"
         private const val CLASS_NAME = "className:"
         private const val FIELDS = "fields:"
-        const val FLAG_PACKAGE_NAME = 1 shl 0
-        const val FLAG_CLASS_NAME = 1 shl 1
-        const val FLAG_FIELDS = 1 shl 5
-        const val FLAG_FIELDS_SUB_CLASS_1 = 1 shl 6
+        internal const val FLAG_PACKAGE_NAME = 1 shl 0
+        internal const val FLAG_IMPORTS = 1 shl 1
+        internal const val FLAG_CLASS_NAME = 1 shl 2
+        internal const val FLAG_FIELDS = 1 shl 5
+        internal const val FLAG_FIELDS_SUB_CLASS_1 = 1 shl 6
         internal val keywordMap = mapOf(
             PACKAGE_NAME to FLAG_PACKAGE_NAME,
+            IMPORTS to FLAG_IMPORTS,
             CLASS_NAME to FLAG_CLASS_NAME,
             FIELDS to FLAG_FIELDS
         )
     }
 
     var packageName = Constants.String.BLANK
+    var imports = emptyArray<String>()
     var className = Constants.String.BLANK
     var fields = emptyArray<FieldDescription>()
 
@@ -78,6 +82,11 @@ fun BeanDescription.Companion.buildListFromFile(fullFilename: String): List<Bean
                     when {
                         currentFlag and FLAG_PACKAGE_NAME == FLAG_PACKAGE_NAME -> {
                             currentBeanDescription.packageName = line
+                        }
+                        currentFlag and FLAG_IMPORTS == FLAG_IMPORTS -> {
+                            val importHashSet = currentBeanDescription.imports.toHashSet()
+                            importHashSet += line
+                            currentBeanDescription.imports = importHashSet.toTypedArray()
                         }
                         currentFlag and FLAG_CLASS_NAME == FLAG_CLASS_NAME -> {
                             currentBeanDescription.className = line

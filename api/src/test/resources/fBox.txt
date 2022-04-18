@@ -1,0 +1,22 @@
+begin:
+name:
+    新增FBox分组
+key:
+    addBoxGroup
+uri:
+    /api/client/v2/box/group/mgt
+method:
+    PUT
+headers:
+    Authorization Bearer $token
+contentType:
+    application/json
+requestParameters:
+    name string 组名
+    prevId string 父节点ID,使用新版URL2地址使用这个参数，本页面剩余其他地址不用传这个参数。
+responseDatas:
+    access_token string accessToken
+    expires_in int accessToken的有效期
+    token_type string accessToken的类型(Bearer)固定值
+functionParameterString:
+    token: String

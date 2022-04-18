@@ -1,6 +1,9 @@
 /** Automatically generated file. DO NOT MODIFY */
 package <%=packageName%>
 
+<%for(var i=0;i<imports.length;i++){%>
+import <%=imports[i]%>
+<%}%>
 import com.oneliang.ktx.util.http.HttpUtil
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
@@ -15,7 +18,8 @@ object <%=className%>HttpApi {
 <%for(var index=0;index<list.length;index++){%>
     <%var item=list[index];%>
     <%var apiClassName = className + item.key.substring(0, 1).toUpperCase() + item.key.substring(1);%>
-    fun <%=item.key%>(host: String, api<%=apiClassName%>Request: Api<%=apiClassName%>Request): Api<%=apiClassName%>Response {
+    //<%=item.name%>
+    fun <%=item.key%>(host: String<%=item.functionParameterString%>, api<%=apiClassName%>Request: Api<%=apiClassName%>Request): Api<%=apiClassName%>Response {
         val httpUrl = "$host<%=item.uri%>"
         val httpHeaderList = mutableListOf<HttpUtil.HttpNameValue>()
     <%for(var i=0;i<item.headers.length;i++){%><%var header=item.headers[i];%>
@@ -31,7 +35,11 @@ object <%=className%>HttpApi {
         val responseJson = HttpUtil.sendRequestPost(httpUrl, httpHeaderList = httpHeaderList, httpParameterList = httpParameterList)
         <%} else {%>
         //application/json
+            <%if (item.method.toUpperCase() == 'POST') {%>
         val responseJson = HttpUtil.sendRequestPostWithBytes(httpUrl, httpHeaderList = httpHeaderList, byteArray = api<%=apiClassName%>Request.toJson().toByteArray())
+            <%} else {%>
+        val responseJson = HttpUtil.sendRequestWithBytes(httpUrl, "<%=item.method.toUpperCase()%>", httpHeaderList = httpHeaderList, byteArray = api<%=apiClassName%>Request.toJson().toByteArray())
+            <%}%>
         <%}%>
         return responseJson.jsonToObject(Api<%=apiClassName%>Response::class)
     }

@@ -17,15 +17,19 @@ class HttpApiDescription {
         private const val CONTENT_TYPE = "contentType:"
         private const val REQUEST_PARAMETERS = "requestParameters:"
         private const val RESPONSE_DATAS = "responseDatas:"
-        const val FLAG_NAME = 1 shl 0
-        const val FLAG_KEY = 1 shl 1
-        const val FLAG_URI = 1 shl 2
-        const val FLAG_METHOD = 1 shl 3
-        const val FLAG_HEADERS = 1 shl 4
-        const val FLAG_CONTENT_TYPE = 1 shl 5
-        const val FLAG_REQUEST_PARAMETERS = 1 shl 6
-        const val FLAG_REQUEST_PARAMETERS_SUB_CLASS_1 = 1 shl 7
-        const val FLAG_RESPONSE_DATAS = 1 shl 10
+        private const val CLASS_IMPORTS = "classImports:"
+        private const val FUNCTION_PARAMETER_STRING = "functionParameterString:"
+        internal const val FLAG_NAME = 1 shl 0
+        internal const val FLAG_KEY = 1 shl 1
+        internal const val FLAG_URI = 1 shl 2
+        internal const val FLAG_METHOD = 1 shl 3
+        internal const val FLAG_HEADERS = 1 shl 4
+        internal const val FLAG_CONTENT_TYPE = 1 shl 5
+        internal const val FLAG_REQUEST_PARAMETERS = 1 shl 6
+        internal const val FLAG_REQUEST_PARAMETERS_SUB_CLASS_1 = 1 shl 7
+        internal const val FLAG_RESPONSE_DATAS = 1 shl 10
+        internal const val FLAG_CLASS_IMPORTS = 1 shl 11
+        internal const val FLAG_FUNCTION_PARAMETER_STRING = 1 shl 12
         internal val keywordMap = mapOf(
             NAME to FLAG_NAME,
             KEY to FLAG_KEY,
@@ -34,7 +38,9 @@ class HttpApiDescription {
             HEADERS to FLAG_HEADERS,
             CONTENT_TYPE to FLAG_CONTENT_TYPE,
             REQUEST_PARAMETERS to FLAG_REQUEST_PARAMETERS,
-            RESPONSE_DATAS to FLAG_RESPONSE_DATAS
+            RESPONSE_DATAS to FLAG_RESPONSE_DATAS,
+            CLASS_IMPORTS to FLAG_CLASS_IMPORTS,
+            FUNCTION_PARAMETER_STRING to FLAG_FUNCTION_PARAMETER_STRING
         )
     }
 
@@ -46,7 +52,7 @@ class HttpApiDescription {
     var contentType = Constants.Http.ContentType.APPLICATION_JSON
     var requestParameters = emptyArray<KeyValueDescription>()
     var responseDatas = emptyArray<KeyValueDescription>()
-
+    var functionParameterString = Constants.String.BLANK
 
     class KeyValueDescription(
         key: String = Constants.String.BLANK,
@@ -63,11 +69,12 @@ private fun HttpApiDescription.Companion.parseRequestParameter(line: String): Ht
     return HttpApiDescription.KeyValueDescription(requestParameter[0], requestParameter[1], description)
 }
 
-fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Pair<String, List<HttpApiDescription>> {
+fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Triple<String, Collection<String>, List<HttpApiDescription>> {
     val httpApiDescriptionList = mutableListOf<HttpApiDescription>()
     var httpApiDescription: HttpApiDescription? = null
     val file = fullFilename.toFile()
     val className = file.name.substring(0, file.name.indexOf(Constants.Symbol.DOT))
+    val importHashSet = hashSetOf<String>()
     if (file.exists() && file.isFile) {
         var currentFlag = 0
         file.readContentIgnoreLine {
@@ -113,7 +120,8 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Pair<S
                             if (!line.equals(Constants.String.NULL, true)) {
                                 val header = line.split(Constants.String.SPACE)
                                 val headerList = currentHttpApiDescription.headers.toMutableList()
-                                headerList += KeyValue(header[0], header[1])
+                                val value = line.substring(header[0].length + Constants.String.SPACE.length).trim()
+                                headerList += KeyValue(header[0], value)
                                 currentHttpApiDescription.headers = headerList.toTypedArray()
                             }
                         }
@@ -151,6 +159,12 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Pair<S
                             requestDataList += HttpApiDescription.KeyValueDescription(responseData[0], responseData[1], description)
                             currentHttpApiDescription.responseDatas = requestDataList.toTypedArray()
                         }
+                        currentFlag and FLAG_CLASS_IMPORTS == FLAG_CLASS_IMPORTS -> {
+                            importHashSet += line
+                        }
+                        currentFlag and FLAG_FUNCTION_PARAMETER_STRING == FLAG_FUNCTION_PARAMETER_STRING -> {
+                            currentHttpApiDescription.functionParameterString = Constants.Symbol.COMMA + Constants.String.SPACE + line
+                        }
                     }
                 }
             }
@@ -159,5 +173,5 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Pair<S
     } else {
         throw FileNotFoundException("file does not exists or file is a directory, file:%s".format(fullFilename))
     }
-    return className to httpApiDescriptionList
+    return Triple(className, importHashSet, httpApiDescriptionList)
 }

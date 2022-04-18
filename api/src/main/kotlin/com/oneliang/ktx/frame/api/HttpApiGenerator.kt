@@ -9,8 +9,9 @@ import java.io.File
 
 object HttpApiGenerator {
 
-    private const val CLASS_NAME = "className"
     private const val PACKAGE_NAME = "packageName"
+    private const val IMPORTS = "imports"
+    private const val CLASS_NAME = "className"
     private const val API_MODEL_PACKAGE_NAME = "apiModelPackageName"
 
     fun generate(
@@ -29,9 +30,14 @@ object HttpApiGenerator {
         val apiOutputDirectory = File(baseOutputDirectory).absolutePath.replaceAllSlashToLeft() + Constants.Symbol.SLASH_LEFT + packageName.replace(Constants.Symbol.DOT, Constants.Symbol.SLASH_LEFT)
         val apiModelOutputDirectory = File(baseOutputDirectory).absolutePath.replaceAllSlashToLeft() + Constants.Symbol.SLASH_LEFT + apiModelPackageName.replace(Constants.Symbol.DOT, Constants.Symbol.SLASH_LEFT)
         httpApiDocList.forEach { fullFilename ->
-            val (filename, httpApiDescriptionList) = HttpApiDescription.buildListFromFile(fullFilename)
+            val (filename, importsCollection, httpApiDescriptionList) = HttpApiDescription.buildListFromFile(fullFilename)
             val className = filename.toUpperCaseRange(0, 1)
-            option.instanceExtendValueMap = mapOf(CLASS_NAME to className, PACKAGE_NAME to packageName, API_MODEL_PACKAGE_NAME to apiModelPackageName)
+            option.instanceExtendValueMap = mapOf(
+                PACKAGE_NAME to packageName,
+                IMPORTS to importsCollection,
+                CLASS_NAME to className,
+                API_MODEL_PACKAGE_NAME to apiModelPackageName
+            )
             httpApiDescriptionList.forEach { httpApiDescription ->
                 option.instance = httpApiDescription
                 apiRequestTemplateFullFilename.ifNotBlank {

@@ -1,6 +1,10 @@
 /** Automatically generated file. DO NOT MODIFY */
 package <%=packageName%>
 
+<%for(var i=0;i<imports.length;i++){%>
+import <%=imports[i]%>
+<%}%>
+
 class <%=className%> {
 <%for(var i=0;i<fields.length;i++){%>
     <%var field=fields[i];%>
