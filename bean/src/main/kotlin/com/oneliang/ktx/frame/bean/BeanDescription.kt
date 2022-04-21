@@ -13,6 +13,7 @@ class BeanDescription {
         private const val IMPORTS = "imports:"
         private const val CLASS_NAME = "className:"
         private const val FIELDS = "fields:"
+        internal const val TEMPLATE_FIELD_TYPE_CLASS = "CLASS"
         internal const val FLAG_PACKAGE_NAME = 1 shl 0
         internal const val FLAG_IMPORTS = 1 shl 1
         internal const val FLAG_CLASS_NAME = 1 shl 2
@@ -92,13 +93,19 @@ fun BeanDescription.Companion.buildListFromFile(fullFilename: String): List<Bean
                             currentBeanDescription.className = line
                         }
                         currentFlag and FLAG_FIELDS == FLAG_FIELDS -> {
+                            val spaceIndex = line.indexOf(Constants.String.SPACE)
                             val colonIndex = line.lastIndexOf(Constants.Symbol.COLON)
                             val fieldList = currentBeanDescription.fields.toMutableList()
-                            if (colonIndex > 0) {//has array
-                                currentFlag = currentFlag or FLAG_FIELDS_SUB_CLASS_1
-                                val fieldKey = line.substring(0, colonIndex)
-                                fieldList += BeanDescription.FieldDescription(fieldKey, "CLASS")
-                                currentBeanDescription.fields = fieldList.toTypedArray()
+                            if (spaceIndex < 0 && colonIndex > 0 || colonIndex in 1 until spaceIndex) {//no space but has colon or colon index less than space, has array
+                                if (currentFlag and FLAG_FIELDS_SUB_CLASS_1 == FLAG_FIELDS_SUB_CLASS_1) {//sub class flag has open, reset sub class flag
+                                    currentFlag = currentFlag and FLAG_FIELDS_SUB_CLASS_1.inv()//remove sub class flag
+                                } else {
+                                    currentFlag = currentFlag or FLAG_FIELDS_SUB_CLASS_1
+                                    val fieldKey = line.substring(0, colonIndex)
+                                    val description = line.substring(colonIndex + 1)
+                                    fieldList += BeanDescription.FieldDescription(fieldKey, TEMPLATE_FIELD_TYPE_CLASS, description)
+                                    currentBeanDescription.fields = fieldList.toTypedArray()
+                                }
                             } else {
                                 if (currentFlag and FLAG_FIELDS_SUB_CLASS_1 == FLAG_FIELDS_SUB_CLASS_1) {//use sub class
                                     if (currentBeanDescription.fields.isNotEmpty()) {

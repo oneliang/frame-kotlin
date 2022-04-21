@@ -40,8 +40,10 @@ object HttpApiGenerator {
             )
             httpApiDescriptionList.forEach { httpApiDescription ->
                 option.instance = httpApiDescription
-                apiRequestTemplateFullFilename.ifNotBlank {
-                    Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "Api${className}${httpApiDescription.key.toUpperCaseRange(0, 1)}Request.kt", option)
+                if (httpApiDescription.requestParameters.isNotEmpty()) {
+                    apiRequestTemplateFullFilename.ifNotBlank {
+                        Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "Api${className}${httpApiDescription.key.toUpperCaseRange(0, 1)}Request.kt", option)
+                    }
                 }
                 if (httpApiDescription.responseDatas.isNotEmpty()) {
                     apiResponseTemplateFullFilename.ifNotBlank {

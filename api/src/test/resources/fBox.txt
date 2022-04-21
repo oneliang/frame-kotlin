@@ -1,3 +1,4 @@
+#----------新增FBox分组----------
 begin:
 name:
     新增FBox分组
@@ -15,5 +16,167 @@ requestParameters:
     name string 组名
     prevId string 父节点ID,使用新版URL2地址使用这个参数，本页面剩余其他地址不用传这个参数。
 responseDatas:
+#返回添加分组的组id（groupId），不是JSON格式。
 functionParameterString:
     token: String
+
+#----------FBox新增----------
+begin:
+name:
+    该功能用于用户添加FBox,只能作为拥有者添加，一个FBox同时只能有一个拥有者
+key:
+    registerBox
+uri:
+    /api/client/v2/box/register
+method:
+    POST
+headers:
+    Authorization Bearer $token
+contentType:
+    application/json
+requestParameters:
+    alias string FBox别名
+    boxNo string FBox序列号
+    boxPassword string FBox密码
+    groupId string FBox分组uid和groupName二选一
+    groupName string FBox分组uid和groupName二选一，如果不存在，则新增分组
+responseDatas:
+#返回FBox的regId（返回不是json格式的，是string）
+functionParameterString:
+    token: String
+
+#----------新增监控点分组----------
+begin:
+name:
+    该接口用户可用于新增监控点分组。
+key:
+    dmonDefGroupPut
+uri:
+    /api/dmon/def/group
+method:
+    PUT
+headers:
+    Authorization Bearer $token
+contentType:
+    application/json
+requestParameters:
+    name string 监控点组名称
+    boxUid string 盒子Id
+responseDatas:
+#返回添加分组的组id(groupId),不是JSON格式的。
+functionParameterString:
+    token: String
+
+#----------新增数据监控点----------
+begin:
+name:
+    该接口可用于用户添加数据监控点
+key:
+    dmonPut
+uri:
+    /api/v2/box/dmon?boxNo=${boxNo}
+method:
+    PUT
+headers:
+    Authorization Bearer $token
+contentType:
+    application/json
+requestParameters:
+    dmonGrpId string 监控点分组Id，若使用dmonGrpId则无需使用dmonGrpName
+    dmonGrpName string 监控点分组名称，若使用dmonGrpName属性则无需使用dmongrpId属性,若分组不存在，系统自动创建
+    name string 监控点名称
+    intDigits int 整数位（目前无效），对位类型、二进制、十六进制、字符串类型无效
+    fracDigits int 小数位
+    unit string 字类型单位
+    privilege int 读写模式2：只写模式，4：只读模式，6：读写模式
+    devAlias string 设备驱动别名,请查看FlexManager里"远程下载"的别名
+    station int PLC通讯站号
+    dataType int 数据类型，详情见附录二
+    regId int 寄存器Id，与ioWidth联合使用，确定唯一寄存器
+    ioWidth int 寄存器位宽，与regId联合使用，确定唯一寄存器
+    regName string 寄存器名称，能确定唯一寄存器，与上面两参数任选其一
+    addr int PLC主地址
+    subAddr int PLC子地址
+    addrBlk int PLCDB块地址
+    trafficSaving boolean 是否省流量模式，true:启用，false：不启用，字符串类型无效
+    deadValue float 死区值，数据再±deadValue范围内数据不推送，字符串、位类型、16进制、2进制不支持
+    #  label JSON对象 位类型时显示标签，属性ttext:值为1时显示的文本，ftext：值为0时显示的文本
+    memo string 备注信息
+    encoding int 编码格式，字符串类型使用0：无，非字符串类型使用，1：Unicode,2:Ascii
+    stringByteOrder int 字符串字节序，编码为Ascii格式时有效0：倒序，1：正序
+    charCount int 字符串个数（仅字符串类型有效
+    bitIndexEnabled boolean 是否启用按位索引
+    bitIndex int 按位索引号
+    valueTransform:#jobject 数值运算设置
+        maxValue int 数值上限
+        minValue int 数值下限
+        scaleMaxValue int 比例上限
+        scaleMinValue int 比例下限
+        gain int 增益
+        offset int 偏移量
+        type int 1：比例转换，2：缩放
+    valueTransform:
+    executeOnEdge boolean 是否启用边缘执行，启用时必须配置数值运算
+responseDatas:
+#返回添加监控点的Id(long)List集合
+functionParameterString:
+    token: String, boxNo: String
+
+#----------FBox监控点列表----------
+begin:
+name:
+    该接口用于用户获取当前FBox下所有监控组的数组（JSON数组）
+key:
+    dmonGroupGet
+uri:
+    /api/v2/box/dmon/grouped?boxNo=${boxNo}
+method:
+    GET
+headers:
+    Authorization Bearer $token
+contentType:
+    application/json
+requestParameters:
+responseDatas:
+    id string 监控点分组Id
+    name string 监控点分组名称
+    items: #json数组 监控点条目数组，单个属性见下表
+        id string 监控点Id
+        name string 监控点名称
+        grpId string 监控点分组id
+        grpName string 监控点分组名称
+        devAlias string 设备驱动别名
+        station int PLC通讯站号
+        dataType int 数据类型，详情见附录二
+        regId int 寄存器Id，与ioWidth联合使用，确定唯一寄存器
+        ioWidth int 寄存器位宽，与regId联合使用，确定唯一寄存器
+        regName string 寄存器名称，能确定唯一寄存器，与上面两参数任选其一
+        addr int PLC主地址
+        subAddr int PLC子地址
+        addrBlk int PLCDB块地址
+        intDigits int 整数位（目前无效），对位类型、二进制、十六进制、字符串类型无效
+        fracDigits int 小数位
+        unit string 单位，仅对字类型有效
+        privilege int 读写模式2：只写模式，4：只读模式，6：读写模式
+        trafficSaving boolean 是否省流量模式，true:启用，false：不启用
+        deadValue float 死区值，数据再±deadValue范围内数据不推送
+        label json对象 位类型时显示标签，属性ttext:值为1时显示的文本，ftext：值为0时显示的文本
+        memo string 备注信息
+        encoding int 编码格式，字符串类型使用0：无，非字符串类型使用，1：Unicode,2:Ascii
+        stringByteOrder int 字符串字节序，编码为Ascii格式时有效0：倒序，1：正序
+        charCount int 字符粗个数（仅字符串类型有效）
+        deviceChanged boolean 设备是否被移除（只有在移除时出现该参数，为true）FBox的连接设备変更后会出现该参数
+        tstate int 离线任务标记，0：未执行，1：执行成功，2：执行失败，3：固件不支持
+        valueTransform:#jobject 数值运算设置
+            maxValue int 数值上限
+            minValue int 数值下限
+            scaleMaxValue int 比例上限
+            scaleMinValue int 比例下限
+            gain int 增益
+            offset int 偏移量
+            type int 1：比例转换，2：缩放
+        valueTransform:
+        executeOnEdge boolean 是否启用边缘执行，启用时必须配置数值运算
+    items:
+functionParameterString:
+    token: String, boxNo: String

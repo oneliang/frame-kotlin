@@ -18,34 +18,6 @@ requestParameters:
     client_id string 开发者账号
     client_secret string 开发者密码
     grant_type string password
-    abc:
-        aa string aa description
-        bb string bb description
-responseDatas:
-    access_token string accessToken
-    expires_in int accessToken的有效期
-    token_type string accessToken的类型(Bearer)固定值
-
-begin:
-name:
-    重新登录接口
-key:
-    reLogin
-uri:
-    /idserver/core/connect/token
-method:
-    POST
-headers:
-    NULL
-contentType:
-    application/x-www-form-urlencoded
-requestParameters:
-    username string FBox 客户端账号
-    password string FBox 客户端密码
-    scope string openid offline_access fbox email profile
-    client_id string 开发者账号
-    client_secret string 开发者密码
-    grant_type string password
 responseDatas:
     access_token string accessToken
     expires_in int accessToken的有效期
