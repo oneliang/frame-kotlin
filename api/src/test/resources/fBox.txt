@@ -223,10 +223,10 @@ headers:
 contentType:
     application/json
 requestParameters:
-    ids jarray 监控点id集合，与names二选一，使用名称优先，少于100个元素。(优先使用ids参数传参)
+    ids Array<String> 监控点id集合，与names二选一，使用名称优先，少于100个元素。(优先使用ids参数传参)
     timeOut int 最大读取超时，null为取服务器默认值(6000ms)
-    groupnames jarray 用于不同组下存在同名监控点的情况。与监控点名称集合联合使用，组名与监控点名称一 一对应
-    names jarray 监控点名称集合，与ids二选一，使用名称优先，少于100个元素。
+    groupnames Array<String> 用于不同组下存在同名监控点的情况。与监控点名称集合联合使用，组名与监控点名称一 一对应
+    names Array<String> 监控点名称集合，与ids二选一，使用名称优先，少于100个元素。
 responseDatas:
     id string 监控点Id
     timestamp long 时间戳，由于从缓存里拉的数据，所以需要时间戳来判断是否已经过期,UTC时间
