@@ -6,11 +6,10 @@ import com.oneliang.ktx.frame.socket.TlvPacketProcessor
 import com.oneliang.ktx.frame.socket.nio.ClientManager
 import com.oneliang.ktx.util.common.HOST_ADDRESS
 import com.oneliang.ktx.util.common.PID
-import com.oneliang.ktx.util.common.toByteArray
 import com.oneliang.ktx.util.common.toInt
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
-import com.oneliang.ktx.util.json.jsonToJsonObject
+import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 
@@ -33,15 +32,15 @@ class LockerClientManager(host: String, port: Int) : Function1<ByteArray, Unit> 
         val responseTlvPacket = this.tlvPacketProcessor.receiveTlvPacket(p1)
         val responseJson = String(responseTlvPacket.body)
         logger.debug("receive, type:%s, body json:%s", responseTlvPacket.type.toInt(), responseJson)
-        val responseJsonObject = responseJson.jsonToJsonObject()
-        val action = responseJsonObject.optString("action")
-        val id = responseJsonObject.optString("id")
-        val success = responseJsonObject.optBoolean("success")
+        val lockResponse = responseJson.jsonToObject(LockResponse::class)
+        val action = lockResponse.action
+        val id = lockResponse.id
+        val success = lockResponse.success
         when {
-            action == "tryLock" && success -> {
+            action == ConstantsLock.Action.TRY_LOCK && success -> {
                 this.awaitAndSignal.signal(id)
             }
-            action == "releaseLock" && success -> {
+            action == ConstantsLock.Action.RELEASE_LOCK && success -> {
             }
         }
     }
