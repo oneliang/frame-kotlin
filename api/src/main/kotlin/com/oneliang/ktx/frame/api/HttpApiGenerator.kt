@@ -4,6 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.ifNotBlank
 import com.oneliang.ktx.util.common.replaceAllSlashToLeft
 import com.oneliang.ktx.util.common.toUpperCaseRange
+import com.oneliang.ktx.util.generate.BeanDescription
 import com.oneliang.ktx.util.generate.Template
 import java.io.File
 
@@ -11,7 +12,7 @@ object HttpApiGenerator {
 
     private const val PACKAGE_NAME = "packageName"
     private const val IMPORTS = "imports"
-    private const val CLASS_NAME = "className"
+    private const val BASE_CLASS_NAME = "baseClassName"
     private const val API_MODEL_PACKAGE_NAME = "apiModelPackageName"
 
     fun generate(
@@ -31,30 +32,44 @@ object HttpApiGenerator {
         val apiModelOutputDirectory = File(baseOutputDirectory).absolutePath.replaceAllSlashToLeft() + Constants.Symbol.SLASH_LEFT + apiModelPackageName.replace(Constants.Symbol.DOT, Constants.Symbol.SLASH_LEFT)
         httpApiDocList.forEach { fullFilename ->
             val (filename, importsCollection, httpApiDescriptionList) = HttpApiDescription.buildListFromFile(fullFilename)
-            val className = filename.toUpperCaseRange(0, 1)
-            option.instanceExtendValueMap = mapOf(
-                PACKAGE_NAME to packageName,
-                IMPORTS to importsCollection,
-                CLASS_NAME to className,
-                API_MODEL_PACKAGE_NAME to apiModelPackageName
-            )
+            val baseClassName = filename.toUpperCaseRange(0, 1)
             httpApiDescriptionList.forEach { httpApiDescription ->
-                option.instance = httpApiDescription
                 if (httpApiDescription.requestParameters.isNotEmpty()) {
                     apiRequestTemplateFullFilename.ifNotBlank {
-                        Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "Api${className}${httpApiDescription.key.toUpperCaseRange(0, 1)}Request.kt", option)
+                        val apiRequestBeanClassName = "Api${baseClassName}${httpApiDescription.key.toUpperCaseRange(0, 1)}Request"
+                        val apiRequestBeanDescription = BeanDescription()
+                        apiRequestBeanDescription.className = apiRequestBeanClassName
+                        apiRequestBeanDescription.fields = httpApiDescription.requestParameters
+                        apiRequestBeanDescription.packageName = apiModelPackageName
+                        option.instance = apiRequestBeanDescription
+                        Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "${apiRequestBeanClassName}.kt", option)
                     }
                 }
                 if (httpApiDescription.responseDatas.isNotEmpty()) {
                     apiResponseTemplateFullFilename.ifNotBlank {
-                        Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "Api${className}${httpApiDescription.key.toUpperCaseRange(0, 1)}Response.kt", option)
+                        val apiResponseBeanClassName = "Api${baseClassName}${httpApiDescription.key.toUpperCaseRange(0, 1)}Response"
+                        val apiResponseBeanDescription = BeanDescription()
+                        apiResponseBeanDescription.className = apiResponseBeanClassName
+                        apiResponseBeanDescription.fields = httpApiDescription.requestParameters
+                        apiResponseBeanDescription.packageName = apiModelPackageName
+                        option.instance = apiResponseBeanDescription
+                        Template.generate(it, apiModelOutputDirectory + Constants.Symbol.SLASH_LEFT + "${apiResponseBeanClassName}.kt", option)
                     }
                 }
             }
             option.instance = mapOf<String, Any>("list" to httpApiDescriptionList)//replace it
+            option.instanceExtendValueMap = mapOf(
+                PACKAGE_NAME to packageName,
+                IMPORTS to importsCollection,
+                BASE_CLASS_NAME to baseClassName,
+                API_MODEL_PACKAGE_NAME to apiModelPackageName
+            )
             apiTemplateFullFilename.ifNotBlank {
-                Template.generate(it, apiOutputDirectory + Constants.Symbol.SLASH_LEFT + "${className}HttpApi.kt", option)
+                Template.generate(it, apiOutputDirectory + Constants.Symbol.SLASH_LEFT + "${baseClassName}HttpApi.kt", option)
             }
+            //reset after generate
+            option.instance = null
+            option.instanceExtendValueMap = emptyMap()
         }
     }
 }

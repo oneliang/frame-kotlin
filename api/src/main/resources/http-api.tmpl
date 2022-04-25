@@ -9,7 +9,7 @@ import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
 <%for(var index=0;index<list.length;index++){%>
     <%var item=list[index];%>
-    <%var apiClassName = className + item.key.substring(0, 1).toUpperCase() + item.key.substring(1);%>
+    <%var apiClassName = baseClassName + item.key.substring(0, 1).toUpperCase() + item.key.substring(1);%>
     <%if (item.requestParameters.length!=0) {%>
 import <%=apiModelPackageName%>.Api<%=apiClassName%>Request
     <%}%>
@@ -17,13 +17,13 @@ import <%=apiModelPackageName%>.Api<%=apiClassName%>Request
 import <%=apiModelPackageName%>.Api<%=apiClassName%>Response
     <%}%>
 <%}%>
-object <%=className%>HttpApi {
+object <%=baseClassName%>HttpApi {
 
 <%for(var index=0;index<list.length;index++){%>
     <%var item=list[index];%>
     <%var hasRequest = item.requestParameters.length!=0;%>
     <%var hasResponse = item.responseDatas.length!=0;%>
-    <%var apiClassName = className + item.key.substring(0, 1).toUpperCase() + item.key.substring(1);%>
+    <%var apiClassName = baseClassName + item.key.substring(0, 1).toUpperCase() + item.key.substring(1);%>
     //<%=item.name%>
     fun <%=item.key%>(host: String<%=item.functionParameterString%><%=(hasRequest ? ', api' + apiClassName + 'Request: Api' + apiClassName + 'Request' : '')%>): <%=(hasResponse ? 'Api'+apiClassName+'Response' : 'String')%> {
         val httpUrl = "${host}<%=item.uri%>"
@@ -44,7 +44,11 @@ object <%=className%>HttpApi {
             <%if (item.method.toUpperCase() == 'POST') {%>
         val responseJson = HttpUtil.sendRequestPostWithBytes(httpUrl, httpHeaderList = httpHeaderList, byteArray = api<%=apiClassName%>Request.toJson().toByteArray())
             <%} else {%>
+                <%if (hasRequest) {%>
         val responseJson = HttpUtil.sendRequestWithBytes(httpUrl, "<%=item.method.toUpperCase()%>", httpHeaderList = httpHeaderList, byteArray = api<%=apiClassName%>Request.toJson().toByteArray())
+                <%} else {%>
+        val responseJson = HttpUtil.sendRequestWithBytes(httpUrl, "<%=item.method.toUpperCase()%>", httpHeaderList = httpHeaderList)
+                <%}%>
             <%}%>
         <%}%>
         <%if (hasResponse) {%>

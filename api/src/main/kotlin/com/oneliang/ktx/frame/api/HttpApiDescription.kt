@@ -2,9 +2,10 @@ package com.oneliang.ktx.frame.api
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.pojo.KeyValue
-import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.toFile
 import com.oneliang.ktx.util.file.readContentIgnoreLine
+import com.oneliang.ktx.util.generate.BeanDescription
+import com.oneliang.ktx.util.generate.processSubClass
 import java.io.FileNotFoundException
 
 class HttpApiDescription {
@@ -55,89 +56,10 @@ class HttpApiDescription {
     var method = Constants.Http.RequestMethod.POST.value
     var headers = emptyArray<KeyValue>()
     var contentType = Constants.Http.ContentType.APPLICATION_JSON
-    var requestParameters = emptyArray<KeyValueDescription>()
-    var responseDatas = emptyArray<KeyValueDescription>()
+    var requestParameters = emptyArray<BeanDescription.FieldDescription>()
+    var responseDatas = emptyArray<BeanDescription.FieldDescription>()
     var functionParameterString = Constants.String.BLANK
 
-    class KeyValueDescription(
-        key: String = Constants.String.BLANK,
-        value: String = Constants.String.BLANK,
-        var description: String = Constants.String.BLANK
-    ) : KeyValue(key, value) {
-        var subParameters = emptyArray<KeyValueDescription>()
-    }
-}
-
-private fun HttpApiDescription.Companion.parseParameter(line: String): HttpApiDescription.KeyValueDescription {
-    val parameter = line.split(Constants.String.SPACE)
-    val description = line.substring(parameter[0].length + Constants.String.SPACE.length + parameter[1].length).trim()
-    return HttpApiDescription.KeyValueDescription(parameter[0], parameter[1], description)
-}
-
-private fun HttpApiDescription.Companion.processSubClass(
-    line: String,
-    currentFlag: Int,
-    flagSubClassKeyMap: MutableMap<Int, String>,
-    parameterList: MutableList<HttpApiDescription.KeyValueDescription>,
-    subClass1: Int,
-    subClass2: Int
-): Pair<Int, Array<HttpApiDescription.KeyValueDescription>?> {
-    val spaceIndex = line.indexOf(Constants.String.SPACE)
-    val colonIndex = line.lastIndexOf(Constants.Symbol.COLON)
-    //space priority higher than colon
-//    val parameterList = currentHttpApiDescription.requestParameters.toMutableList()
-    if (spaceIndex < 0 && colonIndex > 0 || colonIndex in 1 until spaceIndex) {//no space but has colon or colon index less than space, has array
-        val parameterKey = line.substring(0, colonIndex)
-        if (currentFlag and subClass1 == subClass1) {//sub class flag has open, reset sub class flag
-            if (parameterKey == flagSubClassKeyMap[subClass1].nullToBlank()) {//the same key, so finished sub class 1
-                return currentFlag and subClass1.inv() to null//remove sub class 1 flag
-            } else {//2
-                if (parameterKey == flagSubClassKeyMap[subClass2].nullToBlank()) {
-                    return currentFlag and subClass2.inv() to null//remove sub class 2 flag
-                } else {
-                    flagSubClassKeyMap[subClass2] = parameterKey
-                    val description = line.substring(colonIndex + 1)
-                    val lastParameter = parameterList.last()
-                    val subParameterList = lastParameter.subParameters.toMutableList()
-                    subParameterList += HttpApiDescription.KeyValueDescription(parameterKey, TEMPLATE_DESCRIPTION_TYPE_CLASS, description)
-                    lastParameter.subParameters = subParameterList.toTypedArray()
-                    return currentFlag or subClass2 to null
-                }
-            }
-        } else {//first in sub class
-            flagSubClassKeyMap[subClass1] = parameterKey
-            val description = line.substring(colonIndex + 1)
-            parameterList += HttpApiDescription.KeyValueDescription(parameterKey, TEMPLATE_DESCRIPTION_TYPE_CLASS, description)
-            return currentFlag or subClass1 to parameterList.toTypedArray()
-        }
-    } else {
-        if (currentFlag and subClass2 == subClass2) {//use sub class 2
-            if (parameterList.isNotEmpty()) {
-                val lastParameter = parameterList.last()
-                val subParameterList = lastParameter.subParameters.toMutableList()
-                val lastSubParameter = subParameterList.last()
-                val subSubParameterList = lastSubParameter.subParameters.toMutableList()
-                subSubParameterList += parseParameter(line)
-                lastSubParameter.subParameters = subSubParameterList.toTypedArray()
-                return 0 to null
-            } else {
-                error("some invoke sequence error, please check it")
-            }
-        } else if (currentFlag and subClass1 == subClass1) {//use sub class 1
-            if (parameterList.isNotEmpty()) {
-                val lastParameter = parameterList.last()
-                val subParameterList = lastParameter.subParameters.toMutableList()
-                subParameterList += parseParameter(line)
-                lastParameter.subParameters = subParameterList.toTypedArray()
-                return 0 to null
-            } else {
-                error("some invoke sequence error, please check it")
-            }
-        } else {//has space, space priority higher than colon
-            parameterList += parseParameter(line)
-            return 0 to parameterList.toTypedArray()
-        }
-    }
 }
 
 fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Triple<String, Collection<String>, List<HttpApiDescription>> {
@@ -203,7 +125,7 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Triple
                             }
                             currentFlag and FLAG_REQUEST_PARAMETERS == FLAG_REQUEST_PARAMETERS -> {
                                 val parameterList = currentHttpApiDescription.requestParameters.toMutableList()
-                                val (modifyCurrentFlag, parameterTypeArray) = processSubClass(
+                                val (modifyCurrentFlag, parameterTypeArray) = BeanDescription.processSubClass(
                                     line,
                                     currentFlag,
                                     flagSubClassKeyMap,
@@ -220,7 +142,7 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Triple
                             }
                             currentFlag and FLAG_RESPONSE_DATAS == FLAG_RESPONSE_DATAS -> {
                                 val parameterList = currentHttpApiDescription.responseDatas.toMutableList()
-                                val (modifyCurrentFlag, parameterTypeArray) = processSubClass(
+                                val (modifyCurrentFlag, parameterTypeArray) = BeanDescription.processSubClass(
                                     line,
                                     currentFlag,
                                     flagSubClassKeyMap,

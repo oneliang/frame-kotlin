@@ -180,3 +180,62 @@ responseDatas:
     items:
 functionParameterString:
     token: String, boxNo: String
+
+#----------监控点值写入----------
+begin:
+name:
+    该接口用于用户对监控点数据进行写入操作
+key:
+    dmonValuePost
+uri:
+    /api/v2/dmon/value?boxNo=${boxNo}
+method:
+    POST
+headers:
+    Authorization Bearer $token
+contentType:
+    application/json
+requestParameters:
+    id string 监控点uid，若使用id属性，则无需使用name
+    name string 监控点名称,使用name则无需使用id属性
+    groupname string 监控分组名称,与name联合使用,用于区分不同分组下监控点名称重名
+    type int 传值类型：{0：value值为监控点中指定的类型}，{1：value值整数为10进制值，浮点数和其它直接上传}
+    value string 值
+#如传值type为1，所有整数类型都要转化为10进制整数传给服务器，带小 数位的整数先乘以10^n转化为不带小数位的整数
+responseDatas:
+    
+functionParameterString:
+    token: String, boxNo: String
+
+#----------获取监控点值----------
+#(不建议使用接口获取实时数据！！推荐使用signalr推送)
+begin:
+name:
+    该接口可用于用户获取监控点值。(有频率限制，建议不要超过一秒一次，若超过一定频率，会屏蔽IP处理),获取实时数据，建议使用SignalR推送
+key:
+    dmonValueGet
+uri:
+    /api/v2/dmon/value/get?boxNo=${boxNo}
+method:
+    POST
+headers:
+    Authorization Bearer $token
+contentType:
+    application/json
+requestParameters:
+    ids jarray 监控点id集合，与names二选一，使用名称优先，少于100个元素。(优先使用ids参数传参)
+    timeOut int 最大读取超时，null为取服务器默认值(6000ms)
+    groupnames jarray 用于不同组下存在同名监控点的情况。与监控点名称集合联合使用，组名与监控点名称一 一对应
+    names jarray 监控点名称集合，与ids二选一，使用名称优先，少于100个元素。
+responseDatas:
+    id string 监控点Id
+    timestamp long 时间戳，由于从缓存里拉的数据，所以需要时间戳来判断是否已经过期,UTC时间
+    dataType int 数据类型，见附录二
+    value string 值,根据数据类型返回值类型。
+    name string 监控点名称
+    boxId long 盒子Id
+    status int 监控点状态，0：正常，1：无数据，2：超时，3：错误，4：Socket异常，5：FDS错误，16：未完成
+    connState int 盒子连接状态, 0：未知 ， 1：已连接 ，2：超时， 3：断开
+    connStateTimestamp long 盒子的上线时间
+functionParameterString:
+    token: String, boxNo: String

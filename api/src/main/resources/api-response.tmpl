@@ -1,72 +1,75 @@
 /** Automatically generated file. DO NOT MODIFY */
-package <%=apiModelPackageName%>
-<%var apiClassName = className + key.substring(0, 1).toUpperCase() + key.substring(1);%>
-//<%=name%>
-class Api<%=apiClassName%>Response {
-<%for(var i=0;i<responseDatas.length;i++){%>
-    <%var parameter=responseDatas[i];%>
-    <%var fieldName=parameter.key;%>
-    <%var fieldType=parameter.value.toUpperCase();%>
+package <%=packageName%>
+
+<%for(var i=0;i<imports.length;i++){%>
+import <%=imports[i]%>
+<%}%>
+
+class <%=className%> {
+<%for(var i=0;i<fields.length;i++){%>
+    <%var field=fields[i];%>
+    <%var fieldName=field.key;%>
+    <%var fieldType=field.value.toUpperCase();%>
     <%if (fieldType == 'STRING'){%>
-    var <%=fieldName%>: String = ""//<%=parameter.description%>
+    var <%=fieldName%>: String = ""//<%=field.description%>
     <%} else if (fieldType == 'BOOLEAN') {%>
-    var <%=fieldName%>: Boolean = false//<%=parameter.description%>
+    var <%=fieldName%>: Boolean = false//<%=field.description%>
     <%} else if (fieldType == 'SHORT') {%>
-    var <%=fieldName%>: Short = 0//<%=parameter.description%>
+    var <%=fieldName%>: Short = 0//<%=field.description%>
     <%} else if (fieldType == 'INT') {%>
-    var <%=fieldName%>: Int = 0//<%=parameter.description%>
+    var <%=fieldName%>: Int = 0//<%=field.description%>
     <%} else if (fieldType == 'LONG') {%>
-    var <%=fieldName%>: Long = 0l//<%=parameter.description%>
+    var <%=fieldName%>: Long = 0l//<%=field.description%>
     <%} else if (fieldType == 'FLOAT') {%>
-    var <%=fieldName%>: Float = 0f//<%=parameter.description%>
+    var <%=fieldName%>: Float = 0f//<%=field.description%>
     <%} else if (fieldType == 'DOUBLE') {%>
-    var <%=fieldName%>: Double = 0.0//<%=parameter.description%>
+    var <%=fieldName%>: Double = 0.0//<%=field.description%>
     <%} else if (fieldType == 'CLASS') {%>
     <%var subClassName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);%>
-    var <%=fieldName%>: <%=subClassName%>Bean? = null//<%=parameter.description%>
+    var <%=fieldName%>: <%=subClassName%>Bean? = null//<%=field.description%>
     class <%=subClassName%>Bean {
-        <%if (parameter.subParameters!=null){%>
-            <%for(var j=0;j<parameter.subParameters.length;j++){%>
-                <%var subClassParameter=parameter.subParameters[j];%>
-                <%var subClassFieldName=subClassParameter.key;%>
-                <%var subClassFieldType=subClassParameter.value.toUpperCase();%>
+        <%if (field.subFields!=null){%>
+            <%for(var j=0;j<field.subFields.length;j++){%>
+                <%var subClassField=field.subFields[j];%>
+                <%var subClassFieldName=subClassField.key;%>
+                <%var subClassFieldType=subClassField.value.toUpperCase();%>
                 <%var subSubClassName = subClassFieldName.substring(0, 1).toUpperCase() + subClassFieldName.substring(1);%>
                 <%if (subClassFieldType == 'STRING'){%>
-        var <%=subClassFieldName%>: String = ""//<%=subClassParameter.description%>
+        var <%=subClassFieldName%>: String = ""//<%=subClassField.description%>
                 <%} else if (subClassFieldType == 'BOOLEAN') {%>
-        var <%=subClassFieldName%>: Boolean = false//<%=subClassParameter.description%>
+        var <%=subClassFieldName%>: Boolean = false//<%=subClassField.description%>
                 <%} else if (subClassFieldType == 'SHORT') {%>
-        var <%=subClassFieldName%>: Short = 0//<%=subClassParameter.description%>
+        var <%=subClassFieldName%>: Short = 0//<%=subClassField.description%>
                 <%} else if (subClassFieldType == 'INT') {%>
-        var <%=subClassFieldName%>: Int = 0//<%=subClassParameter.description%>
+        var <%=subClassFieldName%>: Int = 0//<%=subClassField.description%>
                 <%} else if (subClassFieldType == 'LONG') {%>
-        var <%=subClassFieldName%>: LONG = 0l//<%=subClassParameter.description%>
+        var <%=subClassFieldName%>: LONG = 0l//<%=subClassField.description%>
                 <%} else if (subClassFieldType == 'FLOAT') {%>
-        var <%=subClassFieldName%>: Float = 0f//<%=subClassParameter.description%>
+        var <%=subClassFieldName%>: Float = 0f//<%=subClassField.description%>
                 <%} else if (subClassFieldType == 'DOUBLE') {%>
-        var <%=subClassFieldName%>: Double = 0.0//<%=subClassParameter.description%>
+        var <%=subClassFieldName%>: Double = 0.0//<%=subClassField.description%>
                 <%} else if (subClassFieldType == 'CLASS') {%>
-        var <%=subClassFieldName%>: <%=subSubClassName%>Bean? = null//<%=subClassParameter.description%>
+        var <%=subClassFieldName%>: <%=subSubClassName%>Bean? = null//<%=subClassField.description%>
         class <%=subSubClassName%>Bean {
-            <%if (subClassParameter.subParameters!=null){%>
-                <%for(var k=0;k<subClassParameter.subParameters.length;k++){%>
-                    <%var subSubClassParameter=subClassParameter.subParameters[k];%>
-                    <%var subSubClassFieldName=subSubClassParameter.key;%>
-                    <%var subSubClassFieldType=subSubClassParameter.value.toUpperCase();%>
+            <%if (subClassField.subFields!=null){%>
+                <%for(var k=0;k<subClassField.subFields.length;k++){%>
+                    <%var subSubClassField=subClassField.subFields[k];%>
+                    <%var subSubClassFieldName=subSubClassField.key;%>
+                    <%var subSubClassFieldType=subSubClassField.value.toUpperCase();%>
                     <%if (subSubClassFieldType == 'STRING'){%>
-            var <%=subSubClassFieldName%>: String = ""//<%=subSubClassParameter.description%>
+            var <%=subSubClassFieldName%>: String = ""//<%=subSubClassField.description%>
                     <%} else if (subSubClassFieldType == 'BOOLEAN') {%>
-            var <%=subSubClassFieldName%>: Boolean = false//<%=subSubClassParameter.description%>
+            var <%=subSubClassFieldName%>: Boolean = false//<%=subSubClassField.description%>
                     <%} else if (subSubClassFieldType == 'SHORT') {%>
-            var <%=subSubClassFieldName%>: Short = 0//<%=subSubClassParameter.description%>
+            var <%=subSubClassFieldName%>: Short = 0//<%=subSubClassField.description%>
                     <%} else if (subSubClassFieldType == 'INT') {%>
-            var <%=subSubClassFieldName%>: Int = 0//<%=subSubClassParameter.description%>
+            var <%=subSubClassFieldName%>: Int = 0//<%=subSubClassField.description%>
                     <%} else if (subSubClassFieldType == 'LONG') {%>
-            var <%=subSubClassFieldName%>: LONG = 0l//<%=subSubClassParameter.description%>
+            var <%=subSubClassFieldName%>: LONG = 0l//<%=subSubClassField.description%>
                     <%} else if (subSubClassFieldType == 'FLOAT') {%>
-            var <%=subSubClassFieldName%>: Float = 0f//<%=subSubClassParameter.description%>
+            var <%=subSubClassFieldName%>: Float = 0f//<%=subSubClassField.description%>
                     <%} else if (subSubClassFieldType == 'DOUBLE') {%>
-            var <%=subSubClassFieldName%>: Double = 0.0//<%=subSubClassParameter.description%>
+            var <%=subSubClassFieldName%>: Double = 0.0//<%=subSubClassField.description%>
                     <%}%>
                 <%}%>
             <%}%>
