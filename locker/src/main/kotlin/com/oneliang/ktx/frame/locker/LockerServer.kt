@@ -8,8 +8,6 @@ import com.oneliang.ktx.frame.socket.nio.Server
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
-import com.oneliang.ktx.util.logging.BaseLogger
-import com.oneliang.ktx.util.logging.Logger
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.ByteArrayInputStream
 import java.util.concurrent.ConcurrentHashMap
@@ -44,7 +42,7 @@ class LockerServer(host: String, port: Int, maxThreadCount: Int = Runtime.getRun
         val id = lockRequest.id
         val lockKey = lockRequest.lockKey
         this.idSocketChannelMap[id] = socketChannelHashCode
-        return if (action == "tryLock") {
+        return if (action == ConstantsLock.Action.TRY_LOCK) {
             var success = false
             this.atomicMap.operate(lockKey, create = {
                 success = true
