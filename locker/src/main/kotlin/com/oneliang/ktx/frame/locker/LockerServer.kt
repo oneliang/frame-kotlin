@@ -100,7 +100,8 @@ class LockerServer(host: String, port: Int, maxThreadCount: Int = Runtime.getRun
                     val tryLockResponseJson = LockResponse.buildTryLockResponse(notifyId, success).toJson()
                     val notifyByteArray = TlvPacket(ConstantsLock.TlvPackageType.NOTIFY, tryLockResponseJson.toByteArray()).toByteArray()
                     //just write, because has special data
-                    this.server.notify(this.idSocketChannelMap[notifyId] ?: 0, notifyByteArray)
+                    val removedNotifyId = this.idSocketChannelMap.remove(notifyId)
+                    this.server.notify(removedNotifyId ?: 0, notifyByteArray)
                 }
             }
             val releaseLockResponseJson = LockResponse.buildReleaseLockResponse(id, success).toJson()
