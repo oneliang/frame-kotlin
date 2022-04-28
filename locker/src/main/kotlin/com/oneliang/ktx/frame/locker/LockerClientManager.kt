@@ -13,23 +13,18 @@ import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 
-class LockerClientManager(host: String, port: Int) : Function1<ByteArray, Unit> {
+class LockerClientManager(host: String, port: Int) {
     companion object {
         private val logger = LoggerManager.getLogger(LockerClientManager::class)
     }
 
-    private val clientManager = ClientManager(host, port, this)
     private val tlvPacketProcessor = TlvPacketProcessor()
     private val atomicMap = AtomicMap<String, LocalLocker>()
     private val awaitAndSignal = AwaitAndSignal<String>()
 
-    init {
-        this.clientManager.start()
-    }
-
-    //clientManager readProcessor is lambda, so you can implement Function interface to use it
-    override fun invoke(p1: ByteArray) {
-        val responseTlvPacket = this.tlvPacketProcessor.receiveTlvPacket(p1)
+    //second way:clientManager readProcessor is lambda, so you can implement Function interface to use it
+    private val readProcessor = { byteArray: ByteArray ->
+        val responseTlvPacket = this.tlvPacketProcessor.receiveTlvPacket(byteArray)
         val responseJson = String(responseTlvPacket.body)
         logger.debug("receive, type:%s, body json:%s", responseTlvPacket.type.toInt(), responseJson)
         val lockResponse = responseJson.jsonToObject(LockResponse::class)
@@ -43,6 +38,11 @@ class LockerClientManager(host: String, port: Int) : Function1<ByteArray, Unit> 
             action == ConstantsLock.Action.RELEASE_LOCK && success -> {
             }
         }
+    }
+    private val clientManager = ClientManager(host, port, this.readProcessor)
+
+    init {
+        this.clientManager.start()
     }
 
     private fun generateGlobalThreadId(): String {
