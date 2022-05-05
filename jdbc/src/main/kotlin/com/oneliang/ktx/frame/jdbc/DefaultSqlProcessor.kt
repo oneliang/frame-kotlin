@@ -83,7 +83,7 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
     /**
      * create table column process
      * @param column
-     * @param type
+     * @param fieldColumnMappingType
      * @param idFlag
      * @param length
      * @param precision
@@ -92,14 +92,14 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
      * @param comment
      * @return String
      */
-    override fun createTableColumnDefinitionProcess(column: String, type: SqlUtil.ColumnType, idFlag: Boolean, length: Int, precision: Int, nullable: Boolean, defaultValue: String?, comment: String): String {
+    override fun createTableColumnDefinitionProcess(column: String, fieldColumnMappingType: SqlUtil.FieldColumnMappingType, idFlag: Boolean, length: Int, precision: Int, nullable: Boolean, defaultValue: String?, comment: String): String {
         val stringBuilder = StringBuilder()
         stringBuilder.append(this.keywordSymbolLeft + column + this.keywordSymbolRight)
         stringBuilder.append(Constants.String.SPACE)
         var optimizeDefaultValue = defaultValue
         stringBuilder.append(
-            when (type) {
-                SqlUtil.ColumnType.STRING -> {
+            when (fieldColumnMappingType) {
+                SqlUtil.FieldColumnMappingType.STRING -> {
                     optimizeDefaultValue = Constants.String.BLANK
                     if (length <= 0) {//custom default value
                         "TEXT"
@@ -107,11 +107,11 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
                         "VARCHAR($length)"
                     }
                 }
-                SqlUtil.ColumnType.BOOLEAN -> {
+                SqlUtil.FieldColumnMappingType.BOOLEAN -> {
                     optimizeDefaultValue = Constants.String.ZERO
                     "INT(1)"
                 }
-                SqlUtil.ColumnType.INT -> {
+                SqlUtil.FieldColumnMappingType.INT -> {
                     optimizeDefaultValue = Constants.String.ZERO
                     if (length <= 0) {//mysql default value
                         "INT(11)"
@@ -119,14 +119,14 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
                         "INT($length)"
                     }
                 }
-                SqlUtil.ColumnType.LONG -> {
+                SqlUtil.FieldColumnMappingType.LONG -> {
                     optimizeDefaultValue = Constants.String.ZERO
                     if (length <= 0) {
-                        error("length:$length error, column:$column, column type:$type")
+                        error("length:$length error, column:$column, column type:$fieldColumnMappingType")
                     }
                     "BIGINT($length)"
                 }
-                SqlUtil.ColumnType.FLOAT -> {
+                SqlUtil.FieldColumnMappingType.FLOAT -> {
                     if (length <= 0 || precision <= 0) {//mysql default value
                         optimizeDefaultValue = "0.0"
                         "FLOAT"
@@ -135,7 +135,7 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
                         "FLOAT($length, $precision)"
                     }
                 }
-                SqlUtil.ColumnType.DOUBLE -> {
+                SqlUtil.FieldColumnMappingType.DOUBLE -> {
                     optimizeDefaultValue = "0.0"
                     if (length <= 0 || precision <= 0) {//mysql default value
                         "DOUBLE"
@@ -143,15 +143,15 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
                         "DOUBLE($length, $precision)"
                     }
                 }
-                SqlUtil.ColumnType.DATE -> {
+                SqlUtil.FieldColumnMappingType.DATE -> {
                     optimizeDefaultValue = Constants.Date.DEFAULT.toFormatString(Constants.Time.YEAR_MONTH_DAY)
                     "DATE"
                 }
-                SqlUtil.ColumnType.DATETIME -> {
+                SqlUtil.FieldColumnMappingType.DATETIME -> {
                     optimizeDefaultValue = Constants.Date.DEFAULT.toFormatString()
                     "DATETIME"
                 }
-                SqlUtil.ColumnType.BIG_DECIMAL -> {
+                SqlUtil.FieldColumnMappingType.BIG_DECIMAL -> {
                     if (length <= 0) {//mysql default value
                         optimizeDefaultValue = "0." + generateZeroString(2)
                         "DECIMAL(10, 2)"
@@ -166,7 +166,7 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
             stringBuilder.append(Constants.String.SPACE)
             stringBuilder.append("NOT NULL")
         }
-        if (idFlag && type == SqlUtil.ColumnType.INT) {
+        if (idFlag && fieldColumnMappingType == SqlUtil.FieldColumnMappingType.INT) {
             stringBuilder.append(Constants.String.SPACE)
             stringBuilder.append("AUTO_INCREMENT")
         } else {//not id add default value

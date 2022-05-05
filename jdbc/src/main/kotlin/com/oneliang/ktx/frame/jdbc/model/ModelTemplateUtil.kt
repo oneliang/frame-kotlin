@@ -55,10 +55,10 @@ object ModelTemplateUtil {
                         val type = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_TYPE)?.nodeValue ?: field.type
                         field.type = type
                         when (type) {
-                            SqlUtil.ColumnType.DATETIME.value, SqlUtil.ColumnType.DATE.value -> {
+                            SqlUtil.FieldColumnMappingType.DATETIME.value, SqlUtil.FieldColumnMappingType.DATE.value -> {
                                 importHashSet += Date::class.qualifiedName.nullToBlank()
                             }
-                            SqlUtil.ColumnType.BIG_DECIMAL.value -> {
+                            SqlUtil.FieldColumnMappingType.BIG_DECIMAL.value -> {
                                 importHashSet += BigDecimal::class.qualifiedName.nullToBlank()
                             }
                         }

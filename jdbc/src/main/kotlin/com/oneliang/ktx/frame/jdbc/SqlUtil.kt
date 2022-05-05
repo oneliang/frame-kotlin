@@ -590,7 +590,7 @@ object SqlUtil {
         /**
          * create table column definition process
          * @param column
-         * @param type
+         * @param fieldColumnMappingType
          * @param idFlag
          * @param length
          * @param precision
@@ -599,7 +599,7 @@ object SqlUtil {
          * @param comment
          * @return String
          */
-        fun createTableColumnDefinitionProcess(column: String, type: ColumnType, idFlag: Boolean, length: Int = 0, precision: Int = 0, nullable: Boolean, defaultValue: String? = null, comment: String = Constants.String.BLANK): String
+        fun createTableColumnDefinitionProcess(column: String, fieldColumnMappingType: FieldColumnMappingType, idFlag: Boolean, length: Int = 0, precision: Int = 0, nullable: Boolean, defaultValue: String? = null, comment: String = Constants.String.BLANK): String
 
         /**
          * create table index process
@@ -619,7 +619,7 @@ object SqlUtil {
         SINGLE_ID, MULTIPLE_ID
     }
 
-    enum class ColumnType(val value: String) {
+    enum class FieldColumnMappingType(val value: String) {
         STRING("STRING"),
         BOOLEAN("BOOLEAN"),
         INT("INT"),

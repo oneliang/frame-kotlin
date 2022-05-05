@@ -10,7 +10,7 @@ open class TableModel {
     var indexArray = emptyArray<IndexModel>()
 
     open class ColumnModel {
-        var type: String = SqlUtil.ColumnType.STRING.value
+        var type: String = SqlUtil.FieldColumnMappingType.STRING.value
         var nullable: Boolean = false
         var column: String = Constants.String.BLANK
         var idFlag: Boolean = false

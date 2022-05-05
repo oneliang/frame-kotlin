@@ -128,7 +128,7 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
     /**
      * create table column process
      * @param column
-     * @param type
+     * @param fieldColumnMappingType
      * @param idFlag
      * @param length
      * @param precision
@@ -137,7 +137,7 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
      * @param comment
      * @return String
      */
-    override fun createTableColumnDefinitionProcess(column: String, type: SqlUtil.ColumnType, idFlag: Boolean, length: Int, precision: Int, nullable: Boolean, defaultValue: String?, comment: String): String {
+    override fun createTableColumnDefinitionProcess(column: String, fieldColumnMappingType: SqlUtil.FieldColumnMappingType, idFlag: Boolean, length: Int, precision: Int, nullable: Boolean, defaultValue: String?, comment: String): String {
         TODO("Not yet implemented")
     }
 

@@ -28,7 +28,7 @@ object TableModelUtil {
         val columnDefinitionSqlList = mutableListOf<String>()
         val columnIndexSqlList = mutableListOf<String>()
         tableModel.columnArray.forEach {
-            columnDefinitionSqlList += sqlProcessor.createTableColumnDefinitionProcess(it.column, SqlUtil.ColumnType.valueOf(it.type), it.idFlag, it.length, it.precision, it.nullable, it.columnDefaultValue, it.comment)
+            columnDefinitionSqlList += sqlProcessor.createTableColumnDefinitionProcess(it.column, SqlUtil.FieldColumnMappingType.valueOf(it.type), it.idFlag, it.length, it.precision, it.nullable, it.columnDefaultValue, it.comment)
             if (it.idFlag) {
                 columnIndexSqlList += sqlProcessor.createTableIndexProcess(it.idFlag, arrayOf(it.column), Constants.String.BLANK)
             }
