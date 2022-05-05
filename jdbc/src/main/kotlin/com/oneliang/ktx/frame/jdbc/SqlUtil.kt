@@ -621,6 +621,7 @@ object SqlUtil {
 
     enum class ColumnType(val value: String) {
         STRING("STRING"),
+        BOOLEAN("BOOLEAN"),
         INT("INT"),
         LONG("LONG"),
         FLOAT("FLOAT"),

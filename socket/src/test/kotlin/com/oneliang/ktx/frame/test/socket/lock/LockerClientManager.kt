@@ -37,7 +37,7 @@ class LockerClientManager(private val host: String, private val port: Int) : Fun
         private val logger = LoggerManager.getLogger(LockerClient::class)
     }
 
-    private val clientManager = ClientManager(this.host, this.port, this)
+    private val clientManager = ClientManager(this.host, this.port, readProcessor = this)
     private val tlvPacketProcessor = TlvPacketProcessor()
     private val atomicMap = AtomicMap<String, LocalLocker>()
     private val awaitAndSignal = AwaitAndSignal<String>()

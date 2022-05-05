@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.socket.nio
 
+import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.concurrent.ThreadPool
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.nio.channels.Selector
@@ -8,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock
 class ClientManager(
     private val host: String,
     private val port: Int,
+    private val threadCount: Int = Runtime.getRuntime().availableProcessors(),
     private val readProcessor: (byteArray: ByteArray) -> Unit = {}
 ) {
     companion object {
@@ -17,7 +19,6 @@ class ClientManager(
     @Volatile
     private var hasBeenInitialized = false
     private val initializeLock = ReentrantLock()
-    private val threadCount = Runtime.getRuntime().availableProcessors()
     private val threadPool = ThreadPool()
     private var clients: Array<Client> = emptyArray()
 
@@ -28,8 +29,11 @@ class ClientManager(
         }
         try {
             this.initializeLock.lock()
+            if (this.hasBeenInitialized) {//double check
+                return//return will trigger finally, but use unlock safety
+            }
             this.threadPool.minThreads = 1
-            this.threadPool.maxThreads = this.threadCount
+            this.threadPool.maxThreads = if (this.threadCount < 1) Runtime.getRuntime().availableProcessors() else this.threadCount
             this.threadPool.start()
             this.clients = Array(this.threadCount) {
                 Client(this.host, this.port, Selector.open(), this.readProcessor)
@@ -39,8 +43,11 @@ class ClientManager(
                     it.run()
                 }
             }
-        } finally {
             this.hasBeenInitialized = true
+        } catch (t: Throwable) {
+            this.hasBeenInitialized = false
+            logger.error(Constants.String.EXCEPTION, t)
+        } finally {
             this.initializeLock.unlock()
         }
     }

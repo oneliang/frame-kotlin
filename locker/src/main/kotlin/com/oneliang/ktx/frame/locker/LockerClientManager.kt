@@ -39,7 +39,7 @@ class LockerClientManager(host: String, port: Int) {
             }
         }
     }
-    private val clientManager = ClientManager(host, port, this.readProcessor)
+    private val clientManager = ClientManager(host, port, readProcessor = this.readProcessor)
 
     init {
         this.clientManager.start()

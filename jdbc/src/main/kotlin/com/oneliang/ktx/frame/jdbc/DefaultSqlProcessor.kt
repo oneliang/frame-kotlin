@@ -107,6 +107,10 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
                         "VARCHAR($length)"
                     }
                 }
+                SqlUtil.ColumnType.BOOLEAN -> {
+                    optimizeDefaultValue = Constants.String.ZERO
+                    "INT(1)"
+                }
                 SqlUtil.ColumnType.INT -> {
                     optimizeDefaultValue = Constants.String.ZERO
                     if (length <= 0) {//mysql default value

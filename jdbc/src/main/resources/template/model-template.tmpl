@@ -41,6 +41,8 @@ open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames
     <%var defaultValue = fieldBean.defaultValue;%>
     <%if (type == 'STRING'){%>
     <%=overrideString%>var <%=fieldBean.name%>: String<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "\"\"")%>
+    <%} else if (type == 'BOOLEAN') {%>
+    <%=overrideString%>var <%=fieldBean.name%>: Boolean<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : false)%>
     <%} else if (type == 'INT') {%>
     <%=overrideString%>var <%=fieldBean.name%>: Int<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%>
     <%} else if (type == 'LONG') {%>

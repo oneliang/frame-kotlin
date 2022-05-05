@@ -11,12 +11,11 @@ import com.oneliang.ktx.util.logging.LoggerManager
 fun main() {
     LoggerManager.registerLogger("*", BaseLogger(Logger.Level.DEBUG))
     val tlvPacketProcessor = TlvPacketProcessor()
-    ClientManager("localhost", 9999) {
+    ClientManager("localhost", 9999, 1) {
         val tlvPacket = tlvPacketProcessor.receiveTlvPacket(it)
         println(String(tlvPacket.body))
     }.also { clientManager ->
         clientManager.start()
-        Thread.sleep(1000)
         clientManager.send(TlvPacket(1.toByteArray(), "i am client".toByteArray()).toByteArray())
     }
 //    Client("localhost", 9999).start()
