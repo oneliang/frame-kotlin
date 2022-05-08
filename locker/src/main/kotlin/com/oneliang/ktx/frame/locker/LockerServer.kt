@@ -1,14 +1,14 @@
 package com.oneliang.ktx.frame.locker
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.socket.TlvPacket
-import com.oneliang.ktx.frame.socket.TlvPacketProcessor
 import com.oneliang.ktx.frame.socket.nio.SelectorProcessor
 import com.oneliang.ktx.frame.socket.nio.Server
 import com.oneliang.ktx.util.concurrent.atomic.AtomicMap
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
+import com.oneliang.ktx.util.packet.TlvPacket
+import com.oneliang.ktx.util.packet.TlvPacketProcessor
 import java.io.ByteArrayInputStream
 import java.util.concurrent.ConcurrentHashMap
 
@@ -16,10 +16,10 @@ class LockerServer(host: String, port: Int, maxThreadCount: Int = Runtime.getRun
 
     companion object {
         private val logger = LoggerManager.getLogger(LockerServer::class)
+        private val tlvPacketProcessor = TlvPacketProcessor()
     }
 
     private val idSocketChannelMap = ConcurrentHashMap<String, Int>()
-    private val tlvPacketProcessor = TlvPacketProcessor()
     private val server = Server(host, port, maxThreadCount).also { it.selectorProcessor = this }
     private val atomicMap = AtomicMap<String, Locker>()
 
@@ -34,7 +34,7 @@ class LockerServer(host: String, port: Int, maxThreadCount: Int = Runtime.getRun
     }
 
     override fun process(byteArray: ByteArray, socketChannelHashCode: Int): ByteArray {
-        val tlvPacket = this.tlvPacketProcessor.receiveTlvPacket(ByteArrayInputStream(byteArray))
+        val tlvPacket = tlvPacketProcessor.receiveTlvPacket(ByteArrayInputStream(byteArray))
         val requestString = String(tlvPacket.body)
         logger.debug("server read:%s", requestString)
         val lockRequest = requestString.jsonToObject(LockRequest::class)

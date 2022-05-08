@@ -2,13 +2,13 @@ package com.oneliang.ktx.frame.test.socket.lock
 
 import com.oneliang.ktx.frame.socket.SocketClientPool
 import com.oneliang.ktx.frame.socket.SocketClientSource
-import com.oneliang.ktx.frame.socket.TlvPacket
-import com.oneliang.ktx.frame.socket.TlvPacketProcessor
 import com.oneliang.ktx.util.common.toByteArray
 import com.oneliang.ktx.util.common.toFormatString
 import com.oneliang.ktx.util.json.JsonObject
 import com.oneliang.ktx.util.json.jsonToJsonObject
 import com.oneliang.ktx.util.logging.LoggerManager
+import com.oneliang.ktx.util.packet.TlvPacket
+import com.oneliang.ktx.util.packet.TlvPacketProcessor
 import java.util.*
 
 private fun tryLockRequestJson(lockKey: String): String {
@@ -28,10 +28,10 @@ private fun releaseLockRequestJson(lockKey: String): String {
 class LockerClient(private val host: String, private val port: Int) {
     companion object {
         private val logger = LoggerManager.getLogger(LockerClient::class)
+        private val tlvPacketProcessor = TlvPacketProcessor()
     }
 
     private val socketClientPool = SocketClientPool()
-    private val tlvPacketProcessor = TlvPacketProcessor()
 
     init {
         this.socketClientPool.setResourceSource(SocketClientSource().also {
@@ -50,8 +50,8 @@ class LockerClient(private val host: String, private val port: Int) {
             val tlvPacket = TlvPacket(1.toByteArray(), tryLockRequestJson.toByteArray())
             val begin = System.currentTimeMillis()
             val responseTlvPacket = it.send { outputStream, inputStream ->
-                this.tlvPacketProcessor.sendTlvPacket(outputStream, tlvPacket)
-                this.tlvPacketProcessor.receiveTlvPacket(inputStream)
+                tlvPacketProcessor.sendTlvPacket(outputStream, tlvPacket)
+                tlvPacketProcessor.receiveTlvPacket(inputStream)
             }
             if (responseTlvPacket != null) {
                 val responseJson = String(responseTlvPacket.body)
@@ -65,7 +65,7 @@ class LockerClient(private val host: String, private val port: Int) {
                     } else {
                         println("-------------------need to waiting---------------------")
                         val a = it.receive { inputStream ->
-                            this.tlvPacketProcessor.receiveTlvPacket(inputStream)
+                            tlvPacketProcessor.receiveTlvPacket(inputStream)
                         }
                         println(Date().toFormatString() + ", wait for:" + a?.type + "," + String(a?.body ?: ByteArray(0)))
                         false
@@ -95,8 +95,8 @@ class LockerClient(private val host: String, private val port: Int) {
             val tlvPacket = TlvPacket(1.toByteArray(), releaseLockRequestJson.toByteArray())
             val begin = System.currentTimeMillis()
             val responseTlvPacket = it.send { outputStream, inputStream ->
-                this.tlvPacketProcessor.sendTlvPacket(outputStream, tlvPacket)
-                this.tlvPacketProcessor.receiveTlvPacket(inputStream)
+                tlvPacketProcessor.sendTlvPacket(outputStream, tlvPacket)
+                tlvPacketProcessor.receiveTlvPacket(inputStream)
             }
             if (responseTlvPacket != null) {
                 val responseJson = String(responseTlvPacket.body)

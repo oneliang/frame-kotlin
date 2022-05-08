@@ -61,7 +61,7 @@ class SourceProcessor : ParallelSourceProcessor<String> {
     fun trigger() {
         this.quit.compareAndSet(false, true)
 
-        this.awaitAndSignal.signal(NEED_TO_FETCH, {
+        this.awaitAndSignal.signal(NEED_TO_FETCH, true, {
             println(Thread.currentThread().id.toString() + ":3333333333")
         }, {
             println(Thread.currentThread().id.toString() + ":4444444444")

@@ -1,10 +1,10 @@
 package com.oneliang.ktx.frame.test.socket
 
 import com.oneliang.ktx.frame.socket.SocketServer
-import com.oneliang.ktx.frame.socket.TlvPacket
 import com.oneliang.ktx.frame.socket.TlvStreamProcessor
 import com.oneliang.ktx.util.common.toByteArray
 import com.oneliang.ktx.util.common.toHexString
+import com.oneliang.ktx.util.packet.TlvPacket
 import java.io.InputStream
 import java.io.OutputStream
 

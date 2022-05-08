@@ -1,13 +1,13 @@
 package com.oneliang.ktx.frame.test.socket
 
-import com.oneliang.ktx.frame.socket.TlvPacket
-import com.oneliang.ktx.frame.socket.TlvPacketProcessor
 import com.oneliang.ktx.frame.socket.nio.SelectorProcessor
 import com.oneliang.ktx.frame.socket.nio.Server
 import com.oneliang.ktx.util.common.toByteArray
 import com.oneliang.ktx.util.logging.BaseLogger
 import com.oneliang.ktx.util.logging.Logger
 import com.oneliang.ktx.util.logging.LoggerManager
+import com.oneliang.ktx.util.packet.TlvPacket
+import com.oneliang.ktx.util.packet.TlvPacketProcessor
 import java.io.ByteArrayInputStream
 
 fun main() {

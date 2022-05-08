@@ -1,8 +1,6 @@
 package com.oneliang.ktx.frame.test.socket.lock
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.socket.TlvPacket
-import com.oneliang.ktx.frame.socket.TlvPacketProcessor
 import com.oneliang.ktx.frame.socket.nio.ClientManager
 import com.oneliang.ktx.util.common.HOST_ADDRESS
 import com.oneliang.ktx.util.common.PID
@@ -13,6 +11,8 @@ import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
 import com.oneliang.ktx.util.json.JsonObject
 import com.oneliang.ktx.util.json.jsonToJsonObject
 import com.oneliang.ktx.util.logging.LoggerManager
+import com.oneliang.ktx.util.packet.TlvPacket
+import com.oneliang.ktx.util.packet.TlvPacketProcessor
 
 private fun tryLockRequestJson(lockKey: String, id: String): String {
     val requestJsonObject = JsonObject()
@@ -35,16 +35,16 @@ class LocalLocker(val lock: String, val lockId: String, var lockingIdHashSet: Ha
 class LockerClientManager(private val host: String, private val port: Int) : Function1<ByteArray, Unit> {
     companion object {
         private val logger = LoggerManager.getLogger(LockerClient::class)
+        private val tlvPacketProcessor = TlvPacketProcessor()
     }
 
     private val clientManager = ClientManager(this.host, this.port, readProcessor = this)
-    private val tlvPacketProcessor = TlvPacketProcessor()
     private val atomicMap = AtomicMap<String, LocalLocker>()
     private val awaitAndSignal = AwaitAndSignal<String>()
 
     //clientManager readProcessor is lambda, so you can implement Function interface to use it
     override fun invoke(p1: ByteArray) {
-        val responseTlvPacket = this.tlvPacketProcessor.receiveTlvPacket(p1)
+        val responseTlvPacket = tlvPacketProcessor.receiveTlvPacket(p1)
         val responseJson = String(responseTlvPacket.body)
         logger.debug("receive, type:%s, body json:%s", responseTlvPacket.type.toInt(), responseJson)
         val responseJsonObject = responseJson.jsonToJsonObject()

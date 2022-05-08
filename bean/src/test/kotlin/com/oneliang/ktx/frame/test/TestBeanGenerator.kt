@@ -1,6 +1,6 @@
 package com.oneliang.ktx.frame.test
 
-import com.oneliang.ktx.frame.bean.BeanGenerator
+import com.oneliang.ktx.util.generate.BeanGenerator
 
 fun main() {
     val fullFilename = "D:/Dandelion/java/githubWorkspace/frame-kotlin/bean/src/test/resources/kotlin-bean.txt"

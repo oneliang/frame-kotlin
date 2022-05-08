@@ -2,13 +2,13 @@ package com.oneliang.ktx.frame.test.socket
 
 import com.oneliang.ktx.frame.socket.SocketClientPool
 import com.oneliang.ktx.frame.socket.SocketClientSource
-import com.oneliang.ktx.frame.socket.TlvPacket
-import com.oneliang.ktx.frame.socket.TlvPacketProcessor
 import com.oneliang.ktx.util.common.toByteArray
 import com.oneliang.ktx.util.common.toHexString
 import com.oneliang.ktx.util.logging.BaseLogger
 import com.oneliang.ktx.util.logging.Logger
 import com.oneliang.ktx.util.logging.LoggerManager
+import com.oneliang.ktx.util.packet.TlvPacket
+import com.oneliang.ktx.util.packet.TlvPacketProcessor
 import java.net.Socket
 
 fun main() {
