@@ -13,7 +13,7 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.packet.TlvPacket
 import com.oneliang.ktx.util.packet.TlvPacketProcessor
 
-class LockerClientManager(host: String, port: Int) {
+class LockerClientManager(serverHost: String, serverPort: Int) {
     companion object {
         private val logger = LoggerManager.getLogger(LockerClientManager::class)
         private val tlvPacketProcessor = TlvPacketProcessor()
@@ -39,7 +39,7 @@ class LockerClientManager(host: String, port: Int) {
             }
         }
     }
-    private val clientManager = ClientManager(host, port, readProcessor = this.readProcessor)
+    private val clientManager = ClientManager(serverHost, serverPort, readProcessor = this.readProcessor)
 
     init {
         this.clientManager.start()

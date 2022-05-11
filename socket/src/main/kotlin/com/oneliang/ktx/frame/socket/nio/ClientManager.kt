@@ -7,8 +7,8 @@ import java.nio.channels.Selector
 import java.util.concurrent.locks.ReentrantLock
 
 class ClientManager(
-    private val host: String,
-    private val port: Int,
+    private val serverHost: String,
+    private val serverPort: Int,
     private val threadCount: Int = Runtime.getRuntime().availableProcessors(),
     private val readProcessor: (byteArray: ByteArray) -> Unit = {}
 ) {
@@ -21,7 +21,6 @@ class ClientManager(
     private val initializeLock = ReentrantLock()
     private val threadPool = ThreadPool()
     private var clients: Array<Client> = emptyArray()
-
 
     private fun initialize() {
         if (this.hasBeenInitialized) {
@@ -36,7 +35,7 @@ class ClientManager(
             this.threadPool.maxThreads = if (this.threadCount < 1) Runtime.getRuntime().availableProcessors() else this.threadCount
             this.threadPool.start()
             this.clients = Array(this.threadCount) {
-                Client(this.host, this.port, Selector.open(), this.readProcessor)
+                Client(this.serverHost, this.serverPort, Selector.open(), this.readProcessor)
             }
             this.clients.forEach {
                 this.threadPool.addThreadTask {

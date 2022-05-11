@@ -37,5 +37,6 @@ include(":tomcat")
 include(":bus")
 include(":locker")
 include(":transaction")
+include(":rpc")
 //netty
 apply(from = "${rootDir}/netty/netty.gradle")

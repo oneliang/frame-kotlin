@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.locks.ReentrantLock
 
 class Client(
-    private val host: String,
-    private val port: Int,
+    private val serverHost: String,
+    private val serverPort: Int,
     private val selector: Selector,
     private val readProcessor: (byteArray: ByteArray) -> Unit = {}
 ) {
@@ -45,7 +45,7 @@ class Client(
             val socketChannel = SocketChannel.open()
             this.socketChannel = socketChannel ?: error("socketChannel is null")
             socketChannel.configureBlocking(false)
-            socketChannel.connect(InetSocketAddress(this.host, this.port))
+            socketChannel.connect(InetSocketAddress(this.serverHost, this.serverPort))
             socketChannel.register(this.selector, SelectionKey.OP_CONNECT)
             this.hasBeenInitialized = true
         } catch (t: Throwable) {
@@ -128,7 +128,7 @@ class Client(
                 }
                 logger.verbose("after selected key size:%s", this.selector.selectedKeys().size)
             } else if (privateSocketChannel == null) {
-                logger.debug("socket channel is null, maybe reconnecting, maybe server is close, host:%s, port:%s", this.host, this.port)
+                logger.debug("socket channel is null, maybe reconnecting, maybe server is close, host:%s, port:%s", this.serverHost, this.serverPort)
                 this.hasBeenInitialized = false
                 this.initialize()//reset socket channel
                 Thread.sleep(this.reconnectTimeout)

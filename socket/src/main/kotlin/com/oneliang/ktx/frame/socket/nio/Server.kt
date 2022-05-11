@@ -13,7 +13,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class Server(
-    private val host: String, private val port: Int,
+    private val host: String,
+    private val port: Int,
     private val maxThreadCount: Int = Runtime.getRuntime().availableProcessors()
 ) : LoopThread() {
     companion object {
