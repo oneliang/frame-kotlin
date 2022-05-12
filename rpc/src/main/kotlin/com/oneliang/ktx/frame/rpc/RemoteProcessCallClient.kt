@@ -4,21 +4,28 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.socket.nio.ClientManager
 import com.oneliang.ktx.util.common.HOST_ADDRESS
 import com.oneliang.ktx.util.common.PID
+import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
 import com.oneliang.ktx.util.logging.LoggerManager
-import com.oneliang.ktx.util.packet.TlvPacketProcessor
+import java.util.concurrent.ConcurrentHashMap
 
 class RemoteProcessCallClient(
     providerServerHost: String,
-    providerServerPort: Int,
-    private val readProcessor: (byteArray: ByteArray) -> Unit = {}
+    providerServerPort: Int
 ) {
     companion object {
         private val logger = LoggerManager.getLogger(RemoteProcessCallClient::class)
-        private val tlvPacketProcessor = TlvPacketProcessor()
     }
 
     private val providerClient = ProviderClient(providerServerHost, providerServerPort)
     private var clientManager: ClientManager? = null
+    private val remoteProcessCallResponseDataMap = ConcurrentHashMap<String, RemoteProcessCallResponse>()
+    private val awaitAndSignal = AwaitAndSignal<String>()
+    private val readProcessor: (byteArray: ByteArray) -> Unit = {
+        val remoteProcessCallResponse = RemoteProcessCallResponse.fromByteArray(it)
+        val id = remoteProcessCallResponse.id
+        this.remoteProcessCallResponseDataMap[id] = remoteProcessCallResponse
+        this.awaitAndSignal.signal(id)
+    }
 
     private fun generateGlobalThreadId(): String {
         val tid = Thread.currentThread().id.toString()
@@ -39,16 +46,15 @@ class RemoteProcessCallClient(
         return true
     }
 
-    fun remoteProcessCall(method: String, parameters: Array<ByteArray>) {
+    fun remoteProcessCall(method: String, parameters: Array<ByteArray>): ByteArray {
+        val id = generateGlobalThreadId()
         val remoteProcessCallRequest = RemoteProcessCallRequest()
-        remoteProcessCallRequest.id = generateGlobalThreadId()
+        remoteProcessCallRequest.id = id
         remoteProcessCallRequest.method = method
         remoteProcessCallRequest.parameters = parameters
         this.clientManager?.send(remoteProcessCallRequest.toByteArray())
-
-    }
-
-    fun send(byteArray: ByteArray) {
-        this.clientManager?.send(byteArray)
+        this.awaitAndSignal.await(id)
+        val remoteProcessCallResponse = this.remoteProcessCallResponseDataMap.remove(id)
+        return remoteProcessCallResponse?.result ?: ByteArray(0)
     }
 }
