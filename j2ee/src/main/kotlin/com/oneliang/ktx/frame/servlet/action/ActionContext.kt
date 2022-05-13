@@ -1,10 +1,13 @@
 package com.oneliang.ktx.frame.servlet.action
 
+import com.oneliang.ktx.Constants
 import com.oneliang.ktx.exception.InitializeException
 import com.oneliang.ktx.frame.context.AbstractContext
 import com.oneliang.ktx.util.common.JavaXmlUtil
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.ConcurrentHashMap
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
 
 open class ActionContext : AbstractContext() {
     companion object {
@@ -55,45 +58,41 @@ open class ActionContext : AbstractContext() {
                 JavaXmlUtil.initializeFromAttributeMap(globalExceptionForwardBean, attributeMap)
             }
             //action list
-            val actionElementList = root.getElementsByTagName(ActionBean.TAG_ACTION)
+            val actionElementList = root.getElementsByTagName(ActionBean.TAG_ACTION) ?: return
             //xml to object
-            if (actionElementList != null) {
-                val length = actionElementList.length
-                for (index in 0 until length) {
-                    val actionElement = actionElementList.item(index)
-                    //action bean
-                    val actionBean = ActionBean()
-                    val attributeMap = actionElement.attributes
-                    JavaXmlUtil.initializeFromAttributeMap(actionBean, attributeMap)
-                    //node list
-                    val childNodeElementList = actionElement.childNodes
-                    if (childNodeElementList != null) {
-                        val childNodeLength = childNodeElementList.length
-                        for (nodeIndex in 0 until childNodeLength) {
-                            val childNodeElement = childNodeElementList.item(nodeIndex)
-                            val childNodeElementName = childNodeElement.nodeName
-                            //interceptorList
-                            if (childNodeElementName == ActionInterceptorBean.TAG_INTERCEPTOR) {
-                                val actionInterceptorBean = ActionInterceptorBean()
-                                val interceptorAttributeMap = childNodeElement.attributes
-                                JavaXmlUtil.initializeFromAttributeMap(actionInterceptorBean, interceptorAttributeMap)
-                                actionBean.addActionBeanInterceptor(actionInterceptorBean)
-                            } else if (childNodeElementName == ActionForwardBean.TAG_FORWARD) {
-                                val actionForwardBean = ActionForwardBean()
-                                val forwardAttributeMap = childNodeElement.attributes
-                                JavaXmlUtil.initializeFromAttributeMap(actionForwardBean, forwardAttributeMap)
-                                actionBean.addActionForwardBean(actionForwardBean)
-                            }//forwardList
-                        }
-                    }
-                    val actionInstance = objectMap.getOrPut(actionBean.id) {
-                        ObjectBean(this.classLoader.loadClass(actionBean.type).newInstance() as ActionInterface, ObjectBean.Type.REFERENCE)
-                    }
-                    actionBean.actionInstance = actionInstance
-                    actionBeanMap[actionBean.id] = actionBean
-                    val actionBeanList = pathActionBeanMap.getOrPut(actionBean.path) { mutableListOf() }
-                    actionBeanList.add(actionBean)
+            val length = actionElementList.length
+            for (index in 0 until length) {
+                val actionElement = actionElementList.item(index)
+                //action bean
+                val actionBean = ActionBean()
+                val attributeMap = actionElement.attributes
+                JavaXmlUtil.initializeFromAttributeMap(actionBean, attributeMap)
+                //node list
+                val childNodeElementList = actionElement.childNodes ?: continue
+                val childNodeLength = childNodeElementList.length
+                for (nodeIndex in 0 until childNodeLength) {
+                    val childNodeElement = childNodeElementList.item(nodeIndex)
+                    val childNodeElementName = childNodeElement.nodeName
+                    //interceptorList
+                    if (childNodeElementName == ActionInterceptorBean.TAG_INTERCEPTOR) {
+                        val actionInterceptorBean = ActionInterceptorBean()
+                        val interceptorAttributeMap = childNodeElement.attributes
+                        JavaXmlUtil.initializeFromAttributeMap(actionInterceptorBean, interceptorAttributeMap)
+                        actionBean.addActionBeanInterceptor(actionInterceptorBean)
+                    } else if (childNodeElementName == ActionForwardBean.TAG_FORWARD) {
+                        val actionForwardBean = ActionForwardBean()
+                        val forwardAttributeMap = childNodeElement.attributes
+                        JavaXmlUtil.initializeFromAttributeMap(actionForwardBean, forwardAttributeMap)
+                        actionBean.addActionForwardBean(actionForwardBean)
+                    }//forwardList
                 }
+                val actionObjectBean = objectMap.getOrPut(actionBean.id) {
+                    ObjectBean(this.classLoader.loadClass(actionBean.type).newInstance() as ActionInterface, ObjectBean.Type.REFERENCE)
+                }
+                actionBean.actionObjectBean = actionObjectBean
+                actionBeanMap[actionBean.id] = actionBean
+                val actionBeanList = pathActionBeanMap.getOrPut(actionBean.path) { mutableListOf() }
+                actionBeanList.add(actionBean)
             }
         } catch (e: Throwable) {
             logger.error("parameter:%s", e, fixParameters)
@@ -109,6 +108,29 @@ open class ActionContext : AbstractContext() {
         pathActionBeanMap.clear()
         globalForwardBeanMap.clear()
         globalForwardMap.clear()
+    }
+
+    fun registerAction(path: String, httpRequestMethods: Array<Constants.Http.RequestMethod> = arrayOf(Constants.Http.RequestMethod.GET, Constants.Http.RequestMethod.POST), actionInterface: ActionInterface) {
+        val actionBean = ActionBean()
+        actionBean.path = path
+        actionBean.level = ActionBean.Level.PUBLIC.value
+        val fixHttpRequestMethods = httpRequestMethods.ifEmpty { arrayOf(Constants.Http.RequestMethod.GET, Constants.Http.RequestMethod.POST) }
+        actionBean.httpRequestMethods = fixHttpRequestMethods.joinToString(separator = Constants.Symbol.COMMA)
+        val actionObjectBean = objectMap.getOrPut(actionBean.id) {
+            ObjectBean(actionInterface, ObjectBean.Type.REFERENCE)
+        }
+        actionBean.actionObjectBean = actionObjectBean
+        actionBeanMap[actionBean.id] = actionBean
+        val actionBeanList = pathActionBeanMap.getOrPut(actionBean.path) { mutableListOf() }
+        actionBeanList.add(actionBean)
+    }
+
+    fun registerAction(path: String, httpRequestMethods: Array<Constants.Http.RequestMethod> = arrayOf(Constants.Http.RequestMethod.GET, Constants.Http.RequestMethod.POST), block: (servletRequest: ServletRequest, servletResponse: ServletResponse) -> String) {
+        registerAction(path, httpRequestMethods, object : ActionInterface {
+            override fun execute(servletRequest: ServletRequest, servletResponse: ServletResponse): String {
+                return block(servletRequest, servletResponse)
+            }
+        })
     }
 
     /**

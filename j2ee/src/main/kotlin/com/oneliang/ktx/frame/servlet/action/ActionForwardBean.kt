@@ -51,7 +51,7 @@ class ActionForwardBean : Cloneable {
      */
     fun isContainsParameters(parameterMap: Map<String, Array<String>>): Boolean {
         var result = true
-        if (!this.parameterMap.isEmpty()) {
+        if (this.parameterMap.isNotEmpty()) {
             run loop@{
                 this.parameterMap.forEach { (settingParameterKey, settingParameterValues) ->
                     if (parameterMap.containsKey(settingParameterKey)) {

@@ -42,7 +42,7 @@ val ConfigurationContext.afterGlobalInterceptorBeanIterable: Iterable<GlobalInte
 /**
  * global exception forward path
  */
-val ConfigurationContext.globalExceptionForwardPath: String?
+val ConfigurationContext.globalExceptionForwardPath: String
     get() {
         val actionContext = this.findContext(ActionContext::class)
         return actionContext?.globalExceptionForwardPath.nullToBlank()

@@ -21,11 +21,12 @@ class AnnotationActionContext : ActionContext() {
             for (kClass in kClassList) {
                 logger.debug("Annotation action class:%s", kClass)
                 val id = kClass.java.name
-                val actionInstance: Any
+                val actionObjectBean: ObjectBean
                 val objectBean = objectMap[id]
                 if (objectBean == null) {
-                    actionInstance = kClass.java.newInstance()
-                    objectMap[id] = ObjectBean(actionInstance, ObjectBean.Type.REFERENCE)
+                    val actionInstance = kClass.java.newInstance()
+                    actionObjectBean = ObjectBean(actionInstance, ObjectBean.Type.REFERENCE)
+                    objectMap[id] = actionObjectBean
                 } else {
                     logger.warning("Annotation action class has been instantiated, class:%s, id:%s", kClass, id)
                     continue
@@ -44,29 +45,15 @@ class AnnotationActionContext : ActionContext() {
                             Action.RequestMapping.Level.PUBLIC -> ActionBean.Level.PUBLIC.value
                             else -> ActionBean.Level.PRIVATE.value
                         }
-                        val annotationHttpRequestMethods = requestMappingAnnotation.httpRequestMethods
-                        val httpRequestMethods = if (annotationHttpRequestMethods.isNotEmpty()) {
-                            annotationHttpRequestMethods
-                        } else {
-                            arrayOf(Constants.Http.RequestMethod.GET, Constants.Http.RequestMethod.POST)
-                        }
-                        if (httpRequestMethods.isNotEmpty()) {
-                            val stringBuilder = StringBuilder()
-                            for (i in httpRequestMethods.indices) {
-                                stringBuilder.append(httpRequestMethods[i].value)
-                                if (i < httpRequestMethods.size - 1) {
-                                    stringBuilder.append(Constants.Symbol.COMMA)
-                                }
-                            }
-                            annotationActionBean.httpRequestMethods = stringBuilder.toString()
-                        }
+                        val httpRequestMethods = requestMappingAnnotation.httpRequestMethods.ifEmpty { arrayOf(Constants.Http.RequestMethod.GET, Constants.Http.RequestMethod.POST) }
+                        annotationActionBean.httpRequestMethods = httpRequestMethods.joinToString(separator = Constants.Symbol.COMMA)
                         val httpRequestMethodsCode = annotationActionBean.httpRequestMethodsCode
                         val idWithMethodAndHttpRequestMethod = id + Constants.Symbol.DOT + method.name + Constants.Symbol.COMMA + httpRequestMethodsCode
                         annotationActionBean.id = idWithMethodAndHttpRequestMethod
                         val requestPath = requestMappingAnnotation.value
                         annotationActionBean.path = requestPath
                         annotationActionBean.method = method
-                        annotationActionBean.actionInstance = actionInstance
+                        annotationActionBean.actionObjectBean = actionObjectBean
                         actionBeanMap[idWithMethodAndHttpRequestMethod] = annotationActionBean
                         val actionBeanList = pathActionBeanMap.getOrPut(requestPath) { mutableListOf() }
                         actionBeanList.add(annotationActionBean)

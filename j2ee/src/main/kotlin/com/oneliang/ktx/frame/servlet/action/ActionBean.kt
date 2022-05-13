@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.servlet.action
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.context.AbstractContext
 import com.oneliang.ktx.util.common.parseRegexGroup
 
 open class ActionBean {
@@ -70,13 +71,7 @@ open class ActionBean {
      */
     var httpRequestMethodsCode = ActionInterface.HttpRequestMethod.GET.code or ActionInterface.HttpRequestMethod.POST.code
         private set
-    /**
-     * @return the actionInstance
-     */
-    /**
-     * @param actionInstance the actionInstance to set
-     */
-    var actionInstance: Any? = null
+    var actionObjectBean: AbstractContext.ObjectBean? = null
     val actionInterceptorBeanList = mutableListOf<ActionInterceptorBean>()
     val beforeActionInterceptorBeanList = mutableListOf<ActionInterceptorBean>()
     val afterActionInterceptorBeanList = mutableListOf<ActionInterceptorBean>()

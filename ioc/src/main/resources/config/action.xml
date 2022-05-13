@@ -6,8 +6,9 @@
 	<action id="fileUpload" path="fileUpload" type="project.action.FileUploadAction">
 		<interceptor id="testInterceptor" mode="before"/>
 	</action>
-	<action id="fileDownload" path="fileDownload" type="project.action.FileDownloadAction"></action>
-	<action id="cssFile" path="cssFile" type="project.action.CssFileAction"></action>
-	<action id="cssText" path="cssText" type="project.action.CssTextAction"></action>
-	<action id="cssChange" path="cssChange" type="project.action.CssChangeAction"></action>
+	<action id="fileDownload" path="fileDownload" httpRequestMethods="DELETE" type="project.action.FileDownloadAction"/>
+	<action id="fileDownloada" path="fileDownload" httpRequestMethods="POST" type="project.action.FileDownloadAction"/>
+	<action id="cssFile" path="cssFile" type="project.action.CssFileAction"/>
+	<action id="cssText" path="cssText" type="project.action.CssTextAction"/>
+	<action id="cssChange" path="cssChange" type="project.action.CssChangeAction"/>
 </actions>

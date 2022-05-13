@@ -344,7 +344,7 @@ class ActionListener : HttpServlet() {
         if (!beforeActionInterceptorResult) {
             return false
         }
-        val actionInstance = actionBean.actionInstance
+        val actionInstance = actionBean.actionObjectBean?.instance
         return try {
             if (actionInstance is ActionInterface) {
                 doAction(uri, actionBean, httpServletRequest, httpServletResponse, httpRequestMethod)
@@ -379,7 +379,7 @@ class ActionListener : HttpServlet() {
      */
     @Throws(ActionExecuteException::class, ServletException::class, IOException::class)
     private fun doAction(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
-        val actionInstance = actionBean.actionInstance
+        val actionInstance = actionBean.actionObjectBean?.instance
         if (actionInstance !is ActionInterface) {
             logger.error("It is not ActionInterface, actionBean:%s, it is impossible", actionBean)
             return false
@@ -493,7 +493,7 @@ class ActionListener : HttpServlet() {
             logger.error("It is not AnnotationActionBean, actionBean:%s, it is impossible", actionBean)
             return false
         }
-        val actionInstance = actionBean.actionInstance
+        val actionInstance = actionBean.actionObjectBean?.instance
         val parameterMap = httpServletRequest.parameterMap as Map<String, Array<String>>
         val actionForwardBean = actionBean.findActionForwardBeanByStaticParameter(parameterMap)
         val (normalExecute, needToStaticExecute) = this.getExecuteType(actionForwardBean)
