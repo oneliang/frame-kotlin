@@ -21,7 +21,6 @@ class HttpApiDescription {
         private const val RESPONSE_DATAS = "responseDatas:"
         private const val CLASS_IMPORTS = "classImports:"
         private const val FUNCTION_PARAMETER_STRING = "functionParameterString:"
-        internal const val TEMPLATE_DESCRIPTION_TYPE_CLASS = "CLASS"
         internal const val FLAG_NAME = 1 shl 0
         internal const val FLAG_KEY = 1 shl 1
         internal const val FLAG_URI = 1 shl 2
