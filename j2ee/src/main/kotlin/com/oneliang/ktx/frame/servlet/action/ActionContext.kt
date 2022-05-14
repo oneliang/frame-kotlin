@@ -110,6 +110,12 @@ open class ActionContext : AbstractContext() {
         globalForwardMap.clear()
     }
 
+    /**
+     * register action
+     * @param path
+     * @param httpRequestMethods
+     * @param actionInterface
+     */
     fun registerAction(path: String, httpRequestMethods: Array<Constants.Http.RequestMethod> = arrayOf(Constants.Http.RequestMethod.GET, Constants.Http.RequestMethod.POST), actionInterface: ActionInterface) {
         val actionBean = ActionBean()
         actionBean.path = path
@@ -125,10 +131,16 @@ open class ActionContext : AbstractContext() {
         actionBeanList.add(actionBean)
     }
 
-    fun registerAction(path: String, httpRequestMethods: Array<Constants.Http.RequestMethod> = arrayOf(Constants.Http.RequestMethod.GET, Constants.Http.RequestMethod.POST), block: (servletRequest: ServletRequest, servletResponse: ServletResponse) -> String) {
+    /**
+     * register action
+     * @param path
+     * @param httpRequestMethods
+     * @param executor
+     */
+    fun registerAction(path: String, httpRequestMethods: Array<Constants.Http.RequestMethod> = arrayOf(Constants.Http.RequestMethod.GET, Constants.Http.RequestMethod.POST), executor: (servletRequest: ServletRequest, servletResponse: ServletResponse) -> String) {
         registerAction(path, httpRequestMethods, object : ActionInterface {
             override fun execute(servletRequest: ServletRequest, servletResponse: ServletResponse): String {
-                return block(servletRequest, servletResponse)
+                return executor.invoke(servletRequest, servletResponse)
             }
         })
     }
