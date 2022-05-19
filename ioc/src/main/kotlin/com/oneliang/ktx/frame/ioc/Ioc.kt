@@ -10,7 +10,7 @@ annotation class Ioc(val id: String = Constants.String.BLANK, val proxy: Boolean
     @MustBeDocumented
     @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
     @Retention(AnnotationRetention.RUNTIME)
-    annotation class AfterInject
+    annotation class AfterInject(val async: Boolean = true)
 
     @MustBeDocumented
     @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)

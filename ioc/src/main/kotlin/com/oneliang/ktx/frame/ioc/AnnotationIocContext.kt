@@ -15,12 +15,14 @@ class AnnotationIocContext : IocContext() {
             for (method in methods) {
                 //after inject
                 if (method.isAnnotationPresent(Ioc.AfterInject::class.java)) {
+                    val iocAfterInjectAnnotation = method.getAnnotation(Ioc.AfterInject::class.java)
                     val iocAfterInjectBean = IocAfterInjectBean()
                     iocAfterInjectBean.method = method.name
+                    iocAfterInjectBean.async = iocAfterInjectAnnotation.async
                     iocBean.addIocAfterInjectBean(iocAfterInjectBean)
                 } else if (method.isAnnotationPresent(Ioc.AllowExplicitlyInvoke::class.java)) {
-                    val methodInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitlyInvoke::class.java)
-                    val methodId = methodInvokeAnnotation.id
+                    val methodAllowExplicitlyInvokeAnnotation = method.getAnnotation(Ioc.AllowExplicitlyInvoke::class.java)
+                    val methodId = methodAllowExplicitlyInvokeAnnotation.id
                     if (!iocAllowExplicitlyInvokeBeanMap.containsKey(methodId)) {
                         val iocInvokedBean = IocAllowExplicitlyInvokeBean()
                         iocInvokedBean.id = methodId

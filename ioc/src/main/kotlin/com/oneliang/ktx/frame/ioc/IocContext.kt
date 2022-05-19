@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.ioc
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.exception.InitializeException
 import com.oneliang.ktx.frame.context.AbstractContext
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.frame.ioc.aop.*
 import com.oneliang.ktx.util.common.JavaXmlUtil
 import com.oneliang.ktx.util.common.KotlinClassUtil
@@ -21,6 +22,7 @@ open class IocContext : AbstractContext() {
         private val logger = LoggerManager.getLogger(IocContext::class)
         internal val iocConfigurationBean = IocConfigurationBean()
         internal val iocBeanMap = ConcurrentHashMap<String, IocBean>()
+        private val coroutine = Coroutine()
     }
 
     /**
@@ -438,7 +440,9 @@ open class IocContext : AbstractContext() {
                 val method = beanInstance.javaClass.getMethod(iocAfterInjectBean.method)
                 logger.info("After inject, instance id:%s, bean instance:%s, method:%s", id, beanInstance, iocAfterInjectBean.method)
                 try {
-                    method.invoke(beanInstance)
+                    coroutine.async {
+                        method.invoke(beanInstance)
+                    }
                 } catch (e: Throwable) {
                     logger.error("After inject error, instance id:%s, bean instance:%s, method:%s", e, id, beanInstance, iocAfterInjectBean.method)
                     //no need to throw exception, it will break the main thread

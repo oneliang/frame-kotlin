@@ -13,4 +13,6 @@ class IocAfterInjectBean {
      * @param method the method to set
      */
     var method: String = Constants.String.BLANK
+
+    var async: Boolean = true
 }
