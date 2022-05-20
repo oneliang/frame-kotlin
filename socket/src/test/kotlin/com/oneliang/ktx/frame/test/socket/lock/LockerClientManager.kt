@@ -82,7 +82,7 @@ class LockerClientManager(private val host: String, private val port: Int) : Fun
         }, update = { oldClientLocker ->
             LocalLocker(oldClientLocker.lock, oldClientLocker.lockId).also {
                 //only use the same hashset
-                oldClientLocker.lockingIdHashSet += id
+                oldClientLocker.lockingIdHashSet.add(id)
                 it.lockingIdHashSet = oldClientLocker.lockingIdHashSet
             }
         })
