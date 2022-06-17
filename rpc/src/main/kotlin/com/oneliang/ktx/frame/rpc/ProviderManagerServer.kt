@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.rpc
 import com.oneliang.ktx.frame.socket.nio.SelectorProcessor
 import com.oneliang.ktx.frame.socket.nio.Server
 import com.oneliang.ktx.util.common.HOST_ADDRESS
+import com.oneliang.ktx.util.concurrent.atomic.LRUCacheSet
 import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
@@ -18,7 +19,7 @@ class ProviderManagerServer(host: String = HOST_ADDRESS, port: Int, maxThreadCou
         private val tlvPacketProcessor = TlvPacketProcessor()
     }
 
-    private val clusterHostMap = ConcurrentHashMap<String, MutableList<Provider>>()
+    private val clusterHostMap = ConcurrentHashMap<String, LRUCacheSet<Provider>>()
 
     private val selectorProcessor: SelectorProcessor = object : SelectorProcessor {
         override fun process(byteArray: ByteArray, socketChannelHashCode: Int): ByteArray {
@@ -35,7 +36,11 @@ class ProviderManagerServer(host: String = HOST_ADDRESS, port: Int, maxThreadCou
                     val clusterKey = lookupProviderRequest.clusterKey
                     val servers = clusterHostMap[clusterKey]
                     val lookupProviderResponse = LookupProviderResponse.build(id, true)
-                    lookupProviderResponse.provider = if (servers != null && servers.isNotEmpty()) servers[0] else null
+                    val provider = if (servers != null && servers.size > 0) servers.first() else null
+                    if (servers != null && provider != null) {
+                        servers.operate(provider)//update lru counter
+                    }
+                    lookupProviderResponse.provider = provider
                     val lookupResponseJson = lookupProviderResponse.toJson()
                     logger.debug("end lookup host, json:%s", lookupResponseJson)
                     TlvPacket(ConstantsRemoteProcessCall.TlvPackageType.LOOKUP_PROVIDER, lookupResponseJson.toByteArray()).toByteArray()
@@ -45,8 +50,8 @@ class ProviderManagerServer(host: String = HOST_ADDRESS, port: Int, maxThreadCou
                     val clusterKey = providerRegisterRequest.clusterKey
                     val providerHost = providerRegisterRequest.host
                     val providerPort = providerRegisterRequest.port
-                    val list = clusterHostMap.getOrPut(clusterKey) { mutableListOf() }
-                    list += Provider(providerHost, providerPort)
+                    val providerSet = clusterHostMap.getOrPut(clusterKey) { LRUCacheSet(type = LRUCacheSet.Type.ASCENT) }
+                    providerSet.operate(Provider(providerHost, providerPort))
                     val providerRegisterResponseJson = ProviderRegisterResponse.build(id, true).toJson()
                     TlvPacket(ConstantsRemoteProcessCall.TlvPackageType.REGISTER, providerRegisterResponseJson.toByteArray()).toByteArray()
                 }

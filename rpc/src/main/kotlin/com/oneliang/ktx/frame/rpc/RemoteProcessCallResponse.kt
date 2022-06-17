@@ -9,7 +9,9 @@ import com.oneliang.ktx.util.packet.TlvPacketProcessor
 import java.io.ByteArrayInputStream
 
 internal class RemoteProcessCallResponse {
-    companion object
+    companion object {
+        internal val tlvPacketProcessor = TlvPacketProcessor()
+    }
 
     var id = Constants.String.BLANK
     var method = Constants.String.BLANK
@@ -34,7 +36,6 @@ internal class RemoteProcessCallResponse {
 
 internal fun RemoteProcessCallResponse.Companion.fromByteArray(byteArray: ByteArray): RemoteProcessCallResponse {
     val remoteProcessCallResponse = RemoteProcessCallResponse()
-    val tlvPacketProcessor = TlvPacketProcessor()
     val tlvPacket = tlvPacketProcessor.receiveTlvPacket(byteArray)
     val byteArrayInputStream = ByteArrayInputStream(tlvPacket.body)
     //id

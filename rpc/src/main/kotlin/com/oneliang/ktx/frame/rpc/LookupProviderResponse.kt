@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.rpc
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.util.common.hash
 
 internal class LookupProviderResponse : BaseData() {
     companion object
@@ -9,7 +10,8 @@ internal class LookupProviderResponse : BaseData() {
     var provider: Provider? = null
 }
 
-class Provider(var host: String = Constants.String.BLANK, var port: Int = 0) {
+data class Provider(var host: String = Constants.String.BLANK, var port: Int = 0) {
+
     override fun toString(): String {
         val stringBuilder = StringBuilder()
         stringBuilder.append("provider:")
