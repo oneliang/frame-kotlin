@@ -58,6 +58,13 @@ val d = fun String.(a: String): String {
     return a + this.length.toString()
 }
 
+fun test() {
+    println("".a)
+    println(b())
+    println(c(""))
+    println(d("", ""))
+}
+
 fun main(args: Array<String>) {
     println(Date().toFormatString("MMM dd, yyyy", Locale.ENGLISH))
     println("Feb 15, 2020".toUtilDate("MMM dd, yyyy", Locale.ENGLISH))
