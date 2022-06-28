@@ -37,6 +37,27 @@ class ByForMap(map: Map<String, *>) {
     val field: String by map
 }
 
+val String.a: String
+    get() {
+        return "property extensions"
+    }
+
+/**
+ * equal above
+fun String.getA(): String {
+return "property extensions"
+}
+ **/
+
+val b = {}
+val c = fun(a: String): String {
+    return a
+}
+
+val d = fun String.(a: String): String {
+    return a + this.length.toString()
+}
+
 fun main(args: Array<String>) {
     println(Date().toFormatString("MMM dd, yyyy", Locale.ENGLISH))
     println("Feb 15, 2020".toUtilDate("MMM dd, yyyy", Locale.ENGLISH))
