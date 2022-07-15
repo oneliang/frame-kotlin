@@ -1,9 +1,7 @@
 package com.oneliang.ktx.frame.rpc
 
-import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.socket.nio.ClientManager
-import com.oneliang.ktx.util.common.HOST_ADDRESS
-import com.oneliang.ktx.util.common.PID
+import com.oneliang.ktx.util.common.Generator
 import com.oneliang.ktx.util.common.toInt
 import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
 import com.oneliang.ktx.util.json.jsonToObject
@@ -50,14 +48,8 @@ class ProviderClient(serverHost: String, serverPort: Int) {
         this.clientManager.start()
     }
 
-    private fun generateGlobalThreadId(): String {
-        val tid = Thread.currentThread().id.toString()
-        //tid@pid@hostAddress, threadId+jvmId+IP
-        return tid + Constants.Symbol.AT + PID + Constants.Symbol.AT + HOST_ADDRESS
-    }
-
     fun register(clusterKey: String, host: String, port: Int): Boolean {
-        val id = generateGlobalThreadId()
+        val id = Generator.generateGlobalThreadId()
         val providerRegisterRequestJson = ProviderRegisterRequest.build(id, clusterKey, host, port).toJson()
         logger.debug("provider register request:%s", providerRegisterRequestJson)
         val registerTlvPacket = TlvPacket(ConstantsRemoteProcessCall.TlvPackageType.REGISTER, providerRegisterRequestJson.toByteArray())
@@ -69,7 +61,7 @@ class ProviderClient(serverHost: String, serverPort: Int) {
     }
 
     fun lookup(clusterKey: String): Provider? {
-        val id = generateGlobalThreadId()
+        val id = Generator.generateGlobalThreadId()
         val lookupProviderRequestJson = LookupProviderRequest.build(id, clusterKey).toJson()
         logger.debug("lookup provider request:%s", lookupProviderRequestJson)
         val lookupTlvPacket = TlvPacket(ConstantsRemoteProcessCall.TlvPackageType.LOOKUP_PROVIDER, lookupProviderRequestJson.toByteArray())

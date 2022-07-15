@@ -15,7 +15,7 @@ internal class DefaultParallelSourceContext(
         private val logger = LoggerManager.getLogger(DefaultParallelSourceContext::class)
     }
 
-    override suspend fun collect(value: Any, parallelContextAction: ParallelContextAction) {
+    override fun collect(value: Any, parallelContextAction: ParallelContextAction) {
         if (this.parallelJobStepList.isEmpty()) {
             this.parallelJob.finish()
         }

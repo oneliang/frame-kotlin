@@ -7,7 +7,7 @@ import com.oneliang.ktx.util.logging.LoggerManager
 
 internal object ParallelContextUtil {
     private val logger = LoggerManager.getLogger(ParallelContextUtil::class)
-    internal suspend fun collectForParallelProcessor(coroutine: Coroutine, parallelJob: ParallelJob<Any>, parallelJobStep: ParallelJobStep<Any>, value: Any, parentParallelContextAction: ParallelContextAction) {
+    internal fun collectForParallelProcessor(coroutine: Coroutine, parallelJob: ParallelJob<Any>, parallelJobStep: ParallelJobStep<Any>, value: Any, parentParallelContextAction: ParallelContextAction) {
         when {
             parallelJobStep.isParallelTransformProcessor() -> {
                 logger.info("transform processor, value:%s", value)

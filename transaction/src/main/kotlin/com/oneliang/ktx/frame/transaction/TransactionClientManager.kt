@@ -1,9 +1,7 @@
 package com.oneliang.ktx.frame.transaction
 
-import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.socket.nio.ClientManager
-import com.oneliang.ktx.util.common.HOST_ADDRESS
-import com.oneliang.ktx.util.common.PID
+import com.oneliang.ktx.util.common.Generator
 import com.oneliang.ktx.util.common.toInt
 import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
 import com.oneliang.ktx.util.json.jsonToObject
@@ -52,14 +50,8 @@ class TransactionClientManager(host: String, port: Int) {
         this.clientManager.start()
     }
 
-    private fun generateGlobalThreadId(): String {
-        val tid = Thread.currentThread().id.toString()
-        //tid@pid@hostAddress, threadId+jvmId+IP
-        return tid + Constants.Symbol.AT + PID + Constants.Symbol.AT + HOST_ADDRESS
-    }
-
     fun executeInTransaction(masterId: String, block: () -> Unit, rollbackBlock: () -> Unit) {
-        val id = generateGlobalThreadId()
+        val id = Generator.generateGlobalThreadId()
         if (masterId.isNotBlank()) {
             val executeInTransactionRequestJson = TransactionRequest.buildExecuteInTransactionRequest(masterId, masterId).toJson()
             logger.debug("end transaction request:%s", executeInTransactionRequestJson)
@@ -75,7 +67,7 @@ class TransactionClientManager(host: String, port: Int) {
     }
 
     fun executeTransaction(block: (masterId: String) -> Boolean) {
-        val id = generateGlobalThreadId()
+        val id = Generator.generateGlobalThreadId()
         val beginTransactionRequestJson = TransactionRequest.buildBeginTransactionRequest(id, id).toJson()
         logger.debug("begin transaction request:%s", beginTransactionRequestJson)
         val beginTransactionTlvPacket = TlvPacket(ConstantsTransaction.TlvPackageType.BEGIN, beginTransactionRequestJson.toByteArray())

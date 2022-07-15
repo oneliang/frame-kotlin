@@ -65,7 +65,7 @@ class Client(
         if (!this.hasBeenInitialized) {
             initialize()
         }
-        this.sendQueue.add(byteArray)//support send before run
+        this.sendQueue.add(byteArray)//support invoke send method before invoke run method
         val socketChannel = this.socketChannel
         if (socketChannel != null && socketChannel.isConnected) {//send after connected
             socketChannel.register(this.selector, SelectionKey.OP_WRITE)

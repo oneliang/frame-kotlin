@@ -8,7 +8,7 @@ import com.oneliang.ktx.frame.parallel.ParallelContext
 import com.oneliang.ktx.frame.parallel.ParallelTransformProcessor
 
 class MultiKeyValueMatchParallelTransformProcessor(private val keyValueArrayMap: Map<String, Array<String>>) : ParallelTransformProcessor<Pair<String, Map<String, String>>, MultiKeyValueMatchData> {
-    override suspend fun process(value: Pair<String, Map<String, String>>, parallelContext: ParallelContext<MultiKeyValueMatchData>) {
+    override fun process(value: Pair<String, Map<String, String>>, parallelContext: ParallelContext<MultiKeyValueMatchData>) {
 //    override fun flatMap(value: Tuple2<UNIQUE, Map<String, String>>, out: Collector<Tuple2<String, Int>>?) {
         val key = value.first
         if (key.isBlank()) {//last data for finish or error data

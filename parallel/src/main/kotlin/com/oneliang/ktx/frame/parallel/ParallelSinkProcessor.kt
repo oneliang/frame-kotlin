@@ -7,9 +7,9 @@ interface ParallelSinkProcessor<IN> {
 
     fun initialize(sinkCacheData: CacheData.Data?) {}
 
-    suspend fun sink(value: IN)
+    fun sink(value: IN)
 
-    suspend fun savepoint(sinkCacheData: CacheData.Data) {}
+    fun savepoint(sinkCacheData: CacheData.Data) {}
 
     val cacheKey: String
         get() {

@@ -10,7 +10,7 @@ open class QueueParallelSourceProcessor<T : Any> : ParallelSourceProcessor<T> {
     private val lock = Object()//maybe a small lock in java
     private val queue = ConcurrentLinkedQueue<Pair<T, ParallelContextAction>>()
 
-    override suspend fun process(parallelSourceContext: ParallelSourceContext<T>) {
+    override fun process(parallelSourceContext: ParallelSourceContext<T>) {
         while (true) {
             if (this.queue.isNotEmpty()) {
                 val (resource, parallelContextAction) = this.queue.poll()

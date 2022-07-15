@@ -56,8 +56,8 @@ class ProviderManagerServer(host: String = HOST_ADDRESS, port: Int, maxThreadCou
                     TlvPacket(ConstantsRemoteProcessCall.TlvPackageType.REGISTER, providerRegisterResponseJson.toByteArray()).toByteArray()
                 }
                 else -> {
-                    val lookupResponseJson = LookupProviderResponse.build(id, false).also { it.action = ConstantsRemoteProcessCall.Action.NONE }.toJson()
-                    TlvPacket(ConstantsRemoteProcessCall.TlvPackageType.NONE, lookupResponseJson.toByteArray()).toByteArray()
+                    val responseJson = BaseData.build(id, ConstantsRemoteProcessCall.Action.NONE).toJson()
+                    TlvPacket(ConstantsRemoteProcessCall.TlvPackageType.NONE, responseJson.toByteArray()).toByteArray()
                 }
             }
         }

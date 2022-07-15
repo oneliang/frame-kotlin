@@ -26,7 +26,7 @@ class SourceProcessor : ParallelSourceProcessor<String> {
         }
     }
 
-    override suspend fun process(parallelSourceContext: ParallelSourceContext<String>) {
+    override fun process(parallelSourceContext: ParallelSourceContext<String>) {
         while (!quit.get()) {
             for (i in 1..3) {
                 if (i <= sequence) {
@@ -71,7 +71,7 @@ class SourceProcessor : ParallelSourceProcessor<String> {
 //        }
     }
 
-    override suspend fun savepoint(sourceCacheData: CacheData.Data) {
+    override fun savepoint(sourceCacheData: CacheData.Data) {
         sourceCacheData.data = sequence.toString()
     }
 
@@ -92,7 +92,7 @@ fun main() {
     val queueParallelSourceProcessor = QueueParallelSourceProcessor<String>()
     parallelJob.addParallelSourceProcessor(queueParallelSourceProcessor)
     parallelJob.generateFirstParallelJobStep().addParallelTransformProcessor(object : ParallelTransformProcessor<String, String> {
-        override suspend fun process(value: String, parallelContext: ParallelContext<String>) {
+        override fun process(value: String, parallelContext: ParallelContext<String>) {
             if (value.isBlank()) {
                 parallelContext.collect(Constants.String.BLANK)
                 return
@@ -107,7 +107,7 @@ fun main() {
             }
         }
 
-        override suspend fun sink(value: String) {
+        override fun sink(value: String) {
             if (value.isBlank()) {
                 return
             }
@@ -115,7 +115,7 @@ fun main() {
             println("sink value:$value")
         }
 
-        override suspend fun savepoint(sinkCacheData: CacheData.Data) {
+        override fun savepoint(sinkCacheData: CacheData.Data) {
             sinkCacheData.apply {
                 this.data = count.get().toString()
             }

@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.rpc
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.socket.nio.ClientManager
+import com.oneliang.ktx.util.common.Generator
 import com.oneliang.ktx.util.common.HOST_ADDRESS
 import com.oneliang.ktx.util.common.PID
 import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
@@ -27,12 +28,6 @@ class RemoteProcessCallClient(
         this.awaitAndSignal.signal(id)
     }
 
-    private fun generateGlobalThreadId(): String {
-        val tid = Thread.currentThread().id.toString()
-        //tid@pid@hostAddress, threadId+jvmId+IP
-        return tid + Constants.Symbol.AT + PID + Constants.Symbol.AT + HOST_ADDRESS
-    }
-
     fun lookup(clusterKey: String): Boolean {
         val server = this.providerClient.lookup(clusterKey)
         if (server != null) {
@@ -47,7 +42,7 @@ class RemoteProcessCallClient(
     }
 
     fun remoteProcessCall(method: String, parameters: Array<ByteArray>): ByteArray {
-        val id = generateGlobalThreadId()
+        val id = Generator.generateGlobalThreadId()
         val remoteProcessCallRequest = RemoteProcessCallRequest()
         remoteProcessCallRequest.id = id
         remoteProcessCallRequest.method = method

@@ -7,9 +7,9 @@ interface ParallelSourceProcessor<OUT> {
 
     fun initialize(sourceCacheData: CacheData.Data?) {}
 
-    suspend fun process(parallelSourceContext: ParallelSourceContext<OUT>)
+    fun process(parallelSourceContext: ParallelSourceContext<OUT>)
 
-    suspend fun savepoint(sourceCacheData: CacheData.Data) {}
+    fun savepoint(sourceCacheData: CacheData.Data) {}
 
     val cacheKey: String
         get() {

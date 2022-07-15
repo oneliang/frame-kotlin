@@ -14,7 +14,7 @@ internal class DefaultParallelContext(
         private val logger = LoggerManager.getLogger(DefaultParallelContext::class)
     }
 
-    override suspend fun collect(value: Any) {
+    override fun collect(value: Any) {
         if (this.parallelJob.parallelJobConfiguration.async) {
             this.coroutine.launch {
                 ParallelContextUtil.collectForParallelProcessor(this.coroutine, this.parallelJob, this.parallelJobStep, value, this.parentParallelContextAction)

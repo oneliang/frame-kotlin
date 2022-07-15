@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.locker
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.socket.nio.ClientManager
+import com.oneliang.ktx.util.common.Generator
 import com.oneliang.ktx.util.common.HOST_ADDRESS
 import com.oneliang.ktx.util.common.PID
 import com.oneliang.ktx.util.common.toInt
@@ -45,14 +46,8 @@ class LockerClientManager(serverHost: String, serverPort: Int) {
         this.clientManager.start()
     }
 
-    private fun generateGlobalThreadId(): String {
-        val tid = Thread.currentThread().id.toString()
-        //tid@pid@hostAddress, threadId+jvmId+IP
-        return tid + Constants.Symbol.AT + PID + Constants.Symbol.AT + HOST_ADDRESS
-    }
-
     fun tryLock(lockKey: String) {
-        val id = generateGlobalThreadId()
+        val id = Generator.generateGlobalThreadId()
         val tryLockRequestJson = LockRequest.buildTryLockRequest(lockKey, id).toJson()
         logger.debug("tryLock request:%s", tryLockRequestJson)
         val tlvPacket = TlvPacket(ConstantsLock.TlvPackageType.REQUEST_RESPONSE, tryLockRequestJson.toByteArray())
@@ -72,7 +67,7 @@ class LockerClientManager(serverHost: String, serverPort: Int) {
     }
 
     fun releaseLock(lockKey: String) {
-        val id = generateGlobalThreadId()
+        val id = Generator.generateGlobalThreadId()
         val releaseLockRequestJson = LockRequest.buildReleaseLockRequest(lockKey, id).toJson()
         logger.debug("releaseLock request:%s", releaseLockRequestJson)
         val tlvPacket = TlvPacket(ConstantsLock.TlvPackageType.REQUEST_RESPONSE, releaseLockRequestJson.toByteArray())

@@ -4,5 +4,5 @@ interface ParallelContext<IN> {
 
     val parentParallelContextAction: ParallelContextAction
 
-    suspend fun collect(value: IN)
+    fun collect(value: IN)
 }
