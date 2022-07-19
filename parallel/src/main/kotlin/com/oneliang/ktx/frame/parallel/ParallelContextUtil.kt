@@ -2,16 +2,15 @@ package com.oneliang.ktx.frame.parallel
 
 import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.frame.parallel.cache.CacheData
-import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 
 internal object ParallelContextUtil {
     private val logger = LoggerManager.getLogger(ParallelContextUtil::class)
-    internal fun collectForParallelProcessor(coroutine: Coroutine, parallelJob: ParallelJob<Any>, parallelJobStep: ParallelJobStep<Any>, value: Any, parentParallelContextAction: ParallelContextAction) {
+    internal fun collectForParallelProcessor(coroutine: Coroutine, parallelJob: ParallelJob<Any?>, parallelJobStep: ParallelJobStep<Any?>, value: Any?, parentParallelContextAction: ParallelContextAction) {
         when {
             parallelJobStep.isParallelTransformProcessor() -> {
                 logger.info("transform processor, value:%s", value)
-                var nextParallelJobStep: ParallelJobStep<Any>? = null
+                var nextParallelJobStep: ParallelJobStep<Any?>? = null
                 if (parallelJobStep.hasNextParallelJobStep()) {
                     nextParallelJobStep = parallelJobStep.nextParallelJobStep
                 }

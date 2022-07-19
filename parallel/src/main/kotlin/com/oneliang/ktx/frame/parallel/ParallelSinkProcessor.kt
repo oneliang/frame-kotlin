@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.parallel
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.parallel.cache.CacheData
 
-interface ParallelSinkProcessor<IN> {
+interface ParallelSinkProcessor<IN : Any?> {
 
     fun initialize(sinkCacheData: CacheData.Data?) {}
 

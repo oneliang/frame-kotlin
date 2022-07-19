@@ -11,7 +11,7 @@ import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.util.concurrent.CountDownLatch
 
-class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfiguration: ParallelJobConfiguration = ParallelJobConfiguration.DEFAULT) {
+class ParallelJob<IN : Any?>(private val jobName: String, internal val parallelJobConfiguration: ParallelJobConfiguration = ParallelJobConfiguration.DEFAULT) {
     companion object {
         private val logger = LoggerManager.getLogger(ParallelJob::class)
     }
@@ -56,11 +56,11 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
             if (this.parallelJobConfiguration.useCache) {
                 val json = this.cacheManager.getFromCache(this.jobName, String::class).nullToBlank()
                 this.cacheData = CacheData.fromJson(json)
-                initializeAllSinkProcessorFromCache((this.firstParallelJobStepList as List<ParallelJobStep<Any>>), this.cacheData)
+                initializeAllSinkProcessorFromCache((this.firstParallelJobStepList as List<ParallelJobStep<Any?>>), this.cacheData)
             }
             val sourceCacheKeySet = hashSetOf<String>()
             for (parallelSourceProcessor in this.parallelSourceProcessorSet) {
-                parallelSourceProcessor as ParallelSourceProcessor<Any>
+                parallelSourceProcessor as ParallelSourceProcessor<Any?>
                 val sourceCacheKey = parallelSourceProcessor.cacheKey
                 if (sourceCacheKeySet.contains(parallelSourceProcessor.cacheKey)) {
                     "duplicate cache key for source processor, source cache key:%s, source processor:%s".format(sourceCacheKey, parallelSourceProcessor).also {
@@ -73,7 +73,7 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
                 val sourceData = this.cacheData?.getSourceData(sourceCacheKey)
                 parallelSourceProcessor.initialize(sourceData)
                 this.mainCoroutine.launch {
-                    val parallelJob = this as ParallelJob<Any>
+                    val parallelJob = this as ParallelJob<Any?>
                     val parallelSourceContext = DefaultParallelSourceContext(this.processCoroutine, parallelSourceProcessor, this.firstParallelJobStepList, parallelJob)
                     parallelSourceProcessor.process(parallelSourceContext)
                 }
@@ -88,7 +88,7 @@ class ParallelJob<IN>(private val jobName: String, internal val parallelJobConfi
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun initializeAllSinkProcessorFromCache(parallelJobStepList: List<ParallelJobStep<Any>>, cacheData: CacheData?) {
+    private fun initializeAllSinkProcessorFromCache(parallelJobStepList: List<ParallelJobStep<Any?>>, cacheData: CacheData?) {
         val list = parallelJobStepList.findAllChild(isChild = {
             it.isParallelSinkProcessor()
         }, hasChild = {

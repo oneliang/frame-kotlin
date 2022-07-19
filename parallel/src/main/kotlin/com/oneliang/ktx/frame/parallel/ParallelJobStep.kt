@@ -1,19 +1,19 @@
 package com.oneliang.ktx.frame.parallel
 
-class ParallelJobStep<IN> {
+class ParallelJobStep<IN : Any?> {
 
-    internal lateinit var parallelTransformProcessor: ParallelTransformProcessor<IN, Any>
+    internal lateinit var parallelTransformProcessor: ParallelTransformProcessor<IN, Any?>
     internal val parallelSinkProcessorList = mutableListOf<ParallelSinkProcessor<IN>>()
-    internal lateinit var nextParallelJobStep: ParallelJobStep<Any>
+    internal lateinit var nextParallelJobStep: ParallelJobStep<Any?>
 
     @Suppress("UNCHECKED_CAST")
     fun <OUT> addParallelTransformProcessor(parallelProcessor: ParallelTransformProcessor<IN, OUT>): ParallelJobStep<OUT> {
         if (this::parallelTransformProcessor.isInitialized) {
             error("parallel transform processor has been initialized, only can initialize one time")
         }
-        this.parallelTransformProcessor = parallelProcessor as ParallelTransformProcessor<IN, Any>
+        this.parallelTransformProcessor = parallelProcessor as ParallelTransformProcessor<IN, Any?>
         val parallelJobStep = ParallelJobStep<OUT>()
-        this.nextParallelJobStep = parallelJobStep as ParallelJobStep<Any>
+        this.nextParallelJobStep = parallelJobStep as ParallelJobStep<Any?>
         return parallelJobStep
     }
 

@@ -8,14 +8,14 @@ import kotlinx.coroutines.launch
 
 internal class DefaultParallelSourceContext(
         private val coroutine: Coroutine,
-        private val parallelSourceProcessor: ParallelSourceProcessor<Any>,
-        private val parallelJobStepList: List<ParallelJobStep<Any>>,
-        private val parallelJob: ParallelJob<Any>) : ParallelSourceContext<Any> {
+        private val parallelSourceProcessor: ParallelSourceProcessor<Any?>,
+        private val parallelJobStepList: List<ParallelJobStep<Any?>>,
+        private val parallelJob: ParallelJob<Any?>) : ParallelSourceContext<Any?> {
     companion object {
         private val logger = LoggerManager.getLogger(DefaultParallelSourceContext::class)
     }
 
-    override fun collect(value: Any, parallelContextAction: ParallelContextAction) {
+    override fun collect(value: Any?, parallelContextAction: ParallelContextAction) {
         if (this.parallelJobStepList.isEmpty()) {
             this.parallelJob.finish()
         }
