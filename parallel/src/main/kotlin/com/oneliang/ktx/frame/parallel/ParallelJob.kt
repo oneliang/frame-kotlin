@@ -50,7 +50,7 @@ class ParallelJob<IN : Any?>(private val jobName: String, internal val parallelJ
             }
             this.cacheManager = FileCacheManager(this.parallelJobConfiguration.cacheDirectory)
         }
-        logInfo("execute")
+        logDebug("execute")
         this.countDownLatch = CountDownLatch(this.parallelSourceProcessorSet.size)
         this.mainCoroutine.runBlocking {
             if (this.parallelJobConfiguration.useCache) {
@@ -80,11 +80,11 @@ class ParallelJob<IN : Any?>(private val jobName: String, internal val parallelJ
             }
         }
         this.countDownLatch.await()
-        logInfo("before finish, waiting for timeout:%s", this.parallelJobConfiguration.timeoutAfterFinished)
+        logDebug("before finish, waiting for timeout:%s", this.parallelJobConfiguration.timeoutAfterFinished)
         Thread.sleep(this.parallelJobConfiguration.timeoutAfterFinished)
-        logInfo("after finish")
+        logDebug("after finish")
         val cost = System.currentTimeMillis() - begin
-        logInfo("execute finished, cost:%s", cost)
+        logDebug("execute finished, cost:%s", cost)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -141,7 +141,7 @@ class ParallelJob<IN : Any?>(private val jobName: String, internal val parallelJ
 
     internal fun saveCache() {
         if (this.parallelJobConfiguration.useCache) {
-            logInfo("saving cache.")
+            logDebug("saving cache.")
             this.cacheManager.saveToCache(jobName, this.cacheData?.toJson().nullToBlank())
         }
     }
@@ -155,7 +155,7 @@ class ParallelJob<IN : Any?>(private val jobName: String, internal val parallelJ
         logger.error(Constants.Symbol.MIDDLE_BRACKET_LEFT + this.jobName + Constants.Symbol.MIDDLE_BRACKET_RIGHT + message, *args)
     }
 
-    private fun logInfo(message: String, vararg args: Any) {
-        logger.info(Constants.Symbol.MIDDLE_BRACKET_LEFT + this.jobName + Constants.Symbol.MIDDLE_BRACKET_RIGHT + message, *args)
+    private fun logDebug(message: String, vararg args: Any) {
+        logger.debug(Constants.Symbol.MIDDLE_BRACKET_LEFT + this.jobName + Constants.Symbol.MIDDLE_BRACKET_RIGHT + message, *args)
     }
 }

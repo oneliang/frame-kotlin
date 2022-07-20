@@ -9,7 +9,7 @@ internal object ParallelContextUtil {
     internal fun collectForParallelProcessor(coroutine: Coroutine, parallelJob: ParallelJob<Any?>, parallelJobStep: ParallelJobStep<Any?>, value: Any?, parentParallelContextAction: ParallelContextAction) {
         when {
             parallelJobStep.isParallelTransformProcessor() -> {
-                logger.info("transform processor, value:%s", value)
+                logger.debug("transform processor, value:%s", value)
                 var nextParallelJobStep: ParallelJobStep<Any?>? = null
                 if (parallelJobStep.hasNextParallelJobStep()) {
                     nextParallelJobStep = parallelJobStep.nextParallelJobStep
@@ -22,7 +22,7 @@ internal object ParallelContextUtil {
                 }
             }
             parallelJobStep.isParallelSinkProcessor() -> {
-                logger.info("sink processor, value:%s, parent context action:%s", value, parentParallelContextAction)
+                logger.debug("sink processor, value:%s, parent context action:%s", value, parentParallelContextAction)
                 for (parallelSinkProcessor in parallelJobStep.parallelSinkProcessorList) {
                     if (parallelJob.parallelJobConfiguration.async) {
                         coroutine.launch {
