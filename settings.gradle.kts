@@ -38,5 +38,6 @@ include(":bus")
 include(":locker")
 include(":transaction")
 include(":rpc")
+include(":container")
 //netty
 apply(from = "${rootDir}/netty/netty.gradle")
