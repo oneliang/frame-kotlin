@@ -2,24 +2,15 @@ package com.oneliang.ktx.frame.planner
 
 import com.oneliang.ktx.Constants
 
-class PlanLineGroup {
-
-    var key = Constants.String.BLANK
-    var planLineList = emptyList<PlanLine>()
-        get() {
-            if (field.isEmpty()) {
-                error("planLineList can not be empty")
-            }
-            return field
-        }
+class PlanLineGroup(var key: String = Constants.String.BLANK, var planLineList: List<PlanLine> = emptyList()) {
 
     fun findSuitablePlanLine(): PlanLine? {
         var suitablePlanLine: PlanLine? = null
         var minimumPlanCostTime = 0L
         var minimumLastPlanEndTime = 0L
         for ((index, planLine) in this.planLineList.withIndex()) {
-            val totalPlanCostTime = planLine.getTotalPlanCostTime()
-            val lastPlanEndTime = planLine.getLastPlanEndTime()
+            val totalPlanCostTime = planLine.getTotalPlanStepCostTime()
+            val lastPlanEndTime = planLine.getLastPlanStepEndTime()
             if (index == 0) {
                 minimumPlanCostTime = totalPlanCostTime
                 minimumLastPlanEndTime = lastPlanEndTime
@@ -37,7 +28,7 @@ class PlanLineGroup {
 
     fun getTotalPlanCostTime(): Long {
         var totalPlanCostTime = 0L
-        this.planLineList.forEach { totalPlanCostTime += it.getTotalPlanCostTime() }
+        this.planLineList.forEach { totalPlanCostTime += it.getTotalPlanStepCostTime() }
         return totalPlanCostTime
     }
 }

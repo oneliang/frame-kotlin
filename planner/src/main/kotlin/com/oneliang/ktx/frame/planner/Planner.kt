@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.planner
 
+import com.oneliang.ktx.util.common.toFormatString
 import com.oneliang.ktx.util.common.toMap
 import com.oneliang.ktx.util.common.toUtilDate
 import com.oneliang.ktx.util.logging.LoggerManager
@@ -54,18 +55,21 @@ object Planner {
         }
     }
 
-    fun print(planLineGroupList: List<PlanLineGroup>, beginTime: Long) {
+    fun print(planLineGroupList: List<PlanLineGroup>, beginTime: Long, printPlanStep: Boolean = false) {
         planLineGroupList.forEach { planLineGroup ->
             logger.info("group key:%s", planLineGroup.key)
             planLineGroup.planLineList.forEach { planLine ->
-                planLine.planStepList.forEach { planStep ->
-                    val planTask = planStep.planTask
-                    val planTaskStep = planStep.planTaskStep
-                    val planBeginDate = (beginTime + planStep.planBeginTime).toUtilDate()
-                    val planEndDate = (beginTime + planStep.planEndTime).toUtilDate()
-                    logger.info("plan task key:%s, plan task step, plan line group key:%s, begin time:%s, end time:%s, cost time:%s", planTask.key, planTaskStep.planLineGroupKey, planBeginDate, planEndDate, planTaskStep.planCostTime)
+                if (printPlanStep) {
+                    planLine.planStepList.forEach { planStep ->
+                        val planTask = planStep.planTask
+                        val planTaskStep = planStep.planTaskStep
+                        val planBeginDateString = (beginTime + planStep.planBeginTime).toUtilDate().toFormatString()
+                        val planEndDateString = (beginTime + planStep.planEndTime).toUtilDate().toFormatString()
+                        logger.info("plan task key:%s, plan task step, plan line group key:%s, begin time:%s, end time:%s, cost time:%s", planTask.key, planTaskStep.planLineGroupKey, planBeginDateString, planEndDateString, planTaskStep.planCostTime)
+                    }
                 }
-                logger.info("plan line name:%s, total plan cost time:%s", planLine.name, planLine.getTotalPlanCostTime())
+                val lastPlanStepEndTimeDateString = (beginTime + planLine.getLastPlanStepEndTime()).toUtilDate().toFormatString()
+                logger.info("plan line name:%s, total plan cost time:%s, last plan step end time:%s", planLine.name, planLine.getTotalPlanStepCostTime(), lastPlanStepEndTimeDateString)
             }
         }
     }

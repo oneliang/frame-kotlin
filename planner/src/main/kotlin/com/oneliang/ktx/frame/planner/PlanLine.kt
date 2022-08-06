@@ -64,7 +64,7 @@ class PlanLine(val name: String) {
         }
     }
 
-    fun getLastIdleTime(length: Long): Long {
+    internal fun getLastIdleTime(length: Long): Long {
         return if (this.planStepList.isEmpty()) {//when plan step list is empty, get the first plan time
             this.planTimeList.first().begin
         } else {
@@ -77,11 +77,11 @@ class PlanLine(val name: String) {
         }
     }
 
-    fun getTotalPlanCostTime(): Long {
+    fun getTotalPlanStepCostTime(): Long {
         return this.planStepList.sumByLong { it.planEndTime - it.planBeginTime }
     }
 
-    fun getLastPlanEndTime(): Long {
+    fun getLastPlanStepEndTime(): Long {
         return this.planStepList.lastOrNull()?.planEndTime ?: 0L
     }
 }
