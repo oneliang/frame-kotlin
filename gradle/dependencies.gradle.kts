@@ -38,6 +38,8 @@ val dependencies by extra {
         "tomcat-embed-core" to "org.apache.tomcat.embed:tomcat-embed-core:9.0.58",
         "tomcat-embed-jasper" to "org.apache.tomcat.embed:tomcat-embed-jasper:9.0.58",
         //netty asynchronize event-driven network application framework
-        "netty-all" to "io.netty:netty-all:4.1.47.Final"
+        "netty-all" to "io.netty:netty-all:4.1.47.Final",
+        //mongo
+        "mongodb-driver-sync" to "org.mongodb:mongodb-driver-sync:4.7.0"
     )
 }

@@ -6,8 +6,8 @@ class PlanTime(var begin: Long, var end: Long) {
     constructor() : this(0L, 0L)
 
     init {
-        if (end < begin) {
-            error("begin[%s] bigger than end[%s] ".format(end, begin))
+        if (end <= begin) {
+            error("plan time end must be greater than begin, begin[%s], end[%s] ".format(begin, end))
         } else {//end >= begin
             //ignore
         }

@@ -39,5 +39,6 @@ include(":locker")
 include(":transaction")
 include(":rpc")
 include(":container")
+include(":mongodb")
 //netty
 apply(from = "${rootDir}/netty/netty.gradle")

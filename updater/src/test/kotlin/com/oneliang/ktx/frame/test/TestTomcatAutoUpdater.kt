@@ -1,16 +1,11 @@
 package com.oneliang.ktx.frame.test
 
-import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.ssh.Ssh
 import com.oneliang.ktx.frame.updater.UpdaterExecutor
 import com.oneliang.ktx.frame.updater.tomcat.TomcatAutoUpdater
-import com.oneliang.ktx.util.common.perform
-import com.oneliang.ktx.util.common.readContentIgnoreLine
 import com.oneliang.ktx.util.file.readContentIgnoreLine
 import com.oneliang.ktx.util.json.jsonToObjectList
 import java.io.File
 import java.util.concurrent.CountDownLatch
-import javax.swing.JOptionPane
 
 fun main() {
 //    val configuration = TomcatAutoUpdater.Configuration().apply {
@@ -30,7 +25,7 @@ fun main() {
 //            password = configuration.password,
 //            configurationMap = mapOf(Ssh.Configuration.USERAUTH_GSSAPI_WITH_MIC to "no", Ssh.Configuration.STRICT_HOST_KEY_CHECKING to "no"), afterSessionConnect = { session ->
 //        Ssh.exec(session, "java -version") {
-//            it.inputStream.readContentIgnoreLine { line ->
+//            it.inputStream.readContentEachLine { line ->
 //                println(line)
 //                true
 //            }

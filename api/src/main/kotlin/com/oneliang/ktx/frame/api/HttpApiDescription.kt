@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.api
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.pojo.KeyValue
 import com.oneliang.ktx.util.common.toFile
+import com.oneliang.ktx.util.file.readContentEachLine
 import com.oneliang.ktx.util.file.readContentIgnoreLine
 import com.oneliang.ktx.util.generate.BeanDescription
 import com.oneliang.ktx.util.generate.processSubClass
@@ -70,11 +71,11 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Triple
     if (file.exists() && file.isFile) {
         var currentFlag = 0
         val flagSubClassKeyMap = mutableMapOf<Int, String>()
-        file.readContentIgnoreLine {
+        file.readContentEachLine {
             try {
                 val line = it.trim()
                 if (line.isBlank() || line.startsWith(Constants.Symbol.POUND_KEY, true)) {
-                    return@readContentIgnoreLine true//continue
+                    return@readContentEachLine true//continue
                 }
                 when {
                     line.startsWith(BEGIN) -> {
@@ -94,9 +95,9 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Triple
                             }
                         }
                         if (keywordSign) {
-                            return@readContentIgnoreLine true
+                            return@readContentEachLine true
                         }
-                        val currentHttpApiDescription = httpApiDescription ?: return@readContentIgnoreLine true
+                        val currentHttpApiDescription = httpApiDescription ?: return@readContentEachLine true
                         when {
                             currentFlag and FLAG_NAME == FLAG_NAME -> {
                                 currentHttpApiDescription.name = line

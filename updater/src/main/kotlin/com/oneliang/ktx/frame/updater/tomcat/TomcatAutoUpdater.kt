@@ -5,7 +5,6 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.ssh.Ssh
 import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.file.fileExists
-import com.oneliang.ktx.util.json.jsonToObject
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 
@@ -25,7 +24,7 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
         private fun findTomcatProcessPid(session: Session, war: Configuration.War): List<Int> {
             val tomcatPidList = mutableListOf<Int>()
             Ssh.exec(session, "ps -ef|grep ${war.remoteTomcatDirectory}") {
-                it.inputStream.readContentIgnoreLine { line ->
+                it.inputStream.readContentEachLine { line ->
                     val found = line.finds(war.remoteTomcatDirectory)
                     if (found) {
                         logger.info(line)
@@ -96,13 +95,13 @@ class TomcatAutoUpdater(private val configuration: Configuration) {
         private fun execRemoteFileMd5(session: Session, remoteFullFilename: String): String {
             var remoteFileMd5 = Constants.String.BLANK
             Ssh.exec(session, "md5sum $remoteFullFilename") {
-                it.inputStream.readContentIgnoreLine { line ->
+                it.inputStream.readContentEachLine { line ->
                     logger.info(line)
                     val stringList = line.splitForWhitespace()
                     if (stringList.isNotEmpty()) {
                         remoteFileMd5 = stringList[0]
                     }
-                    return@readContentIgnoreLine false
+                    return@readContentEachLine false
                 }
             }
             return remoteFileMd5

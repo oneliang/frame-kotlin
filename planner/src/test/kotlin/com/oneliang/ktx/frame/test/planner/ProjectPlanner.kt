@@ -3,6 +3,8 @@ package com.oneliang.ktx.frame.test.planner
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.planner.*
 import com.oneliang.ktx.util.common.getDayZeroTime
+import com.oneliang.ktx.util.file.readContentEachLine
+import java.io.File
 import java.util.*
 
 const val GROUP_FRONT = "front"
@@ -19,8 +21,38 @@ private fun generatePlanTimeList(days: Int): List<PlanTime> {
     return planTimeList
 }
 
-val planTimeList = generatePlanTimeList(10)//listOf(PlanTime(9 * Constants.Time.MILLISECONDS_OF_HOUR, 18 * Constants.Time.MILLISECONDS_OF_HOUR))
+val planTimeList = generatePlanTimeList(20)//listOf(PlanTime(9 * Constants.Time.MILLISECONDS_OF_HOUR, 18 * Constants.Time.MILLISECONDS_OF_HOUR))
+
+fun readPlanTaskFromFile(file: File): List<PlanTask> {
+    val planTaskList = mutableListOf<PlanTask>()
+    file.readContentEachLine { line ->
+        if (line.isBlank()) {
+            return@readContentEachLine true
+        }
+        val fixLine = line.trim()
+        val dataArrays = fixLine.split(Constants.Symbol.COMMA)
+        if (dataArrays.size >= 4) {
+            val key = dataArrays[0] + Constants.Symbol.MINUS + Constants.Symbol.GREATER_THAN + dataArrays[1]
+            val frontHour = dataArrays[2].toInt()
+            val backendHour = dataArrays[3].toInt()
+            if (frontHour > 0) {
+                planTaskList += PlanTask(key, listOf(PlanTask.Step(GROUP_FRONT, frontHour * Constants.Time.MILLISECONDS_OF_HOUR)))
+            }
+            if (backendHour > 0) {
+                planTaskList += PlanTask(key, listOf(PlanTask.Step(GROUP_BACKEND, backendHour * Constants.Time.MILLISECONDS_OF_HOUR)))
+            }
+        } else {
+            println("data arrays size less than 4, it is:%s".format(dataArrays.size))
+        }
+        true
+    }
+    return planTaskList
+}
+
 fun main() {
+    val projectPath = File(Constants.String.BLANK).absolutePath
+    val requirementFile = File(projectPath, "planner/src/test/resources/requirement.txt")
+    val planTaskList = readPlanTaskFromFile(requirementFile)
     val frontPlanLineGroup = PlanLineGroup(GROUP_FRONT)
     val backendPlanLineGroup = PlanLineGroup(GROUP_BACKEND)
     frontPlanLineGroup.planLineList = listOf(
@@ -35,24 +67,6 @@ fun main() {
         }, PlanLine(GROUP_BACKEND_LINE_B).also {
             it.planTimeList = planTimeList
         })
-    val planTask1 = PlanTask("浏览埋点").also {
-        it.stepList = listOf(PlanTask.Step(GROUP_FRONT, 10 * Constants.Time.MILLISECONDS_OF_HOUR))
-    }
-    val planTask2 = PlanTask("点击埋点").also {
-        it.stepList = listOf(PlanTask.Step(GROUP_FRONT, 10 * Constants.Time.MILLISECONDS_OF_HOUR))
-    }
-    val planTask3 = PlanTask("产业招商").also {
-        it.stepList = listOf(
-            PlanTask.Step(GROUP_FRONT, 22 * Constants.Time.MILLISECONDS_OF_HOUR),
-        )
-    }
-    val planTask4 = PlanTask("产业招商").also {
-        it.stepList = listOf(
-            PlanTask.Step(GROUP_BACKEND, 12 * Constants.Time.MILLISECONDS_OF_HOUR)
-        )
-    }
-
-    val planTaskList = listOf(planTask1, planTask2, planTask3, planTask4)
     Planner.plan(listOf(frontPlanLineGroup, backendPlanLineGroup), planTaskList)
     Planner.print(listOf(frontPlanLineGroup, backendPlanLineGroup), Date().getDayZeroTime())
 }
