@@ -3,7 +3,6 @@ package com.oneliang.ktx.frame.planner
 import com.oneliang.ktx.util.math.segment.Segmenter
 
 class PlanTime(var begin: Long, var end: Long) {
-    constructor() : this(0L, 0L)
 
     init {
         if (end <= begin) {
