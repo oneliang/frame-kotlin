@@ -118,7 +118,7 @@ class Message<O : Any, I : Any> {
      * constructor
      * @param success
      * @param message
-     * @param object
+     * @param instance
      * @param objectList
      */
     constructor(success: Boolean, message: String, instance: O?, objectList: List<I>, otherInformation: String) {
