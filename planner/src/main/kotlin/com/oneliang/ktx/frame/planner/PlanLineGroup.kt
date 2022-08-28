@@ -8,6 +8,7 @@ class PlanLineGroup(var key: String = Constants.String.BLANK, var planLineList: 
         var suitablePlanLine: PlanLine? = null
         var minimumPlanCostTime = 0L
         var minimumLastPlanEndTime = 0L
+        //find plan line which last plan end time is minimum
         for ((index, planLine) in this.planLineList.withIndex()) {
             val totalPlanCostTime = planLine.getTotalPlanStepCostTime()
             val lastPlanEndTime = planLine.getLastPlanStepEndTime()
