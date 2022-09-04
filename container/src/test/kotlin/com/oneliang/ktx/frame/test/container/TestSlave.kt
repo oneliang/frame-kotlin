@@ -8,8 +8,9 @@ import com.oneliang.ktx.util.logging.LoggerManager
 
 fun main() {
     LoggerManager.registerLogger("*", BaseLogger(Logger.Level.DEBUG))
-    val sla = Slave(HOST_ADDRESS, 9999)
-    sla.jarFullFilename = "D:/slave.jar"
-    sla.containerRunnableClassName = "com.oneliang.ktx.frame.test.container.TestSlaveContainerRunner"
-    sla.start()
+    val slave = Slave(HOST_ADDRESS, 9999)
+    slave.localTest = true
+    slave.jarFullFilename = "D:/slave.jar"
+    slave.containerRunnableClassName = "com.oneliang.ktx.frame.test.container.TestSlaveContainerRunner"
+    slave.start()
 }

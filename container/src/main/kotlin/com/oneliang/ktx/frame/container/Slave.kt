@@ -20,7 +20,10 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
         private val tlvPacketProcessor = TlvPacketProcessor()
     }
 
+    lateinit var id: String
     private var classLoader: ClassLoader? = null
+
+    internal var localTest = false
     var jarFullFilename: String = Constants.String.BLANK
     var containerRunnableClassName = Constants.String.BLANK
     private var containerRunnable: ContainerRunnable? = null
@@ -31,14 +34,30 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
     private val readProcessor = { byteArray: ByteArray ->
         val responseTlvPacket = tlvPacketProcessor.receiveTlvPacket(byteArray)
         val responseJson = String(responseTlvPacket.body)
-        logger.debug("receive, type:%s, body json:%s", responseTlvPacket.type.toInt(), responseJson)
-        val slaveRegisterResponse = responseJson.jsonToObject(SlaveRegisterResponse::class)
-        val action = slaveRegisterResponse.action
-        val id = slaveRegisterResponse.id
-        val success = slaveRegisterResponse.success
-        when {
-            action == ConstantsContainer.Action.SLAVE_REGISTER && success -> {
-                this.awaitAndSignal.signal(id)
+//        logger.debug("receive, type:%s, body json:%s", responseTlvPacket.type.toInt(), responseJson)
+        val baseData = responseJson.jsonToObject(BaseData::class)
+        val action = baseData.action
+        val id = baseData.id
+        when (action) {
+            ConstantsContainer.Action.SLAVE_REGISTER -> {
+                val slaveRegisterResponse = responseJson.jsonToObject(SlaveRegisterResponse::class)
+                if (slaveRegisterResponse.success) {
+                    this.awaitAndSignal.signal(id)
+                }
+            }
+            ConstantsContainer.Action.SLAVE_UNREGISTER -> {
+                val slaveUnregisterResponse = responseJson.jsonToObject(SlaveUnregisterResponse::class)
+                if (slaveUnregisterResponse.success) {
+                    this.awaitAndSignal.signal(id)
+                }
+                logger.debug("unregister, type:%s, body json:%s", responseTlvPacket.type.toInt(), responseJson)
+            }
+            ConstantsContainer.Action.SLAVE_DATA -> {
+                val slaveDataResponse = responseJson.jsonToObject(SlaveDataResponse::class)
+                if (slaveDataResponse.success) {
+//                    this.awaitAndSignal.signal(id)
+                }
+                logger.debug("data, type:%s, body json:%s", responseTlvPacket.type.toInt(), responseJson)
             }
         }
     }
@@ -46,13 +65,17 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
     private val operationLock = OperationLock()
 
     private fun loadContainerRunnable() {
-        if (this.jarFullFilename.isBlank()) {
+        if (!this.localTest && this.jarFullFilename.isBlank()) {
             error("jar full filename is blank")
         }
         if (this.containerRunnableClassName.isBlank()) {
             error("container runnable class name is blank")
         }
-        this.classLoader = DynamicJarManager.loadJar(this.jarFullFilename)
+        this.classLoader = if (this.localTest) {
+            Thread.currentThread().contextClassLoader
+        } else {
+            DynamicJarManager.loadJar(this.jarFullFilename)
+        }
         try {
             val containerRunnableClass = this.classLoader?.loadClass(this.containerRunnableClassName)
             if (containerRunnableClass != null) {
@@ -71,9 +94,11 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
         }
     }
 
-    private fun register(){
-        val id = Generator.generateGlobalThreadId()
-        val slaveRegisterRequest = SlaveRegisterRequest.build(id)
+    private fun register() {
+        if (!this::id.isInitialized) {
+            this.id = Generator.generateGlobalThreadId()
+        }
+        val slaveRegisterRequest = SlaveRegisterRequest.build(this.id)
         val slaveRegisterRequestJson = slaveRegisterRequest.toJson()
         val tlvPacketByteArray = TlvPacket(ConstantsContainer.TlvPackageType.SLAVE_REGISTER, slaveRegisterRequestJson.toByteArray()).toByteArray()
         this.clientManager.send(tlvPacketByteArray)
@@ -105,8 +130,13 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
         }
     }
 
-    override fun send() {
-        this.clientManager.send(ByteArray(0))
+    /**
+     * only for slave data tlv package
+     */
+    override fun sendData(byteArray: ByteArray) {
+        val slaveDataRequest = SlaveDataRequest.build(this.id, byteArray)
+        val tlvPacketByteArray = TlvPacket(ConstantsContainer.TlvPackageType.SLAVE_DATA, slaveDataRequest.toByteArray()).toByteArray()
+        this.clientManager.send(tlvPacketByteArray)
     }
 
     override fun receive() {

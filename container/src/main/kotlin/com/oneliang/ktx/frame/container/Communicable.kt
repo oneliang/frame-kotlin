@@ -2,6 +2,10 @@ package com.oneliang.ktx.frame.container
 
 interface Communicable {
 
-    fun send()
+    /**
+     * only for slave data tlv package
+     */
+    fun sendData(byteArray: ByteArray)
+
     fun receive()
 }

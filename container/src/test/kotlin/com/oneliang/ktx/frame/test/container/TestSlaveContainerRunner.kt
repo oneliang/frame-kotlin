@@ -12,7 +12,9 @@ class TestSlaveContainerRunner : ContainerRunnable {
     override lateinit var communicable: Communicable
 
     override fun running() {
-        logger.debug("communicable:%s", communicable)
+        logger.debug("communicable:%s", this.communicable)
         logger.debug("this:%s", this)
+        Thread.sleep(2000)
+        this.communicable.sendData("abcdefg".toByteArray())
     }
 }
