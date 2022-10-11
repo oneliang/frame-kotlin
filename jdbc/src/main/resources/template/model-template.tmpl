@@ -29,7 +29,20 @@ open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames
     companion object {
         const val TABLE = "{<%=className%>}"
 <%for(var i=0;i<fieldArray.length;i++){%><%var fieldBean = fieldArray[i];%><%var type = fieldBean.type;%><%var nullable = fieldBean.nullable;%><%var nullableString = (nullable? "?": "");%>
-        const val COLUMN_<%=fieldBean.name.toUpperCase()%> = "{<%=className%>.<%=fieldBean.name%>}"
+        <%var string = fieldBean.name;%>
+        <%var startIndex = 0;%>
+        <%var endIndex = 0;%>
+        <%var resultString = "";%>
+        <%for(var j=0; j<string.length; j++){%>
+            <%var code = string.charCodeAt(j);%>
+            <%if (code >= 65 && code <= 90) {%>
+                <%endIndex = j; %>
+                <%resultString += string.substring(startIndex, startIndex + 1).toLowerCase() + string.substring(startIndex + 1, endIndex) + "_";%>
+                <%startIndex = endIndex;%>
+            <%}%>
+        <%}%>
+        <%resultString += string.substring(endIndex, endIndex + 1).toLowerCase() + string.substring(endIndex + 1, string.length);%>
+        const val COLUMN_<%=resultString.toUpperCase()%> = "{<%=className%>.<%=fieldBean.name%>}"
 <%}%>
     }
 
