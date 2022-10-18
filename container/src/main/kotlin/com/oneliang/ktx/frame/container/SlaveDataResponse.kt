@@ -8,7 +8,7 @@ internal class SlaveDataResponse : BaseData() {
 
 internal fun SlaveDataResponse.Companion.build(id: String, success: Boolean): SlaveDataResponse {
     val slaveDataResponse = SlaveDataResponse()
-    slaveDataResponse.action = ConstantsContainer.Action.SLAVE_REGISTER
+    slaveDataResponse.action = ConstantsContainer.Action.SLAVE_DATA
     slaveDataResponse.id = id
     slaveDataResponse.success = success
     return slaveDataResponse
