@@ -15,7 +15,8 @@ import java.util.concurrent.ConcurrentHashMap
 class Server(
     private val host: String,
     private val port: Int,
-    private val maxThreadCount: Int = Runtime.getRuntime().availableProcessors()
+    private val maxThreadCount: Int = Runtime.getRuntime().availableProcessors(),
+    private val disconnectCallback: (socketChannelHashCode: Int) -> Unit = {}
 ) : LoopThread() {
     companion object {
         private val logger = LoggerManager.getLogger(Server::class)
@@ -87,6 +88,11 @@ class Server(
             SelectorThreadTask(Selector.open()) { socketChannel ->
                 this.socketChannelMap.remove(socketChannel)
                 logger.debug("disconnect, current socket channel map:%s", this.socketChannelMap.toJson())
+                try {
+                    this.disconnectCallback(socketChannel)
+                } catch (e: Throwable) {
+                    logger.error("disconnect callback execute error, socket channel id:%s", e, socketChannel)
+                }
             }.also {
                 it.selectorProcessor = this.selectorProcessor
             }

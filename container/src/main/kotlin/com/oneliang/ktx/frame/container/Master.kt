@@ -13,6 +13,7 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.packet.TlvPacket
 import com.oneliang.ktx.util.packet.TlvPacketProcessor
 import java.io.ByteArrayInputStream
+import java.util.concurrent.ConcurrentHashMap
 
 class Master(port: Int) : Container, Communicable, SelectorProcessor {
 
@@ -22,8 +23,11 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
     }
 
     private val operationLock = OperationLock()
-    private val server = Server(HOST_ADDRESS, port)
-    private val slaveMap = mutableMapOf<String, Pair<String, Int>>()
+    private val server = Server(HOST_ADDRESS, port) { socketChannelHashCode ->
+        removeSlaveBySocketChannelHashCode(socketChannelHashCode)
+    }
+    private val slaveMap = ConcurrentHashMap<String, Pair<String, Int>>()
+    private val socketChannelSlaveMap = ConcurrentHashMap<Int, String>()
 
     private var classLoader: ClassLoader? = null
 
@@ -40,17 +44,19 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
         return when (type) {
             ConstantsContainer.TlvPackageType.SLAVE_REGISTER.toInt() -> {
                 val slaveRegisterRequest = requestString.jsonToObject(SlaveRegisterRequest::class)
-                this.slaveMap[slaveRegisterRequest.id] = slaveRegisterRequest.id to socketChannelHashCode
-                logger.info("slave register, slave id:%s, socket channel hash code:%s", slaveRegisterRequest.id, socketChannelHashCode)
-                val slaveRegisterResponse = SlaveRegisterResponse.build(slaveRegisterRequest.id, true)
+                val slaveId = slaveRegisterRequest.id
+                this.addSlaveToMap(socketChannelHashCode, slaveId)
+                logger.info("slave register, slave id:%s, socket channel hash code:%s", slaveId, socketChannelHashCode)
+                val slaveRegisterResponse = SlaveRegisterResponse.build(slaveId, true)
                 val slaveRegisterResponseJson = slaveRegisterResponse.toJson()
                 TlvPacket(ConstantsContainer.TlvPackageType.SLAVE_REGISTER, slaveRegisterResponseJson.toByteArray()).toByteArray()
             }
             ConstantsContainer.TlvPackageType.SLAVE_UNREGISTER.toInt() -> {
                 val slaveUnregisterRequest = requestString.jsonToObject(SlaveUnregisterRequest::class)
-                this.slaveMap.remove(slaveUnregisterRequest.id)
-                logger.info("slave unregister, slave id:%s, socket channel hash code:%s", slaveUnregisterRequest.id, socketChannelHashCode)
-                val slaveUnregisterResponse = SlaveUnregisterResponse.build(slaveUnregisterRequest.id, true)
+                val slaveId = slaveUnregisterRequest.id
+                this.removeSlaveById(slaveId)
+                logger.info("slave unregister, slave id:%s, socket channel hash code:%s", slaveId, socketChannelHashCode)
+                val slaveUnregisterResponse = SlaveUnregisterResponse.build(slaveId, true)
                 val slaveUnregisterResponseJson = slaveUnregisterResponse.toJson()
                 TlvPacket(ConstantsContainer.TlvPackageType.SLAVE_UNREGISTER, slaveUnregisterResponseJson.toByteArray()).toByteArray()
             }
@@ -66,6 +72,26 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
                 val responseJson = BaseData.build(Constants.String.BLANK, ConstantsContainer.Action.NONE).toJson()
                 TlvPacket(ConstantsContainer.TlvPackageType.NONE, responseJson.toByteArray()).toByteArray()
             }
+        }
+    }
+
+    private fun addSlaveToMap(socketChannelHashCode: Int, slaveId: String) {
+        this.slaveMap[slaveId] = slaveId to socketChannelHashCode
+        this.socketChannelSlaveMap[socketChannelHashCode] = slaveId
+    }
+
+    private fun removeSlaveBySocketChannelHashCode(socketChannelHashCode: Int) {
+        val slaveId = this.socketChannelSlaveMap.remove(socketChannelHashCode)
+        if (slaveId != null) {
+            this.slaveMap.remove(slaveId)
+        }
+    }
+
+    private fun removeSlaveById(slaveId: String) {
+        val slaveIdPair = this.slaveMap.remove(slaveId)
+        if (slaveIdPair != null) {
+            val (_, socketChannelHashCode) = slaveIdPair
+            this.socketChannelSlaveMap.remove(socketChannelHashCode)
         }
     }
 
