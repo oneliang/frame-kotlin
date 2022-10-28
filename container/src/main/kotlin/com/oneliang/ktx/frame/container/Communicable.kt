@@ -2,10 +2,20 @@ package com.oneliang.ktx.frame.container
 
 interface Communicable {
 
+    val id: String
+
     /**
      * only for slave data tlv package
      */
     fun sendData(byteArray: ByteArray)
 
-    fun receive()
+    /**
+     * set receive callback
+     * @param receiveCallback
+     */
+    fun setReceiveCallback(receiveCallback: ReceiveCallback)
+
+    interface ReceiveCallback {
+        fun receive(byteArray: ByteArray)
+    }
 }

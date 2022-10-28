@@ -3,6 +3,7 @@ package com.oneliang.ktx.frame.container
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.socket.nio.SelectorProcessor
 import com.oneliang.ktx.frame.socket.nio.Server
+import com.oneliang.ktx.util.common.Generator
 import com.oneliang.ktx.util.common.HOST_ADDRESS
 import com.oneliang.ktx.util.common.isEntity
 import com.oneliang.ktx.util.common.toInt
@@ -35,6 +36,10 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
     var jarFullFilename: String = Constants.String.BLANK
     var containerRunnableClassName = Constants.String.BLANK
     private var containerRunnable: ContainerRunnable? = null
+
+    private lateinit var privateId: String
+    override val id: String
+        get() = "Master-$privateId"
 
     override fun process(byteArray: ByteArray, socketChannelHashCode: Int): ByteArray {
         val tlvPacket = tlvPacketProcessor.receiveTlvPacket(ByteArrayInputStream(byteArray))
@@ -130,6 +135,7 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
             loadContainerRunnable()
             this.server.selectorProcessor = this
             this.server.start()
+            this.privateId = Generator.generateGlobalThreadId()
             val containerRunnable = this.containerRunnable
             if (containerRunnable != null) {
                 containerRunnable.communicable = this
@@ -152,9 +158,13 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
     }
 
     override fun sendData(byteArray: ByteArray) {
-//        this.server.notify()
+        this.socketChannelSlaveMap.forEach { (socketChannelHashCode, _) ->
+            val masterNotifyConfigChanged = MasterNotifyConfigChanged.build(this.id, byteArray)
+            val tlvPacketByteArray = TlvPacket(ConstantsContainer.TlvPackageType.MASTER_NOTIFY_CONFIG_CHANGED, masterNotifyConfigChanged.toByteArray()).toByteArray()
+            this.server.notify(socketChannelHashCode, tlvPacketByteArray)
+        }
     }
 
-    override fun receive() {
+    override fun setReceiveCallback(receiveCallback: Communicable.ReceiveCallback) {
     }
 }
