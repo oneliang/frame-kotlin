@@ -11,6 +11,6 @@ fun main() {
     val slave = Slave(HOST_ADDRESS, 9999)
     slave.localTest = true
     slave.jarFullFilename = "D:/slave.jar"
-    slave.containerRunnableClassName = "com.oneliang.ktx.frame.test.container.TestSlaveContainerRunner"
+    slave.containerExecutorClassName = "com.oneliang.ktx.frame.test.container.TestSlaveContainerRunner"
     slave.start()
 }

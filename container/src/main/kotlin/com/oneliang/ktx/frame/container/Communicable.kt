@@ -6,16 +6,46 @@ interface Communicable {
 
     /**
      * only for slave data tlv package
+     * @param byteArray
      */
     fun sendData(byteArray: ByteArray)
 
     /**
-     * set receive callback
-     * @param receiveCallback
+     * set communication callback
+     * @param communicationCallback
      */
-    fun setReceiveCallback(receiveCallback: ReceiveCallback)
+    fun setCommunicationCallback(communicationCallback: CommunicationCallback)
 
-    interface ReceiveCallback {
-        fun receive(byteArray: ByteArray)
+    interface CommunicationCallback {
+        /**
+         * on register
+         * @param id
+         */
+        fun onRegister(id: String) {}
+
+        /**
+         * on unregister
+         * @param id
+         */
+        fun onUnregister(id: String) {}
+
+        /**
+         * on connect
+         * @param socketChannelHashCode
+         */
+        fun onConnect(socketChannelHashCode: Int) {}
+
+        /**
+         * on disconnect
+         * @param socketChannelHashCode
+         */
+        fun onDisconnect(socketChannelHashCode: Int) {}
+
+        /**
+         * on receive data
+         * @param id
+         * @param byteArray
+         */
+        fun onReceiveData(id: String, byteArray: ByteArray)
     }
 }

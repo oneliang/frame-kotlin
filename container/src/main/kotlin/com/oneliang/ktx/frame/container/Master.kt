@@ -24,9 +24,28 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
     }
 
     private val operationLock = OperationLock()
-    private val server = Server(HOST_ADDRESS, port) { socketChannelHashCode ->
-        removeSlaveBySocketChannelHashCode(socketChannelHashCode)
-    }
+    private val server = Server(HOST_ADDRESS, port, statusCallback = object : Server.StatusCallback {
+        /**
+         * on connect
+         * @param socketChannelHashCode
+         */
+        override fun onConnect(socketChannelHashCode: Int) {
+            if (this@Master::communicationCallback.isInitialized) {
+                this@Master.communicationCallback.onConnect(socketChannelHashCode)
+            }
+        }
+
+        /**
+         * on disconnect
+         * @param socketChannelHashCode
+         */
+        override fun onDisconnect(socketChannelHashCode: Int) {
+            this@Master.removeSlaveBySocketChannelHashCode(socketChannelHashCode)
+            if (this@Master::communicationCallback.isInitialized) {
+                this@Master.communicationCallback.onDisconnect(socketChannelHashCode)
+            }
+        }
+    })
     private val slaveMap = ConcurrentHashMap<String, Pair<String, Int>>()
     private val socketChannelSlaveMap = ConcurrentHashMap<Int, String>()
 
@@ -34,8 +53,9 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
 
     internal var localTest = false
     var jarFullFilename: String = Constants.String.BLANK
-    var containerRunnableClassName = Constants.String.BLANK
-    private var containerRunnable: ContainerRunnable? = null
+    var containerExecutorClassName = Constants.String.BLANK
+    private var containerExecutor: ContainerExecutor? = null
+    private lateinit var communicationCallback: Communicable.CommunicationCallback
 
     private lateinit var privateId: String
     override val id: String
@@ -51,6 +71,13 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
                 val slaveRegisterRequest = requestString.jsonToObject(SlaveRegisterRequest::class)
                 val slaveId = slaveRegisterRequest.id
                 this.addSlaveToMap(socketChannelHashCode, slaveId)
+                if (this::communicationCallback.isInitialized) {
+                    try {
+                        this.communicationCallback.onRegister(slaveId)
+                    } catch (e: Throwable) {
+                        logger.error("slave on register callback exception, slave register request id:%s", e, slaveId)
+                    }
+                }
                 logger.info("slave register, slave id:%s, socket channel hash code:%s", slaveId, socketChannelHashCode)
                 val slaveRegisterResponse = SlaveRegisterResponse.build(slaveId, true)
                 val slaveRegisterResponseJson = slaveRegisterResponse.toJson()
@@ -60,6 +87,13 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
                 val slaveUnregisterRequest = requestString.jsonToObject(SlaveUnregisterRequest::class)
                 val slaveId = slaveUnregisterRequest.id
                 this.removeSlaveById(slaveId)
+                if (this::communicationCallback.isInitialized) {
+                    try {
+                        this.communicationCallback.onUnregister(slaveId)
+                    } catch (e: Throwable) {
+                        logger.error("slave on unregister callback exception, slave unregister request id:%s", e, slaveId)
+                    }
+                }
                 logger.info("slave unregister, slave id:%s, socket channel hash code:%s", slaveId, socketChannelHashCode)
                 val slaveUnregisterResponse = SlaveUnregisterResponse.build(slaveId, true)
                 val slaveUnregisterResponseJson = slaveUnregisterResponse.toJson()
@@ -69,6 +103,13 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
                 val slaveDataRequest = SlaveDataRequest.fromByteArray(tlvPacket.body)
                 val slaveData = String(slaveDataRequest.data)
                 logger.info("slave data, slave id:%s, slave data:%s, socket channel hash code:%s", slaveDataRequest.id, slaveData, socketChannelHashCode)
+                if (this::communicationCallback.isInitialized) {
+                    try {
+                        this.communicationCallback.onReceiveData(slaveDataRequest.id, slaveDataRequest.data)
+                    } catch (e: Throwable) {
+                        logger.error("slave data receive callback exception, slave data request id:%s", e, slaveDataRequest.id)
+                    }
+                }
                 val slaveDataResponse = SlaveDataResponse.build(slaveDataRequest.id, true)
                 val slaveDataResponseJson = slaveDataResponse.toJson()
                 TlvPacket(ConstantsContainer.TlvPackageType.SLAVE_DATA, slaveDataResponseJson.toByteArray()).toByteArray()
@@ -80,18 +121,33 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
         }
     }
 
+    /**
+     * add slave to map
+     * @param socketChannelHashCode
+     * @param slaveId
+     */
     private fun addSlaveToMap(socketChannelHashCode: Int, slaveId: String) {
         this.slaveMap[slaveId] = slaveId to socketChannelHashCode
         this.socketChannelSlaveMap[socketChannelHashCode] = slaveId
     }
 
-    private fun removeSlaveBySocketChannelHashCode(socketChannelHashCode: Int) {
+    /**
+     * remove slave by socket channel hash code
+     * @param socketChannelHashCode
+     * @return String?
+     */
+    private fun removeSlaveBySocketChannelHashCode(socketChannelHashCode: Int): String? {
         val slaveId = this.socketChannelSlaveMap.remove(socketChannelHashCode)
         if (slaveId != null) {
             this.slaveMap.remove(slaveId)
         }
+        return slaveId
     }
 
+    /**
+     * remove slave by id
+     * @param slaveId
+     */
     private fun removeSlaveById(slaveId: String) {
         val slaveIdPair = this.slaveMap.remove(slaveId)
         if (slaveIdPair != null) {
@@ -100,12 +156,12 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
         }
     }
 
-    private fun loadContainerRunnable() {
+    private fun loadContainerExecutor() {
         if (!this.localTest && this.jarFullFilename.isBlank()) {
             error("jar full filename is blank")
         }
-        if (this.containerRunnableClassName.isBlank()) {
-            error("container runnable class name is blank")
+        if (this.containerExecutorClassName.isBlank()) {
+            error("container executor class name is blank")
         }
         this.classLoader = if (this.localTest) {
             Thread.currentThread().contextClassLoader
@@ -113,17 +169,18 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
             DynamicJarManager.loadJar(this.jarFullFilename)
         }
         try {
-            val containerRunnableClass = this.classLoader?.loadClass(this.containerRunnableClassName)
-            if (containerRunnableClass != null) {
-                val containerRunnableClassInstance = containerRunnableClass.newInstance()
-                if (containerRunnableClassInstance.isEntity(ContainerRunnable::class)) {
-                    this.containerRunnable = containerRunnableClassInstance as ContainerRunnable
-                    this.containerRunnable?.communicable = this
+            val containerExecutorClass = this.classLoader?.loadClass(this.containerExecutorClassName)
+            if (containerExecutorClass != null) {
+                val containerExecutorClassInstance = containerExecutorClass.newInstance()
+                if (containerExecutorClassInstance.isEntity(ContainerExecutor::class)) {
+                    this.containerExecutor = containerExecutorClassInstance as ContainerExecutor
+                    this.containerExecutor?.communicable = this
+                    this.containerExecutor?.initialize()
                 } else {
-                    error("container runnable class instance is not the entity of ContainerRunnable::class")
+                    error("container executor class instance is not the entity of ContainerExecutor::class")
                 }
             } else {
-                error("container runnable class is null, it is not a ClassNotFoundException??? It is impossible.")
+                error("container executor class is null, it is not a ClassNotFoundException??? It is impossible.")
             }
         } catch (e: Throwable) {
             throw e
@@ -132,15 +189,15 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
 
     override fun start() {
         this.operationLock.operate {
-            loadContainerRunnable()
-            this.server.selectorProcessor = this
-            this.server.start()
-            this.privateId = Generator.generateGlobalThreadId()
-            val containerRunnable = this.containerRunnable
-            if (containerRunnable != null) {
-                containerRunnable.communicable = this
-                containerRunnable.running()
+            //initialize
+            if (!this::privateId.isInitialized) {
+                this.privateId = Generator.generateGlobalThreadId()
             }
+            loadContainerExecutor()
+            this.server.selectorProcessor = this
+            //start and execute
+            this.server.start()
+            this.containerExecutor?.execute()
         }
     }
 
@@ -157,6 +214,10 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
         }
     }
 
+    /**
+     * send data
+     * @param byteArray
+     */
     override fun sendData(byteArray: ByteArray) {
         this.socketChannelSlaveMap.forEach { (socketChannelHashCode, _) ->
             val masterNotifyConfigChanged = MasterNotifyConfigChanged.build(this.id, byteArray)
@@ -165,6 +226,11 @@ class Master(port: Int) : Container, Communicable, SelectorProcessor {
         }
     }
 
-    override fun setReceiveCallback(receiveCallback: Communicable.ReceiveCallback) {
+    /**
+     * set communication callback
+     * @param communicationCallback
+     */
+    override fun setCommunicationCallback(communicationCallback: Communicable.CommunicationCallback) {
+        this.communicationCallback = communicationCallback
     }
 }

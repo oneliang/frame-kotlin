@@ -5,6 +5,7 @@ import com.oneliang.ktx.frame.socket.nio.ClientManager
 import com.oneliang.ktx.util.common.Generator
 import com.oneliang.ktx.util.common.isEntity
 import com.oneliang.ktx.util.common.toInt
+import com.oneliang.ktx.util.concurrent.ResourceQueueThread
 import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
 import com.oneliang.ktx.util.concurrent.atomic.OperationLock
 import com.oneliang.ktx.util.json.jsonToObject
@@ -24,8 +25,8 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
     internal var localTest = false
 
     var jarFullFilename: String = Constants.String.BLANK
-    var containerRunnableClassName = Constants.String.BLANK
-    private var containerRunnable: ContainerRunnable? = null
+    var containerExecutorClassName = Constants.String.BLANK
+    private var containerExecutor: ContainerExecutor? = null
     private val awaitAndSignal = AwaitAndSignal<String>()
 
     private lateinit var privateId: String
@@ -42,14 +43,15 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
                 val receiveJson = String(receiveTlvPacket.body)
                 val slaveRegisterResponse = receiveJson.jsonToObject(SlaveRegisterResponse::class)
                 if (slaveRegisterResponse.success) {
-                    this.awaitAndSignal.signal(id)
+                    this.awaitAndSignal.signal(this.privateId)
                 }
+                logger.debug("register, type:%s, body json:%s", receiveTlvPacket.type.toInt(), receiveJson)
             }
             ConstantsContainer.TlvPackageType.SLAVE_UNREGISTER.toInt() -> {
                 val receiveJson = String(receiveTlvPacket.body)
                 val slaveUnregisterResponse = receiveJson.jsonToObject(SlaveUnregisterResponse::class)
                 if (slaveUnregisterResponse.success) {
-                    this.awaitAndSignal.signal(id)
+                    this.awaitAndSignal.signal(this.privateId)
                 }
                 logger.debug("unregister, type:%s, body json:%s", receiveTlvPacket.type.toInt(), receiveJson)
             }
@@ -57,30 +59,64 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
                 val receiveJson = String(receiveTlvPacket.body)
                 val slaveDataResponse = receiveJson.jsonToObject(SlaveDataResponse::class)
                 if (slaveDataResponse.success) {
-//                    this.awaitAndSignal.signal(id)
+//                    this.awaitAndSignal.signal(privateId)
                 }
                 logger.debug("data, type:%s, body json:%s", receiveTlvPacket.type.toInt(), receiveJson)
             }
             ConstantsContainer.TlvPackageType.MASTER_NOTIFY_CONFIG_CHANGED.toInt() -> {
                 val masterNotifyConfigChanged = MasterNotifyConfigChanged.fromByteArray(receiveTlvPacket.body)
-                if (this::receiveCallback.isInitialized) {
-                    this.receiveCallback.receive(masterNotifyConfigChanged.data)
+                if (this::communicationCallback.isInitialized) {
+                    this.communicationCallback.onReceiveData(masterNotifyConfigChanged.id, masterNotifyConfigChanged.data)
                 }
                 val masterData = String(masterNotifyConfigChanged.data)
                 logger.debug("master notify config changed, type:%s, body json:%s", receiveTlvPacket.type.toInt(), masterData)
             }
         }
     }
-    private val clientManager = ClientManager(masterHost, masterPort, 1, this.readProcessor)
-    private val operationLock = OperationLock()
-    private lateinit var receiveCallback: Communicable.ReceiveCallback
+    private val clientManager = ClientManager(masterHost, masterPort, 1, this.readProcessor, object : ClientManager.ClientStatusCallback {
+        override fun onConnect(clientIndex: Int) {
+            this@Slave.workerThread.addResource(WorkerAction.CONNECT)
+            this@Slave.workerThread.addResource(WorkerAction.REGISTER)
+        }
 
-    private fun loadContainerRunnable() {
+        override fun onDisconnect(clientIndex: Int) {
+            this@Slave.workerThread.addResource(WorkerAction.DISCONNECT)
+        }
+    })
+    private val operationLock = OperationLock()
+    private lateinit var communicationCallback: Communicable.CommunicationCallback
+
+    private enum class WorkerAction {
+        CONNECT, DISCONNECT, REGISTER, UNREGISTER
+    }
+
+    private val workerThread = ResourceQueueThread(object : ResourceQueueThread.ResourceProcessor<WorkerAction> {
+        override fun process(resource: WorkerAction) {
+            logger.debug("communication action:%s", resource)
+            when (resource) {
+                WorkerAction.CONNECT -> {
+                    this@Slave.communicationCallback.onConnect(0)
+                }
+                WorkerAction.DISCONNECT -> {
+                    this@Slave.communicationCallback.onDisconnect(0)
+                }
+                WorkerAction.REGISTER -> {
+                    this@Slave.register()
+                    this@Slave.communicationCallback.onRegister(this@Slave.privateId)
+                }
+                WorkerAction.UNREGISTER -> {
+                    this@Slave.communicationCallback.onUnregister(this@Slave.privateId)
+                }
+            }
+        }
+    })
+
+    private fun loadContainerExecutor() {
         if (!this.localTest && this.jarFullFilename.isBlank()) {
             error("jar full filename is blank")
         }
-        if (this.containerRunnableClassName.isBlank()) {
-            error("container runnable class name is blank")
+        if (this.containerExecutorClassName.isBlank()) {
+            error("container executor class name is blank")
         }
         this.classLoader = if (this.localTest) {
             Thread.currentThread().contextClassLoader
@@ -88,17 +124,18 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
             DynamicJarManager.loadJar(this.jarFullFilename)
         }
         try {
-            val containerRunnableClass = this.classLoader?.loadClass(this.containerRunnableClassName)
-            if (containerRunnableClass != null) {
-                val containerRunnableClassInstance = containerRunnableClass.newInstance()
-                if (containerRunnableClassInstance.isEntity(ContainerRunnable::class)) {
-                    this.containerRunnable = containerRunnableClassInstance as ContainerRunnable
-                    this.containerRunnable?.communicable = this
+            val containerExecutorClass = this.classLoader?.loadClass(this.containerExecutorClassName)
+            if (containerExecutorClass != null) {
+                val containerExecutorClassInstance = containerExecutorClass.newInstance()
+                if (containerExecutorClassInstance.isEntity(ContainerExecutor::class)) {
+                    this.containerExecutor = containerExecutorClassInstance as ContainerExecutor
+                    this.containerExecutor?.communicable = this
+                    this.containerExecutor?.initialize()
                 } else {
-                    error("container runnable class instance is not the entity of ContainerRunnable::class")
+                    error("container executor class instance is not the entity of ContainerExecutor::class")
                 }
             } else {
-                error("container runnable class is null, it is not a ClassNotFoundException??? It is impossible.")
+                error("container executor class is null, it is not a ClassNotFoundException??? It is impossible.")
             }
         } catch (e: Throwable) {
             throw e
@@ -106,31 +143,31 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
     }
 
     private fun register() {
-        if (!this::privateId.isInitialized) {
-            this.privateId = Generator.generateGlobalThreadId()
-        }
         val slaveRegisterRequest = SlaveRegisterRequest.build(this.privateId)
         val slaveRegisterRequestJson = slaveRegisterRequest.toJson()
         val tlvPacketByteArray = TlvPacket(ConstantsContainer.TlvPackageType.SLAVE_REGISTER, slaveRegisterRequestJson.toByteArray()).toByteArray()
         this.clientManager.send(tlvPacketByteArray)
+        this.awaitAndSignal.await(this.privateId)
     }
 
     override fun start() {
         this.operationLock.operate {
-            loadContainerRunnable()
-            this.clientManager.start()
-            this.register()
-            val containerRunnable = this.containerRunnable
-            if (containerRunnable != null) {
-                containerRunnable.communicable = this
-                containerRunnable.running()
+            //initialize
+            if (!this::privateId.isInitialized) {
+                this.privateId = Generator.generateGlobalThreadId()
             }
+            loadContainerExecutor()
+            //start and execute
+            this.workerThread.start()
+            this.clientManager.start()
+            this.containerExecutor?.execute()
         }
     }
 
     override fun stop() {
         this.operationLock.operate {
             this.clientManager.stop()
+            this.workerThread.stopNow()
         }
     }
 
@@ -143,6 +180,7 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
 
     /**
      * only for slave data tlv package
+     * @param byteArray
      */
     override fun sendData(byteArray: ByteArray) {
         val slaveDataRequest = SlaveDataRequest.build(this.privateId, byteArray)
@@ -151,10 +189,10 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
     }
 
     /**
-     * set receive callback
-     * @param receiveCallback
+     * set communication callback
+     * @param communicationCallback
      */
-    override fun setReceiveCallback(receiveCallback: Communicable.ReceiveCallback) {
-        this.receiveCallback = receiveCallback
+    override fun setCommunicationCallback(communicationCallback: Communicable.CommunicationCallback) {
+        this.communicationCallback = communicationCallback
     }
 }

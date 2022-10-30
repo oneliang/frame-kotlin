@@ -10,7 +10,8 @@ class ClientManager(
     private val serverHost: String,
     private val serverPort: Int,
     private val threadCount: Int = Runtime.getRuntime().availableProcessors(),
-    private val readProcessor: (byteArray: ByteArray) -> Unit = {}
+    private val readProcessor: (byteArray: ByteArray) -> Unit = {},
+    private val clientStatusCallback: ClientStatusCallback? = null
 ) {
     companion object {
         private val logger = LoggerManager.getLogger(ClientManager::class)
@@ -34,8 +35,16 @@ class ClientManager(
             this.threadPool.minThreads = 1
             this.threadPool.maxThreads = if (this.threadCount < 1) Runtime.getRuntime().availableProcessors() else this.threadCount
             this.threadPool.start()
-            this.clients = Array(this.threadCount) {
-                Client(this.serverHost, this.serverPort, Selector.open(), this.readProcessor)
+            this.clients = Array(this.threadCount) { clientIndex ->
+                Client(this.serverHost, this.serverPort, Selector.open(), this.readProcessor, object : Client.StatusCallback {
+                    override fun onConnect() {
+                        this@ClientManager.clientStatusCallback?.onConnect(clientIndex)
+                    }
+
+                    override fun onDisconnect() {
+                        this@ClientManager.clientStatusCallback?.onDisconnect(clientIndex)
+                    }
+                })
             }
             this.clients.forEach {
                 this.threadPool.addThreadTask {
@@ -61,6 +70,9 @@ class ClientManager(
     @Synchronized
     fun stop() {
         this.threadPool.stop()
+        for (client in this.clients) {
+            client.close()
+        }
         this.clients = emptyArray()
         this.hasBeenInitialized = false
     }
@@ -74,5 +86,23 @@ class ClientManager(
         }
         val client = this.clients[byteArray.hashCode() % this.clients.size]
         client.send(byteArray)
+    }
+
+    /**
+     * ClientStatusCallback
+     */
+    interface ClientStatusCallback {
+
+        /**
+         * on connect, blocking callback
+         * @param clientIndex
+         */
+        fun onConnect(clientIndex: Int)
+
+        /**
+         * on disconnect, blocking callback
+         * @param clientIndex
+         */
+        fun onDisconnect(clientIndex: Int)
     }
 }

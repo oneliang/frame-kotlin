@@ -10,6 +10,6 @@ fun main() {
     val master = Master(9999)
     master.localTest = true
     master.jarFullFilename = "D:/master.jar"
-    master.containerRunnableClassName = "com.oneliang.ktx.frame.test.container.TestMasterContainerRunner"
+    master.containerExecutorClassName = "com.oneliang.ktx.frame.test.container.TestMasterContainerRunner"
     master.start()
 }

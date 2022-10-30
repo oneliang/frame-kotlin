@@ -16,7 +16,7 @@ class Server(
     private val host: String,
     private val port: Int,
     private val maxThreadCount: Int = Runtime.getRuntime().availableProcessors(),
-    private val disconnectCallback: (socketChannelHashCode: Int) -> Unit = {}
+    private val statusCallback: StatusCallback? = null
 ) : LoopThread() {
     companion object {
         private val logger = LoggerManager.getLogger(Server::class)
@@ -55,6 +55,11 @@ class Server(
                 val socketChannel = serverSocketChannel.accept()
                 val socketChannelHashCode = socketChannel.hashCode()
                 this.socketChannelMap[socketChannelHashCode] = socketChannel
+                try {
+                    this.statusCallback?.onConnect(socketChannelHashCode)
+                } catch (e: Throwable) {
+                    logger.error("status callback, on connect execute error, socket channel hash code:%s", e, socketChannelHashCode)
+                }
                 logger.debug("current socket channel map size:%s", this.socketChannelMap.size)
                 socketChannel.configureBlocking(false)
                 val selector = getSelector(socketChannelHashCode)
@@ -85,13 +90,13 @@ class Server(
         this.threadPool.maxThreads = this.maxThreadCount
         this.threadPool.start()
         this.selectorThreadTask = Array(this.threadPool.maxThreads) {
-            SelectorThreadTask(Selector.open()) { socketChannel ->
-                this.socketChannelMap.remove(socketChannel)
+            SelectorThreadTask(Selector.open()) { socketChannelHashCode ->
+                this.socketChannelMap.remove(socketChannelHashCode)
                 logger.debug("disconnect, current socket channel map:%s", this.socketChannelMap.toJson())
                 try {
-                    this.disconnectCallback(socketChannel)
+                    this.statusCallback?.onDisconnect(socketChannelHashCode)
                 } catch (e: Throwable) {
-                    logger.error("disconnect callback execute error, socket channel id:%s", e, socketChannel)
+                    logger.error("status callback, on disconnect execute error, socket channel hash code:%s", e, socketChannelHashCode)
                 }
             }.also {
                 it.selectorProcessor = this.selectorProcessor
@@ -132,5 +137,23 @@ class Server(
         socketChannelHashCodes.forEach { socketChannelHashCode ->
             notify(socketChannelHashCode)
         }
+    }
+
+    /**
+     * StatusCallback
+     */
+    interface StatusCallback {
+
+        /**
+         * on connect
+         * @param socketChannelHashCode
+         */
+        fun onConnect(socketChannelHashCode: Int)
+
+        /**
+         * on disconnect
+         * @param socketChannelHashCode
+         */
+        fun onDisconnect(socketChannelHashCode: Int)
     }
 }

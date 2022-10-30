@@ -16,7 +16,8 @@ class Client(
     private val serverHost: String,
     private val serverPort: Int,
     private val selector: Selector,
-    private val readProcessor: (byteArray: ByteArray) -> Unit = {}
+    private val readProcessor: (byteArray: ByteArray) -> Unit = {},
+    private val statusCallback: StatusCallback? = null
 ) {
     companion object {
         private val logger = LoggerManager.getLogger(Client::class)
@@ -54,6 +55,11 @@ class Client(
         } finally {
             this.initializeLock.unlock()
         }
+    }
+
+    private fun reinitialize() {
+        this.hasBeenInitialized = false
+        this.initialize()
     }
 
     private fun resetSocketChannel() {
@@ -96,6 +102,11 @@ class Client(
                                     logger.debug("client:%s, connecting", this)
                                 }
                                 logger.debug("client connected, socket channel:%s", socketChannel)
+                                try {
+                                    this.statusCallback?.onConnect()
+                                } catch (e: Throwable) {
+                                    logger.error("status callback, on connect execute error, socket channel:%s", e, socketChannel)
+                                }
                                 key.interestOps(SelectionKey.OP_READ or SelectionKey.OP_WRITE)
 //                                socketChannel.register(this.selector, SelectionKey.OP_READ or SelectionKey.OP_WRITE)
                             }
@@ -124,15 +135,44 @@ class Client(
                         key.cancel()
                         socketChannel.close()
                         this.resetSocketChannel()
+                        try {
+                            this.statusCallback?.onDisconnect()
+                        } catch (e: Throwable) {
+                            logger.error("status callback, on disconnect execute error, socket channel:%s", e, socketChannel)
+                        }
+                        break
                     }
                 }
                 logger.verbose("after selected key size:%s", this.selector.selectedKeys().size)
             } else if (privateSocketChannel == null) {
                 logger.debug("socket channel is null, maybe reconnecting, maybe server is close, host:%s, port:%s", this.serverHost, this.serverPort)
-                this.hasBeenInitialized = false
-                this.initialize()//reset socket channel
+                this.reinitialize()//reset socket channel
                 Thread.sleep(this.reconnectTimeout)
             }//else is not open
         }
+    }
+
+    fun close() {
+        try {
+            this.socketChannel?.close()
+        } catch (e: Throwable) {
+            logger.error("socket channel close error.", e)
+        }
+    }
+
+    /**
+     * StatusCallback
+     */
+    interface StatusCallback {
+
+        /**
+         * on connect, blocking callback
+         */
+        fun onConnect()
+
+        /**
+         * on disconnect, blocking callback
+         */
+        fun onDisconnect()
     }
 }
