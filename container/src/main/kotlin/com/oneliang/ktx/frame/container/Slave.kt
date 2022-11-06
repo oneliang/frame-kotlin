@@ -2,9 +2,7 @@ package com.oneliang.ktx.frame.container
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.socket.nio.ClientManager
-import com.oneliang.ktx.util.common.Generator
-import com.oneliang.ktx.util.common.isEntity
-import com.oneliang.ktx.util.common.toInt
+import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.concurrent.ResourceQueueThread
 import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
 import com.oneliang.ktx.util.concurrent.atomic.OperationLock
@@ -65,9 +63,7 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
             }
             ConstantsContainer.TlvPackageType.MASTER_NOTIFY_CONFIG_CHANGED.toInt() -> {
                 val masterNotifyConfigChanged = MasterNotifyConfigChanged.fromByteArray(receiveTlvPacket.body)
-                if (this::communicationCallback.isInitialized) {
-                    this.communicationCallback.onReceiveData(masterNotifyConfigChanged.id, masterNotifyConfigChanged.data)
-                }
+                this.workerThread.addResource(WorkerMessage(WorkerMessage.Action.RECEIVE_DATA, masterNotifyConfigChanged.id, masterNotifyConfigChanged.data))
                 val masterData = String(masterNotifyConfigChanged.data)
                 logger.debug("master notify config changed, type:%s, body json:%s", receiveTlvPacket.type.toInt(), masterData)
             }
@@ -75,37 +71,50 @@ class Slave(masterHost: String, masterPort: Int) : Container, Communicable {
     }
     private val clientManager = ClientManager(masterHost, masterPort, 1, this.readProcessor, object : ClientManager.ClientStatusCallback {
         override fun onConnect(clientIndex: Int) {
-            this@Slave.workerThread.addResource(WorkerAction.CONNECT)
-            this@Slave.workerThread.addResource(WorkerAction.REGISTER)
+            this@Slave.workerThread.addResource(WorkerMessage(WorkerMessage.Action.CONNECT))
+            this@Slave.workerThread.addResource(WorkerMessage(WorkerMessage.Action.REGISTER))
         }
 
         override fun onDisconnect(clientIndex: Int) {
-            this@Slave.workerThread.addResource(WorkerAction.DISCONNECT)
+            this@Slave.workerThread.addResource(WorkerMessage(WorkerMessage.Action.DISCONNECT))
         }
     })
     private val operationLock = OperationLock()
     private lateinit var communicationCallback: Communicable.CommunicationCallback
 
-    private enum class WorkerAction {
-        CONNECT, DISCONNECT, REGISTER, UNREGISTER
+    private class WorkerMessage(var action: Action, var masterId: String? = null, var data: ByteArray = EMPTY_BYTE_ARRAY) {
+        internal enum class Action {
+            CONNECT, DISCONNECT, REGISTER, UNREGISTER, RECEIVE_DATA
+        }
     }
 
-    private val workerThread = ResourceQueueThread(object : ResourceQueueThread.ResourceProcessor<WorkerAction> {
-        override fun process(resource: WorkerAction) {
+    private val workerThread = ResourceQueueThread(object : ResourceQueueThread.ResourceProcessor<WorkerMessage> {
+        override fun process(resource: WorkerMessage) {
             logger.debug("communication action:%s", resource)
-            when (resource) {
-                WorkerAction.CONNECT -> {
+            when (resource.action) {
+                WorkerMessage.Action.CONNECT -> {
                     this@Slave.communicationCallback.onConnect(0)
                 }
-                WorkerAction.DISCONNECT -> {
-                    this@Slave.communicationCallback.onDisconnect(0)
+                WorkerMessage.Action.DISCONNECT -> {
+                    if (this@Slave::communicationCallback.isInitialized) {
+                        this@Slave.communicationCallback.onDisconnect(0)
+                    }
                 }
-                WorkerAction.REGISTER -> {
+                WorkerMessage.Action.REGISTER -> {
                     this@Slave.register()
-                    this@Slave.communicationCallback.onRegister(this@Slave.privateId)
+                    if (this@Slave::communicationCallback.isInitialized) {
+                        this@Slave.communicationCallback.onRegister(this@Slave.privateId)
+                    }
                 }
-                WorkerAction.UNREGISTER -> {
-                    this@Slave.communicationCallback.onUnregister(this@Slave.privateId)
+                WorkerMessage.Action.UNREGISTER -> {
+                    if (this@Slave::communicationCallback.isInitialized) {
+                        this@Slave.communicationCallback.onUnregister(this@Slave.privateId)
+                    }
+                }
+                WorkerMessage.Action.RECEIVE_DATA -> {
+                    if (this@Slave::communicationCallback.isInitialized) {
+                        this@Slave.communicationCallback.onReceiveData(resource.masterId.nullToBlank(), resource.data)
+                    }
                 }
             }
         }
