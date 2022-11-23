@@ -1,0 +1,10 @@
+{
+  "slaves": [
+    {
+      "hostAddress": "192.168.3.12",
+      "sources": [
+        "/C:/Users/Administrator/Desktop/xx/xx/xx"
+      ]
+    }
+  ]
+}

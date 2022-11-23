@@ -36,14 +36,19 @@ class TestSlaveContainerRunner : ContainerExecutor, Communicable.CommunicationCa
     override fun onReceiveData(id: String, byteArray: ByteArray) {
         val config = String(byteArray).jsonToObject(Config::class)
         val slaves = config.slaves
+        var hostAddressFound = false
         run looping@{
             slaves.forEach {
                 if (it.hostAddress.contains(HOST_ADDRESS)) {
                     this.slave = it
                     logger.debug("i am in host address:%s, sources:%s", it.hostAddress, it.sources.toJson())
+                    hostAddressFound = true
                     return@looping//break
                 }
             }
+        }
+        if (!hostAddressFound) {
+            logger.warning("i am not in host address")
         }
     }
 }

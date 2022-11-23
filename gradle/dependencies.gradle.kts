@@ -40,6 +40,9 @@ val dependencies by extra {
         //netty asynchronize event-driven network application framework
         "netty-all" to "io.netty:netty-all:4.1.47.Final",
         //mongo
-        "mongodb-driver-sync" to "org.mongodb:mongodb-driver-sync:4.7.0"
+        "mongodb-driver-sync" to "org.mongodb:mongodb-driver-sync:4.7.0",
+        //elastic search
+        "elasticsearch-java" to "co.elastic.clients:elasticsearch-java:8.4.3",
+        "jackson-databind" to "com.fasterxml.jackson.core:jackson-databind:2.12.3"
     )
 }

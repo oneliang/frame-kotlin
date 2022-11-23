@@ -40,5 +40,6 @@ include(":transaction")
 include(":rpc")
 include(":container")
 include(":mongodb")
+include(":elasticsearch")
 //netty
 apply(from = "${rootDir}/netty/netty.gradle")
