@@ -2,8 +2,6 @@ package com.oneliang.ktx.frame.test.planner
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.planner.*
-import com.oneliang.ktx.util.common.getDayZeroTime
-import java.util.*
 
 fun main() {
     val LINE_A = "A"
@@ -11,25 +9,25 @@ fun main() {
     val LINE_C = "C"
     val planLineGroupA = PlanLineGroup().also {
         it.key = LINE_A
-        it.planLineList = listOf(PlanLine(LINE_A + "_1").apply {
+        it.planLineList = listOf(PlanLine(LINE_A + "_1", 0).apply {
             this.planTimeList = listOf(PlanTime(0, 96 * Constants.Time.MILLISECONDS_OF_HOUR))
-        }, PlanLine(LINE_A + "_2").apply {
+        }, PlanLine(LINE_A + "_2", 0).apply {
             this.planTimeList = listOf(PlanTime(0, 96 * Constants.Time.MILLISECONDS_OF_HOUR))
         })
     }
     val planLineGroupB = PlanLineGroup().also {
         it.key = LINE_B
-        it.planLineList = listOf(PlanLine(LINE_B + "_1").apply {
+        it.planLineList = listOf(PlanLine(LINE_B + "_1", 0).apply {
             this.planTimeList = listOf(PlanTime(0, 96 * Constants.Time.MILLISECONDS_OF_HOUR))
-        }, PlanLine(LINE_B + "_2").apply {
+        }, PlanLine(LINE_B + "_2", 0).apply {
             this.planTimeList = listOf(PlanTime(0, 96 * Constants.Time.MILLISECONDS_OF_HOUR))
         })
     }
     val planLineGroupC = PlanLineGroup().also {
         it.key = LINE_C
-        it.planLineList = listOf(PlanLine(LINE_C + "_1").apply {
+        it.planLineList = listOf(PlanLine(LINE_C + "_1", 0).apply {
             this.planTimeList = listOf(PlanTime(0, 96 * Constants.Time.MILLISECONDS_OF_HOUR))
-        }, PlanLine(LINE_C + "_2").apply {
+        }, PlanLine(LINE_C + "_2", 0).apply {
             this.planTimeList = listOf(PlanTime(0, 96 * Constants.Time.MILLISECONDS_OF_HOUR))
         })
     }
@@ -82,5 +80,5 @@ fun main() {
     val planLineGroupList = listOf(planLineGroupA, planLineGroupB, planLineGroupC)
     val planTaskList = listOf(planTaskABC, planTaskA, planTaskB, planTaskC, planTaskA1, planTaskB1, planTaskC1)
     Planner.plan(planLineGroupList, planTaskList)
-    Planner.print(planLineGroupList, Date().getDayZeroTime())
+    Planner.print(planLineGroupList)
 }

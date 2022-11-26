@@ -4,12 +4,13 @@ import com.oneliang.ktx.util.common.sumByLong
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.math.segment.Segmenter
 
-class PlanLine(val name: String) {
+class PlanLine(val name: String, val beginTime: Long) {
     companion object {
         private val logger = LoggerManager.getLogger(PlanLine::class)
     }
 
     var executableTime = 0L
+
     //    var planCostTime = 0L
     var executeTime = 0L
     var currentPlanTask: PlanTask? = null
