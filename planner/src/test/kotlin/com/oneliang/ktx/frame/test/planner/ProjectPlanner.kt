@@ -4,6 +4,7 @@ import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.planner.*
 import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.file.readContentEachLine
+import com.oneliang.ktx.util.jxl.writeSimpleExcel
 import com.oneliang.ktx.util.logging.BaseLogger
 import com.oneliang.ktx.util.logging.Logger
 import com.oneliang.ktx.util.logging.LoggerManager
@@ -131,7 +132,7 @@ private fun testPlanFor221(projectPath: String) {
     Planner.print(listOf(front221PlanLineGroup, backend221PlanLineGroup))
 }
 
-private fun testPlanFor222(projectPath: String) {
+private fun testPlanFor222(projectPath: String): List<PlanLineGroup> {
     val frontAPlanTimeBeginDate = "2022-09-16 00:00:00".toUtilDate()
     val frontBPlanTimeBeginDate = "2022-09-16 00:00:00".toUtilDate()
     val backendAPlanTimeBeginDate = "2022-09-16 00:00:00".toUtilDate()
@@ -148,9 +149,11 @@ private fun testPlanFor222(projectPath: String) {
         generatePlanLine(backendAKey, backendAPlanTimeBeginDate, 100),
         generatePlanLine(backendBKey, backendBPlanTimeBeginDate, 100)
     )
-    Planner.plan(listOf(front222PlanLineGroup, backend222PlanLineGroup), requirement222PlanTaskList)
+    val planLineGorupList = listOf(front222PlanLineGroup, backend222PlanLineGroup)
+    Planner.plan(planLineGorupList, requirement222PlanTaskList)
     println("----------print the plan----------")
     Planner.print(listOf(front222PlanLineGroup, backend222PlanLineGroup), true)
+    return planLineGorupList
 }
 
 fun main() {
@@ -162,5 +165,38 @@ fun main() {
     testPlanFor221(projectPath)
     println("--------------------")
     //2.2.2
-    testPlanFor222(projectPath)
+    val planLineGroupList = testPlanFor222(projectPath)
+    writeExcel(planLineGroupList)
+}
+
+private fun writeExcel(planLineGroupList: List<PlanLineGroup>) {
+
+    val headerArray = arrayOf(
+        "group_key",
+        "line_name",
+        "任务名称",
+        "开始时间",
+        "结束时间"
+    )
+    val dataList = mutableListOf<Array<Any>>()
+    planLineGroupList.forEach { planLineGroup ->
+        val planLineList = planLineGroup.planLineList
+        planLineList.forEach { planLine ->
+            planLine.planItemList.forEach { planItem ->
+                val planTask = planItem.planTask
+                val planTaskStep = planItem.planTaskStep
+                val planBeginDateString = (planLine.beginTime + planItem.planBeginTime).toUtilDate().toFormatString()
+                val planEndDateString = (planLine.beginTime + planItem.planEndTime).toUtilDate().toFormatString()
+                dataList += arrayOf(
+                    planLineGroup.key,
+                    planLine.name,
+                    planTask.key,
+                    planBeginDateString,
+                    planEndDateString
+                )
+            }
+        }
+
+    }
+    "C:/Users/Administrator/Desktop/project_planner.xls".toFile().writeSimpleExcel(headers = headerArray, iterable = dataList)
 }

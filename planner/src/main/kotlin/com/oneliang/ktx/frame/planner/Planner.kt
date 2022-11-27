@@ -62,11 +62,11 @@ object Planner {
                 val lastPlanStepEndTimeDateString = (planLine.beginTime + planLine.getLastPlanStepEndTime()).toUtilDate().toFormatString()
                 logger.info("plan line name:%s, total plan cost time:%s, last plan step end time:%s", planLine.name, planLine.getTotalPlanStepCostTime(), lastPlanStepEndTimeDateString)
                 if (printPlanStep) {
-                    planLine.planStepList.forEach { planStep ->
-                        val planTask = planStep.planTask
-                        val planTaskStep = planStep.planTaskStep
-                        val planBeginDateString = (planLine.beginTime + planStep.planBeginTime).toUtilDate().toFormatString()
-                        val planEndDateString = (planLine.beginTime + planStep.planEndTime).toUtilDate().toFormatString()
+                    planLine.planItemList.forEach { planItem ->
+                        val planTask = planItem.planTask
+                        val planTaskStep = planItem.planTaskStep
+                        val planBeginDateString = (planLine.beginTime + planItem.planBeginTime).toUtilDate().toFormatString()
+                        val planEndDateString = (planLine.beginTime + planItem.planEndTime).toUtilDate().toFormatString()
                         logger.info("plan task key:%s, plan task step, plan line group key:%s, begin time:%s, end time:%s, cost time:%s", planTask.key, planTaskStep.planLineGroupKey, planBeginDateString, planEndDateString, planTaskStep.planCostTime)
                     }
                 }

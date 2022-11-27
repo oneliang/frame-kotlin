@@ -15,10 +15,10 @@ class PlanLine(val name: String, val beginTime: Long) {
     var executeTime = 0L
     var currentPlanTask: PlanTask? = null
 
-    private val privatePlanStepList = mutableListOf<PlanStep>()
-    val planStepList: List<PlanStep>
+    private val privatePlanItemList = mutableListOf<PlanItem>()
+    val planItemList: List<PlanItem>
         get() {
-            return this.privatePlanStepList
+            return this.privatePlanItemList
         }
     private lateinit var planTimeSegmentList: List<Segmenter.Segment<Any?>>
     private lateinit var splitSegmentList: List<Segmenter.Segment<Any?>>
@@ -36,7 +36,7 @@ class PlanLine(val name: String, val beginTime: Long) {
         }
 
     fun addPlanTaskStep(planTask: PlanTask, planTaskStep: PlanTask.Step, newBeginTime: Long = 0) {
-        val lastPlanStep = this.planStepList.lastOrNull()
+        val lastPlanStep = this.planItemList.lastOrNull()
         val planCostTime = planTaskStep.planCostTime
         var beginTime = 0L
         if (newBeginTime > 0) {
@@ -47,14 +47,14 @@ class PlanLine(val name: String, val beginTime: Long) {
             }
         }
         this.splitSegmentList = Segmenter.resetAndSplitSegment(this.splitSegmentList, beginTime, planCostTime to (planTask to planTaskStep))
-        this.privatePlanStepList.clear()
+        this.privatePlanItemList.clear()
         this.splitSegmentList.forEach {
             val data = it.data
             if (data != null && data is Pair<*, *>) {
                 val task = data.first
                 val taskStep = data.second
                 if (task != null && task is PlanTask && taskStep != null && taskStep is PlanTask.Step) {
-                    this.privatePlanStepList += PlanStep(task, taskStep).apply {
+                    this.privatePlanItemList += PlanItem(task, taskStep).apply {
                         this.planBeginTime = it.begin
                         this.planEndTime = it.end
                     }
@@ -66,23 +66,23 @@ class PlanLine(val name: String, val beginTime: Long) {
     }
 
     internal fun getLastIdleTime(length: Long): Long {
-        return if (this.planStepList.isEmpty()) {//when plan step list is empty, get the first plan time
+        return if (this.planItemList.isEmpty()) {//when plan step list is empty, get the first plan time
             this.planTimeList.first().begin
         } else {
             val (found, begin) = Segmenter.findSuitableBegin(this.planTimeSegmentList, 0L, length)
             if (found) {
                 begin
             } else {
-                this.planStepList.last().planEndTime
+                this.planItemList.last().planEndTime
             }
         }
     }
 
     fun getTotalPlanStepCostTime(): Long {
-        return this.planStepList.sumByLong { it.planEndTime - it.planBeginTime }
+        return this.planItemList.sumByLong { it.planEndTime - it.planBeginTime }
     }
 
     fun getLastPlanStepEndTime(): Long {
-        return this.planStepList.lastOrNull()?.planEndTime ?: 0L
+        return this.planItemList.lastOrNull()?.planEndTime ?: 0L
     }
 }
