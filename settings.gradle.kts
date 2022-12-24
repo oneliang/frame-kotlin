@@ -41,5 +41,6 @@ include(":rpc")
 include(":container")
 include(":mongodb")
 include(":elasticsearch")
+include(":ik-analyzer")
 //netty
 apply(from = "${rootDir}/netty/netty.gradle")

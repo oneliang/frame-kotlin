@@ -4,5 +4,8 @@ apply from: "${rootDir}/gradle/maven-publish.gradle"
 dependencies {
     implementation rootProject.ext.dependencies["elasticsearch-java"]
     implementation rootProject.ext.dependencies["jackson-databind"]
+    implementation rootProject.ext.dependencies["selenium-java"]
+    implementation rootProject.ext.dependencies["webdrivermanager"]
+    implementation rootProject.ext.dependencies["maven-surefire-plugin"]
 }
 
