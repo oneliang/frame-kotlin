@@ -44,8 +44,8 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         if (this.modules.isEmpty()) {
             error("field modules can not be empty")
         }
-        this.configFileStorage.configProperties.setProperty("modules", this.modules.toJson())
-        this.configFileStorage.configProperties.saveTo(this.configFileStorage.configPropertiesFile)
+        this.configFileStorage.setProperty("modules", this.modules.toJson())
+        this.configFileStorage.save()
     }
 
     private val keyPropertiesMap = LRUCacheMap<String, PropertiesItem>(this.cacheMaxSize)
@@ -241,17 +241,23 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
 }
 
 private fun benchMark() {
-    val fileStorage = FileStorage("/D:/temp", cacheMaxSize = 10)
+//    val fileStorage = FileStorage("/D:/temp", cacheMaxSize = 10)
+    val fileStorage = FileStorage("/Users/oneliang/Java/temp", cacheMaxSize = 10)
     fileStorage.initialize()
-    fileStorage.add("A", "A")
-    fileStorage.add("A", "B")
-    val repeatTime = 10
-    for (i in 0..repeatTime) {
-        val begin = System.currentTimeMillis()
-        println(fileStorage.search("A").toJson() + ", cost:" + (System.currentTimeMillis() - begin))
-    }
-    fileStorage.hit("A", "A")
-    fileStorage.hit("A", "A")
+//    fileStorage.search("A").forEach {
+//        println(it.jsonToObject(FileStorage.PropertyValue::class).value)
+//    }
+    fileStorage.add("你好吗","好好")
+//    fileStorage.add("A", "A")
+//    fileStorage.add("A", "B")
+//    fileStorage.add("A", "A\r\nB\r\nC")
+//    val repeatTime = 10
+//    for (i in 0..repeatTime) {
+//        val begin = System.currentTimeMillis()
+//        println(fileStorage.search("A").toJson() + ", cost:" + (System.currentTimeMillis() - begin))
+//    }
+//    fileStorage.hit("A", "A")
+//    fileStorage.hit("A", "A")
 
     return
     val array = arrayOf("A", "B", "C", "D", "E")

@@ -49,6 +49,9 @@ val dependencies by extra {
             //webdrivermanager
             "webdrivermanager" to "io.github.bonigarcia:webdrivermanager:5.2.3",
             //maven plugins
-            "maven-surefire-plugin" to "org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7"
+            "maven-surefire-plugin" to "org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7",
+            //lucene
+            "lucene-core" to "org.apache.lucene:lucene-core:9.4.2",
+            "lucene-queryparser" to "org.apache.lucene:lucene-queryparser:9.4.2"
     )
 }

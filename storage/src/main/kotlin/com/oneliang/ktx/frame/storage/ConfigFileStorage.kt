@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.storage
 
+import com.oneliang.ktx.util.file.saveTo
 import com.oneliang.ktx.util.file.toPropertiesAutoCreate
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
@@ -11,8 +12,8 @@ class ConfigFileStorage(private var directory: String, configFilename: String = 
         private val logger = LoggerManager.getLogger(ConfigFileStorage::class)
     }
 
-    val configPropertiesFile: File
-    val configProperties: Properties
+    private val configPropertiesFile: File
+    private val configProperties: Properties
 
     init {
         if (this.directory.isBlank()) {
@@ -26,5 +27,21 @@ class ConfigFileStorage(private var directory: String, configFilename: String = 
         logger.info("Config file storage directory:%s", this.directory)
         this.configPropertiesFile = File(this.directory, configFilename)
         this.configProperties = configPropertiesFile.toPropertiesAutoCreate()
+    }
+
+    fun setProperty(key: String, value: String) {
+        this.configProperties.setProperty(key, value)
+    }
+
+    fun getProperty(key: String): String {
+        return this.configProperties.getProperty(key)
+    }
+
+    fun removeProperty(key: String) {
+        this.configProperties.remove(key)
+    }
+
+    fun save() {
+        this.configProperties.saveTo(this.configPropertiesFile)
     }
 }

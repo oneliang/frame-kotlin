@@ -5,7 +5,6 @@ import com.oneliang.ktx.frame.storage.ConfigFileStorage
 import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.file.FileUtil
 import com.oneliang.ktx.util.file.createFileIncludeDirectory
-import com.oneliang.ktx.util.file.saveTo
 import com.oneliang.ktx.util.file.write
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
@@ -77,9 +76,11 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
                     logger.error(Constants.String.EXCEPTION, e)
                 }
             }
+
             ByteArray::class -> {
                 return FileUtil.readFile(cacheFullFilename) as T
             }
+
             else -> logger.error("get from cache not support the class:%s", cacheType)
         }
         return null
@@ -95,9 +96,9 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
     T, cacheRefreshTime: Long) {
         //first try to delete old cache, maybe old and new cache file is the same
         val keyString = key.toString()
-        val oldCacheFullFilename = this.configFileStorage.configProperties.getProperty(keyString)
+        val oldCacheFullFilename = this.configFileStorage.getProperty(keyString)
         if (!oldCacheFullFilename.isNullOrBlank()) {
-            this.configFileStorage.configProperties.remove(keyString)
+            this.configFileStorage.removeProperty(keyString)
             val oldCacheFile = File(oldCacheFullFilename)
             oldCacheFile.delete()
         }
@@ -115,13 +116,15 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
                     logger.error(Constants.String.EXCEPTION, e)
                 }
             }
+
             ByteArray::class -> {
                 cacheFile.write(value as ByteArray)
             }
+
             else -> logger.error("save to cache not support the class:%s", cacheType)
         }
         //update new cache
-        this.configFileStorage.configProperties.setProperty(keyString, cacheFullFilename)
-        this.configFileStorage.configProperties.saveTo(this.configFileStorage.configPropertiesFile)
+        this.configFileStorage.setProperty(keyString, cacheFullFilename)
+        this.configFileStorage.save()
     }
 }

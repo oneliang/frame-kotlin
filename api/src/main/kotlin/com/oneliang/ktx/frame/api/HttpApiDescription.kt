@@ -74,7 +74,7 @@ fun HttpApiDescription.Companion.buildListFromFile(fullFilename: String): Triple
         file.readContentEachLine {
             try {
                 val line = it.trim()
-                if (line.isBlank() || line.startsWith(Constants.Symbol.POUND_KEY, true)) {
+                if (line.isBlank() || line.startsWith(Constants.Symbol.POUND, true)) {
                     return@readContentEachLine true//continue
                 }
                 when {
