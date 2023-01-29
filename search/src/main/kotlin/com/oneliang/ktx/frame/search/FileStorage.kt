@@ -22,6 +22,7 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
     companion object {
         private val logger = LoggerManager.getLogger(FileStorage::class)
         private const val CONFIG_PROPERTIES_NAME = "config"
+        private const val CONFIG_PROPERTIES_KEY_MODULES = "modules"
     }
 
     init {
@@ -44,7 +45,7 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         if (this.modules.isEmpty()) {
             error("field modules can not be empty")
         }
-        this.configFileStorage.setProperty("modules", this.modules.toJson())
+        this.configFileStorage.setProperty(CONFIG_PROPERTIES_KEY_MODULES, this.modules.toJson())
         this.configFileStorage.save()
     }
 
@@ -165,7 +166,7 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         val valueMd5 = value.MD5String()
 
         val (_, propertiesItem, lastUsedTime, count) = this.valuePropertiesMap.operate(keyValueRelativeFilename, create = {
-            //not in cache, than read from cache
+            //not in cache, then read from cache
             logger.debug("Auto create value file or cache, key:%s, value full filename:%s", keyValueRelativeFilename, keyValueRelativeFilename)
             val properties = valueFile.toPropertiesAutoCreate()
             val savedValue = properties.getProperty(valueMd5, Constants.String.BLANK)
@@ -247,7 +248,7 @@ private fun benchMark() {
 //    fileStorage.search("A").forEach {
 //        println(it.jsonToObject(FileStorage.PropertyValue::class).value)
 //    }
-    fileStorage.add("你好吗","好好")
+    fileStorage.add("你好吗", "好好")
 //    fileStorage.add("A", "A")
 //    fileStorage.add("A", "B")
 //    fileStorage.add("A", "A\r\nB\r\nC")
