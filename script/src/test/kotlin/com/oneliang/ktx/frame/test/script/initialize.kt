@@ -1,4 +1,4 @@
-package com.oneliang.ktx.frame.test
+package com.oneliang.ktx.frame.test.script
 
 fun initialize(): String {
     return "AAA"
