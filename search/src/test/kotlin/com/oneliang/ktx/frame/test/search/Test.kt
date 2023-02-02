@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.tokenization.Dictionary
 import com.oneliang.ktx.frame.tokenization.FeatureOwnerWithDictionary
 
 private fun loadDictionary(): Dictionary {
-    val dictionaryFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/ik-analyzer/src/main/kotlin/com/oneliang/ktx/frame/ik/analyzer/dic/main2012.dic"
+    val dictionaryFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/main/resources/main2012.dic"
     val dictionary = Dictionary()
     dictionary.load(dictionaryFullFilename)
     return dictionary
