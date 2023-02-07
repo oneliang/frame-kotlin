@@ -36,4 +36,11 @@ interface Storage {
      * @param value
      */
     fun hit(key: String, value: String)
+
+    /**
+     * exist values
+     * @param key
+     * @return Boolean
+     */
+    fun existValues(key: String): Boolean
 }

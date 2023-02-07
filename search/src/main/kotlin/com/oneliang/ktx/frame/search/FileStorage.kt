@@ -131,7 +131,7 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         val keyFullFilename = generateKeyFullFilename(relativeFilename)
         val keyFile = File(keyFullFilename)
         val (_, propertiesItem, lastUsedTime, count) = this.keyPropertiesMap.operate(relativeFilename, create = {
-            //not in cache, than read from cache
+            //not in cache, then read from cache
             logger.debug("Auto create key file or cache, key:%s, key index full filename:%s", key, relativeFilename)
             val properties = keyFile.toPropertiesAutoCreate()
             val value = properties.getProperty(key, Constants.String.BLANK)
@@ -219,6 +219,12 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         delete(key, value, true)
     }
 
+    override fun existValues(key: String): Boolean {
+        val (keyValueRelativeFilename, _, _) = readKeyPropertiesAutoCreate(key)
+        val (_, valueProperties) = readValuePropertiesAutoCreate(keyValueRelativeFilename, Constants.String.BLANK)
+        return valueProperties.values.isNotEmpty()
+    }
+
     override fun update(key: String, originalValue: String, newValue: String) {
         delete(key, originalValue, false)
         add(key, newValue, true)
@@ -248,7 +254,8 @@ private fun benchMark() {
 //    fileStorage.search("A").forEach {
 //        println(it.jsonToObject(FileStorage.PropertyValue::class).value)
 //    }
-    fileStorage.add("你好吗", "好好")
+//    println(fileStorage.existValues("你好吗"))
+//    fileStorage.add("你好吗", "好好")
 //    fileStorage.add("A", "A")
 //    fileStorage.add("A", "B")
 //    fileStorage.add("A", "A\r\nB\r\nC")
