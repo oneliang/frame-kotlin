@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.tokenization
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.isChinese
 
-class DefaultCategorizationStrategy(private val mixNumberAndEnglishLetter: Boolean = true) : Dictionary.CategorizationStrategy {
+open class DefaultCategorizationStrategy(private val mixNumberAndEnglishLetter: Boolean = true) : Dictionary.CategorizationStrategy {
 
     /**
      * check the same category
@@ -23,7 +23,7 @@ class DefaultCategorizationStrategy(private val mixNumberAndEnglishLetter: Boole
                     || (currentChar.isUpperCase() && nextChar.isLowerCase())
                     || (currentChar.isUpperCase() && nextChar.isUpperCase())) {
                 true
-            } else if ((currentChar.isDigit() && nextChar == Constants.Symbol.DOT_CHAR)
+            } else if ((currentChar.isDigit() && nextChar == Constants.Ascii.DOT)
                     || (currentChar == Constants.Symbol.DOT_CHAR && nextChar.isDigit())) {
                 true
             } else {

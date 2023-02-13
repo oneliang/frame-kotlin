@@ -17,7 +17,9 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.util.*
 
-class FileStorage(private var directory: String, private val modules: Array<Int> = arrayOf(100), private val cacheMaxSize: Int = 0) : Storage {
+class FileStorage(private var directory: String,
+                  private val modules: Array<Int> = arrayOf(100),
+                  private val cacheMaxSize: Int = 0) : Storage<String, String> {
 
     companion object {
         private val logger = LoggerManager.getLogger(FileStorage::class)
@@ -194,7 +196,7 @@ class FileStorage(private var directory: String, private val modules: Array<Int>
         val (valueFile, valueProperties) = readValuePropertiesAutoCreate(keyValueRelativeFilename, Constants.String.BLANK)
         saveProperties(keyFile, keyProperties)
         saveProperties(valueFile, valueProperties)
-        return valueProperties.values.map { it.toString() }
+        return valueProperties.values.map { it.toString().jsonToObject(PropertyValue::class).value }
     }
 
     override fun hit(key: String, value: String) {

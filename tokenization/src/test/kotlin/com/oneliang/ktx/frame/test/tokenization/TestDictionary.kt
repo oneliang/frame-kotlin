@@ -61,14 +61,15 @@ private fun testMemory() {
 }
 
 fun main() {
-    testMemory()
-    return
+//    testMemory()
+//    return
 
-    val dictionaryFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/ik-analyzer/src/main/kotlin/com/oneliang/ktx/frame/ik/analyzer/dic/main2012.dic"
+    val dictionaryFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/main/resources/main2012.dic"
     val dictionary = Dictionary()
     dictionary.load(dictionaryFullFilename)
 //    dictionary.loadDictionary(setOf("求购"))
-    val content = "求购201宏旺J1 0.5卷一个求购"
+//    val content = "求购201宏旺J1 0.5卷一个求购"
+    val content = "1.12//1.38/2.05*4今开0.92/0.95/1.42/1.35/0.68*4可加单"
     val wordCollector = dictionary.splitWords(content)
     val contentId = Generator.ID()
     val wordIndexMap = mutableMapOf<String, MutableSet<String>>()
@@ -78,6 +79,7 @@ fun main() {
     wordIndexMap.forEach { (key, value) ->
         println("${key}(${value.toJson()})")
     }
+    return
     charIndexMap.forEach { (key, value) ->
         println("${key}(${value.toJson()})")
     }

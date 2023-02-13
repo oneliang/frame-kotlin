@@ -3,9 +3,9 @@ package com.oneliang.ktx.frame.search.engine
 interface IndexWriter<K, V> {
 
     /**
-     * write index
+     * write
      * @param key
      * @param value
      */
-    fun writeIndex(key: K, value: V)
+    fun write(key: K, value: V)
 }
