@@ -1,7 +1,7 @@
 package com.oneliang.ktx.frame.cache
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.storage.ConfigFileStorage
+import com.oneliang.ktx.frame.storage.ConfigStorage
 import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.file.FileUtil
 import com.oneliang.ktx.util.file.createFileIncludeDirectory
@@ -26,7 +26,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
         logger.info("Cache directory:%s", this.cacheDirectory)
     }
 
-    private val configFileStorage = ConfigFileStorage(this.cacheDirectory, CACHE_PROPERTIES_NAME)
+    private val configStorage = ConfigStorage(this.cacheDirectory, CACHE_PROPERTIES_NAME)
 
     /**
      * generate cache relative filename
@@ -96,9 +96,9 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
     T, cacheRefreshTime: Long) {
         //first try to delete old cache, maybe old and new cache file is the same
         val keyString = key.toString()
-        val oldCacheFullFilename = this.configFileStorage.getProperty(keyString)
-        if (!oldCacheFullFilename.isNullOrBlank()) {
-            this.configFileStorage.removeProperty(keyString)
+        val oldCacheFullFilename = this.configStorage.getProperty(keyString)
+        if (oldCacheFullFilename.isNotBlank()) {
+            this.configStorage.removeProperty(keyString)
             val oldCacheFile = File(oldCacheFullFilename)
             oldCacheFile.delete()
         }
@@ -124,7 +124,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             else -> logger.error("save to cache not support the class:%s", cacheType)
         }
         //update new cache
-        this.configFileStorage.setProperty(keyString, cacheFullFilename)
-        this.configFileStorage.save()
+        this.configStorage.setProperty(keyString, cacheFullFilename)
+        this.configStorage.save()
     }
 }

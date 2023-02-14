@@ -6,10 +6,10 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.util.*
 
-class ConfigFileStorage(private var directory: String, configFilename: String = "config") {
+class ConfigStorage(private var directory: String, configFilename: String = "config") {
 
     companion object {
-        private val logger = LoggerManager.getLogger(ConfigFileStorage::class)
+        private val logger = LoggerManager.getLogger(ConfigStorage::class)
     }
 
     private val configPropertiesFile: File

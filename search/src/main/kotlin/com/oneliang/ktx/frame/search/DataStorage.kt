@@ -1,7 +1,7 @@
 package com.oneliang.ktx.frame.search
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.storage.ConfigFileStorage
+import com.oneliang.ktx.frame.storage.ConfigStorage
 import com.oneliang.ktx.frame.storage.Storage
 import com.oneliang.ktx.util.common.MD5String
 import com.oneliang.ktx.util.common.calculateCompose
@@ -17,12 +17,12 @@ import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.util.*
 
-class FileStorage(private var directory: String,
+class DataStorage(private var directory: String,
                   private val modules: Array<Int> = arrayOf(100),
                   private val cacheMaxSize: Int = 0) : Storage<String, String> {
 
     companion object {
-        private val logger = LoggerManager.getLogger(FileStorage::class)
+        private val logger = LoggerManager.getLogger(DataStorage::class)
         private const val CONFIG_PROPERTIES_NAME = "config"
         private const val CONFIG_PROPERTIES_KEY_MODULES = "modules"
     }
@@ -36,7 +36,7 @@ class FileStorage(private var directory: String,
         logger.info("File storage directory:%s", this.directory)
     }
 
-    private val configFileStorage = ConfigFileStorage(this.directory, CONFIG_PROPERTIES_NAME)
+    private val configStorage = ConfigStorage(this.directory, CONFIG_PROPERTIES_NAME)
     private val autoSaveThread = ResourceQueueThread(object : ResourceQueueThread.ResourceProcessor<AutoSaveItem> {
         override fun process(resource: AutoSaveItem) {
             resource.properties.saveTo(resource.file)
@@ -47,8 +47,8 @@ class FileStorage(private var directory: String,
         if (this.modules.isEmpty()) {
             error("field modules can not be empty")
         }
-        this.configFileStorage.setProperty(CONFIG_PROPERTIES_KEY_MODULES, this.modules.toJson())
-        this.configFileStorage.save()
+        this.configStorage.setProperty(CONFIG_PROPERTIES_KEY_MODULES, this.modules.toJson())
+        this.configStorage.save()
     }
 
     private val keyPropertiesMap = LRUCacheMap<String, PropertiesItem>(this.cacheMaxSize)
@@ -251,8 +251,8 @@ class FileStorage(private var directory: String,
 
 private fun benchMark() {
 //    val fileStorage = FileStorage("/D:/temp", cacheMaxSize = 10)
-    val fileStorage = FileStorage("/Users/oneliang/Java/temp", cacheMaxSize = 10)
-    fileStorage.initialize()
+    val dataStorage = DataStorage("/Users/oneliang/Java/temp", cacheMaxSize = 10)
+    dataStorage.initialize()
 //    fileStorage.search("A").forEach {
 //        println(it.jsonToObject(FileStorage.PropertyValue::class).value)
 //    }
@@ -288,29 +288,29 @@ private fun benchMark() {
 //        fileStorage.add(it, it)
     }
     val pairList = set.map { it to it }
-    fileStorage.addAll(pairList)
+    dataStorage.addAll(pairList)
 //    return
     var begin = System.currentTimeMillis()
-    var list = fileStorage.search("A")
+    var list = dataStorage.search("A")
     var cost = System.currentTimeMillis() - begin
     println("$cost," + list.toJson())
     begin = System.currentTimeMillis()
-    list = fileStorage.search("B")
+    list = dataStorage.search("B")
     cost = System.currentTimeMillis() - begin
     println("$cost," + list.toJson())
     begin = System.currentTimeMillis()
-    list = fileStorage.search("B")
+    list = dataStorage.search("B")
     cost = System.currentTimeMillis() - begin
     println("$cost," + list.toJson())
     begin = System.currentTimeMillis()
-    fileStorage.delete("B", "B")
-    list = fileStorage.search("B")
+    dataStorage.delete("B", "B")
+    list = dataStorage.search("B")
     cost = System.currentTimeMillis() - begin
     println("$cost," + list.toJson())
 
     begin = System.currentTimeMillis()
-    fileStorage.update("B", "B", "BBB")
-    list = fileStorage.search("B")
+    dataStorage.update("B", "B", "BBB")
+    list = dataStorage.search("B")
     cost = System.currentTimeMillis() - begin
     println("$cost," + list.toJson())
 }

@@ -1,6 +1,6 @@
 package com.oneliang.ktx.frame.search.engine
 
-interface IndexReader<K, V> {
+interface ResourceReader<K, V> {
 
     /**
      * read key from index

@@ -1,6 +1,6 @@
 package com.oneliang.ktx.frame.search.engine
 
-interface IndexWriter<K, V> {
+interface ResourceWriter<K, V> {
 
     /**
      * write

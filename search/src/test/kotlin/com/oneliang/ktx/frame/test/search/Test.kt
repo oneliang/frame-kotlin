@@ -1,9 +1,9 @@
 package com.oneliang.ktx.frame.test.search
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.search.engine.DefaultIndexEngine
-import com.oneliang.ktx.frame.search.engine.DefaultIndexReaderAndWriter
-import com.oneliang.ktx.frame.search.engine.DefaultIndexer
+import com.oneliang.ktx.frame.search.engine.DefaultDataEngine
+import com.oneliang.ktx.frame.search.engine.DefaultResourceReader
+import com.oneliang.ktx.frame.search.engine.DefaultResourceWriter
 import com.oneliang.ktx.frame.tokenization.Dictionary
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.toFile
@@ -12,7 +12,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 private fun loadDictionary(): Dictionary {
-    val dictionaryFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/main/resources/main2012.dic"
+    val dictionaryFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/main/resources/main.dic"
     val dictionary = Dictionary()
     dictionary.load(dictionaryFullFilename)
     return dictionary
@@ -24,12 +24,10 @@ fun migrateTest() {
 //    println(fileStorage.search("0.88").size)
 //
 //    return
-    val indexEngine = DefaultIndexEngine<DefaultIndexer.ValueItem>()
-    val indexReaderAndWriter = DefaultIndexReaderAndWriter(indexDirectory)
-    indexEngine.indexer = DefaultIndexer().also {
-        it.indexWriter = indexReaderAndWriter
-        it.featureOwner = FeatureOwnerForValueItem(dictionary)
-    }
+    val featureOwner = FeatureOwnerForValueItem(dictionary)
+    val resourceReader = DefaultResourceReader(indexDirectory)
+    val resourceWriter = DefaultResourceWriter(indexDirectory)
+    val defaultDataEngine = DefaultDataEngine(featureOwner, resourceReader, resourceWriter)
 //    val dataFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/test/resources/data.json"
 //    val content = StringBuilder()
 //    dataFullFilename.toFile().readContentEachLine {
@@ -43,15 +41,15 @@ fun migrateTest() {
     run loop@{
         readResult.dataList.forEach {
             val value = it["content"].nullToBlank()
-            indexEngine.index(DefaultIndexer.ValueItem(value, Constants.String.BLANK))
-            return@loop//break
+            defaultDataEngine.index(DefaultDataEngine.ValueItem(value, Constants.String.BLANK))
+//            return@loop//break
         }
     }
     val inputStreamReader = InputStreamReader(System.`in`)
     val bufferedReader = BufferedReader(inputStreamReader)
     while (true) {
         val input = bufferedReader.readLine()
-        val resultList = indexReaderAndWriter.read(input)
+        val resultList = defaultDataEngine.search(input)
         println("***** Result *****")
         for ((index, result) in resultList.withIndex()) {
             println("%s:%s".format(index + 1, result))
