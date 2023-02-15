@@ -46,9 +46,9 @@ class DefaultResourceWriter(rootDirectory: String,
         val indexList = mutableListOf<Pair<String, String>>()
         val valueList = mutableListOf<Pair<String, String>>()
         //index
-        indexMap.forEach { (key, contentIdSet) ->
-            if (this.indexKeyFilter(key)) {
-                indexList += key to contentIdSet.toJson()
+        indexMap.forEach { (subKey, keySet) ->
+            if (this.indexKeyFilter(subKey)) {
+                indexList += subKey to keySet.toJson()
             } else {
                 return@forEach //continue
             }
