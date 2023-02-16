@@ -5,7 +5,6 @@ import com.oneliang.ktx.frame.search.DataStorage
 import com.oneliang.ktx.frame.tokenization.Dictionary
 import com.oneliang.ktx.util.common.Generator
 import com.oneliang.ktx.util.common.extractKeyword
-import com.oneliang.ktx.util.json.toJson
 import java.io.File
 
 class DefaultResourceWriter(rootDirectory: String,
@@ -48,16 +47,20 @@ class DefaultResourceWriter(rootDirectory: String,
         //index
         indexMap.forEach { (subKey, keySet) ->
             if (this.indexKeyFilter(subKey)) {
-                indexList += subKey to keySet.toJson()
+                for (indexKey in keySet) {
+                    indexList += subKey to indexKey
+                }
             } else {
                 return@forEach //continue
             }
         }
         this.indexDataStorage.addAll(indexList)
         //data
-        valueMap.forEach { (key, contentIdSet) ->
+        valueMap.forEach { (key, valueSet) ->
             if (this.valueKeyFilter(key)) {
-                valueList += key to contentIdSet.toJson()
+                for (value in valueSet) {
+                    valueList += key to value
+                }
             } else {
                 return@forEach //continue
             }

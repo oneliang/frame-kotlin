@@ -1,6 +1,5 @@
 package com.oneliang.ktx.frame.search.engine
 
-import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.search.DataStorage
 import com.oneliang.ktx.util.common.extractKeyword
 import com.oneliang.ktx.util.json.jsonToArrayString
@@ -42,10 +41,7 @@ class DefaultResourceReader(rootDirectory: String) : ResourceReader<String, Stri
             for (subKey in subKeySet) {
                 val list = this.indexDataStorage.search(subKey)
                 for (item in list) {
-                    val jsonArray = item.jsonToArrayString()
-                    jsonArray.forEach {
-                        resultList.add(it)
-                    }
+                    resultList.add(item)
                 }
             }
         }
