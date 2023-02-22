@@ -47,6 +47,7 @@ class TomcatLauncher(private val configuration: Configuration) {
             }
             this.tomcat.addWebapp(webapp.contextPath, fixDocumentBase)
         }
+        this.tomcat.connector
         this.tomcat.start()
         this.tomcat.server.await()
     }
