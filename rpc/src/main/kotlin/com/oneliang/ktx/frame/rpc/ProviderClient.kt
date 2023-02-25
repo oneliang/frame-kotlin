@@ -44,8 +44,12 @@ class ProviderClient(serverHost: String, serverPort: Int) {
 
     private val clientManager = ClientManager(serverHost, serverPort, readProcessor = this.readProcessor)
 
-    init {
+    fun start() {
         this.clientManager.start()
+    }
+
+    fun stop() {
+        this.clientManager.stop()
     }
 
     fun register(clusterKey: String, host: String, port: Int): Boolean {

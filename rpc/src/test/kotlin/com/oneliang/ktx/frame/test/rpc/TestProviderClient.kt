@@ -9,7 +9,9 @@ import com.oneliang.ktx.util.logging.LoggerManager
 fun main() {
     LoggerManager.registerLogger("*", BaseLogger(Logger.Level.DEBUG))
     val providerClient = ProviderClient(HOST_ADDRESS, 9999)
+    providerClient.start()
     val provider = providerClient.lookup("server_a_cluster")
     println(provider)
     Thread.sleep(10000)
+    providerClient.stop()
 }
