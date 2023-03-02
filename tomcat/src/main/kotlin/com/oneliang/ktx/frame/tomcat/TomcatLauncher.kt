@@ -10,6 +10,7 @@ import java.io.FileNotFoundException
 
 class TomcatLauncher(private val configuration: Configuration) {
     class Configuration {
+        var schema = Constants.Protocol.HTTP
         var port = 8080
         var hostname = "localhost"
         var baseDir = Constants.String.BLANK
@@ -23,7 +24,7 @@ class TomcatLauncher(private val configuration: Configuration) {
 
     private val tomcat = Tomcat()
 
-    fun launch() {
+    fun launch(afterStart: () -> Unit = {}) {
         this.tomcat.setPort(this.configuration.port)
         this.tomcat.setHostname(this.configuration.hostname)
         this.tomcat.setBaseDir(this.configuration.baseDir)
@@ -49,6 +50,7 @@ class TomcatLauncher(private val configuration: Configuration) {
         }
         this.tomcat.connector
         this.tomcat.start()
+        afterStart()
         this.tomcat.server.await()
     }
 }
