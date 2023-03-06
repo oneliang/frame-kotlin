@@ -5,7 +5,7 @@ import com.oneliang.ktx.util.http.HttpUtil
 
 abstract class TomcatTestCase {
 
-    lateinit var baseUrl: String
+    lateinit var baseUrlMap: Map<String, String>
 
     fun head(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), byteArray: ByteArray = ByteArray(0), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
         return HttpUtil.sendRequestWithWholeBytes(httpUrl, Constants.Http.RequestMethod.HEAD.value, httpHeaderList, byteArray, timeout, advancedOption)
@@ -30,6 +30,11 @@ abstract class TomcatTestCase {
     fun get(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), httpParameterList: List<HttpUtil.HttpNameValue> = emptyList(), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
         return HttpUtil.sendRequestGetWithReturnBytes(httpUrl, httpHeaderList, httpParameterList, timeout, advancedOption)
     }
+
+    fun post(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), byteArray: ByteArray = ByteArray(0), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
+        return HttpUtil.sendRequestPostWithWholeBytes(httpUrl, httpHeaderList, byteArray, timeout, advancedOption)
+    }
+
 
     abstract fun test()
 }

@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.test.tester
 
 import com.oneliang.ktx.frame.tester.TomcatTestSuite
+import com.oneliang.ktx.frame.tomcat.TomcatLauncher
 
 
 fun main() {
@@ -9,7 +10,7 @@ fun main() {
 //    tomcatTester.runTest()
 
 
-    val tomcatTestSuite = TomcatTestSuite("aaa", warFullFilename)
+    val tomcatTestSuite = TomcatTestSuite(arrayOf(TomcatLauncher.Configuration.Webapp("aaa", warFullFilename)))
     tomcatTestSuite.addTomcatTestCase(TestTomcatTestCase())
     tomcatTestSuite.runTest()
 }

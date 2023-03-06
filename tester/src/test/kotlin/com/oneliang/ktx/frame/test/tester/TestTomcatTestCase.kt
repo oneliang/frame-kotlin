@@ -5,6 +5,7 @@ import com.oneliang.ktx.frame.tester.TomcatTestCase
 class TestTomcatTestCase : TomcatTestCase() {
 
     override fun test() {
-        this.get(this.baseUrl + "/monitorReporter/deviceStatus/onlineStatus.do")
+        val baseUrl = this.baseUrlMap["aaa"]
+        this.get("$baseUrl/monitorReporter/deviceStatus/onlineStatus.do")
     }
 }

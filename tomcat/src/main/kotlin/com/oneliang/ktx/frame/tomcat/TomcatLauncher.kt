@@ -16,10 +16,7 @@ class TomcatLauncher(private val configuration: Configuration) {
         var baseDir = Constants.String.BLANK
         var webappArray = emptyArray<Webapp>()
 
-        class Webapp {
-            var contextPath = Constants.String.BLANK
-            var documentBase = Constants.String.BLANK
-        }
+        class Webapp(var contextPath: String = Constants.String.BLANK, var documentBase: String = Constants.String.BLANK)
     }
 
     private val tomcat = Tomcat()

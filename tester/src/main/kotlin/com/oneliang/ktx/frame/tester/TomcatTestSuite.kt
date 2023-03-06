@@ -5,8 +5,7 @@ import com.oneliang.ktx.frame.tomcat.TomcatLauncher
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 
-class TomcatTestSuite(private val contextPath: String,
-                      private val warFullFilename: String,
+class TomcatTestSuite(private val webappArray: Array<TomcatLauncher.Configuration.Webapp>,
                       private val port: Int = 8080) {
 
     companion object {
@@ -17,7 +16,8 @@ class TomcatTestSuite(private val contextPath: String,
     private val configuration = TomcatLauncher.Configuration().also {
         it.port = port
     }
-    private lateinit var baseUrl: String
+
+    private lateinit var baseUrlMap: Map<String, String>
 
     /**
      * add tomcat test case
@@ -33,14 +33,16 @@ class TomcatTestSuite(private val contextPath: String,
     fun runTest() {
         val baseDir = File(Constants.String.BLANK).absolutePath + "/work"
         this.configuration.baseDir = baseDir
-        this.configuration.webappArray = arrayOf(TomcatLauncher.Configuration.Webapp().also {
-            it.contextPath = contextPath
-            it.documentBase = this.warFullFilename
-        })
+        this.configuration.webappArray = this.webappArray
         val tomcatLauncher = TomcatLauncher(this.configuration)
         tomcatLauncher.launch {
-            this.baseUrl = getBaseUrl()
-            logger.info("Access address: %s", this.baseUrl)
+            val baseUrlMap = mutableMapOf<String, String>()
+            for (webapp in this.webappArray) {
+                val baseUrl = getBaseUrl(webapp.contextPath)
+                baseUrlMap[webapp.contextPath] = baseUrl
+                logger.info("Access context:%s, address: %s", webapp.contextPath, baseUrl)
+            }
+            this.baseUrlMap = baseUrlMap
             this.afterLaunch()
 
         }
@@ -50,7 +52,7 @@ class TomcatTestSuite(private val contextPath: String,
      * get base url
      * @return String
      */
-    private fun getBaseUrl(): String {
+    private fun getBaseUrl(contextPath: String): String {
         return this.configuration.schema + this.configuration.hostname + Constants.Symbol.COLON + this.configuration.port + Constants.Symbol.SLASH_LEFT + contextPath
     }
 
@@ -59,7 +61,7 @@ class TomcatTestSuite(private val contextPath: String,
      */
     private fun afterLaunch() {
         for (tomcatTestCase in this.tomcatTestCaseList) {
-            tomcatTestCase.baseUrl = this.baseUrl
+            tomcatTestCase.baseUrlMap = this.baseUrlMap
             tomcatTestCase.test()
         }
     }
