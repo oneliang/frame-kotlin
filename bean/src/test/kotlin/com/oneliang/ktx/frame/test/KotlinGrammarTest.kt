@@ -23,11 +23,11 @@ class ByForField {
 
 class FieldDelegate {
     operator fun setValue(byForField: ByForField, property: KProperty<*>, value: String) {
-        println("original value:$value, need to set value:$value")
+        println("property:${property.name}, original value:$value, need to set value:$value")
     }
 
     operator fun getValue(byForField: ByForField, property: KProperty<*>): String {
-        println("get value")
+        println("property:${property.name}, get value")
         return "123"
     }
 
