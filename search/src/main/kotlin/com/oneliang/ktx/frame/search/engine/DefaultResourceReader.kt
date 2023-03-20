@@ -43,6 +43,11 @@ class DefaultResourceReader(rootDirectory: String) : ResourceReader<String, Stri
                 for (item in list) {
                     resultList.add(item)
                 }
+                val a = this.valueDataStorage.search(resultList[0])
+                for( it in a){
+                    println(it)
+                }
+                break
             }
         }
 

@@ -1,0 +1,350 @@
+
+12.11s
+estate: api.customergroup_mapindustry01a3c09
+3 Spans
+estate (3)
+Yesterday10:35:38 am
+a day ago
+
+9.58s
+sales-ka: /api.get_industry_location_tab154da37
+9 Spans
+estate (7)sales-ka (2)
+Yesterday5:40:19 pm
+19 hours ago
+
+5.53s
+estate: api.customergroup_industry121675d
+3 Spans
+estate (3)
+Yesterday10:41:36 am
+a day ago
+
+4.49s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises003a5dd
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:44:43 am
+a day ago
+
+4.22s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b93626
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:13:19 am
+a day ago
+
+3.59s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b27d96
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:41:25 am
+a day ago
+
+3.49s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises09f7359
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:42:48 am
+a day ago
+
+3.31s
+estate: api.customergroup_industry0673ee2
+4 Spans
+estate (3)sales-ka (1)
+Dec 1211:26:53 am
+2 days ago
+
+3.07s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0401537
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:13:28 am
+a day ago
+
+2.79s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises001bd92
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:25:09 am
+a day ago
+
+2.75s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0959ede
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:25:16 am
+a day ago
+
+2.3s
+sales-ka: /api.get_industry_location_detail10a7ec9
+5 Spans
+estate (3)sales-ka (2)
+Yesterday2:24:06 pm
+a day ago
+
+2.24s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises007b35b
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:15:03 am
+a day ago
+
+2.19s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0a1bbd9
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:14:51 am
+a day ago
+
+2.09s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises00c9ed1
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:26:49 am
+a day ago
+
+1.95s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0a2583a
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:27:47 am
+a day ago
+
+1.92s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0cc07c9
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:25:07 am
+a day ago
+
+1.81s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0c8d4c3
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:28:07 am
+a day ago
+
+1.73s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises060f4e7
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:14:11 am
+a day ago
+
+1.69s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0cb9201
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:26:39 am
+a day ago
+
+1.55s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0a80d53
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:27:51 am
+a day ago
+
+1.54s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises00bca8a
+5 Spans
+estate (3)tungee_paas (2)
+Yesterday11:27:35 am
+a day ago
+
+1.45s
+estate: api.industry_topology12b2b10
+3 Spans
+estate (3)
+Yesterday5:30:39 pm
+19 hours ago
+
+1.44s
+estate: api.industry_topology_chart0844aff
+2 Spans
+estate (2)
+Yesterday9:24:04 am
+a day ago
+
+1.41s
+estate: api.customergroup_industry095fa1e
+3 Spans
+estate (3)
+Yesterday8:44:36 pm
+16 hours ago
+
+1.39s
+estate: api.industry_topology172c292
+2 Spans
+estate (2)
+Dec 1211:21:56 am
+2 days ago
+
+1.32s
+estate: api.customergroup_industry128619d
+3 Spans
+estate (3)
+Dec 122:01:10 pm
+2 days ago
+
+1.31s
+estate: api.get_industry_model_revenue_total_stat01394cb
+1 Span
+estate (1)
+Yesterday10:34:00 am
+a day ago
+
+1.29s
+estate: api.industry_topology13edc3e
+2 Spans
+estate (2)
+Yesterday5:29:31 pm
+19 hours ago
+
+1.28s
+estate: api.industry_topology_chart1040599
+2 Spans
+estate (2)
+Yesterday10:29:12 am
+a day ago
+
+1.2s
+estate: api.get_industry_model_revenue_total_stat1332643
+1 Span
+estate (1)
+Yesterday3:14:41 pm
+a day ago
+
+1.14s
+estate: api.industry_topology0df75a2
+2 Spans
+estate (2)
+Dec 125:16:33 pm
+2 days ago
+
+1.07s
+estate: api.get_industry_model_revenue_total_stat180fc52
+2 Spans
+estate (2)
+Yesterday9:24:04 am
+a day ago
+
+1.05s
+estate: api.get_industry_model_revenue_total_stat122325e
+1 Span
+estate (1)
+Yesterday9:25:54 am
+a day ago
+
+1.03s
+estate: api.get_industry_model_base_proportion131c349
+2 Spans
+estate (2)
+Yesterday10:29:11 am
+a day ago
+
+971.86ms
+estate: api.customergroup_industry11e46f1
+3 Spans
+estate (3)
+Dec 122:02:28 pm
+2 days ago
+
+962.35ms
+estate: api.customergroup_industry053196c
+3 Spans
+estate (3)
+Dec 121:53:14 pm
+2 days ago
+
+907.09ms
+estate: api.industyoverview_dynamic_patentincrement0053270
+1 Span
+estate (1)
+Yesterday3:27:04 pm
+21 hours ago
+
+859.03ms
+estate: api.mapindustry_count04bcd7d
+6 Spans
+estate (6)
+Yesterday5:31:47 pm
+19 hours ago
+
+854.65ms
+estate: api.industry_topology064ccf8
+2 Spans
+estate (2)
+Yesterday8:19:37 pm
+17 hours ago
+
+808.87ms
+estate: api.industry_topology_chart0f78d5b
+2 Spans
+estate (2)
+Yesterday2:53:13 pm
+a day ago
+
+804.29ms
+estate: api.mapindustry_count0b7f4a6
+6 Spans
+estate (6)
+Yesterday10:01:27 am
+a day ago
+
+795.23ms
+estate: api.industry_topology09cc2ee
+2 Spans
+estate (2)
+Yesterday10:34:01 am
+a day ago
+
+782.85ms
+estate: api.get_industry_model_enterprise_num_stat0dce8f2
+1 Span
+estate (1)
+Dec 125:16:33 pm
+2 days ago
+
+689.93ms
+estate: api.listed_enterprise_stat106e321
+1 Span
+estate (1)
+Yesterday9:25:54 am
+a day ago
+
+641.42ms
+estate: api.customergroup_industry0d0eb67
+5 Spans
+estate (4)sales-ka (1)
+Yesterday8:43:37 pm
+16 hours ago
+
+598.73ms
+estate: api.mapindustry_map0f0a587
+3 Spans
+estate (3)
+Yesterday10:07:19 am
+a day ago
+
+571.99ms
+estate: api.customergroup_industry0cd5659
+4 Spans
+estate (3)sales-ka (1)
+Yesterday2:50:09 pm
+a day ago
+
+544.83ms
+estate: api.customergroup_industry04de9ad
+3 Spans
+estate (3)
+Dec 125:17:26 pm
+2 days ago
+
+508.45ms
+estate: api.customergroup_industry002066b
+3 Spans
+estate (3)
+Dec 122:05:44 pm
+2 days ago

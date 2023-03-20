@@ -37,14 +37,14 @@ fun migrateTest() {
 //    println(content)
 //    val content = "求购201宏旺J1 0.5卷一个"
 //    indexEngine.index(content.toString())
-    val readResult = "/Users/oneliang/Java/test-data/steel_requirement_original_data.xls".toFile().readSimpleExcel(0)
-    run loop@{
-        readResult.dataList.forEach {
-            val value = it["content"].nullToBlank()
-            defaultDataEngine.index(DefaultDataEngine.ValueItem(value, Constants.String.BLANK))
-//            return@loop//break
-        }
-    }
+//    val readResult = "/Users/oneliang/Java/test-data/steel_requirement_original_data.xls".toFile().readSimpleExcel(0)
+//    run loop@{
+//        readResult.dataList.forEach {
+//            val value = it["content"].nullToBlank()
+//            defaultDataEngine.index(DefaultDataEngine.ValueItem(value, Constants.String.BLANK))
+////            return@loop//break
+//        }
+//    }
     val inputStreamReader = InputStreamReader(System.`in`)
     val bufferedReader = BufferedReader(inputStreamReader)
     while (true) {

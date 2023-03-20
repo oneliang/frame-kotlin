@@ -1,0 +1,350 @@
+
+2.13s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises082a545
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:53:39 am
+15 hours ago
+
+1.44s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0ba4d98
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today11:46:37 am
+10 hours ago
+
+1.38s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises05d6982
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today8:04:57 am
+14 hours ago
+
+1.37s
+sales-ka: /api.get_strength_quantification128b9d4
+1 Span
+sales-ka (1)
+Today4:28:44 pm
+5 hours ago
+
+1.36s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0612555
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today10:17:04 am
+11 hours ago
+
+1.27s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises005e2e6
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:38:06 am
+15 hours ago
+
+1.24s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises01530ae
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:55:48 am
+15 hours ago
+
+1.22s
+sales-ka: /api.get_strength_quantification175e4cc
+1 Span
+sales-ka (1)
+Today4:33:55 pm
+5 hours ago
+
+1.21s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises02d3ba1
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:55:50 am
+15 hours ago
+
+1.2s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises030f6dd
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:39:24 am
+15 hours ago
+
+1.19s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0169eb4
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:40:14 am
+15 hours ago
+
+1.18s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b73c3f
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:39:12 am
+15 hours ago
+
+1.14s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b9887b
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:54:31 am
+15 hours ago
+
+1.13s
+sales-ka: /api.get_strength_quantification147cb62
+1 Span
+sales-ka (1)
+Today4:35:59 pm
+5 hours ago
+
+1.12s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b6bf27
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:13:08 am
+14 hours ago
+
+1.07s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises09a3ac9
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:39:15 am
+15 hours ago
+
+1.07s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises022f539
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:39:00 am
+15 hours ago
+
+1.07s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises00fb41f
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:17:35 am
+14 hours ago
+
+1.06s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises09fe0d4
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:40:29 am
+15 hours ago
+
+1.05s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises04b245a
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:18:42 am
+14 hours ago
+
+1.03s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises06816ec
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:42:38 am
+15 hours ago
+
+1.03s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b4695d
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:42:59 am
+15 hours ago
+
+1.02s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0968e78
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today1:01:59 pm
+9 hours ago
+
+1.02s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b83614
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:42:26 am
+15 hours ago
+
+1.01s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0919620
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:47:16 am
+15 hours ago
+
+1s
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0625bca
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:41:51 am
+15 hours ago
+
+999.35ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises06e8edc
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today11:42:39 am
+10 hours ago
+
+990.06ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0924c8a
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today11:53:05 am
+10 hours ago
+
+987.95ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises05d81a4
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:33:15 am
+14 hours ago
+
+974.38ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0256055
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:18:51 am
+14 hours ago
+
+968.19ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises05c5f29
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:20:13 am
+14 hours ago
+
+966.65ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises05427ea
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:18:48 am
+14 hours ago
+
+958.84ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0484eaa
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:42:37 am
+15 hours ago
+
+950.24ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises06a2aa3
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:56:42 am
+15 hours ago
+
+938.67ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0bf3d86
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:24:53 am
+14 hours ago
+
+925.55ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b014b3
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:57:03 am
+15 hours ago
+
+923.44ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0844473
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:12:45 am
+15 hours ago
+
+913.32ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0079645
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:14:10 am
+14 hours ago
+
+911.88ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0688b4b
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:44:32 am
+15 hours ago
+
+907.36ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises04c3a28
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:36:31 am
+15 hours ago
+
+894.63ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises006828b
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:44:45 am
+15 hours ago
+
+892.02ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises08f7109
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today7:19:04 am
+14 hours ago
+
+883.74ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0be8e1d
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today11:53:04 am
+10 hours ago
+
+883.46ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0a682b2
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:56:55 am
+15 hours ago
+
+874.69ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0393828
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today11:41:32 am
+10 hours ago
+
+857.71ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises091aae3
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today11:52:53 am
+10 hours ago
+
+854.8ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0891082
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today6:59:08 am
+15 hours ago
+
+841.61ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0a97e20
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today12:04:19 pm
+10 hours ago
+
+824.58ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0943934
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today11:42:57 am
+10 hours ago
+
+775.51ms
+tungee_paas: tungee_open_api.get_estate_industry_matched_enterprises0b84ed5
+7 Spans
+estate (4)sales-ka (1)tungee_paas (2)
+Today10:18:33 am
+11 hours ago

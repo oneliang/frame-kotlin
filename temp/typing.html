@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>typing</title>
+    <script type="text/javascript">
+        function reset(){
+            var letterArray=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+            for ( var index = 0; index < letterArray.length; index++ ) {
+                elementId = letterArray[index]
+                var element = document.getElementById(elementId)
+                element.style.background='white'
+            }
+        }
+        window.setInterval(function(){
+            reset()
+        }, 1000)
+        function initialize(){
+            window.document.onKeyDown = function(e){
+                keyCode = window.event ? e.keyCode:e.which
+                input = document.getElementById('typing_history')
+                if ( 65 <= keyCode && keyCode <= 90 ){
+                    input.value = input.value + e.key.toUpperCase()
+                    var elementId = e.key.toUpperCase()
+                    var element = document.getElementById(elementId)
+                    element.style.background='red'
+                }
+            }
+            window.document.onkeydown = function(e){
+                keyCode = window.event ? e.keyCode:e.which
+                input = document.getElementById('typing_history')
+                if ( 65 <= keyCode && keyCode <= 90 ){
+                    input.value = input.value + e.key.toUpperCase()
+                    document.getElementById(e.key.toUpperCase()).style.background='red'
+                }
+            }
+        }
+
+    </script>
+    <style>
+        .letterClass{
+            float:left;
+            width:8%;
+            min-height:100px;
+            height:8%;
+            text-align:center;
+            line-height:100px;
+            border:solid 1px;
+        }
+        .halfLetterClass{
+            float:left;
+            width:4%;
+            min-height:100px;
+            height:8%;
+            text-align:center;
+            line-height:100px;
+            border:solid 1px;
+        }
+    </style>
+</head>
+<body onload="initialize()">
+<input id="typing_history" readonly type="text" name="adfadsfasd" minlength="10" size="24" height="100"/>
+<br/>
+<br/>
+<br/>
+<br/>
+<div>
+    <span id="Q" class="letterClass">Q</span>
+    <span id="W" class="letterClass">W</span>
+    <span id="E" class="letterClass">E</span>
+    <span id="R" class="letterClass">R</span>
+    <span id="T" class="letterClass">T</span>
+    <span id="Y" class="letterClass">Y</span>
+    <span id="U" class="letterClass">U</span>
+    <span id="I" class="letterClass">I</span>
+    <span id="O" class="letterClass">O</span>
+    <span id="P" class="letterClass">P</span>
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<div style="text-align:center;">
+    <span class="halfLetterClass"></span>
+    <span id="A" class="letterClass">A</span>
+    <span id="S" class="letterClass">S</span>
+    <span id="D" class="letterClass">D</span>
+    <span id="F" class="letterClass">F</span>
+    <span id="G" class="letterClass">G</span>
+    <span id="H" class="letterClass">H</span>
+    <span id="J" class="letterClass">J</span>
+    <span id="K" class="letterClass">K</span>
+    <span id="L" class="letterClass">L</span>
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<div>
+    <span class="letterClass"></span>
+    <span id="Z" class="letterClass">Z</span>
+    <span id="X" class="letterClass">X</span>
+    <span id="C" class="letterClass">C</span>
+    <span id="V" class="letterClass">V</span>
+    <span id="B" class="letterClass">B</span>
+    <span id="N" class="letterClass">N</span>
+    <span id="M" class="letterClass">M</span>
+    <span id="comma" class="letterClass">,</span>
+</div>
+</body>
+</html>

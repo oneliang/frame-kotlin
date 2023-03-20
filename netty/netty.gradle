@@ -1,2 +1,0 @@
-def big_module_name = ':netty'
-include "$big_module_name:mqtt"

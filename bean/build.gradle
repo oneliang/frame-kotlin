@@ -1,7 +1,0 @@
-apply from: "${rootDir}/gradle/feature.gradle"
-apply from: "${rootDir}/gradle/maven-publish.gradle"
-apply plugin: 'kotlinx-serialization'
-
-dependencies {
-    testImplementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0"
-}

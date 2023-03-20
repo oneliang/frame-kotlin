@@ -1,0 +1,49 @@
+
+1.38s
+financing-pc-sales: /mobile-api.get_enterprise_tab_count10bd6e3
+2 Spans1 Error
+financing-pc-sales (2)
+Yesterday5:25:06 pm
+a day ago
+
+1.22s
+financing-pc-sales: /internal-api.financing_enterprises_contact_info100c0f2
+21 Spans
+financing-pc-sales (11)finaning-crm (10)
+Yesterday4:50:03 pm
+a day ago
+
+1.13s
+financing-pc-sales: /mobile-api.get_enterprise_tab_count07dd60a
+2 Spans1 Error
+financing-pc-sales (2)
+Today11:16:38 am
+11 hours ago
+
+684.2ms
+financing-pc-sales: /internal-api.financing_enterprises_contact_info0e6ee96
+13 Spans
+financing-pc-sales (7)finaning-crm (6)
+Yesterday6:49:38 pm
+a day ago
+
+608.59ms
+financing-pc-sales: /mobile-api.get_enterprise_tab_count03a7f95
+2 Spans
+financing-pc-sales (2)
+Yesterday3:32:29 pm
+a day ago
+
+593.92ms
+financing-pc-sales: /mobile-api.get_enterprise_tab_count0790c6d
+2 Spans
+financing-pc-sales (2)
+Yesterday5:24:25 pm
+a day ago
+
+529.88ms
+financing-pc-sales: /api.customer_group_search_specialized_and_new01709b9
+1 Span
+financing-pc-sales (1)
+Yesterday10:18:35 am
+2 days ago
