@@ -11,6 +11,9 @@ fun Project.applyTestFeatureDependencies() {
 
 fun Project.applyFeatureDependencies() {
     this.dependencies.add("api", this.fileTree(mapOf("dir" to "libs", "include" to arrayOf("*.jar"))))
+    this.dependencies.add("implementation", Dependencies["kotlin-reflect"])
+    this.dependencies.add("implementation", Dependencies["kotlin-stdlib"])
+    this.dependencies.add("implementation", Dependencies["kotlinx-coroutines-core"])
     this.dependencies.add("implementation", Dependencies["util-kotlin-base"])
     this.dependencies.add("implementation", Dependencies["util-kotlin-command"])
     this.dependencies.add("implementation", Dependencies["util-kotlin-common"])
@@ -29,6 +32,4 @@ fun Project.applyFeatureDependencies() {
     this.dependencies.add("implementation", Dependencies["util-kotlin-upload"])
     this.dependencies.add("implementation", Dependencies["util-kotlin-math"])
     this.dependencies.add("implementation", Dependencies["util-kotlin-packet"])
-    this.dependencies.add("implementation", Dependencies["kotlin-reflect"])
-    this.dependencies.add("implementation", Dependencies["kotlinx-coroutines-core"])
 }

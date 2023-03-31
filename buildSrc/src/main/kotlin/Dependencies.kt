@@ -2,6 +2,9 @@ object Dependencies {
 
     private val dependencies = mapOf(
         "junit" to "junit:junit:4.12",
+        "kotlin-reflect" to "org.jetbrains.kotlin:kotlin-reflect:${Constants.kotlinVersion}",
+        "kotlin-stdlib" to "org.jetbrains.kotlin:kotlin-stdlib:${Constants.kotlinVersion}",
+        "kotlin-stdlib-js" to "org.jetbrains.kotlin:kotlin-stdlib-js:${Constants.kotlinVersion}",
         "util-kotlin-base" to "com.oneliang.ktx:util-kotlin-base:1.0",
         "util-kotlin-command" to "com.oneliang.ktx:util-kotlin-command:1.0",
         "util-kotlin-common" to "com.oneliang.ktx:util-kotlin-common:1.0",
@@ -21,8 +24,6 @@ object Dependencies {
         "util-kotlin-math" to "com.oneliang.ktx:util-kotlin-math:1.0",
         "util-kotlin-section" to "com.oneliang.ktx:util-kotlin-section:1.0",
         "util-kotlin-packet" to "com.oneliang.ktx:util-kotlin-packet:1.0",
-        "kotlin-reflect" to "org.jetbrains.kotlin:kotlin-reflect:${Constants.kotlinVersion}",
-        "kotlin-stdlib-js" to "org.jetbrains.kotlin:kotlin-stdlib-js:${Constants.kotlinVersion}",
         "javaee-api" to "javax:javaee-api:8.0",
         //kotlin-test
         "kotlin-test" to "org.jetbrains.kotlin:kotlin-test",
