@@ -37,7 +37,7 @@ open class IocContext : AbstractContext() {
             val root = document.documentElement
             //configuration
             val configurationElementList = root.getElementsByTagName(IocConfigurationBean.TAG_CONFIGURATION)
-            if (configurationElementList != null && configurationElementList.length > 0) {
+            if (configurationElementList.length > 0) {
                 val configurationAttributeMap = configurationElementList.item(0).attributes
                 JavaXmlUtil.initializeFromAttributeMap(iocConfigurationBean, configurationAttributeMap)
             }

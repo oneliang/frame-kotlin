@@ -29,20 +29,22 @@ abstract class AbstractServletContextListener : ServletContextListener {
         //real path
         var projectRealPath = servletContextEvent.servletContext.getRealPath(Constants.String.BLANK).nullToBlank()
 
-        //config file
-        if (configFile.isNotBlank()) {
-            try {
-                val configurationContext = ConfigurationContainer.rootConfigurationContext
-                projectRealPath = File(projectRealPath).absolutePath
-                configurationContext.projectRealPath = projectRealPath
-                configurationContext.initialize(configFile)
-                afterConfigurationInitialize(configurationContext)
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                logger.error(Constants.String.EXCEPTION, e)
+        try {
+            projectRealPath = File(projectRealPath).absolutePath
+            beforeConfigurationContextInitialize(projectRealPath)//always initialize logger here
+
+
+            val configurationContext = ConfigurationContainer.rootConfigurationContext
+            configurationContext.projectRealPath = projectRealPath
+            //parameter:configFile can be blank, it is supported by configuration context
+            configurationContext.initialize(configFile)
+            if (configFile.isBlank()) {
+                logger.info("config file is blank, maybe use dsl config")
             }
-        } else {
-            logger.error("config file is not found,please initial the config file")
+            afterConfigurationContextInitialize(configurationContext)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            logger.error(Constants.String.EXCEPTION, e)
         }
     }
 
@@ -54,6 +56,18 @@ abstract class AbstractServletContextListener : ServletContextListener {
         configurationContext.destroyAll()
     }
 
+    /**
+     * always use to initialize logger here, before configuration context initialize
+     * @param projectRealPath
+     */
     @Throws(Exception::class)
-    abstract fun afterConfigurationInitialize(configurationContext: ConfigurationContext)
+    protected open fun beforeConfigurationContextInitialize(projectRealPath: String) {
+    }
+
+    /**
+     * after configuration context initialize
+     * @param configurationContext
+     */
+    @Throws(Exception::class)
+    protected abstract fun afterConfigurationContextInitialize(configurationContext: ConfigurationContext)
 }

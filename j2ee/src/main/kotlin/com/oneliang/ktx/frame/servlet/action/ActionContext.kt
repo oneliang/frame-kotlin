@@ -39,29 +39,27 @@ open class ActionContext : AbstractContext() {
             val root = document.documentElement
             //global forward list
             val globalForwardElementList = root.getElementsByTagName(GlobalForwardBean.TAG_GLOBAL_FORWARD)
-            if (globalForwardElementList != null) {
-                val length = globalForwardElementList.length
-                for (index in 0 until length) {
-                    val globalForwardBean = GlobalForwardBean()
-                    val globalForward = globalForwardElementList.item(index)
-                    val attributeMap = globalForward.attributes
-                    JavaXmlUtil.initializeFromAttributeMap(globalForwardBean, attributeMap)
-                    val globalForwardBeanName = globalForwardBean.name
-                    globalForwardBeanMap[globalForwardBeanName] = globalForwardBean
-                    globalForwardMap[globalForwardBeanName] = globalForwardBean.path
-                }
+            val globalForwardElementListlength = globalForwardElementList.length
+            for (index in 0 until globalForwardElementListlength) {
+                val globalForwardBean = GlobalForwardBean()
+                val globalForward = globalForwardElementList.item(index)
+                val attributeMap = globalForward.attributes
+                JavaXmlUtil.initializeFromAttributeMap(globalForwardBean, attributeMap)
+                val globalForwardBeanName = globalForwardBean.name
+                globalForwardBeanMap[globalForwardBeanName] = globalForwardBean
+                globalForwardMap[globalForwardBeanName] = globalForwardBean.path
             }
             //global exception forward
             val globalExceptionForwardElementList = root.getElementsByTagName(GlobalExceptionForwardBean.TAG_GLOBAL_EXCEPTION_FORWARD)
-            if (globalExceptionForwardElementList != null && globalExceptionForwardElementList.length > 0) {
+            if (globalExceptionForwardElementList.length > 0) {
                 val attributeMap = globalExceptionForwardElementList.item(0).attributes
                 JavaXmlUtil.initializeFromAttributeMap(globalExceptionForwardBean, attributeMap)
             }
             //action list
             val actionElementList = root.getElementsByTagName(ActionBean.TAG_ACTION) ?: return
             //xml to object
-            val length = actionElementList.length
-            for (index in 0 until length) {
+            val actionElementListLength = actionElementList.length
+            for (index in 0 until actionElementListLength) {
                 val actionElement = actionElementList.item(index)
                 //action bean
                 val actionBean = ActionBean()

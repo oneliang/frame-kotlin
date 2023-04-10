@@ -40,10 +40,6 @@ class UriMappingContext : AbstractContext() {
             val document = JavaXmlUtil.parse(path)
             val root = document.documentElement
             val uriBeanElementList = root.getElementsByTagName(UriMappingBean.TAG_URI)
-            if (uriBeanElementList == null) {
-                logger.error("uri bean element list is null")
-                return
-            }
             val length = uriBeanElementList.length
             for (index in 0 until length) {
                 val beanElement = uriBeanElementList.item(index)

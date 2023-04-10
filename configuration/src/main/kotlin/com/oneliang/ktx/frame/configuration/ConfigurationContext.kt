@@ -42,37 +42,25 @@ class ConfigurationContext : AbstractContext() {
      */
     override fun initialize(parameters: String) {
         val fixParameters = fixParameters(parameters)
+        if (fixParameters.isBlank()) {
+            logger.info("parameters is blank, maybe use dsl initialize")
+            return
+        }
         try {
             val path = this.classesRealPath + fixParameters
             val document = JavaXmlUtil.parse(path)
             val root = document.documentElement
             val configurationList = root.getElementsByTagName(ConfigurationBean.TAG_CONFIGURATION)
-            if (configurationList != null) {
-                val length = configurationList.length
-                for (index in 0 until length) {
-                    //initialize configuration bean
-                    val configurationBean = ConfigurationBean()
-                    val configurationNode = configurationList.item(index)
-                    val configurationAttributesMap = configurationNode.attributes
-                    JavaXmlUtil.initializeFromAttributeMap(configurationBean, configurationAttributesMap)
-                    //use configuration bean
-                    val context = this.classLoader.loadClass(configurationBean.contextClass).newInstance() as Context
-                    val configurationBeanId = configurationBean.id
-                    logger.info("Context:%s, id:%s is initializing.", context.javaClass.name, configurationBeanId)
-                    if (context is AbstractContext) {
-                        context.projectRealPath = this.projectRealPath
-                        context.classesRealPath = this.classesRealPath
-                    }
-                    if (configurationBeanMap.containsKey(configurationBeanId)) {
-                        val errorMessage = "configuration error, configuration bean id is exist, id:%s".format(configurationBeanId)
-                        logger.error(errorMessage)
-                        throw InitializeException(errorMessage)
-                    }
-                    context.initialize(configurationBean.parameters)
-                    configurationBean.contextInstance = context
-                    configurationBeanMap[configurationBean.id] = configurationBean
-                    this.selfConfigurationBeanMap[configurationBean.id] = configurationBean
-                }
+            val length = configurationList.length
+            for (index in 0 until length) {
+                //initialize configuration bean
+                val configurationBean = ConfigurationBean()
+                val configurationNode = configurationList.item(index)
+                val configurationAttributesMap = configurationNode.attributes
+                JavaXmlUtil.initializeFromAttributeMap(configurationBean, configurationAttributesMap)
+                //use configuration bean
+                val context = this.classLoader.loadClass(configurationBean.contextClass).newInstance() as Context
+                this.addContext(configurationBean, context)
             }
             this.initialized = true
         } catch (e: Throwable) {
@@ -102,6 +90,56 @@ class ConfigurationContext : AbstractContext() {
         this.destroy()
         configurationBeanMap.clear()
         objectMap.clear()
+    }
+
+    /**
+     * add context
+     * @param configurationBean
+     */
+    fun addContext(configurationBean: ConfigurationBean) {
+        val context = this.classLoader.loadClass(configurationBean.contextClass).newInstance() as Context
+        this.addContext(configurationBean, context)
+    }
+
+    /**
+     * add context
+     * @param configurationBean
+     * @param context
+     */
+    fun addContext(configurationBean: ConfigurationBean, context: Context) {
+        val configurationBeanId = configurationBean.id
+        try {
+            logger.info("Context:%s, id:%s is initializing.", context.javaClass.name, configurationBeanId)
+            if (configurationBeanMap.containsKey(configurationBeanId)) {
+                val errorMessage = "configuration error, configuration bean id is exist, id:%s".format(configurationBeanId)
+                logger.error(errorMessage)
+                throw InitializeException(errorMessage)
+            }
+            if (context is AbstractContext) {
+                context.projectRealPath = this.projectRealPath
+                context.classesRealPath = this.classesRealPath
+            }
+            context.initialize(configurationBean.parameters)
+            configurationBean.contextInstance = context
+            configurationBeanMap[configurationBean.id] = configurationBean
+            this.selfConfigurationBeanMap[configurationBean.id] = configurationBean
+        } catch (e: Throwable) {
+            logger.error("id:%s, context:%s", e, configurationBeanId, context)
+            throw InitializeException("context:[%s] initialize error".format(configurationBeanId), e)
+        }
+    }
+
+    /**
+     * add context
+     * @param id
+     * @param parameters
+     * @param context
+     */
+    fun addContext(id: String, parameters: String, context: Context) {
+        val configurationBean = ConfigurationBean()
+        configurationBean.id = id
+        configurationBean.parameters = parameters
+        this.addContext(configurationBean, context)
     }
 
     /**
