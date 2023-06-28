@@ -5,5 +5,6 @@ dependencies {
     implementation(project(":storage"))
     implementation(project(":tokenization"))
     implementation(project(":cache"))
+    implementation(project(":feature"))
 }
 

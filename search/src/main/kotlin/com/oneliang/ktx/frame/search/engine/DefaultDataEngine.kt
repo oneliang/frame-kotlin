@@ -2,7 +2,7 @@ package com.oneliang.ktx.frame.search.engine
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.tokenization.Dictionary
-import com.oneliang.ktx.frame.tokenization.FeatureOwner
+import com.oneliang.ktx.frame.feature.FeatureOwner
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 

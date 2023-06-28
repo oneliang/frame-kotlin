@@ -1,5 +1,6 @@
 package com.oneliang.ktx.frame.storage
 
+import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.file.saveTo
 import com.oneliang.ktx.util.file.toPropertiesAutoCreate
 import com.oneliang.ktx.util.logging.LoggerManager
@@ -34,7 +35,7 @@ class ConfigStorage(private var directory: String, configFilename: String = "con
     }
 
     fun getProperty(key: String): String {
-        return this.configProperties.getProperty(key)
+        return this.configProperties.getProperty(key).nullToBlank()
     }
 
     fun removeProperty(key: String) {

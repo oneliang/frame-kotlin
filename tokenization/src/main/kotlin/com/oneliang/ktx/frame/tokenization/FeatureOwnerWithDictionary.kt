@@ -1,5 +1,7 @@
 package com.oneliang.ktx.frame.tokenization
 
+import com.oneliang.ktx.frame.feature.FeatureOwner
+
 class FeatureOwnerWithDictionary(private val dictionary: Dictionary) : FeatureOwner<String, Dictionary.WordCollector> {
 
     /**

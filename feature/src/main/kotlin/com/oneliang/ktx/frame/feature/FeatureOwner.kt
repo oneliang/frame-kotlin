@@ -1,4 +1,4 @@
-package com.oneliang.ktx.frame.tokenization
+package com.oneliang.ktx.frame.feature
 
 interface FeatureOwner<ITEM, FEATURE> {
 
