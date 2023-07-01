@@ -1,7 +1,7 @@
 package com.oneliang.ktx.frame.cache
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.storage.ConfigStorage
+import com.oneliang.ktx.frame.storage.KeyValueStorage
 import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.file.FileUtil
 import com.oneliang.ktx.util.file.createFileIncludeDirectory
@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 class FileCacheManager constructor(private var cacheDirectory: String, private val depth: Int = 0, private val defaultCacheRefreshTime: Long = 0L) : CacheManager {
     companion object {
         private val logger = LoggerManager.getLogger(FileCacheManager::class)
-        private const val CACHE_PROPERTIES_NAME = "cache.txt"
+        private const val CACHE_FILENAME = "cache.txt"
     }
 
     init {
@@ -26,7 +26,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
         logger.info("Cache directory:%s", this.cacheDirectory)
     }
 
-    private val configStorage = ConfigStorage(this.cacheDirectory, CACHE_PROPERTIES_NAME)
+    private val keyValueStorage = KeyValueStorage(this.cacheDirectory + Constants.Symbol.SLASH_LEFT + CACHE_FILENAME)
 
     /**
      * generate cache relative filename
@@ -96,9 +96,9 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
     T, cacheRefreshTime: Long) {
         //first try to delete old cache, maybe old and new cache file is the same
         val keyString = key.toString()
-        val oldCacheFullFilename = this.configStorage.getProperty(keyString)
+        val oldCacheFullFilename = this.keyValueStorage.getProperty(keyString)
         if (oldCacheFullFilename.isNotBlank()) {
-            this.configStorage.removeProperty(keyString)
+            this.keyValueStorage.removeProperty(keyString)
             val oldCacheFile = File(oldCacheFullFilename)
             oldCacheFile.delete()
         }
@@ -124,7 +124,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             else -> logger.error("save to cache not support the class:%s", cacheType)
         }
         //update new cache
-        this.configStorage.setProperty(keyString, cacheFullFilename)
-        this.configStorage.save()
+        this.keyValueStorage.setProperty(keyString, cacheFullFilename)
+        this.keyValueStorage.save()
     }
 }

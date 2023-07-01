@@ -172,10 +172,7 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
         return wordCollector
     }
 
-    class Word(val value: String, val beginIndex: Int, val endIndex: Int) {
-        var count = 0
-            internal set
-    }
+    class Word(val value: String, val beginIndex: Int, val endIndex: Int)
 
     class WordCollector {
         val wordList = mutableListOf<Word>()
@@ -183,7 +180,7 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
         fun addWord(word: Word) {
             this.wordList += word
             val wordValueWordList = this.wordMap.getOrPut(word.value) { mutableListOf() }
-            wordValueWordList += word.apply { this.count = this.count + 1 }
+            wordValueWordList += word
         }
     }
 

@@ -1,7 +1,7 @@
 package com.oneliang.ktx.frame.search
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.storage.ConfigStorage
+import com.oneliang.ktx.frame.storage.KeyValueStorage
 import com.oneliang.ktx.frame.storage.Storage
 import com.oneliang.ktx.util.common.MD5String
 import com.oneliang.ktx.util.common.calculateCompose
@@ -23,8 +23,8 @@ class DataStorage(private var directory: String,
 
     companion object {
         private val logger = LoggerManager.getLogger(DataStorage::class)
-        private const val CONFIG_PROPERTIES_NAME = "config"
-        private const val CONFIG_PROPERTIES_KEY_MODULES = "modules"
+        private const val CONFIG_FILENAME = "config"
+        private const val CONFIG_KEY_MODULES = "modules"
     }
 
     init {
@@ -36,7 +36,7 @@ class DataStorage(private var directory: String,
         logger.info("File storage directory:%s", this.directory)
     }
 
-    private val configStorage = ConfigStorage(this.directory, CONFIG_PROPERTIES_NAME)
+    private val keyValueStorage = KeyValueStorage(this.directory + Constants.Symbol.SLASH_LEFT + CONFIG_FILENAME)
     private val autoSaveThread = ResourceQueueThread(object : ResourceQueueThread.ResourceProcessor<AutoSaveItem> {
         override fun process(resource: AutoSaveItem) {
             resource.properties.saveTo(resource.file)
@@ -47,8 +47,8 @@ class DataStorage(private var directory: String,
         if (this.modules.isEmpty()) {
             error("field modules can not be empty")
         }
-        this.configStorage.setProperty(CONFIG_PROPERTIES_KEY_MODULES, this.modules.toJson())
-        this.configStorage.save()
+        this.keyValueStorage.setProperty(CONFIG_KEY_MODULES, this.modules.toJson())
+        this.keyValueStorage.save()
     }
 
     private val keyPropertiesMap = LRUCacheMap<String, PropertiesItem>(this.cacheMaxSize)
