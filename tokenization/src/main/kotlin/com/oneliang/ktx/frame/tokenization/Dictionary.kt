@@ -24,6 +24,12 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
         }
     }
 
+    init {
+        //some dictionary has no single word or empty words, so word length set will be empty
+        //so add the one word length
+        this.wordLengthSet += 1
+    }
+
     /**
      * load dictionary
      * @param fullFilename
@@ -58,7 +64,7 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
      * add keyword to dictionary
      * @param keyword
      */
-    private fun addKeywordToDictionary(keyword: String) {
+    fun addKeywordToDictionary(keyword: String) {
         val data = keyword.trim()
         this.map[data] = data
         this.wordLengthSet += data.length
@@ -101,7 +107,7 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
                 if (this.map.containsKey(word)) {
                     notFound = false
 //                    println("$word[${realBeginIndex + beginIndex},${realBeginIndex + endIndex})")
-                    wordCollector.addWord(Word(word, realBeginIndex + beginIndex, realBeginIndex + endIndex))
+                    wordCollector.addWord(Word(word, realBeginIndex + beginIndex, realBeginIndex + endIndex, true))
                     val leftWord = currentContent.substring(0, beginIndex)//not match
                     val rightWord = currentContent.substring(endIndex, currentContent.length)//not match
                     if (rightWord.isNotEmpty()) {
@@ -126,10 +132,9 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
         }
     }
 
-    private fun splitWords(content: String, beginOffset: Int, wordCollector: WordCollector): List<Word> {
+    private fun splitWords(content: String, wordLengthList: List<Int>, beginOffset: Int, wordCollector: WordCollector): List<Word> {
 //        val wordList = mutableListOf<Word>()
 //        val wordCollector = WordCollector()
-        val wordLengthList = this.wordLengthSet.toList()
         splitWords(content, wordLengthList, 0, beginOffset, wordCollector)
         if (wordCollector.wordList.isEmpty()) {
             val endIndex = beginOffset + content.length
@@ -146,6 +151,7 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
 //        val wordList = mutableListOf<Word>()
         val wordCollector = WordCollector()
         //[beginIndex,endIndex) left close right open
+        val wordLengthList = this.wordLengthSet.toList()// word length set is mutable when dictionary dynamic change, so need to change to list when split words
         while (endIndex <= lastIndex) {
             val currentChar = charArray[endIndex - 1]
             val nextChar = charArray[endIndex]
@@ -157,12 +163,12 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
                 if (endIndex > lastIndex) {//endIndex word is the last word, the character type of endIndex word is the same with current word, endIndex+1 overflow lastIndex, null word
                     currentWord = charArray.copyOfRange(beginIndex, endIndex).concatToString()
                     logger.debug("last word:[%s], need to split, beginIndex:%s", currentWord, beginIndex)
-                    this.splitWords(currentWord, beginIndex, wordCollector)
+                    this.splitWords(currentWord, wordLengthList, beginIndex, wordCollector)
                 }
             } else {//if not the same character type,update beginIndex and endIndex, separate it, stop word, endIndex is the next beginIndex
                 currentWord = charArray.copyOfRange(beginIndex, endIndex).concatToString()
                 logger.debug("after separate word:[%s], need to split, beginIndex:%s", currentWord, beginIndex)
-                this.splitWords(currentWord, beginIndex, wordCollector)
+                this.splitWords(currentWord, wordLengthList, beginIndex, wordCollector)
                 //update index
                 beginIndex = endIndex
                 endIndex = beginIndex + 1
@@ -172,7 +178,7 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
         return wordCollector
     }
 
-    class Word(val value: String, val beginIndex: Int, val endIndex: Int)
+    class Word(val value: String, val beginIndex: Int, val endIndex: Int, val matchInDictionary: Boolean = false)
 
     class WordCollector {
         val wordList = mutableListOf<Word>()

@@ -65,12 +65,18 @@ fun main() {
 //    return
 
     val dictionaryFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/main/resources/main.dic"
+//    val dictionaryFullFilename = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/ik-analyzer/src/main/kotlin/com/oneliang/ktx/frame/ik/analyzer/dic/main2012.dic"
     val dictionary = Dictionary()
     dictionary.load(dictionaryFullFilename)
 //    dictionary.loadDictionary(setOf("求购"))
 //    val content = "求购201宏旺J1 0.5卷一个求购"
-    val content = "1.12 1.12 1.38/2.05*4今开0.92/0.95/1.42/1.35/0.68*4可加单"
+//    val content = "1.12 1.12 1.38/2.05*4今开0.92/0.95/1.42/1.35/0.68*4可加单"
+    val content="你好吗？我很好。春天来了，万物复苏"
     val wordCollector = dictionary.splitWords(content)
+    wordCollector.wordList.forEach { it ->
+        println(it.value)
+    }
+    return
     val contentId = Generator.ID()
     val wordIndexMap = mutableMapOf<String, MutableSet<String>>()
     val charIndexMap = mutableMapOf<Char, MutableSet<String>>()
