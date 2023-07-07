@@ -3,8 +3,7 @@ package com.oneliang.ktx.frame.storage
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.feature.FeatureOwner
 import com.oneliang.ktx.frame.tokenization.Dictionary
-import com.oneliang.ktx.util.common.CircleIterator
-import com.oneliang.ktx.util.common.Mappable
+import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
@@ -17,8 +16,10 @@ class DocumentStorage(
     companion object {
         private val logger = LoggerManager.getLogger(DocumentStorage::class)
         private const val SEGMENT_COUNT = 10
+        private const val ROUTE_FILENAME = "route.ds"
         private const val CONFIG_FILENAME = "config"
-        private const val TERM_FILENAME = "term"
+        private const val POINT_FILENAME = "point"
+        private const val EDGE_FILENAME = "edge"
     }
 
     private val route: Route
@@ -28,14 +29,14 @@ class DocumentStorage(
     private val configManager: ConfigManager = ConfigManager()
     private val configFullFilename = this.directory + Constants.Symbol.SLASH_LEFT + CONFIG_FILENAME
 
-    //    private val termFullFilename = this.directory + Constants.Symbol.SLASH_LEFT + TERM_FILENAME
-    private val termStorage: KeyValueStorage = KeyValueStorage(this.directory + Constants.Symbol.SLASH_LEFT + TERM_FILENAME)
-    private val termIdAtomic: AtomicInteger
+    private val pointStorage: KeyValueStorage = KeyValueStorage(this.directory + Constants.Symbol.SLASH_LEFT + POINT_FILENAME)
+    private val pointIdAtomic: AtomicInteger
+    private val edgeIdAtomic: AtomicInteger
 
     init {
         this.configManager.readConfig(this.config, this.configFullFilename)
         //route
-        val routeFile = File(this.directory, "route.ds")
+        val routeFile = File(this.directory, ROUTE_FILENAME)
         this.route = Route(routeFile.absolutePath, initialDocumentId = this.config.lastDocumentId)
 
         //segment
@@ -47,8 +48,11 @@ class DocumentStorage(
         val initialIndex = (this.config.lastSegmentNo + 1) % SEGMENT_COUNT
         this.circleIterator = CircleIterator(segmentList.toTypedArray(), initialIndex = initialIndex)
 
-        //term
-        this.termIdAtomic = AtomicInteger(this.config.lastTermId)
+        //point
+        this.pointIdAtomic = AtomicInteger(this.config.lastPointId)
+
+        //point
+        this.edgeIdAtomic = AtomicInteger(this.config.lastEdgeId)
     }
 
     /**
@@ -57,28 +61,49 @@ class DocumentStorage(
      */
     fun addDocument(value: String) {
         val wordCollector = this.featureOwner.extractFeature(value)
-        wordCollector.wordMap.forEach { (key, u) ->
-            if (key.isBlank()) {
+        val pointIdWordList = mutableListOf<Pair<String, String>>()
+        wordCollector.wordList.forEach {
+            val word = it.value
+            if (it.value.length == 1 && it.value.toCharArray()[0].isSymbol()) {
+                return@forEach//continue
+            }
+            if (word.isBlank()) {
                 return@forEach // continue
             }
-            if (this.termStorage.hasProperty(key)) {
-                this.termStorage.getProperty(key)
+            val pointIdString = if (this.pointStorage.hasProperty(word)) {
+                this.pointStorage.getProperty(word)
             } else {
-                val termId = this.termIdAtomic.incrementAndGet()
-                val termIdString = termId.toString()
-                this.termStorage.setProperty(key, termIdString)
-                println(termId)
-                this.config.lastTermId = termId
+                val pointId = this.pointIdAtomic.incrementAndGet()
+                val pointIdString = pointId.toString()
+                this.pointStorage.setProperty(word, pointIdString)
+                this.config.lastPointId = pointId
+                pointIdString
             }
+            pointIdWordList += pointIdString to word
         }
-//        addDocument(value.toByteArray())
+        val documentId = addDocument(value.toByteArray())
+        val relativeMap = pointIdWordList.toElementRelativeMap(keyTransform = {
+            it.first
+        }, valueTransform = {
+            documentId
+        })
+        val valueLength = value.length
+        pointIdWordList.forEach {
+            println("word[%s], point id[%s], document id[%s], score[%s]".format(it.second, it.first, documentId, Scorer.score(it.second.length, valueLength)))
+        }
+        relativeMap.forEach { (key, value) ->
+            println("edge[%s], document id[%s], score[%s]".format(key, value.first, Scorer.score(key.length, valueLength, 2.0)))
+        }
+        println(pointIdWordList)
+        println(relativeMap)
+        this.pointStorage.save()
     }
 
     /**
      * add document
      * @param data
      */
-    private fun addDocument(data: ByteArray) {
+    private fun addDocument(data: ByteArray): Int {
         val segmentInfo = this.circleIterator.next()
         val segmentNo = segmentInfo.segmentNo
         var binaryStorage = segmentInfo.binaryStorage
@@ -92,6 +117,7 @@ class DocumentStorage(
         logger.info("add document finished, document id[%s], segment no[%s], start[%s], end[%s]", documentId, segmentNo, start, end)
         this.config.lastDocumentId = documentId
         this.config.lastSegmentNo = segmentNo
+        return documentId
     }
 
     private class SegmentInfo(var segmentNo: Short, var binaryStorage: BinaryStorage?)
@@ -102,7 +128,8 @@ class DocumentStorage(
         companion object {
             private const val KEY_LAST_DOCUMENT_ID = "last_document_id"
             private const val KEY_LAST_SEGMENT_NO = "last_segment_no"
-            private const val KEY_LAST_TERM_ID = "last_term_id"
+            private const val KEY_LAST_POINT_ID = "last_point_id"
+            private const val KEY_LAST_EDGE_ID = "last_edge_id"
         }
 
         @Mappable.Key(KEY_LAST_DOCUMENT_ID)
@@ -111,7 +138,10 @@ class DocumentStorage(
         @Mappable.Key(KEY_LAST_SEGMENT_NO)
         var lastSegmentNo: Short = 0
 
-        @Mappable.Key(KEY_LAST_TERM_ID)
-        var lastTermId: Int = 0
+        @Mappable.Key(KEY_LAST_POINT_ID)
+        var lastPointId: Int = 0
+
+        @Mappable.Key(KEY_LAST_EDGE_ID)
+        var lastEdgeId: Int = 0
     }
 }

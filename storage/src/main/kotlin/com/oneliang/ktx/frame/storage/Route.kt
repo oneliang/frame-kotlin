@@ -8,9 +8,9 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 class Route(
-    fullFilename: String,
-    accessMode: BinaryStorage.AccessMode = BinaryStorage.AccessMode.RW,
-    initialDocumentId: Int = 0
+    fullFilename: String, accessMode: BinaryStorage.AccessMode = BinaryStorage.AccessMode.RW, initialDocumentId: Int = 0
+) : BlockStorage(
+    fullFilename, accessMode, DATA_LENGTH
 ) {
     companion object {
         private val logger = LoggerManager.getLogger(Route::class)
@@ -18,32 +18,18 @@ class Route(
     }
 
     private val documentIdAtomic = AtomicInteger(initialDocumentId)
-    private val binaryStorage = BinaryStorage(fullFilename, accessMode)
     private val documentMap = ConcurrentHashMap<Int, ByteArray>()
 
-    init {
-        read()
-    }
-
     /**
-     * read
+     * read block
+     * @param index
+     * @param start
+     * @param byteArray
      */
-    fun read() {
-        val begin = System.currentTimeMillis()
-        val fileLength = this.binaryStorage.file.length()
-
-        assert(fileLength % DATA_LENGTH == 0L)
-
-        val size = fileLength / DATA_LENGTH
-        for (i in 0 until size) {
-            val start = i * DATA_LENGTH
-            val end = (i + 1) * DATA_LENGTH
-            val byteArray = this.binaryStorage.read(start, end)
-            val documentId = byteArray.sliceArray(0 until 4).toInt()
-            val documentSegmentInfo = byteArray.sliceArray(4 until DATA_LENGTH)
-            this.documentMap[documentId] = documentSegmentInfo
-        }
-        logger.info("read cost:%s", System.currentTimeMillis() - begin)
+    override fun readBlock(index: Int, start: Long, byteArray: ByteArray) {
+        val documentId = byteArray.sliceArray(0 until 4).toInt()
+        val documentSegmentInfo = byteArray.sliceArray(4 until DATA_LENGTH)
+        this.documentMap[documentId] = documentSegmentInfo
     }
 
     /**
@@ -51,7 +37,7 @@ class Route(
      * @param segmentNo
      * @param start
      * @param end
-     * @return
+     * @return Int
      */
     fun write(segmentNo: Short, start: Long, end: Long): Int {
         val docId = this.documentIdAtomic.incrementAndGet()
@@ -65,15 +51,9 @@ class Route(
 
         assert(route.size == DATA_LENGTH)
 
-        this.binaryStorage.write(route)
+        val startPosition = docId.toLong() * DATA_LENGTH
+        this.write(route, startPosition)
         this.documentMap[docId] = route.sliceArray(4 until DATA_LENGTH)
         return docId
-    }
-
-    /**
-     * finalize
-     */
-    fun finalize() {
-        this.binaryStorage.finalize()
     }
 }
