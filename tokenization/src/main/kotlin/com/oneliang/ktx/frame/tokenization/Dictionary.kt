@@ -150,6 +150,10 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
         val lastIndex = content.length - 1
 //        val wordList = mutableListOf<Word>()
         val wordCollector = WordCollector()
+        if (charArray.size == 1) {//special scene, only one word
+            wordCollector.addWord(Word(content, beginIndex, endIndex))
+            return wordCollector
+        }
         //[beginIndex,endIndex) left close right open
         val wordLengthList = this.wordLengthSet.toList()// word length set is mutable when dictionary dynamic change, so need to change to list when split words
         while (endIndex <= lastIndex) {

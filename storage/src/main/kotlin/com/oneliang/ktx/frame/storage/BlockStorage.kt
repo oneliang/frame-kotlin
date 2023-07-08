@@ -13,16 +13,10 @@ abstract class BlockStorage(
 
     private val binaryStorage = BinaryStorage(fullFilename, accessMode)
 
-//    abstract val blockLength:Int
-
-    init {
-        initialize()
-    }
-
     /**
      * initialize
      */
-    private fun initialize() {
+    protected fun initialize() {
         val begin = System.currentTimeMillis()
         val fileLength = this.binaryStorage.file.length()
 
@@ -48,12 +42,21 @@ abstract class BlockStorage(
     abstract fun readBlock(index: Int, start: Long, byteArray: ByteArray)
 
     /**
+     * read
+     * @param start
+     * @param end
+     */
+    protected fun read(start: Long, end: Long): ByteArray {
+        return this.binaryStorage.read(start, end)
+    }
+
+    /**
      * write anywhere
      * @param byteArray
      * @param startPosition
      * @return Pair<Long, Long>
      */
-    fun write(byteArray: ByteArray, startPosition: Long = -1): Pair<Long, Long> {
+    protected fun write(byteArray: ByteArray, startPosition: Long = -1): Pair<Long, Long> {
         return this.binaryStorage.write(byteArray, startPosition)
     }
 
@@ -62,7 +65,7 @@ abstract class BlockStorage(
      * @param byteArray
      * @return Pair<Long, Long>
      */
-    fun writeBlock(byteArray: ByteArray): Pair<Long, Long> {
+    protected fun writeBlock(byteArray: ByteArray): Pair<Long, Long> {
         assert(byteArray.size == this.blockSize)
         return this.binaryStorage.write(byteArray)
     }

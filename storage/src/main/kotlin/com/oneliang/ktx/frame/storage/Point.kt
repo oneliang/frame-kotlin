@@ -1,9 +1,6 @@
 package com.oneliang.ktx.frame.storage
 
-import com.oneliang.ktx.util.common.toByteArray
-import com.oneliang.ktx.util.common.toHexString
-import com.oneliang.ktx.util.common.toInt
-import com.oneliang.ktx.util.common.toShort
+import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ConcurrentHashMap
@@ -18,12 +15,18 @@ class Point(
         private const val POINT_ID_LENGTH = 4//4+2+2
         private const val PAGE_NO_LENGTH = 2
         private const val VALUE_COUNT_LENGTH = 2
-        private const val PAGE_INFO_LENGTH = 8//4+2+2
-        private const val ONE_VALUE_LENGTH = 12
+        private const val PAGE_INFO_LENGTH = POINT_ID_LENGTH + PAGE_NO_LENGTH + VALUE_COUNT_LENGTH//4+2+2
+        private const val VALUE_ID_LENGTH = 4//int
+        private const val VALUE_SCORE_LENGTH = 8//double
+        private const val ONE_VALUE_LENGTH = VALUE_ID_LENGTH + VALUE_SCORE_LENGTH
     }
 
     private val pointIdPageInfoMap = ConcurrentHashMap<Int, MutableList<PointPageInfo>>()
     private val pointIdLastPageInfoMap = ConcurrentHashMap<Int, Pair<Short, PointPageInfo>>()
+
+    init {
+        initialize()
+    }
 
     /**
      * update all page info map
@@ -78,7 +81,7 @@ class Point(
             pageNo = pointPageInfoPair.second.pageNo
             valueCount = pointPageInfoPair.second.valueCount
             val pointPageStart = pointPageInfoPair.second.start
-            if (valueCount >= pageValueCount) {
+            if (valueCount >= this.pageValueCount) {
                 pageNo = (pageNo + 1).toShort()
                 valueCount = 1
                 val byteArrayOutputStream = ByteArrayOutputStream()
@@ -127,6 +130,24 @@ class Point(
             this.updateAllPageInfoMap(pointId, pageNo, valueCount, pointPageStart)
         }
     }
+
+    fun find(pointId: Int): List<ValueInfo> {
+        val valueInfoList = mutableListOf<ValueInfo>()
+        val pointPageInfoList = this.pointIdPageInfoMap[pointId] ?: emptyList()
+        pointPageInfoList.forEach {
+            val start = it.start + PAGE_INFO_LENGTH
+            val end = start + it.valueCount * ONE_VALUE_LENGTH
+            val byteArray = this.read(start, end)
+            for (valueIndex in 0 until it.valueCount) {
+                val id = byteArray.sliceArray(ONE_VALUE_LENGTH * valueIndex until ONE_VALUE_LENGTH * valueIndex + VALUE_ID_LENGTH).toInt()
+                val score = byteArray.sliceArray(ONE_VALUE_LENGTH * valueIndex + VALUE_ID_LENGTH until ONE_VALUE_LENGTH * valueIndex + ONE_VALUE_LENGTH).toDouble()
+                valueInfoList += ValueInfo(id, score)
+            }
+        }
+        return valueInfoList
+    }
+
+    class ValueInfo(val id: Int, val score: Double)
 
     class PointPageInfo(
         val pointId: Int,
