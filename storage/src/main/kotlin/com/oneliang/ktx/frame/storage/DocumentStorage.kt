@@ -7,6 +7,7 @@ import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.pow
 
 class DocumentStorage(
     private val directory: String,
@@ -73,30 +74,43 @@ class DocumentStorage(
     }
 
     /**
+     * get suitable point id and word
+     * @param dictionaryWord
+     */
+    private fun getSuitablePointIdAndWord(dictionaryWord: Dictionary.Word): Pair<Int, String>? {
+        val word = dictionaryWord.value
+        if (dictionaryWord.value.length == 1 && dictionaryWord.value.toCharArray()[0].isSymbol()) {
+            return null
+        }
+        if (word.isBlank()) {
+            return null
+        }
+        val pointId = if (this.pointIdMappingStorage.hasProperty(word)) {
+            this.pointIdMappingStorage.getProperty(word).toInt()
+        } else {
+            val pointId = this.pointIdAtomic.incrementAndGet()
+            val pointIdString = pointId.toString()
+            this.pointIdMappingStorage.setProperty(word, pointIdString)
+            this.config.lastPointId = pointId
+            pointId
+        }
+        return pointId to word
+    }
+
+    /**
      * add document
      * @param value
      */
     fun addDocument(value: String) {
         val wordCollector = this.featureOwner.extractFeature(value)
         val pointIdWordList = mutableListOf<Pair<Int, String>>()
+        val pointIdWordCountMap = mutableMapOf<Pair<Int, String>, PointWordCount>()
         wordCollector.wordList.forEach {
-            val word = it.value
-            if (it.value.length == 1 && it.value.toCharArray()[0].isSymbol()) {
-                return@forEach//continue
-            }
-            if (word.isBlank()) {
-                return@forEach // continue
-            }
-            val pointId = if (this.pointIdMappingStorage.hasProperty(word)) {
-                this.pointIdMappingStorage.getProperty(word).toInt()
-            } else {
-                val pointId = this.pointIdAtomic.incrementAndGet()
-                val pointIdString = pointId.toString()
-                this.pointIdMappingStorage.setProperty(word, pointIdString)
-                this.config.lastPointId = pointId
-                pointId
-            }
+            val (pointId, word) = getSuitablePointIdAndWord(it) ?: return@forEach//continue
             pointIdWordList += pointId to word
+
+            val pointWordCount = pointIdWordCountMap.getOrPut(Pair(pointId, word)) { PointWordCount(pointId, word) }
+            pointWordCount.count++
         }
         val documentId = addDocument(value.toByteArray())
         val relativeMap = pointIdWordList.toElementRelativeMap(keyTransform = {
@@ -105,11 +119,18 @@ class DocumentStorage(
             documentId
         })
         val valueLength = value.length
-        pointIdWordList.forEach {
-            val score = Scorer.score(it.second.length, valueLength)
-            this.point.write(it.first, documentId, score)
-            println("word[%s], point id[%s], document id[%s], score[%s]".format(it.second, it.first, documentId, score))
+//        pointIdWordList.forEach {
+//            val score = Scorer.score(it.second.length, valueLength)
+//            this.point.write(it.first, documentId, score)
+//            println("word[%s], point id[%s], document id[%s], score[%s]".format(it.second, it.first, documentId, score))
+//        }
+
+        pointIdWordCountMap.forEach { (key, pointWordCount) ->
+            val score = Scorer.score(pointWordCount.value.length, valueLength, 1.1.pow(pointWordCount.count))
+            this.point.write(pointWordCount.pointId, documentId, score)
+            println("word[%s], point id[%s], document id[%s], score[%s]".format(pointWordCount.value, pointWordCount.pointId, documentId, score))
         }
+
         relativeMap.forEach { (key, value) ->
             println("edge[%s], document id[%s], score[%s]".format(key, value.first, Scorer.score(key.length, valueLength, 2.0)))
         }
@@ -175,22 +196,7 @@ class DocumentStorage(
         val wordCollector = this.featureOwner.extractFeature(value)
         val pointIdWordList = mutableListOf<Pair<Int, String>>()
         wordCollector.wordList.forEach {
-            val word = it.value
-            if (it.value.length == 1 && it.value.toCharArray()[0].isSymbol()) {
-                return@forEach//continue
-            }
-            if (word.isBlank()) {
-                return@forEach // continue
-            }
-            val pointId = if (this.pointIdMappingStorage.hasProperty(word)) {
-                this.pointIdMappingStorage.getProperty(word).toInt()
-            } else {
-                val pointId = this.pointIdAtomic.incrementAndGet()
-                val pointIdString = pointId.toString()
-                this.pointIdMappingStorage.setProperty(word, pointIdString)
-                this.config.lastPointId = pointId
-                pointId
-            }
+            val (pointId, word) = getSuitablePointIdAndWord(it) ?: return@forEach//continue
             pointIdWordList += pointId to word
         }
         val pointId = pointIdWordList[0].first
@@ -218,7 +224,7 @@ class DocumentStorage(
             logger.error("binary storage is null, please check the logic, segment no[%s]".format(valueInfo.segmentNo))
             return ByteArray(0)
         }
-        return binaryStorage.read(valueInfo.start, valueInfo.end)
+        return uncompressData(binaryStorage.read(valueInfo.start, valueInfo.end))
     }
 
     /**
@@ -236,6 +242,8 @@ class DocumentStorage(
 
     private class SegmentInfo(var segmentNo: Short, var binaryStorage: BinaryStorage?)
 
+    private class PointWordCount(val pointId: Int, val value: String, var count: Int = 0)
+
     @Mappable
     private class Config {
         companion object {
@@ -249,7 +257,7 @@ class DocumentStorage(
         var lastDocumentId: Int = 0
 
         @Mappable.Key(KEY_LAST_SEGMENT_NO)
-        var lastSegmentNo: Short = 0
+        var lastSegmentNo: Short = -1
 
         @Mappable.Key(KEY_LAST_POINT_ID)
         var lastPointId: Int = 0

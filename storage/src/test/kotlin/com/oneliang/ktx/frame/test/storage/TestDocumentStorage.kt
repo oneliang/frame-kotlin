@@ -18,14 +18,14 @@ fun main() {
     val directory = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/storage/src/test/kotlin"
     val documentStorage = DocumentStorage(directory, featureOwner)
     val value = "你好吗？我很好。春天来了，万物复苏"
-//    documentStorage.addDocument(value)
+    documentStorage.addDocument(value)
 //    documentStorage.addDocument(ByteArray(10))
 
-    val keyword = "你"
-    val list = documentStorage.searchDocument(keyword)
-    list.forEach {
-        println("id:%s, score:%s".format(it.id, it.score))
-        val documentByteArray = documentStorage.collectDocument(it.id)
-        println(String(documentByteArray))
-    }
+//    val keyword = "你"
+//    val list = documentStorage.searchDocument(keyword)
+//    list.forEach {
+//        println("id:%s, score:%s".format(it.id, it.score))
+//        val documentByteArray = documentStorage.collectDocument(it.id)
+//        println(String(documentByteArray))
+//    }
 }
