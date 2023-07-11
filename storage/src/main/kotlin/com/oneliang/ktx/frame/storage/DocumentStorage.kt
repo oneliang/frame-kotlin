@@ -190,17 +190,32 @@ class DocumentStorage(
     /**
      * search document
      * @param value
-     * @return List<Point.ValueInfo>
+     * @return List<DocumentInfo>
      */
-    fun searchDocument(value: String): List<Point.ValueInfo> {
+    fun searchDocument(value: String): List<DocumentInfo> {
         val wordCollector = this.featureOwner.extractFeature(value)
         val pointIdWordList = mutableListOf<Pair<Int, String>>()
+        val documentInfoList = mutableListOf<DocumentInfo>()
+        val documentInfoMap = mutableMapOf<Int, DocumentInfo>()
+        val pointIdSet = hashSetOf<Int>()
         wordCollector.wordList.forEach {
             val (pointId, word) = getSuitablePointIdAndWord(it) ?: return@forEach//continue
             pointIdWordList += pointId to word
+            if (!pointIdSet.contains(pointId)) {
+                pointIdSet += pointId
+                val list = this.point.find(pointId, 0, 10)
+                logger.debug("point id:%s, word:%s, find size:%s", pointId, word, list.size)
+                list.forEach { pointValueInfo ->
+                    val newDocumentInfo = documentInfoMap.getOrPut(pointValueInfo.id) {
+                        DocumentInfo(pointValueInfo.id, 0.0).apply {
+                            documentInfoList += this
+                        }
+                    }
+                    newDocumentInfo.totalScore += pointValueInfo.score
+                }
+            }
         }
-        val pointId = pointIdWordList[0].first
-        return this.point.find(pointId)
+        return documentInfoList.sortedByDescending { it.totalScore }
     }
 
     /**
@@ -243,6 +258,8 @@ class DocumentStorage(
     private class SegmentInfo(var segmentNo: Short, var binaryStorage: BinaryStorage?)
 
     private class PointWordCount(val pointId: Int, val value: String, var count: Int = 0)
+
+    class DocumentInfo(val documentId: Int, var totalScore: Double)
 
     @Mappable
     private class Config {

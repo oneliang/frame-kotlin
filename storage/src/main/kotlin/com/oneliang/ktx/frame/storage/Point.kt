@@ -131,17 +131,36 @@ class Point(
         }
     }
 
-    fun find(pointId: Int): List<ValueInfo> {
+    /**
+     * find
+     * @param pointId
+     * @param from [0,+]
+     * @param size
+     * @return List<ValueInfo>
+     */
+    fun find(pointId: Int, from: Int, size: Int): List<ValueInfo> {
         val valueInfoList = mutableListOf<ValueInfo>()
         val pointPageInfoList = this.pointIdPageInfoMap[pointId] ?: emptyList()
-        pointPageInfoList.forEach {
-            val start = it.start + PAGE_INFO_LENGTH
-            val end = start + it.valueCount * ONE_VALUE_LENGTH
-            val byteArray = this.read(start, end)
-            for (valueIndex in 0 until it.valueCount) {
-                val id = byteArray.sliceArray(ONE_VALUE_LENGTH * valueIndex until ONE_VALUE_LENGTH * valueIndex + VALUE_ID_LENGTH).toInt()
-                val score = byteArray.sliceArray(ONE_VALUE_LENGTH * valueIndex + VALUE_ID_LENGTH until ONE_VALUE_LENGTH * valueIndex + ONE_VALUE_LENGTH).toDouble()
-                valueInfoList += ValueInfo(id, score)
+        val fromIndex = from
+        val endIndex = from + size
+        var count = 0
+        run loop@{
+            pointPageInfoList.forEach {
+                if (fromIndex > (it.pageNo * this.pageValueCount - 1) || endIndex < (it.pageNo - 1) * this.pageValueCount) {
+                    return@forEach//continue
+                }
+                val start = it.start + PAGE_INFO_LENGTH
+                val end = start + it.valueCount * ONE_VALUE_LENGTH
+                val byteArray = this.read(start, end)
+                for (valueIndex in 0 until it.valueCount) {
+                    val id = byteArray.sliceArray(ONE_VALUE_LENGTH * valueIndex until ONE_VALUE_LENGTH * valueIndex + VALUE_ID_LENGTH).toInt()
+                    val score = byteArray.sliceArray(ONE_VALUE_LENGTH * valueIndex + VALUE_ID_LENGTH until ONE_VALUE_LENGTH * valueIndex + ONE_VALUE_LENGTH).toDouble()
+                    valueInfoList += ValueInfo(id, score)
+                    count++
+                    if (count == size) {
+                        return@loop//break all
+                    }
+                }
             }
         }
         return valueInfoList
