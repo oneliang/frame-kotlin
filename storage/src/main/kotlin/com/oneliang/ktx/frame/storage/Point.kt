@@ -1,12 +1,13 @@
 package com.oneliang.ktx.frame.storage
 
 import com.oneliang.ktx.util.common.*
+import com.oneliang.ktx.util.file.FileWrapper
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ConcurrentHashMap
 
 class Point(
-    fullFilename: String, accessMode: BinaryStorage.AccessMode = BinaryStorage.AccessMode.RW, private val pageValueCount: Int = 100
+    fullFilename: String, accessMode: FileWrapper.AccessMode = FileWrapper.AccessMode.RW, private val pageValueCount: Int = 100
 ) : BlockStorage(
     fullFilename, accessMode, PAGE_INFO_LENGTH + ONE_VALUE_LENGTH * pageValueCount
 ) {
@@ -67,13 +68,13 @@ class Point(
     }
 
     /**
-     * write data
+     * add
      * @param pointId
      * @param documentId
      * @param score
      * @return Int
      */
-    fun write(pointId: Int, documentId: Int, score: Double) {
+    fun add(pointId: Int, documentId: Int, score: Double) {
         val pointPageInfoPair = this.pointIdLastPageInfoMap[pointId]
         var pageNo: Short = 1
         var valueCount: Short = 1

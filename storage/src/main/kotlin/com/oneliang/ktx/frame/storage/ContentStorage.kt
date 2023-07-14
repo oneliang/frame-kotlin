@@ -70,6 +70,14 @@ open class ContentStorage(
     }
 
     /**
+     * exist id
+     * @param id
+     */
+    open fun existId(id: Int): Boolean {
+        return this.route.findValueInfo(id) != null
+    }
+
+    /**
      * check initialize
      */
     protected fun checkInitialize() {
@@ -81,8 +89,19 @@ open class ContentStorage(
     /**
      * add content
      * @param data
+     * @return Int
      */
     open fun addContent(data: ByteArray): Int {
+        return addContent(id = null, data = data)
+    }
+
+    /**
+     * add content
+     * @param id
+     * @param data
+     * @return Int
+     */
+    open fun addContent(id: Int? = null, data: ByteArray): Int {
         checkInitialize()
 
         val segmentInfo = this.circleIterator.next()
@@ -95,11 +114,15 @@ open class ContentStorage(
         }
 
         val (start, end) = binaryStorage.write(compressData(data))
-        val id = this.route.write(segmentNo, start, end)
-        logger.info("add content finished, id[%s], segment no[%s], start[%s], end[%s]", id, segmentNo, start, end)
-        this.config.lastId = id
+        val outputId = if (id == null) {
+            this.route.write(segmentNo, start, end)
+        } else {
+            this.route.write(id, segmentNo, start, end)
+        }
+        logger.info("add content finished, id[%s], segment no[%s], start[%s], end[%s]", outputId, segmentNo, start, end)
+        this.config.lastId = outputId
         this.config.lastSegmentNo = segmentNo
-        return id
+        return outputId
     }
 
     /**

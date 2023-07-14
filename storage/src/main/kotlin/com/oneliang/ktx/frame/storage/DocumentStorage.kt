@@ -17,12 +17,11 @@ class DocumentStorage(
 
     companion object {
         private val logger = LoggerManager.getLogger(DocumentStorage::class)
-        private const val SEGMENT_COUNT = 10
         private const val POINT_FILENAME = "point"
         private const val POINT_ID_MAPPING_FILENAME = "point_id_mapping"
     }
 
-    private val point: Point
+    private val point: SortedPoint
 
     private val pointIdMappingStorage: KeyValueStorage = KeyValueStorage(this.directory + Constants.Symbol.SLASH_LEFT + POINT_ID_MAPPING_FILENAME)
     private val pointIdAtomic: AtomicInteger
@@ -35,7 +34,7 @@ class DocumentStorage(
 
         //point
         val pointFile = File(this.directory, POINT_FILENAME)
-        this.point = Point(pointFile.absolutePath)
+        this.point = SortedPoint(pointFile.absolutePath)
 
         //point
         this.pointIdAtomic = AtomicInteger(this.config.lastPointId)
@@ -83,7 +82,7 @@ class DocumentStorage(
             val pointWordCount = pointIdWordCountMap.getOrPut(Pair(pointId, word)) { PointWordCount(pointId, word) }
             pointWordCount.count++
         }
-        val documentId = this.addContent(value.toByteArray())
+        val documentId = this.addContent(data = value.toByteArray())
         val relativeMap = pointIdWordList.toElementRelativeMap(keyTransform = {
             it.first.toString()
         }, valueTransform = {
@@ -98,7 +97,7 @@ class DocumentStorage(
 
         pointIdWordCountMap.forEach { (key, pointWordCount) ->
             val score = Scorer.score(pointWordCount.value.length, valueLength, 1.1.pow(pointWordCount.count))
-            this.point.write(pointWordCount.pointId, documentId, score)
+            this.point.add(pointWordCount.pointId, documentId, score)
             println("word[%s], point id[%s], document id[%s], score[%s]".format(pointWordCount.value, pointWordCount.pointId, documentId, score))
         }
 
@@ -140,7 +139,6 @@ class DocumentStorage(
         }
         return documentInfoList.sortedByDescending { it.totalScore }
     }
-
 
     private class PointWordCount(val pointId: Int, val value: String, var count: Int = 0)
 

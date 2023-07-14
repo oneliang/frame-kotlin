@@ -1,10 +1,11 @@
 package com.oneliang.ktx.frame.storage
 
+import com.oneliang.ktx.util.file.FileWrapper
 import com.oneliang.ktx.util.logging.LoggerManager
 
 abstract class BlockStorage(
     fullFilename: String,
-    accessMode: BinaryStorage.AccessMode = BinaryStorage.AccessMode.RW,
+    accessMode: FileWrapper.AccessMode = FileWrapper.AccessMode.RW,
     val blockSize: Int
 ) {
     companion object {
@@ -18,7 +19,7 @@ abstract class BlockStorage(
      */
     protected fun initialize() {
         val begin = System.currentTimeMillis()
-        val fileLength = this.binaryStorage.file.length()
+        val fileLength = this.binaryStorage.length()
 
         assert(fileLength % this.blockSize == 0L)
 
