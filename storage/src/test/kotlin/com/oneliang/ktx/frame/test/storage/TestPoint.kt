@@ -15,9 +15,9 @@ fun main() {
     val end = Runtime.getRuntime().totalMemory()
     println(end)
     println("memory:%s".format(end - begin))
-    point.write(1, 1, 1.2)
-    point.write(1, 2, 1.0)
-    point.write(1, 3, 1.0)
+    point.add(1, 1, 1.2)
+    point.add(1, 2, 1.0)
+    point.add(1, 3, 1.0)
 }
 
 
