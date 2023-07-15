@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.storage
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.common.*
+import com.oneliang.ktx.util.concurrent.atomic.OperationLock
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
@@ -25,9 +26,9 @@ open class ContentStorage(
     private lateinit var segmentMap: MutableMap<Short, SegmentInfo>
     private lateinit var circleIterator: CircleIterator<SegmentInfo>
     protected open val config: Config = Config()
-
     private val configManager: ConfigManager = ConfigManager()
     private val configFullFilename = this.directory + Constants.Symbol.SLASH_LEFT + CONFIG_FILENAME
+    private val configUpdateLock = OperationLock()
     private var flag = 0
 
     /**
@@ -39,6 +40,9 @@ open class ContentStorage(
         }
         try {
             this.initializeLock.lock()
+            if (this.flag.bitContains(INITIALIZE_FLAG)) {//double check
+                return//return will trigger finally, so use unlock in finally
+            }
             //config
             this.configManager.readConfig(this.config, this.configFullFilename)
             //route
@@ -120,8 +124,10 @@ open class ContentStorage(
             this.route.write(id, segmentNo, start, end)
         }
         logger.info("add content finished, id[%s], segment no[%s], start[%s], end[%s]", outputId, segmentNo, start, end)
-        this.config.lastId = outputId
-        this.config.lastSegmentNo = segmentNo
+        this.configUpdateLock.operate {
+            this.config.lastId = maxOf(this.config.lastId, outputId)
+            this.config.lastSegmentNo = segmentNo
+        }
         return outputId
     }
 
