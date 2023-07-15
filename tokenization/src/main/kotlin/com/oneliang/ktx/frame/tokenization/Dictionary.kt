@@ -166,12 +166,12 @@ class Dictionary(private val categorizationStrategy: DefaultCategorizationStrate
                 endIndex += 1
                 if (endIndex > lastIndex) {//endIndex word is the last word, the character type of endIndex word is the same with current word, endIndex+1 overflow lastIndex, null word
                     currentWord = charArray.copyOfRange(beginIndex, endIndex).concatToString()
-                    logger.debug("last word:[%s], need to split, beginIndex:%s", currentWord, beginIndex)
+                    logger.verbose("last word:[%s], need to split, beginIndex:%s", currentWord, beginIndex)
                     this.splitWords(currentWord, wordLengthList, beginIndex, wordCollector)
                 }
             } else {//if not the same character type,update beginIndex and endIndex, separate it, stop word, endIndex is the next beginIndex
                 currentWord = charArray.copyOfRange(beginIndex, endIndex).concatToString()
-                logger.debug("after separate word:[%s], need to split, beginIndex:%s", currentWord, beginIndex)
+                logger.verbose("after separate word:[%s], need to split, beginIndex:%s", currentWord, beginIndex)
                 this.splitWords(currentWord, wordLengthList, beginIndex, wordCollector)
                 //update index
                 beginIndex = endIndex

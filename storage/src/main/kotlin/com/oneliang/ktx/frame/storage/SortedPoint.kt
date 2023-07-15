@@ -1,6 +1,7 @@
 package com.oneliang.ktx.frame.storage
 
 import com.oneliang.ktx.util.common.toByteArray
+import com.oneliang.ktx.util.common.toHexString
 import com.oneliang.ktx.util.common.toLongBits
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.ByteArrayInputStream
@@ -72,6 +73,10 @@ class SortedPoint(
      * @param score
      */
     fun add(pointId: Int, documentId: Int, score: Double) {
+        if (pointId == 39 && documentId == 6) {
+            println("$pointId, debug")
+        }
+
         val existId = this.existId(pointId)
         if (existId) {
             val contentByteArray = this.collectContent(pointId)

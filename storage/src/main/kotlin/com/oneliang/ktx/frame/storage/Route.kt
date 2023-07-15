@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class Route constructor(
     fullFilename: String,
     accessMode: FileWrapper.AccessMode = FileWrapper.AccessMode.RW,
-    initialValueId: Int = Int.MIN_VALUE
+    initialId: Int = Int.MIN_VALUE
 ) : BlockStorage(
     fullFilename, accessMode, DATA_LENGTH
 ) {
@@ -29,14 +29,15 @@ class Route constructor(
 
     private lateinit var idAtomic: AtomicInteger
     private val idMap = ConcurrentHashMap<Int, ValueInfo>()
+    private val segmentIdMap = ConcurrentHashMap<Short, MutableList<ValueInfo>>()
     private val writeLock = OperationLock()
 
     init {
         initialize()
-        if (initialValueId >= 0) {
-            this.idAtomic = AtomicInteger(initialValueId)
+        if (initialId >= 0) {
+            this.idAtomic = AtomicInteger(initialId)
         } else {
-            logger.warning("can not use dynamic value, because initial value id is:%s", initialValueId)
+            logger.warning("can not use dynamic value, because initial id is:%s", initialId)
         }
     }
 
@@ -56,6 +57,8 @@ class Route constructor(
             it.end = valueEnd
         }
         this.idMap[id] = valueInfo
+        val idList = this.segmentIdMap.getOrPut(segmentNo) { mutableListOf() }
+        idList += valueInfo
     }
 
     /**
@@ -89,10 +92,13 @@ class Route constructor(
 
             rewriteValueInfo(id, segmentNo, start, end)
 
-            this.idMap[id] = ValueInfo(id, segmentNo).also {
+            val valueInfo = ValueInfo(id, segmentNo).also {
                 it.start = start
                 it.end = end
             }
+            this.idMap[id] = valueInfo
+            val idList = this.segmentIdMap.getOrPut(segmentNo) { mutableListOf() }
+            idList += valueInfo
             id
         }
     }
@@ -108,21 +114,26 @@ class Route constructor(
 
     /**
      * update all value info
-     * @param separateValueId
+     * @param separateId
      * @param dataOffset
      * @return Boolean
      */
-    fun updateAllValueInfo(separateValueId: Int, dataOffset: Long): Boolean {
+    fun updateAllValueInfo(separateId: Int, dataOffset: Long): Boolean {
         return this.writeLock.operate {
-            val separateValueInfo = this.idMap[separateValueId]
+            val separateValueInfo = this.idMap[separateId]
             if (separateValueInfo == null) {
-                logger.warning("value id:%s not found.", separateValueId)
+                logger.warning("value id:%s not found.", separateId)
                 return@operate false
             }
             separateValueInfo.end = separateValueInfo.end + dataOffset
             this.rewriteValueInfo(separateValueInfo)
+            val idList = this.segmentIdMap[separateValueInfo.segmentNo] ?: emptyList()
+            if (idList.isEmpty()) {
+                logger.error("id list is empty, it is impossible, please check the logic, separate id:%s, segment no:%s", separateId, separateValueInfo.segmentNo)
+                return@operate false
+            }
 
-            this.idMap.forEach { (id, valueInfo) ->
+            idList.forEach { valueInfo ->
                 if (valueInfo.start > separateValueInfo.start) {
                     valueInfo.start = valueInfo.start + dataOffset
                     valueInfo.end = valueInfo.end + dataOffset

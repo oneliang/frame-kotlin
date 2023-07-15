@@ -44,7 +44,7 @@ open class ContentStorage(
             //route
             this.directory.toFile().mkdirs()
             val routeFile = File(this.directory, ROUTE_FILENAME)
-            this.route = Route(routeFile.absolutePath, initialValueId = this.config.lastId)
+            this.route = Route(routeFile.absolutePath, initialId = this.config.lastId)
 
             //segment
             this.segmentMap = mutableMapOf()
@@ -133,7 +133,6 @@ open class ContentStorage(
      */
     open fun replaceContent(id: Int, data: ByteArray): Boolean {
         checkInitialize()
-
         val valueInfo = this.route.findValueInfo(id)
         if (valueInfo == null) {
             logger.error("id[%s] is not found".format(id))

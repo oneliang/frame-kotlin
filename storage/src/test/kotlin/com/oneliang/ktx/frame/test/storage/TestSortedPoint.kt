@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.test.storage
 
 import com.oneliang.ktx.frame.storage.SortedPoint
 import com.oneliang.ktx.util.common.toHexString
+import com.oneliang.ktx.util.common.unGzip
 import java.io.ByteArrayInputStream
 import java.io.DataInputStream
 import java.io.File
@@ -10,29 +11,18 @@ import java.io.File
 fun main() {
     val directory = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/storage/src/test/kotlin/new_point"
 
-    val file = File(directory, "route.ds")
-    println(file.readBytes().toHexString())
-    return
 
-    val sortedPoint = SortedPoint(directory, false)
-    sortedPoint.add(1, 1, 1.0)
-    sortedPoint.add(1, 2, 2.0)
-    sortedPoint.add(1, 3, 3.0)
-    return
-
-//    val dataByteArrayOutputStream = ByteArrayOutputStream()
-//    dataByteArrayOutputStream.write(3.toByteArray())
-//    dataByteArrayOutputStream.write(0.3.toLongBits().toByteArray())
-//    dataByteArrayOutputStream.write(2.toByteArray())
-//    dataByteArrayOutputStream.write(0.2.toLongBits().toByteArray())
-//    dataByteArrayOutputStream.write(1.toByteArray())
-//    dataByteArrayOutputStream.write(0.1.toLongBits().toByteArray())
-//    val dataByteArray = dataByteArrayOutputStream.toByteArray()
-//    newPoint.addContent(dataByteArray)
+    val sortedPoint = SortedPoint(directory, true)
+//    for (pointId in 0 until 11) {
+//        sortedPoint.add(pointId, 1, 1.0)
+//        sortedPoint.add(pointId, 2, 1.0)
+//        sortedPoint.add(pointId, 3, 1.0)
+//        sortedPoint.add(pointId, 4, 1.0)
+//        sortedPoint.add(pointId, 5, 1.0)
+//    }
 //    return
-
-
-    val contentByteArray = sortedPoint.collectContent(1)
+//
+    val contentByteArray = sortedPoint.collectContent(0)
     println(contentByteArray.toHexString())
     val contentInputStream = DataInputStream(ByteArrayInputStream(contentByteArray))
     val contentSize = contentByteArray.size / 12
@@ -41,6 +31,9 @@ fun main() {
         list += contentInputStream.readInt() to contentInputStream.readDouble()
     }
     println(list)
-    val sortedList = list.sortedBy { it.second }
-    println(sortedList)
+    val file = File(directory, "segment_0.ds")
+    println(file.readBytes().unGzip().toHexString())
+    val routeFile = File(directory, "route.ds")
+    println(routeFile.readBytes().toHexString())
+    return
 }

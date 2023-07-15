@@ -34,7 +34,7 @@ class DocumentStorage(
 
         //point
         val pointFile = File(this.directory, POINT_FILENAME)
-        this.point = SortedPoint(pointFile.absolutePath)
+        this.point = SortedPoint(pointFile.absolutePath, this.useCompress)
 
         //point
         this.pointIdAtomic = AtomicInteger(this.config.lastPointId)
@@ -98,14 +98,14 @@ class DocumentStorage(
         pointIdWordCountMap.forEach { (key, pointWordCount) ->
             val score = Scorer.score(pointWordCount.value.length, valueLength, 1.1.pow(pointWordCount.count))
             this.point.add(pointWordCount.pointId, documentId, score)
-            println("word[%s], point id[%s], document id[%s], score[%s]".format(pointWordCount.value, pointWordCount.pointId, documentId, score))
+            logger.verbose("word[%s], point id[%s], document id[%s], score[%s]".format(pointWordCount.value, pointWordCount.pointId, documentId, score))
         }
 
         relativeMap.forEach { (key, value) ->
-            println("edge[%s], document id[%s], score[%s]".format(key, value.first, Scorer.score(key.length, valueLength, 2.0)))
+            logger.verbose("edge[%s], document id[%s], score[%s]".format(key, value.first, Scorer.score(key.length, valueLength, 2.0)))
         }
-        println(pointIdWordList)
-        println(relativeMap)
+        logger.verbose(pointIdWordList.toString())
+        logger.verbose(relativeMap.toString())
         this.pointIdMappingStorage.save()
     }
 
