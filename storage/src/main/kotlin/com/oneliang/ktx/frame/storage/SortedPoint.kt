@@ -73,10 +73,6 @@ class SortedPoint(
      * @param score
      */
     fun add(pointId: Int, documentId: Int, score: Double) {
-        if (pointId == 39 && documentId == 6) {
-            println("$pointId, debug")
-        }
-
         val existId = this.existId(pointId)
         if (existId) {
             val contentByteArray = this.collectContent(pointId)
