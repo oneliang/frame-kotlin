@@ -9,16 +9,15 @@ import java.util.concurrent.locks.ReentrantLock
 
 open class ContentStorage(
     protected val directory: String,
-    protected val useCompress: Boolean = true
+    protected val useCompress: Boolean = true,
+    private val segmentCount: Int = 10
 ) {
 
     companion object {
         private val logger = LoggerManager.getLogger(ContentStorage::class)
-        private const val SEGMENT_COUNT = 10
         private const val ROUTE_FILENAME = "route.ds"
         private const val CONFIG_FILENAME = "config"
         private const val SEGMENT_FILENAME_FORMAT = "segment_%s.ds"
-        private const val INITIALIZE_FLAG = 1 shl 0
     }
 
     private val initializeLock = ReentrantLock()
@@ -28,20 +27,24 @@ open class ContentStorage(
     protected open val config: Config = Config()
     private val configManager: ConfigManager = ConfigManager()
     private val configFullFilename = this.directory + Constants.Symbol.SLASH_LEFT + CONFIG_FILENAME
-    private val configUpdateLock = OperationLock()
-    private var flag = 0
     private var updateLock = OperationLock()
+
+    @Volatile
+    private var hasBeenInitialized = false
+
+    @Volatile
+    private var readMode = false
 
     /**
      * initialize
      */
     fun initialize() {
-        if (this.flag.bitContains(INITIALIZE_FLAG)) {
+        if (this.hasBeenInitialized) {
             return
         }
         try {
             this.initializeLock.lock()
-            if (this.flag.bitContains(INITIALIZE_FLAG)) {//double check
+            if (this.hasBeenInitialized) {//double check
                 return//return will trigger finally, so use unlock in finally
             }
             //config
@@ -54,7 +57,7 @@ open class ContentStorage(
             //segment
             this.segmentMap = mutableMapOf()
             val segmentList = mutableListOf<SegmentInfo>()
-            for (i in 0 until SEGMENT_COUNT) {
+            for (i in 0 until this.segmentCount) {
                 val segmentNo = i.toShort()
                 val segmentFile = File(this.directory, SEGMENT_FILENAME_FORMAT.format(segmentNo))
                 val binaryStorage = if (segmentFile.exists()) {
@@ -66,11 +69,29 @@ open class ContentStorage(
                 segmentList += segmentInfo
                 this.segmentMap[segmentNo] = segmentInfo
             }
-            val initialIndex = (this.config.lastSegmentNo + 1) % SEGMENT_COUNT
+            val initialIndex = (this.config.lastSegmentNo + 1) % this.segmentCount
             this.circleIterator = CircleIterator(segmentList.toTypedArray(), initialIndex = initialIndex)
         } finally {
-            this.flag = this.flag or INITIALIZE_FLAG
+            this.hasBeenInitialized = true
             this.initializeLock.unlock()
+        }
+    }
+
+    /**
+     * change to read mode
+     */
+    fun changeToReadMode() {
+        if (!this.readMode) {
+            this.readMode = true
+        }
+    }
+
+    /**
+     * change to write mode
+     */
+    fun changeToWriteMode() {
+        if (this.readMode) {
+            this.readMode = false
         }
     }
 
@@ -86,7 +107,7 @@ open class ContentStorage(
      * check initialize
      */
     protected fun checkInitialize() {
-        if (!this.flag.bitContains(INITIALIZE_FLAG)) {
+        if (!this.hasBeenInitialized) {
             initialize()
         }
     }
@@ -175,23 +196,28 @@ open class ContentStorage(
      */
     fun collectContent(id: Int): ByteArray {
         checkInitialize()
-        return this.updateLock.operate {
+        val block: () -> ByteArray = block@{
             val valueInfo = this.route.findValueInfo(id)
             if (valueInfo == null) {
                 logger.error("id[%s] is not found".format(id))
-                return@operate ByteArray(0)
+                return@block ByteArray(0)
             }
             val segmentInfo = this.segmentMap[valueInfo.segmentNo]
             if (segmentInfo == null) {
                 logger.error("segment no[%s] is not found in segment map".format(valueInfo.segmentNo))
-                return@operate ByteArray(0)
+                return@block ByteArray(0)
             }
             val binaryStorage = segmentInfo.binaryStorage
             if (binaryStorage == null) {
                 logger.error("binary storage is null, please check the logic, segment no[%s]".format(valueInfo.segmentNo))
-                return@operate ByteArray(0)
+                return@block ByteArray(0)
             }
             uncompressData(binaryStorage.read(valueInfo.start, valueInfo.end))
+        }
+        return if (this.readMode) {//read mode ignore update lock
+            block()
+        } else {
+            return this.updateLock.operate(block)
         }
     }
 

@@ -62,7 +62,7 @@ private fun searchData(documentStorage: DocumentStorage, value: String, outputFu
 }
 
 fun main() {
-    val directory = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/test/kotlin/point"
+    val directory = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/test/kotlin/storage"
 
     val loggerList = mutableListOf<AbstractLogger>()
     loggerList += BaseLogger(Logger.Level.DEBUG)
@@ -77,6 +77,7 @@ fun main() {
     val featureOwner = FeatureOwnerWithDictionary(dictionary)
 
     val documentStorage = DocumentStorage(directory, featureOwner, true)
-    initializeData(documentStorage)
-//    searchData(documentStorage, "304 出售", directory + "/1_result.txt")
+//    initializeData(documentStorage)
+    documentStorage.changeToReadMode()
+    searchData(documentStorage, "304 出售", directory + "/1_result.txt")
 }
