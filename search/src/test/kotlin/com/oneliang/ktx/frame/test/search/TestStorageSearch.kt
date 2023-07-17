@@ -1,15 +1,15 @@
 package com.oneliang.ktx.frame.test.search
 
 import com.oneliang.ktx.Constants
+import com.oneliang.ktx.frame.coroutine.Coroutine
 import com.oneliang.ktx.frame.storage.DocumentStorage
 import com.oneliang.ktx.frame.tokenization.Dictionary
 import com.oneliang.ktx.frame.tokenization.FeatureOwnerWithDictionary
 import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.toFile
 import com.oneliang.ktx.util.jxl.readSimpleExcel
-import com.oneliang.ktx.util.logging.BaseLogger
-import com.oneliang.ktx.util.logging.Logger
-import com.oneliang.ktx.util.logging.LoggerManager
+import com.oneliang.ktx.util.logging.*
+import kotlinx.coroutines.Job
 import java.io.FileOutputStream
 
 private fun loadDictionary(): Dictionary {
@@ -21,14 +21,24 @@ private fun loadDictionary(): Dictionary {
 
 private fun initializeData(documentStorage: DocumentStorage) {
     val readResult = "/Users/oneliang/Java/test-data/steel_requirement_original_data.xls".toFile().readSimpleExcel(0)
-    run loop@{
-        readResult.dataList.forEachIndexed { index, data ->
-            val value = data["content"].nullToBlank()
-            documentStorage.addDocument(value)
-            if (index == 10) {
-                return@loop //break
+    val begin = System.currentTimeMillis()
+    val jobList = mutableListOf<Job>()
+    val coroutine = Coroutine()
+    coroutine.runBlocking {
+        run loop@{
+            readResult.dataList.forEachIndexed { index, data ->
+                if (index == 11) {
+                    return@loop //break
+                }
+                val value = data["content"].nullToBlank()
+                jobList += coroutine.launch {
+                    documentStorage.addDocument(value)
+                }
             }
         }
+
+        jobList.forEach { it.join() }
+        println("initialize data cost:%s".format(System.currentTimeMillis() - begin))
     }
 }
 
@@ -52,8 +62,14 @@ private fun searchData(documentStorage: DocumentStorage, value: String, outputFu
 }
 
 fun main() {
-    LoggerManager.registerLogger("*", BaseLogger(Logger.Level.DEBUG))
     val directory = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/test/kotlin/point"
+
+    val loggerList = mutableListOf<AbstractLogger>()
+    loggerList += BaseLogger(Logger.Level.DEBUG)
+    loggerList += FileLogger(Logger.Level.DEBUG, directory.toFile(), "default")
+    val complexLogger = ComplexLogger(Logger.Level.DEBUG, loggerList, true)
+    LoggerManager.registerLogger("*", complexLogger)
+
 //    val file = File(directory, "route.ds")
 //    println(file.readBytes().toHexString())
 //    return
@@ -61,6 +77,6 @@ fun main() {
     val featureOwner = FeatureOwnerWithDictionary(dictionary)
 
     val documentStorage = DocumentStorage(directory, featureOwner, true)
-//    initializeData(documentStorage)
-    searchData(documentStorage, "304 出售", directory + "/1_result.txt")
+    initializeData(documentStorage)
+//    searchData(documentStorage, "304 出售", directory + "/1_result.txt")
 }

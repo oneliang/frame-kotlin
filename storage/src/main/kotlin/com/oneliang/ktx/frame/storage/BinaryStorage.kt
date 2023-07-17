@@ -36,9 +36,10 @@ class BinaryStorage(private val fullFilename: String, private val accessMode: Fi
      * @param start
      * @param end
      * @param data
+     * @return Pair<Long, Long>
      */
-    fun replace(start: Long, end: Long, data: ByteArray) {
-        this.fileWrapper.replace(start, end, data)
+    fun replace(start: Long, end: Long, data: ByteArray): Pair<Long, Long> {
+        return this.fileWrapper.replace(start, end, data)
     }
 
     /**

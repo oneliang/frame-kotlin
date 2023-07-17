@@ -62,44 +62,42 @@ class Route constructor(
     }
 
     /**
-     * write data
+     * add data
      * @param segmentNo
      * @param start
      * @param end
      * @return Int
      */
-    fun write(segmentNo: Short, start: Long, end: Long): Int {
-        if (this::idAtomic.isInitialized) {
-            val id = this.idAtomic.incrementAndGet()
-            return this.write(id, segmentNo, start, end)
-        } else {
-            error("can not use dynamic value, please use the other write method, fun write(id: Int, segmentNo: Short, start: Long, end: Long): Int")
-        }
+    fun add(segmentNo: Short, start: Long, end: Long): Int {
+        return this.add(null, segmentNo, start, end)
     }
 
     /**
-     * write data
+     * add data
      * @param id
      * @param segmentNo
      * @param start
      * @param end
      * @return Int
      */
-    fun write(id: Int, segmentNo: Short, start: Long, end: Long): Int {
+    fun add(id: Int? = null, segmentNo: Short, start: Long, end: Long): Int {
         return this.writeLock.operate {
+            val fixId = if (id == null && this::idAtomic.isInitialized) {
+                this.idAtomic.incrementAndGet()
+            } else {
+                id ?: error("can not use dynamic value")
+            }
 
-            this.idAtomic.set(id)//update the id atomic
+            rewriteValueInfo(fixId, segmentNo, start, end)
 
-            rewriteValueInfo(id, segmentNo, start, end)
-
-            val valueInfo = ValueInfo(id, segmentNo).also {
+            val valueInfo = ValueInfo(fixId, segmentNo).also {
                 it.start = start
                 it.end = end
             }
-            this.idMap[id] = valueInfo
+            this.idMap[fixId] = valueInfo
             val idList = this.segmentIdMap.getOrPut(segmentNo) { mutableListOf() }
             idList += valueInfo
-            id
+            fixId
         }
     }
 
@@ -109,7 +107,9 @@ class Route constructor(
      * @return ValueInfo?
      */
     fun findValueInfo(id: Int): ValueInfo? {
-        return this.idMap[id]
+        return this.writeLock.operate {
+            this.idMap[id]
+        }
     }
 
     /**

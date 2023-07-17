@@ -30,6 +30,7 @@ open class ContentStorage(
     private val configFullFilename = this.directory + Constants.Symbol.SLASH_LEFT + CONFIG_FILENAME
     private val configUpdateLock = OperationLock()
     private var flag = 0
+    private var updateLock = OperationLock()
 
     /**
      * initialize
@@ -107,28 +108,27 @@ open class ContentStorage(
      */
     open fun addContent(id: Int? = null, data: ByteArray): Int {
         checkInitialize()
+        return this.updateLock.operate {
+            val segmentInfo = this.circleIterator.next()
+            val segmentNo = segmentInfo.segmentNo
+            var binaryStorage = segmentInfo.binaryStorage
+            if (binaryStorage == null) {
+                val segmentFile = File(this.directory, SEGMENT_FILENAME_FORMAT.format(segmentNo))
+                binaryStorage = BinaryStorage(segmentFile.absolutePath)
+                segmentInfo.binaryStorage = binaryStorage
+            }
 
-        val segmentInfo = this.circleIterator.next()
-        val segmentNo = segmentInfo.segmentNo
-        var binaryStorage = segmentInfo.binaryStorage
-        if (binaryStorage == null) {
-            val segmentFile = File(this.directory, SEGMENT_FILENAME_FORMAT.format(segmentNo))
-            binaryStorage = BinaryStorage(segmentFile.absolutePath)
-            segmentInfo.binaryStorage = binaryStorage
-        }
-
-        val (start, end) = binaryStorage.write(compressData(data))
-        val outputId = if (id == null) {
-            this.route.write(segmentNo, start, end)
-        } else {
-            this.route.write(id, segmentNo, start, end)
-        }
-        logger.info("add content finished, id[%s], segment no[%s], start[%s], end[%s]", outputId, segmentNo, start, end)
-        this.configUpdateLock.operate {
+            val (start, end) = binaryStorage.write(compressData(data))
+            val outputId = if (id == null) {
+                this.route.add(segmentNo, start, end)
+            } else {
+                this.route.add(id, segmentNo, start, end)
+            }
+            logger.debug("add content finished, id[%s], segment no[%s], start[%s], end[%s]", outputId, segmentNo, start, end)
             this.config.lastId = maxOf(this.config.lastId, outputId)
             this.config.lastSegmentNo = segmentNo
+            outputId
         }
-        return outputId
     }
 
     /**
@@ -139,30 +139,33 @@ open class ContentStorage(
      */
     open fun replaceContent(id: Int, data: ByteArray): Boolean {
         checkInitialize()
-        val valueInfo = this.route.findValueInfo(id)
-        if (valueInfo == null) {
-            logger.error("id[%s] is not found".format(id))
-            return false
+        return this.updateLock.operate {
+            val valueInfo = this.route.findValueInfo(id)
+            if (valueInfo == null) {
+                logger.error("id[%s] is not found".format(id))
+                return@operate false
+            }
+            val segmentInfo = this.segmentMap[valueInfo.segmentNo]
+            if (segmentInfo == null) {
+                logger.error("segment no[%s] is not found in segment map".format(valueInfo.segmentNo))
+                return@operate false
+            }
+            val binaryStorage = segmentInfo.binaryStorage
+            if (binaryStorage == null) {
+                logger.error("binary storage is null, please check the logic, segment no[%s]".format(valueInfo.segmentNo))
+                return@operate false
+            }
+            val compressedData = compressData(data)
+            val dataOffset = compressedData.size - (valueInfo.end - valueInfo.start)
+            val (start, end) = binaryStorage.replace(valueInfo.start, valueInfo.end, compressedData)
+            val updateSign = this.route.updateAllValueInfo(id, dataOffset)
+            logger.debug("replace content finished, id[%s], segment no[%s], start[%s], end[%s]", id, segmentInfo.segmentNo, start, end)
+            if (!updateSign) {
+                logger.warning("update all value info failure")
+                return@operate false
+            }
+            true
         }
-        val segmentInfo = this.segmentMap[valueInfo.segmentNo]
-        if (segmentInfo == null) {
-            logger.error("segment no[%s] is not found in segment map".format(valueInfo.segmentNo))
-            return false
-        }
-        val binaryStorage = segmentInfo.binaryStorage
-        if (binaryStorage == null) {
-            logger.error("binary storage is null, please check the logic, segment no[%s]".format(valueInfo.segmentNo))
-            return false
-        }
-        val compressedData = compressData(data)
-        val dataOffset = compressedData.size - (valueInfo.end - valueInfo.start)
-        binaryStorage.replace(valueInfo.start, valueInfo.end, compressedData)
-        val updateSign = this.route.updateAllValueInfo(id, dataOffset)
-        if (!updateSign) {
-            logger.warning("update all value info is")
-            return false
-        }
-        return true
     }
 
     /**
@@ -172,23 +175,24 @@ open class ContentStorage(
      */
     fun collectContent(id: Int): ByteArray {
         checkInitialize()
-
-        val valueInfo = this.route.findValueInfo(id)
-        if (valueInfo == null) {
-            logger.error("id[%s] is not found".format(id))
-            return ByteArray(0)
+        return this.updateLock.operate {
+            val valueInfo = this.route.findValueInfo(id)
+            if (valueInfo == null) {
+                logger.error("id[%s] is not found".format(id))
+                return@operate ByteArray(0)
+            }
+            val segmentInfo = this.segmentMap[valueInfo.segmentNo]
+            if (segmentInfo == null) {
+                logger.error("segment no[%s] is not found in segment map".format(valueInfo.segmentNo))
+                return@operate ByteArray(0)
+            }
+            val binaryStorage = segmentInfo.binaryStorage
+            if (binaryStorage == null) {
+                logger.error("binary storage is null, please check the logic, segment no[%s]".format(valueInfo.segmentNo))
+                return@operate ByteArray(0)
+            }
+            uncompressData(binaryStorage.read(valueInfo.start, valueInfo.end))
         }
-        val segmentInfo = this.segmentMap[valueInfo.segmentNo]
-        if (segmentInfo == null) {
-            logger.error("segment no[%s] is not found in segment map".format(valueInfo.segmentNo))
-            return ByteArray(0)
-        }
-        val binaryStorage = segmentInfo.binaryStorage
-        if (binaryStorage == null) {
-            logger.error("binary storage is null, please check the logic, segment no[%s]".format(valueInfo.segmentNo))
-            return ByteArray(0)
-        }
-        return uncompressData(binaryStorage.read(valueInfo.start, valueInfo.end))
     }
 
     /**

@@ -6,5 +6,6 @@ dependencies {
     implementation(project(":tokenization"))
     implementation(project(":cache"))
     implementation(project(":feature"))
+    implementation(project(":coroutine"))
 }
 
