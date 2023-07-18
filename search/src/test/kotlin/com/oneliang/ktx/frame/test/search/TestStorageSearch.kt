@@ -27,9 +27,9 @@ private fun initializeData(documentStorage: DocumentStorage) {
     coroutine.runBlocking {
         run loop@{
             readResult.dataList.forEachIndexed { index, data ->
-                if (index == 11) {
-                    return@loop //break
-                }
+//                if (index == 11) {
+//                    return@loop //break
+//                }
                 val value = data["content"].nullToBlank()
                 jobList += coroutine.launch {
                     documentStorage.addDocument(value)
@@ -38,7 +38,7 @@ private fun initializeData(documentStorage: DocumentStorage) {
         }
 
         jobList.forEach { it.join() }
-        println("initialize data cost:%s".format(System.currentTimeMillis() - begin))
+        println("initialize data size:%s, cost:%s".format(readResult.dataList.size, System.currentTimeMillis() - begin))
     }
 }
 
@@ -65,9 +65,9 @@ fun main() {
     val directory = "/Users/oneliang/Java/githubWorkspace/frame-kotlin/search/src/test/kotlin/storage"
 
     val loggerList = mutableListOf<AbstractLogger>()
-    loggerList += BaseLogger(Logger.Level.DEBUG)
+//    loggerList += BaseLogger(Logger.Level.DEBUG)
     loggerList += FileLogger(Logger.Level.DEBUG, directory.toFile(), "default")
-    val complexLogger = ComplexLogger(Logger.Level.DEBUG, loggerList, true)
+    val complexLogger = ComplexLogger(Logger.Level.INFO, loggerList, true)
     LoggerManager.registerLogger("*", complexLogger)
 
 //    val file = File(directory, "route.ds")

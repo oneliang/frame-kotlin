@@ -112,9 +112,11 @@ class DocumentStorage(
     /**
      * search document
      * @param value
+     * @param from
+     * @param size
      * @return List<DocumentInfo>
      */
-    fun searchDocument(value: String): List<DocumentInfo> {
+    fun searchDocument(value: String, from: Int = 0, size: Int = 10): List<DocumentInfo> {
         val wordCollector = this.featureOwner.extractFeature(value)
         val pointIdWordList = mutableListOf<Pair<Int, String>>()
         val documentInfoList = mutableListOf<DocumentInfo>()
@@ -125,7 +127,7 @@ class DocumentStorage(
             pointIdWordList += pointId to word
             if (!pointIdSet.contains(pointId)) {
                 pointIdSet += pointId
-                val list = this.point.find(pointId, 0, 10)
+                val list = this.point.find(pointId, from, size)
                 logger.debug("point id:%s, word:%s, find size:%s", pointId, word, list.size)
                 list.forEach { pointValueInfo ->
                     val newDocumentInfo = documentInfoMap.getOrPut(pointValueInfo.id) {
@@ -137,7 +139,11 @@ class DocumentStorage(
                 }
             }
         }
-        return documentInfoList.sortedByDescending { it.totalScore }
+        if (from > documentInfoList.size) {
+            return emptyList()
+        }
+        val end = minOf(documentInfoList.size, from + size)
+        return documentInfoList.sortedByDescending { it.totalScore }.subList(from, end)
     }
 
     private class PointWordCount(val pointId: Int, val value: String, var count: Int = 0)
