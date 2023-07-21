@@ -21,7 +21,8 @@ class DocumentStorage(
         private const val POINT_ID_MAPPING_FILENAME = "point_id_mapping"
     }
 
-    private val point: SortedPoint
+    //        private val point: SortedPoint
+    private val point: ComplexPoint
 
     private val pointIdMappingStorage: KeyValueStorage = KeyValueStorage(this.directory + Constants.Symbol.SLASH_LEFT + POINT_ID_MAPPING_FILENAME)
     private val pointIdAtomic: AtomicInteger
@@ -34,7 +35,8 @@ class DocumentStorage(
 
         //point
         val pointFile = File(this.directory, POINT_FILENAME)
-        this.point = SortedPoint(pointFile.absolutePath, this.useCompress)
+//        this.point = SortedPoint(pointFile.absolutePath, this.useCompress)
+        this.point = ComplexPoint(pointFile.absolutePath)
 
         //point
         this.pointIdAtomic = AtomicInteger(this.config.lastPointId)
@@ -107,6 +109,13 @@ class DocumentStorage(
         logger.verbose(pointIdWordList.toString())
         logger.verbose(relativeMap.toString())
         this.pointIdMappingStorage.save()
+    }
+
+    /**
+     * flush
+     */
+    fun flush() {
+        this.point.flush()
     }
 
     /**

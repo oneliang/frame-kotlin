@@ -72,7 +72,6 @@ class Point(
      * @param pointId
      * @param documentId
      * @param score
-     * @return Int
      */
     fun add(pointId: Int, documentId: Int, score: Double) {
         val pointPageInfoPair = this.pointIdLastPageInfoMap[pointId]

@@ -158,7 +158,7 @@ open class ContentStorage(
      * @param data
      * @return Boolean
      */
-    open fun replaceContent(id: Int, data: ByteArray): Boolean {
+    fun replaceContent(id: Int, data: ByteArray): Boolean {
         checkInitialize()
         return this.updateLock.operate {
             val valueInfo = this.route.findValueInfo(id)

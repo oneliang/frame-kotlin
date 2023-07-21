@@ -36,8 +36,9 @@ private fun initializeData(documentStorage: DocumentStorage) {
                 }
             }
         }
-
         jobList.forEach { it.join() }
+
+        documentStorage.flush()
         println("initialize data size:%s, cost:%s".format(readResult.dataList.size, System.currentTimeMillis() - begin))
     }
 }
@@ -66,7 +67,7 @@ fun main() {
 
     val loggerList = mutableListOf<AbstractLogger>()
 //    loggerList += BaseLogger(Logger.Level.DEBUG)
-    loggerList += FileLogger(Logger.Level.DEBUG, directory.toFile(), "default")
+    loggerList += FileLogger(Logger.Level.DEBUG, directory.toFile(), "default.log")
     val complexLogger = ComplexLogger(Logger.Level.INFO, loggerList, true)
     LoggerManager.registerLogger("*", complexLogger)
 
