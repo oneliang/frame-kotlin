@@ -1,0 +1,56 @@
+{
+  "global": {
+    "names": [
+      "小明",
+      "小红",
+      "小军",
+      "小桔",
+      "小方"
+    ],
+    "items": [
+      "苹果",
+      "雪梨",
+      "桔子"
+    ],
+    "dates_unit": [
+      "年",
+      "月",
+      "日"
+    ],
+    "times_unit": [
+      "时",
+      "分",
+      "秒"
+    ],
+    "lengths_unit": [
+      "千米",
+      "米",
+      "分米",
+      "厘米",
+      "毫米"
+    ],
+    "rmb_currency_unit": [
+      "元",
+      "角",
+      "分"
+    ]
+  },
+  "questions": [
+    {
+      "key": "time_plus",
+      "repeat": 10,
+      "config": {
+        "a": "random_timestamp:0:2500",
+        "b": "random_timestamp:2500:5000"
+      },
+      "operator": {
+        "a": [
+          "df:HH时mm分"
+        ],
+        "b": [
+          "df:HH时mm分"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "questions": [
+    {
+      "key": "two_multiply",
+      "repeat": 100,
+      "config": {
+        "a": "random_int:0:10",
+        "b": "random_int:0:10"
+      }
+    }
+  ]
+}

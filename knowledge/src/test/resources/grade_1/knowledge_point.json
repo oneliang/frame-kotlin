@@ -1,0 +1,82 @@
+[
+  {
+    "name": "计算-两个数加法",
+    "key": "two_plus",
+    "template": "<%=a%> + <%=b%>=",
+    "parameters": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "name": "计算-两个数减法",
+    "key": "two_minus",
+    "template": "<%=a%> - <%=b%>=",
+    "parameters": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "name": "计算-两个数乘法",
+    "key": "two_multiply",
+    "template": "<%=a%> x <%=b%>=",
+    "parameters": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "name": "计算-两个数除法",
+    "key": "two_divide",
+    "template": "<%=a%> ÷ <%=b%>=",
+    "parameters": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "name": "应用-两个数加法",
+    "key": "apply_two_plus",
+    "template": "<%=name%>原来有<%=a%>个<%=item%>,后来增加了<%=b%>个<%=item%>,请问<%=name%>现在一共有多少个<%=item%>?",
+    "parameters": [
+      "name",
+      "item",
+      "a",
+      "b"
+    ]
+  },
+  {
+    "name": "应用-两个数减法",
+    "key": "apply_two_minus",
+    "template": "<%=name%>原来有<%=a%>个<%=item%>,后来减少了<%=b%>个<%=item%>,请问<%=name%>现在剩下多少个<%=item%>?",
+    "parameters": [
+      "name",
+      "item",
+      "a",
+      "b"
+    ]
+  },
+  {
+    "name": "应用-两个数乘法",
+    "key": "apply_two_multiply",
+    "template": "<%=name%>有<%=a%>篮<%=item%>,每篮<%=item%>有<%=b%>个,请问<%=name%>现在有多少<%=item%>?",
+    "parameters": [
+      "name",
+      "item",
+      "a",
+      "b"
+    ]
+  },
+  {
+    "name": "应用-两个数除法",
+    "key": "apply_two_divide",
+    "template": "<%=name%>现在有<%=a%>个<%=item%>,需要将这些<%=item%>平均分成<%=b%>份,请问每份<%=item%>是多少?",
+    "parameters": [
+      "name",
+      "item",
+      "a",
+      "b"
+    ]
+  }
+]

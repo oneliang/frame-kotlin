@@ -1,0 +1,12 @@
+[
+  {
+    "name": "换算-任意单位",
+    "key": "unit_convert_any_unit",
+    "template": "<%=a%><%=unit_0%> = (  )<%=unit_1%>",
+    "parameters": [
+      "a",
+      "unit_0",
+      "unit_1"
+    ]
+  }
+]

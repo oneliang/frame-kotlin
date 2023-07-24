@@ -45,5 +45,6 @@ include(":ik-analyzer")
 include(":tokenization")
 include(":tester")
 include(":feature")
+include(":knowledge")
 //netty
 apply(from = "${rootDir}/netty/netty.gradle.kts")

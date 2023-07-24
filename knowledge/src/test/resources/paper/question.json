@@ -1,0 +1,168 @@
+{
+  "global": {
+    "names": [
+      "小明",
+      "小红",
+      "小军",
+      "小桔",
+      "小方"
+    ],
+    "items": [
+      "苹果",
+      "雪梨",
+      "桔子"
+    ],
+    "dates_unit": [
+      "年",
+      "月",
+      "日"
+    ],
+    "times_unit": [
+      "时",
+      "分",
+      "秒"
+    ],
+    "lengths_unit": [
+      "千米",
+      "米",
+      "分米",
+      "厘米",
+      "毫米"
+    ],
+    "rmb_currency_unit": [
+      "元",
+      "角",
+      "分"
+    ]
+  },
+  "questions": [
+    {
+      "key": "two_plus",
+      "repeat": 2,
+      "config": {
+        "a": "random_int:0:100",
+        "b": "random_int:0:100"
+      }
+    },
+    {
+      "key": "two_minus",
+      "config": {
+        "a": "random_int:0:100",
+        "b": "random_int:0:100"
+      },
+      "operator": {
+        "a": [
+          ">:b"
+        ]
+      }
+    },
+    {
+      "key": "two_multiply",
+      "config": {
+        "a": "random_int:0:100",
+        "b": "random_int:0:100"
+      }
+    },
+    {
+      "key": "two_divide",
+      "config": {
+        "a": "random_int:0:100",
+        "b": "random_int:0:100"
+      }
+    },
+    {
+      "key": "unit_convert_any_unit",
+      "repeat": 2,
+      "config": {
+        "unit_0": "random_string:times_unit",
+        "unit_1": "random_string:times_unit",
+        "a": "random_int:0:100"
+      }
+    },
+    {
+      "key": "unit_convert_any_unit",
+      "repeat": 2,
+      "config": {
+        "unit_0": "random_string:dates_unit",
+        "unit_1": "random_string:dates_unit",
+        "a": "random_int:0:100"
+      }
+    },
+    {
+      "key": "unit_convert_any_unit",
+      "repeat": 2,
+      "config": {
+        "unit_0": "random_string:lengths_unit",
+        "unit_1": "random_string:lengths_unit",
+        "a": "random_int:0:100"
+      }
+    },
+    {
+      "key": "apply_two_plus",
+      "config": {
+        "name": "random_string:names",
+        "item": "random_string:items",
+        "a": "random_int:0:100",
+        "b": "random_int:0:100"
+      }
+    },
+    {
+      "key": "apply_two_minus",
+      "config": {
+        "name": "random_string:names",
+        "item": "random_string:items",
+        "a": "random_int:0:100",
+        "b": "random_int:0:100"
+      },
+      "operator": {
+        "a": [
+          ">:b"
+        ]
+      }
+    },
+    {
+      "key": "apply_two_multiply",
+      "config": {
+        "name": "random_string:names",
+        "item": "random_string:items",
+        "a": "random_int:0:100",
+        "b": "random_int:0:100"
+      }
+    },
+    {
+      "key": "apply_two_divide",
+      "config": {
+        "name": "random_string:names",
+        "item": "random_string:items",
+        "a": "random_float:0:100",
+        "b": "random_float:0:100"
+      },
+      "operator": {
+        "a": [
+          ">:b",
+          "f:.2f"
+        ],
+        "b": [
+          "f:.2f"
+        ]
+      }
+    },
+    {
+      "key": "apply_two_plus",
+      "config": {
+        "name": "random_string:names",
+        "item": "random_string:items",
+        "a": "random_float:0:100",
+        "b": "random_float:0:100"
+      },
+      "operator": {
+        "a": [
+          "f:.2f"
+        ],
+        "b": [
+          "f:.2f"
+        ]
+      }
+    }
+  ]
+}
