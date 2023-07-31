@@ -46,5 +46,6 @@ include(":tokenization")
 include(":tester")
 include(":feature")
 include(":knowledge")
+include(":gradle-plugin")
 //netty
 apply(from = "${rootDir}/netty/netty.gradle.kts")
