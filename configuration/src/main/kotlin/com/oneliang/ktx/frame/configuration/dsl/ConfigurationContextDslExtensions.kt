@@ -7,7 +7,6 @@ import com.oneliang.ktx.frame.configuration.ConfigurationContainer
 import com.oneliang.ktx.frame.configuration.ConfigurationContext
 
 fun configurationContext(block: ConfigurationContext.() -> Unit) {
-    ConfigurationContainer.rootConfigurationContext.initialize(Constants.String.BLANK)
     block(ConfigurationContainer.rootConfigurationContext)
 }
 

@@ -43,7 +43,6 @@ class ConfigurationContext : AbstractContext() {
     override fun initialize(parameters: String) {
         val fixParameters = fixParameters(parameters)
         if (fixParameters.isBlank()) {
-            logger.info("parameters is blank, maybe use dsl initialize")
             return
         }
         try {
