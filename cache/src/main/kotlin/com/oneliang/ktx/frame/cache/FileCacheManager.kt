@@ -49,7 +49,8 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
             val time = System.currentTimeMillis()
             time.getZeroTime(fixCacheRefreshTime).toUtilDate().toFormatString(Constants.Time.UNION_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
         }
-        val cacheName = keyString.toBriefString(80) + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.toLowerCase()
+        val cacheName =
+            keyString.toBriefString(80) + Constants.Symbol.UNDERLINE + keyMd5 + Constants.Symbol.UNDERLINE + formatTime + Constants.Symbol.UNDERLINE + cacheType.java.simpleName.lowercase()
         return relativePath.toString() + Constants.Symbol.SLASH_LEFT + cacheName
     }
 
@@ -92,8 +93,7 @@ class FileCacheManager constructor(private var cacheDirectory: String, private v
      * @param value
      * @param cacheRefreshTime
      */
-    override fun <T : Any> saveToCache(key: Any, value:
-    T, cacheRefreshTime: Long) {
+    override fun <T : Any> saveToCache(key: Any, value: T, cacheRefreshTime: Long) {
         //first try to delete old cache, maybe old and new cache file is the same
         val keyString = key.toString()
         val oldCacheFullFilename = this.keyValueStorage.getProperty(keyString)
