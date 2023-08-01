@@ -22,9 +22,15 @@ object CollectUtil {
      * @param httpHeaderList
      * @param requestByteArray
      * @param advancedOption
-     * @return ByteArrayOutputStream
+     * @return ByteArray
      */
-    private fun collectFromHttp(httpUrl: String, method: String = Constants.Http.RequestMethod.GET.value, httpHeaderList: List<HttpNameValue> = emptyList(), requestByteArray: ByteArray = ByteArray(0), advancedOption: AdvancedOption? = null): ByteArray {
+    private fun collectFromHttp(
+        httpUrl: String,
+        method: String = Constants.Http.RequestMethod.GET.value,
+        httpHeaderList: List<HttpNameValue> = emptyList(),
+        requestByteArray: ByteArray = ByteArray(0),
+        advancedOption: AdvancedOption? = null
+    ): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
         val callback = object : Callback {
             @Throws(Exception::class)
@@ -60,14 +66,23 @@ object CollectUtil {
     /**
      * collect from http with cache
      * @param httpUrl
+     * @param method
      * @param cacheKey keep the same cache key can delete old cache
      * @param httpHeaderList
      * @param requestByteArray
      * @param fileCacheManager
      * @param cacheRefreshTime
-     * @return ByteArrayOutputStream
+     * @return ByteArray
      */
-    fun collectFromHttpWithCache(httpUrl: String, method: String = Constants.Http.RequestMethod.GET.value, cacheKey: String = Constants.String.BLANK, httpHeaderList: List<HttpNameValue> = emptyList(), requestByteArray: ByteArray = ByteArray(0), fileCacheManager: FileCacheManager? = null, cacheRefreshTime: Long = -1L): ByteArray {
+    fun collectFromHttpWithCache(
+        httpUrl: String,
+        method: String = Constants.Http.RequestMethod.GET.value,
+        cacheKey: String = Constants.String.BLANK,
+        httpHeaderList: List<HttpNameValue> = emptyList(),
+        requestByteArray: ByteArray = ByteArray(0),
+        fileCacheManager: FileCacheManager? = null,
+        cacheRefreshTime: Long = -1L
+    ): ByteArray {
         val newCacheKey = cacheKey.ifBlank {
             httpUrl.replace(Constants.Symbol.SLASH_LEFT, Constants.Symbol.DOLLAR).replace(Constants.Symbol.COLON, Constants.Symbol.AT).replace(Constants.Symbol.QUESTION_MARK, Constants.Symbol.POUND)
         }
@@ -91,19 +106,54 @@ object CollectUtil {
     /**
      * collect from http with cache
      * use for collect rule
+     * @param httpUrl
+     * @param method
+     * @param cacheKey
+     * @param httpHeaderList
+     * @param requestByteArray
+     * @param fileCacheManager
+     * @param cacheRefreshTime
+     * @param collectRuleList
      * @return List<CollectData>
      */
-    fun collectFromHttpWithCache(httpUrl: String, method: String = Constants.Http.RequestMethod.GET.value, cacheKey: String = Constants.String.BLANK, httpHeaderList: List<HttpNameValue> = emptyList(), requestByteArray: ByteArray = ByteArray(0), fileCacheManager: FileCacheManager? = null, cacheRefreshTime: Long = -1L, collectRuleList: List<CollectRule> = emptyList()): List<CollectData> {
-        return this.collectFromHttpWithCache(httpUrl, method, cacheKey, httpHeaderList, requestByteArray, fileCacheManager, cacheRefreshTime, collectRuleList, object : CollectDataTransformer<List<CollectData>> {
-            override fun transform(collectDataList: List<CollectData>): List<CollectData> {
-                return collectDataList
-            }
-        })
+    fun collectFromHttpWithCache(
+        httpUrl: String,
+        method: String = Constants.Http.RequestMethod.GET.value,
+        cacheKey: String = Constants.String.BLANK,
+        httpHeaderList: List<HttpNameValue> = emptyList(),
+        requestByteArray: ByteArray = ByteArray(0),
+        fileCacheManager: FileCacheManager? = null,
+        cacheRefreshTime: Long = -1L,
+        collectRuleList: List<CollectRule> = emptyList()
+    ): List<CollectData> {
+        return this.collectFromHttpWithCache(
+            httpUrl,
+            method,
+            cacheKey,
+            httpHeaderList,
+            requestByteArray,
+            fileCacheManager,
+            cacheRefreshTime,
+            collectRuleList,
+            object : CollectDataTransformer<List<CollectData>> {
+                override fun transform(collectDataList: List<CollectData>): List<CollectData> {
+                    return collectDataList
+                }
+            })
     }
 
     /**
      * collect from http with cache
      * use for collect rule
+     * @param httpUrl
+     * @param method
+     * @param cacheKey
+     * @param httpHeaderList
+     * @param requestByteArray
+     * @param fileCacheManager
+     * @param cacheRefreshTime
+     * @param collectRuleList
+     * @param collectDataTransformer
      * @return T
      */
     fun <T> collectFromHttpWithCache(
@@ -137,12 +187,15 @@ object CollectUtil {
             CollectRule.Type.CONTENT.value -> {
                 listOf(content)
             }
+
             CollectRule.Type.REGEX.value -> {
                 parseByRegex(content, collectRule.rule)
             }
+
             CollectRule.Type.XPATH.value -> {
                 parseByXPath(content)
             }
+
             else -> {
                 emptyList()
             }
