@@ -6,7 +6,7 @@ import com.oneliang.ktx.frame.i18n.MessageContext
 
 
 class MessageContextDslBean {
-    var parameter: String = Constants.String.BLANK
+    var parameters: String = Constants.String.BLANK
 }
 
 fun ConfigurationContext.messageContext(
@@ -16,7 +16,6 @@ fun ConfigurationContext.messageContext(
     val messageContext = MessageContext()
     val messageContextDslBean = MessageContextDslBean()
     block(messageContext, messageContextDslBean)
-    val messageContextParameter = messageContextDslBean.parameter
     val fixId = id.ifBlank { MessageContext::class.java.name }
-    this.addContext(fixId, messageContextParameter, messageContext)
+    this.addContext(fixId, messageContextDslBean.parameters, messageContext)
 }

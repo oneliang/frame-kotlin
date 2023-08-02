@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.configuration.ConfigurationContext
 import com.oneliang.ktx.frame.jdbc.AnnotationMappingContext
 
 class AnnotationMappingContextDslBean {
-    var parameter: String = Constants.String.BLANK
+    var parameters: String = Constants.String.BLANK
 }
 
 fun ConfigurationContext.annotationMappingContext(
@@ -15,7 +15,6 @@ fun ConfigurationContext.annotationMappingContext(
     val annotationMappingContext = AnnotationMappingContext()
     val annotationMappingContextDslBean = AnnotationMappingContextDslBean()
     block(annotationMappingContext, annotationMappingContextDslBean)
-    val annotationMappingContextParameter = annotationMappingContextDslBean.parameter
     val fixId = id.ifBlank { AnnotationMappingContext::class.java.name }
-    this.addContext(fixId, annotationMappingContextParameter, annotationMappingContext)
+    this.addContext(fixId, annotationMappingContextDslBean.parameters, annotationMappingContext)
 }

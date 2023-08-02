@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.configuration.ConfigurationContext
 import com.oneliang.ktx.frame.servlet.action.AnnotationInterceptorContext
 
 class AnnotationInterceptorContextDslBean {
-    var parameter: String = Constants.String.BLANK
+    var parameters: String = Constants.String.BLANK
 }
 
 fun ConfigurationContext.annotationInterceptorContext(
@@ -15,7 +15,6 @@ fun ConfigurationContext.annotationInterceptorContext(
     val annotationInterceptorContext = AnnotationInterceptorContext()
     val annotationInterceptorContextDslBean = AnnotationInterceptorContextDslBean()
     block(annotationInterceptorContext, annotationInterceptorContextDslBean)
-    val annotationInterceptorContextParameter = annotationInterceptorContextDslBean.parameter
     val fixId = id.ifBlank { AnnotationInterceptorContext::class.java.name }
-    this.addContext(fixId, annotationInterceptorContextParameter, annotationInterceptorContext)
+    this.addContext(fixId, annotationInterceptorContextDslBean.parameters, annotationInterceptorContext)
 }

@@ -6,7 +6,7 @@ import com.oneliang.ktx.frame.uri.UriMappingContext
 
 
 class UriMappingContextDslBean {
-    var parameter: String = Constants.String.BLANK
+    var parameters: String = Constants.String.BLANK
 }
 
 fun ConfigurationContext.uriMappingContext(
@@ -16,7 +16,6 @@ fun ConfigurationContext.uriMappingContext(
     val uriMappingContext = UriMappingContext()
     val uriMappingContextDslBean = UriMappingContextDslBean()
     block(uriMappingContext, uriMappingContextDslBean)
-    val uriMappingContextParameter = uriMappingContextDslBean.parameter
     val fixId = id.ifBlank { UriMappingContext::class.java.name }
-    this.addContext(fixId, uriMappingContextParameter, uriMappingContext)
+    this.addContext(fixId, uriMappingContextDslBean.parameters, uriMappingContext)
 }

@@ -51,6 +51,22 @@
           "df:HH时mm分"
         ]
       }
+    },
+    {
+      "key": "time_minus",
+      "repeat": 10,
+      "config": {
+        "a": "random_timestamp:2500:5000",
+        "b": "random_timestamp:0:2500"
+      },
+      "operator": {
+        "a": [
+          "df:HH时mm分"
+        ],
+        "b": [
+          "df:HH时mm分"
+        ]
+      }
     }
   ]
 }

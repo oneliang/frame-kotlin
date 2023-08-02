@@ -7,7 +7,7 @@ import com.oneliang.ktx.frame.servlet.action.ActionContext
 
 
 class ActionContextDslBean {
-    var parameter: String = Constants.String.BLANK
+    var parameters: String = Constants.String.BLANK
 }
 
 fun ConfigurationContext.actionContext(
@@ -18,7 +18,7 @@ fun ConfigurationContext.actionContext(
     val actionContextDslBean = ActionContextDslBean()
     block(actionContext, actionContextDslBean)
     val fixId = id.ifBlank { ActionContext::class.java.name }
-    this.addContext(fixId, actionContextDslBean.parameter, actionContext)
+    this.addContext(fixId, actionContextDslBean.parameters, actionContext)
 }
 
 fun ActionContext.action(block: ActionBean.() -> Unit) {

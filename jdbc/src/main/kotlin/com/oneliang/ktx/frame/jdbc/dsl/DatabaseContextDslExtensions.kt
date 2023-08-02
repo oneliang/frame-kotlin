@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.configuration.ConfigurationContext
 import com.oneliang.ktx.frame.jdbc.DatabaseContext
 
 class DatabaseContextDslBean {
-    var parameter: String = Constants.String.BLANK
+    var parameters: String = Constants.String.BLANK
 }
 
 fun ConfigurationContext.databaseContext(
@@ -15,7 +15,6 @@ fun ConfigurationContext.databaseContext(
     val databaseContext = DatabaseContext()
     val databaseContextDslBean = DatabaseContextDslBean()
     block(databaseContext, databaseContextDslBean)
-    val databaseContextParameter = databaseContextDslBean.parameter
     val fixId = id.ifBlank { DatabaseContext::class.java.name }
-    this.addContext(fixId, databaseContextParameter, databaseContext)
+    this.addContext(fixId, databaseContextDslBean.parameters, databaseContext)
 }

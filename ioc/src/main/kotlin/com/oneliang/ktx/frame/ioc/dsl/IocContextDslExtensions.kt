@@ -6,7 +6,7 @@ import com.oneliang.ktx.frame.ioc.IocBean
 import com.oneliang.ktx.frame.ioc.IocContext
 
 class IocContextDslBean {
-    var parameter: String = Constants.String.BLANK
+    var parameters: String = Constants.String.BLANK
 }
 
 fun ConfigurationContext.iocContext(
@@ -17,9 +17,5 @@ fun ConfigurationContext.iocContext(
     val iocContextDslBean = IocContextDslBean()
     block(iocContext, iocContextDslBean)
     val fixId = id.ifBlank { IocContext::class.java.name }
-    this.addContext(fixId, iocContextDslBean.parameter, iocContext)
-}
-
-fun IocContext.bean(block: (iocBean: IocBean) -> Unit) {
-
+    this.addContext(fixId, iocContextDslBean.parameters, iocContext)
 }

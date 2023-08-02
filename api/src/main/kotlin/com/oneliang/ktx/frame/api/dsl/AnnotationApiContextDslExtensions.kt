@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.api.AnnotationApiContext
 import com.oneliang.ktx.frame.configuration.ConfigurationContext
 
 class AnnotationApiContextDslBean {
-    var parameter: String = Constants.String.BLANK
+    var parameters: String = Constants.String.BLANK
 }
 
 fun ConfigurationContext.annotationApiContext(
@@ -15,7 +15,6 @@ fun ConfigurationContext.annotationApiContext(
     val annotationApiContext = AnnotationApiContext()
     val annotationApiContextDslBean = AnnotationApiContextDslBean()
     block(annotationApiContext, annotationApiContextDslBean)
-    val annotationApiContextParameter = annotationApiContextDslBean.parameter
     val fixId = id.ifBlank { AnnotationApiContext::class.java.name }
-    this.addContext(fixId, annotationApiContextParameter, annotationApiContext)
+    this.addContext(fixId, annotationApiContextDslBean.parameters, annotationApiContext)
 }
