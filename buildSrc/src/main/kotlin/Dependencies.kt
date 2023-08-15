@@ -54,7 +54,15 @@ object Dependencies {
         "maven-surefire-plugin" to "org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M7",
         //lucene
         "lucene-core" to "org.apache.lucene:lucene-core:9.4.2",
-        "lucene-queryparser" to "org.apache.lucene:lucene-queryparser:9.4.2"
+        "lucene-queryparser" to "org.apache.lucene:lucene-queryparser:9.4.2",
+        //zookeeper
+        "zookeeper" to "org.apache.zookeeper:zookeeper:3.9.0",
+        //jetty
+        "jetty-webapp" to "org.eclipse.jetty:jetty-webapp:9.4.51.v20230217",
+        "jetty-io" to "org.eclipse.jetty:jetty-io:9.4.51.v20230217",
+        "jetty-server" to "org.eclipse.jetty:jetty-server:9.4.51.v20230217",
+        "jetty-servlet" to "org.eclipse.jetty:jetty-servlet:9.4.51.v20230217",
+        "jetty-util" to "org.eclipse.jetty:jetty-util:9.4.51.v20230217"
     )
 
     operator fun get(key: String): String {

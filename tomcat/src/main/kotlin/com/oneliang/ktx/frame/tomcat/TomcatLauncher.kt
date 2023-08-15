@@ -14,9 +14,9 @@ class TomcatLauncher(private val configuration: Configuration) {
         var port = 8080
         var hostname = "localhost"
         var baseDir = Constants.String.BLANK
-        var webappArray = emptyArray<Webapp>()
+        var webAppArray = emptyArray<WebApp>()
 
-        class Webapp(var contextPath: String = Constants.String.BLANK, var documentBase: String = Constants.String.BLANK)
+        class WebApp(var contextPath: String = Constants.String.BLANK, var documentBase: String = Constants.String.BLANK)
     }
 
     private val tomcat = Tomcat()
@@ -25,10 +25,10 @@ class TomcatLauncher(private val configuration: Configuration) {
         this.tomcat.setPort(this.configuration.port)
         this.tomcat.setHostname(this.configuration.hostname)
         this.tomcat.setBaseDir(this.configuration.baseDir)
-        for (webapp in this.configuration.webappArray) {
-            val documentBaseFile = webapp.documentBase.toFile()
+        for (webApp in this.configuration.webAppArray) {
+            val documentBaseFile = webApp.documentBase.toFile()
             if (!documentBaseFile.exists()) {
-                throw FileNotFoundException("document base not found:%s".format(webapp.documentBase))
+                throw FileNotFoundException("document base not found:%s".format(webApp.documentBase))
             }
             val fixDocumentBase = if (documentBaseFile.isFile) {
                 var documentBaseFilename = documentBaseFile.name
@@ -41,9 +41,9 @@ class TomcatLauncher(private val configuration: Configuration) {
                 documentBaseFile.unZip(documentBaseDirectory)
                 documentBaseDirectory.absolutePath
             } else {
-                webapp.documentBase
+                webApp.documentBase
             }
-            this.tomcat.addWebapp(webapp.contextPath, fixDocumentBase)
+            this.tomcat.addWebapp(webApp.contextPath, fixDocumentBase)
         }
         this.tomcat.connector
         this.tomcat.start()

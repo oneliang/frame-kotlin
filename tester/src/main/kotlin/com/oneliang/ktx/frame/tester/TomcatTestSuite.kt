@@ -5,7 +5,7 @@ import com.oneliang.ktx.frame.tomcat.TomcatLauncher
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 
-class TomcatTestSuite(private val webappArray: Array<TomcatLauncher.Configuration.Webapp>,
+class TomcatTestSuite(private val webAppArray: Array<TomcatLauncher.Configuration.WebApp>,
                       private val port: Int = 8080) {
 
     companion object {
@@ -33,11 +33,11 @@ class TomcatTestSuite(private val webappArray: Array<TomcatLauncher.Configuratio
     fun runTest() {
         val baseDir = File(Constants.String.BLANK).absolutePath + "/work"
         this.configuration.baseDir = baseDir
-        this.configuration.webappArray = this.webappArray
+        this.configuration.webAppArray = this.webAppArray
         val tomcatLauncher = TomcatLauncher(this.configuration)
         tomcatLauncher.launch {
             val baseUrlMap = mutableMapOf<String, String>()
-            for (webapp in this.webappArray) {
+            for (webapp in this.webAppArray) {
                 val baseUrl = getBaseUrl(webapp.contextPath)
                 baseUrlMap[webapp.contextPath] = baseUrl
                 logger.info("Access context:%s, address: %s", webapp.contextPath, baseUrl)

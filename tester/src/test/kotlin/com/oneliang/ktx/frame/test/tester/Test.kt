@@ -10,7 +10,7 @@ fun main() {
 //    tomcatTester.runTest()
 
 
-    val tomcatTestSuite = TomcatTestSuite(arrayOf(TomcatLauncher.Configuration.Webapp("aaa", warFullFilename)))
+    val tomcatTestSuite = TomcatTestSuite(arrayOf(TomcatLauncher.Configuration.WebApp("aaa", warFullFilename)))
     tomcatTestSuite.addTomcatTestCase(TestTomcatTestCase())
     tomcatTestSuite.runTest()
 }

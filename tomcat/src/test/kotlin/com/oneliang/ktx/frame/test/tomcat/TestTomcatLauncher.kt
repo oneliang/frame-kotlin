@@ -6,7 +6,7 @@ fun main() {
     val baseDir = "/Users/oneliang/Java/githubWorkspace/oneliang-team/platform/open-platform/api/monitor-reporter/build/libs"
     val tomcatLauncher = TomcatLauncher(TomcatLauncher.Configuration().apply {
         this.baseDir = "/Users/oneliang/Java/githubWorkspace/oneliang-team/platform/open-platform/api/monitor-reporter/build/libs/work"
-        this.webappArray = arrayOf(TomcatLauncher.Configuration.Webapp().apply {
+        this.webAppArray = arrayOf(TomcatLauncher.Configuration.WebApp().apply {
             this.contextPath = "/aaa"
             this.documentBase = "$baseDir/open-platform-api-monitor-reporter-1.0.war"
         })

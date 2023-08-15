@@ -47,5 +47,7 @@ include(":tester")
 include(":feature")
 include(":knowledge")
 include(":gradle-plugin")
+include(":zookeeper")
+include(":jetty")
 //netty
 apply(from = "${rootDir}/netty/netty.gradle.kts")
