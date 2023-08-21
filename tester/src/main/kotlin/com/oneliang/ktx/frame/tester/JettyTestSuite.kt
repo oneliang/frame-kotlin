@@ -32,9 +32,9 @@ class JettyTestSuite(
      * run test
      */
     fun runTest() {
-        val tomcatLauncher = JettyLauncher(this.configuration)
+        val jettyLauncher = JettyLauncher(this.configuration)
         this.configuration.webApp = this.webApp
-        tomcatLauncher.launch {
+        jettyLauncher.launch {
             val baseUrlMap = mutableMapOf<String, String>()
             val baseUrl = getBaseUrl(this.webApp.contextPath)
             baseUrlMap[this.webApp.contextPath] = baseUrl
@@ -63,9 +63,10 @@ class JettyTestSuite(
      * after launch
      */
     private fun afterLaunch() {
-        for (tomcatTestCase in this.httpTestCaseList) {
-            tomcatTestCase.baseUrlMap = this.baseUrlMap
-            tomcatTestCase.test()
+        for (httpTestCase in this.httpTestCaseList) {
+            httpTestCase.baseUrlMap = this.baseUrlMap
+            logger.info("execute http test case:%s", httpTestCase)
+            httpTestCase.test()
         }
     }
 }

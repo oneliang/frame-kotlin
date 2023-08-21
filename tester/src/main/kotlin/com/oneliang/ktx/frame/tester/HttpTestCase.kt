@@ -7,31 +7,136 @@ abstract class HttpTestCase {
 
     lateinit var baseUrlMap: Map<String, String>
 
-    fun head(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), byteArray: ByteArray = ByteArray(0), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
+    /**
+     * http head method
+     * @param httpUrl
+     * @param httpHeaderList
+     * @param byteArray
+     * @param timeout
+     * @param advancedOption
+     * @return ByteArray
+     */
+    fun head(
+        httpUrl: String,
+        httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(),
+        byteArray: ByteArray = ByteArray(0),
+        timeout: Int = HttpUtil.DEFAULT_TIMEOUT,
+        advancedOption: HttpUtil.AdvancedOption? = null
+    ): ByteArray {
         return HttpUtil.sendRequestWithWholeBytes(httpUrl, Constants.Http.RequestMethod.HEAD.value, httpHeaderList, byteArray, timeout, advancedOption)
     }
 
-    fun put(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), byteArray: ByteArray = ByteArray(0), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
+    /**
+     * http put method
+     * @param httpUrl
+     * @param httpHeaderList
+     * @param byteArray
+     * @param timeout
+     * @param advancedOption
+     * @return ByteArray
+     */
+    fun put(
+        httpUrl: String,
+        httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(),
+        byteArray: ByteArray = ByteArray(0),
+        timeout: Int = HttpUtil.DEFAULT_TIMEOUT,
+        advancedOption: HttpUtil.AdvancedOption? = null
+    ): ByteArray {
         return HttpUtil.sendRequestWithWholeBytes(httpUrl, Constants.Http.RequestMethod.PUT.value, httpHeaderList, byteArray, timeout, advancedOption)
     }
 
-    fun delete(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), byteArray: ByteArray = ByteArray(0), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
+    /**
+     * http delete method
+     * @param httpUrl
+     * @param httpHeaderList
+     * @param byteArray
+     * @param timeout
+     * @param advancedOption
+     * @return ByteArray
+     */
+    fun delete(
+        httpUrl: String,
+        httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(),
+        byteArray: ByteArray = ByteArray(0),
+        timeout: Int = HttpUtil.DEFAULT_TIMEOUT,
+        advancedOption: HttpUtil.AdvancedOption? = null
+    ): ByteArray {
         return HttpUtil.sendRequestWithWholeBytes(httpUrl, Constants.Http.RequestMethod.DELETE.value, httpHeaderList, byteArray, timeout, advancedOption)
     }
 
-    fun options(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), byteArray: ByteArray = ByteArray(0), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
+    /**
+     * http options method
+     * @param httpUrl
+     * @param httpHeaderList
+     * @param byteArray
+     * @param timeout
+     * @param advancedOption
+     * @return ByteArray
+     */
+    fun options(
+        httpUrl: String,
+        httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(),
+        byteArray: ByteArray = ByteArray(0),
+        timeout: Int = HttpUtil.DEFAULT_TIMEOUT,
+        advancedOption: HttpUtil.AdvancedOption? = null
+    ): ByteArray {
         return HttpUtil.sendRequestWithWholeBytes(httpUrl, Constants.Http.RequestMethod.OPTIONS.value, httpHeaderList, byteArray, timeout, advancedOption)
     }
 
-    fun trace(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), byteArray: ByteArray = ByteArray(0), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
+    /**
+     * http trace method
+     * @param httpUrl
+     * @param httpHeaderList
+     * @param byteArray
+     * @param timeout
+     * @param advancedOption
+     * @return ByteArray
+     */
+    fun trace(
+        httpUrl: String,
+        httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(),
+        byteArray: ByteArray = ByteArray(0),
+        timeout: Int = HttpUtil.DEFAULT_TIMEOUT,
+        advancedOption: HttpUtil.AdvancedOption? = null
+    ): ByteArray {
         return HttpUtil.sendRequestWithWholeBytes(httpUrl, Constants.Http.RequestMethod.TRACE.value, httpHeaderList, byteArray, timeout, advancedOption)
     }
 
-    fun get(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), httpParameterList: List<HttpUtil.HttpNameValue> = emptyList(), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
+    /**
+     * http get method
+     * @param httpUrl
+     * @param httpHeaderList
+     * @param httpParameterList
+     * @param timeout
+     * @param advancedOption
+     * @return ByteArray
+     */
+    fun get(
+        httpUrl: String,
+        httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(),
+        httpParameterList: List<HttpUtil.HttpNameValue> = emptyList(),
+        timeout: Int = HttpUtil.DEFAULT_TIMEOUT,
+        advancedOption: HttpUtil.AdvancedOption? = null
+    ): ByteArray {
         return HttpUtil.sendRequestGetWithReturnBytes(httpUrl, httpHeaderList, httpParameterList, timeout, advancedOption)
     }
 
-    fun post(httpUrl: String, httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(), byteArray: ByteArray = ByteArray(0), timeout: Int = HttpUtil.DEFAULT_TIMEOUT, advancedOption: HttpUtil.AdvancedOption? = null): ByteArray {
+    /**
+     * http post method
+     * @param httpUrl
+     * @param httpHeaderList
+     * @param byteArray
+     * @param timeout
+     * @param advancedOption
+     * @return ByteArray
+     */
+    fun post(
+        httpUrl: String,
+        httpHeaderList: List<HttpUtil.HttpNameValue> = emptyList(),
+        byteArray: ByteArray = ByteArray(0),
+        timeout: Int = HttpUtil.DEFAULT_TIMEOUT,
+        advancedOption: HttpUtil.AdvancedOption? = null
+    ): ByteArray {
         return HttpUtil.sendRequestPostWithWholeBytes(httpUrl, httpHeaderList, byteArray, timeout, advancedOption)
     }
 

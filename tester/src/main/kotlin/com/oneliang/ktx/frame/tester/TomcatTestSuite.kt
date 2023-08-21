@@ -68,9 +68,10 @@ class TomcatTestSuite(
      * after launch
      */
     private fun afterLaunch() {
-        for (tomcatTestCase in this.httpTestCaseList) {
-            tomcatTestCase.baseUrlMap = this.baseUrlMap
-            tomcatTestCase.test()
+        for (httpTestCase in this.httpTestCaseList) {
+            httpTestCase.baseUrlMap = this.baseUrlMap
+            logger.info("execute http test case:%s", httpTestCase)
+            httpTestCase.test()
         }
     }
 }
