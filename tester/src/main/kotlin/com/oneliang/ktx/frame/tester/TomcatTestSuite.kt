@@ -5,8 +5,10 @@ import com.oneliang.ktx.frame.tomcat.TomcatLauncher
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.File
 
-class TomcatTestSuite(private val webAppArray: Array<TomcatLauncher.Configuration.WebApp>,
-                      private val port: Int = 8080) {
+class TomcatTestSuite(
+    private val webAppArray: Array<TomcatLauncher.Configuration.WebApp>,
+    private val port: Int = 8080
+) {
 
     companion object {
         private val logger = LoggerManager.getLogger(TomcatTestSuite::class)
@@ -53,7 +55,13 @@ class TomcatTestSuite(private val webAppArray: Array<TomcatLauncher.Configuratio
      * @return String
      */
     private fun getBaseUrl(contextPath: String): String {
-        return this.configuration.schema + this.configuration.hostname + Constants.Symbol.COLON + this.configuration.port + Constants.Symbol.SLASH_LEFT + contextPath
+        val trimContextPath = contextPath.trim()
+        val fixContextPath = if (trimContextPath.startsWith(Constants.Symbol.SLASH_LEFT)) {
+            trimContextPath
+        } else {
+            Constants.Symbol.SLASH_LEFT + trimContextPath
+        }
+        return this.configuration.schema + this.configuration.hostname + Constants.Symbol.COLON + this.configuration.port + fixContextPath
     }
 
     /**
