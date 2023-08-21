@@ -33,6 +33,7 @@ class JettyTestSuite(
      */
     fun runTest() {
         val tomcatLauncher = JettyLauncher(this.configuration)
+        this.configuration.webApp = this.webApp
         tomcatLauncher.launch {
             val baseUrlMap = mutableMapOf<String, String>()
             val baseUrl = getBaseUrl(this.webApp.contextPath)
