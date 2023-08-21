@@ -1,8 +1,8 @@
 package com.oneliang.ktx.frame.test.tester
 
-import com.oneliang.ktx.frame.tester.TomcatTestCase
+import com.oneliang.ktx.frame.tester.HttpTestCase
 
-class TestTomcatTestCase : TomcatTestCase() {
+class TestTomcatTestCase : HttpTestCase() {
 
     override fun test() {
         val baseUrl = this.baseUrlMap["aaa"]

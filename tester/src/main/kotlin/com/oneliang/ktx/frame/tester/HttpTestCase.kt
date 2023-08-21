@@ -3,7 +3,7 @@ package com.oneliang.ktx.frame.tester
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.util.http.HttpUtil
 
-abstract class TomcatTestCase {
+abstract class HttpTestCase {
 
     lateinit var baseUrlMap: Map<String, String>
 

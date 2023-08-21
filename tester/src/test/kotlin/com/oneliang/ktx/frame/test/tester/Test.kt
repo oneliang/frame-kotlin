@@ -11,6 +11,6 @@ fun main() {
 
 
     val tomcatTestSuite = TomcatTestSuite(arrayOf(TomcatLauncher.Configuration.WebApp("aaa", warFullFilename)))
-    tomcatTestSuite.addTomcatTestCase(TestTomcatTestCase())
+    tomcatTestSuite.addHttpTestCase(TestTomcatTestCase())
     tomcatTestSuite.runTest()
 }

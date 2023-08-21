@@ -1,19 +1,20 @@
 package com.oneliang.ktx.frame.tester
 
 import com.oneliang.ktx.Constants
-import com.oneliang.ktx.frame.tomcat.TomcatLauncher
+import com.oneliang.ktx.frame.jetty.JettyLauncher
 import com.oneliang.ktx.util.logging.LoggerManager
-import java.io.File
 
-class TomcatTestSuite(private val webAppArray: Array<TomcatLauncher.Configuration.WebApp>,
-                      private val port: Int = 8080) {
+class JettyTestSuite(
+    private val webApp: JettyLauncher.Configuration.WebApp,
+    private val port: Int = 8080
+) {
 
     companion object {
-        private val logger = LoggerManager.getLogger(TomcatTestSuite::class)
+        private val logger = LoggerManager.getLogger(JettyTestSuite::class)
     }
 
     private val httpTestCaseList = mutableListOf<HttpTestCase>()
-    private val configuration = TomcatLauncher.Configuration().also {
+    private val configuration = JettyLauncher.Configuration().also {
         it.port = port
     }
 
@@ -31,17 +32,12 @@ class TomcatTestSuite(private val webAppArray: Array<TomcatLauncher.Configuratio
      * run test
      */
     fun runTest() {
-        val baseDir = File(Constants.String.BLANK).absolutePath + "/work"
-        this.configuration.baseDir = baseDir
-        this.configuration.webAppArray = this.webAppArray
-        val tomcatLauncher = TomcatLauncher(this.configuration)
+        val tomcatLauncher = JettyLauncher(this.configuration)
         tomcatLauncher.launch {
             val baseUrlMap = mutableMapOf<String, String>()
-            for (webApp in this.webAppArray) {
-                val baseUrl = getBaseUrl(webApp.contextPath)
-                baseUrlMap[webApp.contextPath] = baseUrl
-                logger.info("Access context:%s, address: %s", webApp.contextPath, baseUrl)
-            }
+            val baseUrl = getBaseUrl(this.webApp.contextPath)
+            baseUrlMap[this.webApp.contextPath] = baseUrl
+            logger.info("Access context:%s, address: %s", this.webApp.contextPath, baseUrl)
             this.baseUrlMap = baseUrlMap
             this.afterLaunch()
 
