@@ -2,6 +2,7 @@ package com.oneliang.ktx.frame.servlet.action
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.exception.InitializeException
+import com.oneliang.ktx.frame.configuration.ConfigurationContext
 import com.oneliang.ktx.frame.context.AbstractContext
 import com.oneliang.ktx.util.common.JavaXmlUtil
 import com.oneliang.ktx.util.logging.LoggerManager
@@ -33,6 +34,10 @@ open class ActionContext : AbstractContext() {
      */
     override fun initialize(parameters: String) {
         val fixParameters = fixParameters(parameters)
+        if (fixParameters.isBlank()) {
+            logger.warning("parameters is blank, maybe use dsl initialize, please confirm it.")
+            return
+        }
         try {
             val path = this.classesRealPath + fixParameters
             val document = JavaXmlUtil.parse(path)

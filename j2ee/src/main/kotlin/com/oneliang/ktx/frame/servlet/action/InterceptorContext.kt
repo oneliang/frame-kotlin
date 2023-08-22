@@ -27,47 +27,44 @@ open class InterceptorContext : AbstractContext() {
             val root = document.documentElement
             //global interceptor list
             val globalInterceptorElementList = root.getElementsByTagName(GlobalInterceptorBean.TAG_GLOBAL_INTERCEPTOR)
-            if (globalInterceptorElementList != null) {
-                val globalInterceptorLength = globalInterceptorElementList.length
-                for (index in 0 until globalInterceptorLength) {
-                    val globalInterceptorElement = globalInterceptorElementList.item(index)
-                    val globalInterceptorBean = GlobalInterceptorBean()
-                    val attributeMap = globalInterceptorElement.attributes
-                    JavaXmlUtil.initializeFromAttributeMap(globalInterceptorBean, attributeMap)
-                    if (objectMap.containsKey(globalInterceptorBean.id)) {
-                        logger.warning("Global interceptor class has been instantiated, type:%s, id:%s", globalInterceptorBean.type, globalInterceptorBean.id)
-                        continue
-                    }
-                    val interceptorInstance: InterceptorInterface = this.classLoader.loadClass(globalInterceptorBean.type).newInstance() as InterceptorInterface
-                    globalInterceptorBean.interceptorInstance = interceptorInstance
-                    globalInterceptorBeanMap[globalInterceptorBean.id] = globalInterceptorBean
-                    objectMap[globalInterceptorBean.id] = ObjectBean(interceptorInstance, ObjectBean.Type.REFERENCE)
-                    val mode = globalInterceptorBean.mode
-                    if (mode == GlobalInterceptorBean.INTERCEPTOR_MODE_BEFORE) {
-                        beforeGlobalInterceptorBeanIterable += globalInterceptorBean
-                    } else if (mode == GlobalInterceptorBean.INTERCEPTOR_MODE_AFTER) {
-                        afterGlobalInterceptorBeanIterable += globalInterceptorBean
-                    }
+            val globalInterceptorLength = globalInterceptorElementList.length
+            for (index in 0 until globalInterceptorLength) {
+                val globalInterceptorElement = globalInterceptorElementList.item(index)
+                val globalInterceptorBean = GlobalInterceptorBean()
+                val attributeMap = globalInterceptorElement.attributes
+                JavaXmlUtil.initializeFromAttributeMap(globalInterceptorBean, attributeMap)
+                if (objectMap.containsKey(globalInterceptorBean.id)) {
+                    logger.warning("Global interceptor class has been instantiated, type:%s, id:%s", globalInterceptorBean.type, globalInterceptorBean.id)
+                    continue
+                }
+                val interceptorInstance: InterceptorInterface = this.classLoader.loadClass(globalInterceptorBean.type).newInstance() as InterceptorInterface
+                globalInterceptorBean.interceptorInstance = interceptorInstance
+                globalInterceptorBeanMap[globalInterceptorBean.id] = globalInterceptorBean
+                objectMap[globalInterceptorBean.id] = ObjectBean(interceptorInstance, ObjectBean.Type.REFERENCE)
+                val mode = globalInterceptorBean.mode
+                if (mode == GlobalInterceptorBean.INTERCEPTOR_MODE_BEFORE) {
+                    beforeGlobalInterceptorBeanIterable += globalInterceptorBean
+                } else if (mode == GlobalInterceptorBean.INTERCEPTOR_MODE_AFTER) {
+                    afterGlobalInterceptorBeanIterable += globalInterceptorBean
                 }
             }
+
             //interceptor list
             val interceptorElementList = root.getElementsByTagName(InterceptorBean.TAG_INTERCEPTOR)
-            if (interceptorElementList != null) {
-                val interceptorElementLength = interceptorElementList.length
-                for (index in 0 until interceptorElementLength) {
-                    val interceptorElement = interceptorElementList.item(index)
-                    val interceptor = InterceptorBean()
-                    val attributeMap = interceptorElement.attributes
-                    JavaXmlUtil.initializeFromAttributeMap(interceptor, attributeMap)
-                    if (objectMap.containsKey(interceptor.id)) {
-                        logger.warning("Interceptor class has been instantiated, type:%s, id:%s", interceptor.type, interceptor.id)
-                        continue
-                    }
-                    val interceptorInstance = this.classLoader.loadClass(interceptor.type).newInstance() as InterceptorInterface
-                    interceptor.interceptorInstance = interceptorInstance
-                    interceptorBeanMap[interceptor.id] = interceptor
-                    objectMap[interceptor.id] = ObjectBean(interceptorInstance, ObjectBean.Type.REFERENCE)
+            val interceptorElementLength = interceptorElementList.length
+            for (index in 0 until interceptorElementLength) {
+                val interceptorElement = interceptorElementList.item(index)
+                val interceptor = InterceptorBean()
+                val attributeMap = interceptorElement.attributes
+                JavaXmlUtil.initializeFromAttributeMap(interceptor, attributeMap)
+                if (objectMap.containsKey(interceptor.id)) {
+                    logger.warning("Interceptor class has been instantiated, type:%s, id:%s", interceptor.type, interceptor.id)
+                    continue
                 }
+                val interceptorInstance = this.classLoader.loadClass(interceptor.type).newInstance() as InterceptorInterface
+                interceptor.interceptorInstance = interceptorInstance
+                interceptorBeanMap[interceptor.id] = interceptor
+                objectMap[interceptor.id] = ObjectBean(interceptorInstance, ObjectBean.Type.REFERENCE)
             }
         } catch (e: Throwable) {
             logger.error("parameter:%s", e, fixParameters)
