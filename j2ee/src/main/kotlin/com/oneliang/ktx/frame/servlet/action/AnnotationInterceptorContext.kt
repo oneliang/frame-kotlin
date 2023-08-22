@@ -48,7 +48,7 @@ class AnnotationInterceptorContext : InterceptorContext() {
         var id = interceptorAnnotation.id
         if (id.isBlank()) {
             id = kClass.java.simpleName
-            id = id.substring(0, 1).toLowerCase() + id.substring(1)
+            id = id.substring(0, 1).lowercase() + id.substring(1)
         }
         if (objectMap.containsKey(id)) {
             logger.warning("Annotation interceptor class has been instantiated, class:%s, id:%s", kClass, id)

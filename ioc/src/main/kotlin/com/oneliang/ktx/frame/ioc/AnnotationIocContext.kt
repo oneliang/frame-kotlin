@@ -74,7 +74,7 @@ class AnnotationIocContext : IocContext() {
             } else {
                 kClass.java.simpleName
             }
-            id = id.substring(0, 1).toLowerCase() + id.substring(1)
+            id = id.substring(0, 1).lowercase() + id.substring(1)
         }
         iocBean.id = id
         iocBean.type = kClass.java.name
