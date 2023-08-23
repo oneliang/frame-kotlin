@@ -14,7 +14,7 @@ open class TableModel {
         var nullable: Boolean = false
         var column: String = Constants.String.BLANK
         var idFlag: Boolean = false
-        var columnDefaultValue: String = Constants.String.BLANK
+        var columnDefaultValue: String? = null
         var length: Int = 0
         var precision: Int = 0
         var comment: String = Constants.String.BLANK

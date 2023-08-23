@@ -88,75 +88,92 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
      * @param length
      * @param precision
      * @param nullable
-     * @param defaultValue
+     * @param defaultValue for column, maybe be null
      * @param comment
      * @return String
      */
-    override fun createTableColumnDefinitionProcess(column: String, fieldColumnMappingType: SqlUtil.FieldColumnMappingType, idFlag: Boolean, length: Int, precision: Int, nullable: Boolean, defaultValue: String?, comment: String): String {
+    override fun createTableColumnDefinitionProcess(
+        column: String,
+        fieldColumnMappingType: SqlUtil.FieldColumnMappingType,
+        idFlag: Boolean,
+        length: Int,
+        precision: Int,
+        nullable: Boolean,
+        defaultValue: String?,
+        comment: String
+    ): String {
         val stringBuilder = StringBuilder()
         stringBuilder.append(this.keywordSymbolLeft + column + this.keywordSymbolRight)
         stringBuilder.append(Constants.String.SPACE)
-        var optimizeDefaultValue = defaultValue
+        var fixDefaultValue = defaultValue// use default value when not null
         stringBuilder.append(
             when (fieldColumnMappingType) {
                 SqlUtil.FieldColumnMappingType.STRING -> {
-                    optimizeDefaultValue = Constants.String.BLANK
-                    if (length <= 0) {//custom default value
+                    if (length <= 0) {//can not set default value when not null
                         "TEXT"
-                    } else {
+                    } else {//custom default value
+                        fixDefaultValue = Constants.String.BLANK
                         "VARCHAR($length)"
                     }
                 }
+
                 SqlUtil.FieldColumnMappingType.BOOLEAN -> {
-                    optimizeDefaultValue = Constants.String.ZERO
+                    fixDefaultValue = Constants.String.ZERO
                     "INT(1)"
                 }
+
                 SqlUtil.FieldColumnMappingType.INT -> {
-                    optimizeDefaultValue = Constants.String.ZERO
+                    fixDefaultValue = Constants.String.ZERO
                     if (length <= 0) {//mysql default value
                         "INT(11)"
                     } else {
                         "INT($length)"
                     }
                 }
+
                 SqlUtil.FieldColumnMappingType.LONG -> {
-                    optimizeDefaultValue = Constants.String.ZERO
+                    fixDefaultValue = Constants.String.ZERO
                     if (length <= 0) {
                         error("length:$length error, column:$column, column type:$fieldColumnMappingType")
                     }
                     "BIGINT($length)"
                 }
+
                 SqlUtil.FieldColumnMappingType.FLOAT -> {
                     if (length <= 0 || precision <= 0) {//mysql default value
-                        optimizeDefaultValue = "0.0"
+                        fixDefaultValue = "0.0"
                         "FLOAT"
                     } else {
-                        optimizeDefaultValue = "0." + generateZeroString(precision)
+                        fixDefaultValue = "0." + generateZeroString(precision)
                         "FLOAT($length, $precision)"
                     }
                 }
+
                 SqlUtil.FieldColumnMappingType.DOUBLE -> {
-                    optimizeDefaultValue = "0.0"
+                    fixDefaultValue = "0.0"
                     if (length <= 0 || precision <= 0) {//mysql default value
                         "DOUBLE"
                     } else {
                         "DOUBLE($length, $precision)"
                     }
                 }
+
                 SqlUtil.FieldColumnMappingType.DATE -> {
-                    optimizeDefaultValue = Constants.Date.DEFAULT.toFormatString(Constants.Time.YEAR_MONTH_DAY)
+                    fixDefaultValue = Constants.Date.DEFAULT.toFormatString(Constants.Time.YEAR_MONTH_DAY)
                     "DATE"
                 }
+
                 SqlUtil.FieldColumnMappingType.DATETIME -> {
-                    optimizeDefaultValue = Constants.Date.DEFAULT.toFormatString()
+                    fixDefaultValue = Constants.Date.DEFAULT.toFormatString()
                     "DATETIME"
                 }
+
                 SqlUtil.FieldColumnMappingType.BIG_DECIMAL -> {
                     if (length <= 0) {//mysql default value
-                        optimizeDefaultValue = "0." + generateZeroString(2)
+                        fixDefaultValue = "0." + generateZeroString(2)
                         "DECIMAL(10, 2)"
                     } else {
-                        optimizeDefaultValue = "0." + generateZeroString(precision)
+                        fixDefaultValue = "0." + generateZeroString(precision)
                         "DECIMAL($length, $precision)"
                     }
                 }
@@ -169,10 +186,10 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
         if (idFlag && fieldColumnMappingType == SqlUtil.FieldColumnMappingType.INT) {
             stringBuilder.append(Constants.String.SPACE)
             stringBuilder.append("AUTO_INCREMENT")
-        } else {//not id add default value
-            if (defaultValue != null) {
+        } else {//not id add default value, not null maybe need default value
+            if (!nullable && fixDefaultValue != null) {
                 stringBuilder.append(Constants.String.SPACE)
-                stringBuilder.append("DEFAULT ${Constants.Symbol.SINGLE_QUOTE}${defaultValue.ifBlank { optimizeDefaultValue }}${Constants.Symbol.SINGLE_QUOTE}")
+                stringBuilder.append("DEFAULT ${Constants.Symbol.SINGLE_QUOTE}${fixDefaultValue}${Constants.Symbol.SINGLE_QUOTE}")
             }
         }
         if (comment.isNotBlank()) {

@@ -69,7 +69,7 @@ object ModelTemplateUtil {
                         field.column = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COLUMN)?.nodeValue ?: Constants.String.BLANK
                         val idFlagNode = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_ID_FLAG)
                         field.idFlag = idFlagNode?.nodeValue?.toBoolean() ?: false
-                        field.columnDefaultValue = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COLUMN_DEFAULT_VALUE)?.nodeValue ?: Constants.String.BLANK
+                        field.columnDefaultValue = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COLUMN_DEFAULT_VALUE)?.nodeValue
                         field.length = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_LENGTH)?.nodeValue.toIntSafely()
                         field.precision = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_PRECISION)?.nodeValue.toIntSafely()
                         field.comment = modelChildNodeAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_FIELD_COMMENT)?.nodeValue ?: Constants.String.BLANK
