@@ -5,13 +5,14 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-class Coroutine(coroutineContext: CoroutineContext = EmptyCoroutineContext) {
+class Coroutine(
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    private val exceptionHandler: CoroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        logger.error("Throws an exception with message: %s", throwable, throwable.message)
+    }
+) {
     companion object {
         private val logger = LoggerManager.getLogger(Coroutine::class)
-    }
-
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        logger.error("Throws an exception with message: %s", throwable, throwable.message)
     }
 
     private val coroutineScope = object : CoroutineScope {
