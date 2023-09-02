@@ -25,6 +25,7 @@ import com.oneliang.ktx.frame.jdbc.Table
 <%}%>
     ]
 )
+<%=(comment.length != 0 ? ("// " + comment) : "")%>
 open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames : "")%> {
     companion object {
         const val TABLE = "{<%=className%>}"
@@ -52,22 +53,23 @@ open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames
     <%var nullable = fieldBean.nullable;%>
     <%var nullableString = (nullable? "?": "");%>
     <%var defaultValue = fieldBean.defaultValue;%>
+    <%var comment = fieldBean.comment;%>
     <%if (type == 'STRING'){%>
-    <%=overrideString%>var <%=fieldBean.name%>: String<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "\"\"")%>
+    <%=overrideString%>var <%=fieldBean.name%>: String<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "\"\"")%><%=(comment.length != 0 ? ("// " + comment) : "")%>
     <%} else if (type == 'BOOLEAN') {%>
-    <%=overrideString%>var <%=fieldBean.name%>: Boolean<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : false)%>
+    <%=overrideString%>var <%=fieldBean.name%>: Boolean<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : false)%><%=(comment.length != 0 ? ("// " + comment) : "")%>
     <%} else if (type == 'INT') {%>
-    <%=overrideString%>var <%=fieldBean.name%>: Int<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%>
+    <%=overrideString%>var <%=fieldBean.name%>: Int<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%><%=(comment.length != 0 ? ("// " + comment) : "")%>
     <%} else if (type == 'LONG') {%>
-    <%=overrideString%>var <%=fieldBean.name%>: Long<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%>
+    <%=overrideString%>var <%=fieldBean.name%>: Long<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0)%><%=(comment.length != 0 ? ("// " + comment) : "")%>
     <%} else if (type == 'FLOAT') {%>
-    <%=overrideString%>var <%=fieldBean.name%>: Float<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
+    <%=overrideString%>var <%=fieldBean.name%>: Float<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%><%=(comment.length != 0 ? ("// " + comment) : "")%>
     <%} else if (type == 'DOUBLE') {%>
-    <%=overrideString%>var <%=fieldBean.name%>: Double<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%>
+    <%=overrideString%>var <%=fieldBean.name%>: Double<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : 0.0)%><%=(comment.length != 0 ? ("// " + comment) : "")%>
     <%} else if (type == 'DATE' || type == 'DATETIME') {%>
-    <%=overrideString%>var <%=fieldBean.name%>: Date<%=nullableString%> = <%=defaultValue%>
+    <%=overrideString%>var <%=fieldBean.name%>: Date<%=nullableString%> = <%=defaultValue%><%=(comment.length != 0 ? ("// " + comment) : "")%>
     <%} else if (type == 'BIG_DECIMAL') {%>
-    <%=overrideString%>var <%=fieldBean.name%>: BigDecimal<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "BigDecimal(0)")%>
+    <%=overrideString%>var <%=fieldBean.name%>: BigDecimal<%=nullableString%> = <%=(defaultValue.length != 0 ? defaultValue : "BigDecimal(0)")%><%=(comment.length != 0 ? ("// " + comment) : "")%>
     <%}%>
 <%}%>
 <%for(var i=0;i<codeInClassArray.length;i++){%><%var codeInClass = codeInClassArray[i];%>

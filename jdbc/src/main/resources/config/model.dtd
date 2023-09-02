@@ -6,6 +6,7 @@
 <!ATTLIST model superClassNames CDATA #IMPLIED>
 <!ATTLIST model schema CDATA #IMPLIED>
 <!ATTLIST model table CDATA #IMPLIED>
+<!ATTLIST model comment CDATA #IMPLIED>
 <!ELEMENT import EMPTY>
 <!ATTLIST import value CDATA #REQUIRED>
 <!ELEMENT field EMPTY>

@@ -151,4 +151,13 @@ abstract class AbstractSqlProcessor : SqlUtil.SqlProcessor {
     override fun createTableIndexProcess(primary: Boolean, columns: Array<String>, command: String): String {
         TODO("Not yet implemented")
     }
+
+    /**
+     * create table comment process
+     * @param comment
+     * @return String
+     */
+    override fun createTableCommentProcess(comment: String): String {
+        TODO("Not yet implemented")
+    }
 }

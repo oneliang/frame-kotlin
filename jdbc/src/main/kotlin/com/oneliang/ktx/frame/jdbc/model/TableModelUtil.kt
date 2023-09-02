@@ -28,9 +28,18 @@ object TableModelUtil {
         val columnDefinitionSqlList = mutableListOf<String>()
         val columnIndexSqlList = mutableListOf<String>()
         tableModel.columnArray.forEach {
-            columnDefinitionSqlList += sqlProcessor.createTableColumnDefinitionProcess(it.column, SqlUtil.FieldColumnMappingType.valueOf(it.type), it.idFlag, it.length, it.precision, it.nullable, it.columnDefaultValue, it.comment)
+            columnDefinitionSqlList += sqlProcessor.createTableColumnDefinitionProcess(
+                it.column,
+                SqlUtil.FieldColumnMappingType.valueOf(it.type),
+                it.idFlag,
+                it.length,
+                it.precision,
+                it.nullable,
+                it.columnDefaultValue,
+                it.comment
+            )
             if (it.idFlag) {
-                columnIndexSqlList += sqlProcessor.createTableIndexProcess(it.idFlag, arrayOf(it.column), Constants.String.BLANK)
+                columnIndexSqlList += sqlProcessor.createTableIndexProcess(true, arrayOf(it.column), Constants.String.BLANK)
             }
         }
         tableModel.indexArray.forEach {
@@ -39,7 +48,8 @@ object TableModelUtil {
             columnIndexSqlList += sqlProcessor.createTableIndexProcess(false, columnArray, it.otherCommands)
         }
         val columnDefinitionSql = (columnDefinitionSqlList + columnIndexSqlList).joinToString(Constants.Symbol.COMMA + Constants.String.NEW_LINE)
-        return SqlUtil.createTableSql(schemaTable, columnDefinitionSql, Constants.String.BLANK)
+        val otherCommands = sqlProcessor.createTableCommentProcess(tableModel.comment)
+        return SqlUtil.createTableSql(schemaTable, columnDefinitionSql, otherCommands)
     }
 }
 

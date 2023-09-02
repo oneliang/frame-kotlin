@@ -609,6 +609,13 @@ object SqlUtil {
          * @return String
          */
         fun createTableIndexProcess(primary: Boolean, columns: Array<String>, command: String = Constants.String.BLANK): String
+
+        /**
+         * create table comment process
+         * @param comment
+         * @return String
+         */
+        fun createTableCommentProcess(comment: String = Constants.String.BLANK): String
     }
 
     private enum class DeleteType {

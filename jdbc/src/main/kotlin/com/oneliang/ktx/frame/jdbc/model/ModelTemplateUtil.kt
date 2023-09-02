@@ -34,6 +34,7 @@ object ModelTemplateUtil {
             modelTemplateBean.superClassNames = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SUPER_CLASS_NAMES)?.nodeValue ?: Constants.String.BLANK
             modelTemplateBean.schema = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_SCHEMA)?.nodeValue ?: Constants.String.BLANK
             modelTemplateBean.table = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_TABLE)?.nodeValue ?: Constants.String.BLANK
+            modelTemplateBean.comment = modelAttributeMap.getNamedItem(ModelTemplateBean.ATTRIBUTE_MODEL_COMMENT)?.nodeValue ?: Constants.String.BLANK
             val importHashSet = hashSetOf<String>()
             val columnList = mutableListOf<ModelTemplateBean.Field>()
             val tableIndexList = mutableListOf<ModelTemplateBean.TableIndex>()

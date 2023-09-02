@@ -11,6 +11,7 @@ class ModelTemplateBean : TableModel() {
         const val ATTRIBUTE_MODEL_SUPER_CLASS_NAMES = "superClassNames"
         const val ATTRIBUTE_MODEL_SCHEMA = "schema"
         const val ATTRIBUTE_MODEL_TABLE = "table"
+        const val ATTRIBUTE_MODEL_COMMENT = "comment"
 
         //import
         const val TAG_MODEL_IMPORT = "import"

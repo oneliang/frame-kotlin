@@ -218,4 +218,15 @@ open class DefaultSqlProcessor : AbstractSqlProcessor() {
         }
         return stringBuilder.toString()
     }
+
+    /**
+     * create table comment process
+     * @param comment
+     * @return String
+     */
+    override fun createTableCommentProcess(comment: String): String {
+        return if (comment.isNotBlank()) {
+            "COMMENT " + Constants.Symbol.SINGLE_QUOTE + comment + Constants.Symbol.SINGLE_QUOTE
+        } else Constants.String.BLANK
+    }
 }

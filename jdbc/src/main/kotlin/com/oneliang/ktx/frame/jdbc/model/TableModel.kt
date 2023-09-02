@@ -6,6 +6,7 @@ import com.oneliang.ktx.frame.jdbc.SqlUtil
 open class TableModel {
     var schema = Constants.String.BLANK
     var table = Constants.String.BLANK
+    var comment = Constants.String.BLANK
     var columnArray = emptyArray<ColumnModel>()
     var indexArray = emptyArray<IndexModel>()
 
