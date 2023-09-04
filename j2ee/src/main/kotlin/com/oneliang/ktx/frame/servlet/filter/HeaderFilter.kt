@@ -2,10 +2,7 @@ package com.oneliang.ktx.frame.servlet.filter
 
 import com.oneliang.ktx.Constants
 import com.oneliang.ktx.frame.configuration.ConfigurationContainer
-import com.oneliang.ktx.util.common.nullToBlank
-import com.oneliang.ktx.util.common.replaceAllLines
-import com.oneliang.ktx.util.common.replaceAllSpace
-import com.oneliang.ktx.util.common.toFile
+import com.oneliang.ktx.util.common.*
 import com.oneliang.ktx.util.json.JsonArray
 import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
@@ -70,8 +67,8 @@ class HeaderFilter : Filter {
             logger.info("access control origin full filename:%s", accessControlOriginFullFilename)
             try {
                 accessControlOriginFullFilename.toFile().readLines().forEach {
-                    if (it.isNotBlank()) {
-                        this.accessControlOriginSet += it.trim()
+                    it.trim().ifNotBlank { string ->
+                        this.accessControlOriginSet += string.trim()
                     }
                 }
             } catch (e: Throwable) {
@@ -87,8 +84,8 @@ class HeaderFilter : Filter {
             try {
                 val accessControlHeaderValueList = mutableListOf<String>()
                 accessControlHeaderFullFilename.toFile().readLines().forEach {
-                    if (it.isNotBlank()) {
-                        accessControlHeaderValueList += it.trim()
+                    it.trim().ifNotBlank { string ->
+                        accessControlHeaderValueList += string.trim()
                     }
                 }
                 this.headerMap[Constants.Http.HeaderKey.ACCESS_CONTROL_ALLOW_HEADERS] = accessControlHeaderValueList.joinToString()
