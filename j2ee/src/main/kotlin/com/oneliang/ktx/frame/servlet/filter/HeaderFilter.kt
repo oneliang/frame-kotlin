@@ -6,7 +6,6 @@ import com.oneliang.ktx.util.common.nullToBlank
 import com.oneliang.ktx.util.common.replaceAllLines
 import com.oneliang.ktx.util.common.replaceAllSpace
 import com.oneliang.ktx.util.common.toFile
-import com.oneliang.ktx.util.http.HttpUtil
 import com.oneliang.ktx.util.json.JsonArray
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.IOException
@@ -21,12 +20,13 @@ class HeaderFilter : Filter {
         private const val RESPONSE_HEADER_JSON = "responseHeaderJson"
         private const val HEADER_KEY = "key"
         private const val HEADER_VALUE = "value"
-        private const val ACCESS_CONTROL = "accessControl"
-        private const val ACCESS_CONTROL_FILE = "accessControlFile"
+        private const val ACCESS_CONTROL_ORIGIN = "accessControlOrigin"
+        private const val ACCESS_CONTROL_ORIGIN_FILE = "accessControlOriginFile"
+        private const val ACCESS_CONTROL_HEADERS_FILE = "accessControlHeadersFile"
     }
 
-    private val headerList = mutableListOf<HttpUtil.HttpNameValue>()
-    private val accessControlSet = mutableSetOf<String>()
+    private val headerMap = mutableMapOf<String, String>()
+    private val accessControlOriginSet = mutableSetOf<String>()
 
     /**
      * Method: public void init(FilterConfig filterConfig) throws ServletException
@@ -46,33 +46,51 @@ class HeaderFilter : Filter {
                     val headerJsonArray = JsonArray(fixResponseHeaderJson)
                     for (i in 0 until headerJsonArray.length()) {
                         val headerJsonObject = headerJsonArray.getJsonObject(i)
-                        this.headerList.add(HttpUtil.HttpNameValue(headerJsonObject.getString(HEADER_KEY), headerJsonObject.getString(HEADER_VALUE)))
+                        this.headerMap[headerJsonObject.getString(HEADER_KEY)] = headerJsonObject.getString(HEADER_VALUE)
                     }
                 }
             } catch (e: Throwable) {
                 logger.error("init exception", e)
             }
         }
-        //access control step one
-        this.accessControlSet.clear()
-        val accessControl = filterConfig.getInitParameter(ACCESS_CONTROL).nullToBlank()
-        if (accessControl.isNotBlank()) {
-            accessControl.split(Constants.Symbol.COMMA).forEach {
-                this.accessControlSet += it.trim()
+        //access control origin step one
+        this.accessControlOriginSet.clear()
+        val accessControlOrigin = filterConfig.getInitParameter(ACCESS_CONTROL_ORIGIN).nullToBlank()
+        if (accessControlOrigin.isNotBlank()) {
+            accessControlOrigin.split(Constants.Symbol.COMMA).forEach {
+                this.accessControlOriginSet += it.trim()
             }
         }
-        //access control step two
-        val accessControlFile = filterConfig.getInitParameter(ACCESS_CONTROL_FILE).nullToBlank()
-        if (accessControlFile.isNotBlank()) {
-            val fixAccessControlFile = accessControlFile.trim()
-            val accessControlFullFilename = ConfigurationContainer.rootConfigurationContext.classesRealPath + fixAccessControlFile
-            logger.info("access control full filename:%s", accessControlFullFilename)
+        //access control origin step two
+        val accessControlOriginFile = filterConfig.getInitParameter(ACCESS_CONTROL_ORIGIN_FILE).nullToBlank()
+        if (accessControlOriginFile.isNotBlank()) {
+            val fixAccessControlOriginFile = accessControlOriginFile.trim()
+            val accessControlOriginFullFilename = ConfigurationContainer.rootConfigurationContext.classesRealPath + fixAccessControlOriginFile
+            logger.info("access control origin full filename:%s", accessControlOriginFullFilename)
             try {
-                accessControlFullFilename.toFile().readLines().forEach {
+                accessControlOriginFullFilename.toFile().readLines().forEach {
                     if (it.isNotBlank()) {
-                        this.accessControlSet += it.trim()
+                        this.accessControlOriginSet += it.trim()
                     }
                 }
+            } catch (e: Throwable) {
+                logger.error(Constants.String.EXCEPTION, e)
+            }
+        }
+        //access control header step one
+        val accessControlHeadersFile = filterConfig.getInitParameter(ACCESS_CONTROL_HEADERS_FILE).nullToBlank()
+        if (this.headerMap.containsKey(Constants.Http.HeaderKey.ACCESS_CONTROL_ALLOW_HEADERS) && accessControlHeadersFile.isNotBlank()) {
+            val fixAccessControlHeaderFile = accessControlHeadersFile.trim()
+            val accessControlHeaderFullFilename = ConfigurationContainer.rootConfigurationContext.classesRealPath + fixAccessControlHeaderFile
+            logger.info("access control header full filename:%s", accessControlHeaderFullFilename)
+            try {
+                val accessControlHeaderValueList = mutableListOf<String>()
+                accessControlHeaderFullFilename.toFile().readLines().forEach {
+                    if (it.isNotBlank()) {
+                        accessControlHeaderValueList += it.trim()
+                    }
+                }
+                this.headerMap[Constants.Http.HeaderKey.ACCESS_CONTROL_ALLOW_HEADERS] = accessControlHeaderValueList.joinToString()
             } catch (e: Throwable) {
                 logger.error(Constants.String.EXCEPTION, e)
             }
@@ -90,14 +108,14 @@ class HeaderFilter : Filter {
     @Throws(IOException::class, ServletException::class)
     override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
         val httpServletResponse = servletResponse as HttpServletResponse
-        this.headerList.forEach {
-            httpServletResponse.setHeader(it.name, it.value)
+        this.headerMap.forEach { (key, value) ->
+            httpServletResponse.setHeader(key, value)
         }
-        if (this.accessControlSet.isNotEmpty()) {
+        if (this.accessControlOriginSet.isNotEmpty()) {
             val httpServletRequest = servletRequest as HttpServletRequest
             val httpHeaderOrigin = httpServletRequest.getHeader(Constants.Http.HeaderKey.ORIGIN).nullToBlank()
             logger.info("header[Origin] is:%s", httpHeaderOrigin)
-            if (httpHeaderOrigin.isNotBlank() && accessControlSet.contains(httpHeaderOrigin)) {
+            if (httpHeaderOrigin.isNotBlank() && accessControlOriginSet.contains(httpHeaderOrigin)) {
                 httpServletResponse.setHeader(Constants.Http.HeaderKey.ACCESS_CONTROL_ALLOW_ORIGIN, httpHeaderOrigin)
             } else {
                 logger.error("header[Origin] is not support for %s", httpHeaderOrigin.ifBlank { "blank" })
@@ -110,6 +128,6 @@ class HeaderFilter : Filter {
      * Method: public void destroy()
      */
     override fun destroy() {
-        headerList.clear()
+        headerMap.clear()
     }
 }
