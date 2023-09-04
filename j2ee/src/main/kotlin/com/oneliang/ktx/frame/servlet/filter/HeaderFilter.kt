@@ -7,6 +7,7 @@ import com.oneliang.ktx.util.common.replaceAllLines
 import com.oneliang.ktx.util.common.replaceAllSpace
 import com.oneliang.ktx.util.common.toFile
 import com.oneliang.ktx.util.json.JsonArray
+import com.oneliang.ktx.util.json.toJson
 import com.oneliang.ktx.util.logging.LoggerManager
 import java.io.IOException
 import javax.servlet.*
@@ -95,6 +96,7 @@ class HeaderFilter : Filter {
                 logger.error(Constants.String.EXCEPTION, e)
             }
         }
+        logger.info("initialize filter:%s, finished, response header map is:%s", this::class, this.headerMap.toJson())
     }
 
     /**
