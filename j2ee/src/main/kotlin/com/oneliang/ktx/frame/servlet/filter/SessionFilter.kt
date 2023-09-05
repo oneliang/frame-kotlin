@@ -94,9 +94,9 @@ class SessionFilter : Filter {
                 uri = uri.substring(front)
                 val params = mapToParameter(request.getParameterMap())
                 val errorForwardUrl = if (this.errorForward.indexOf(Constants.Symbol.QUESTION_MARK) > 0) {
-                    this.errorForward + Constants.Symbol.AND + Constants.RequestParameter.RETURN_URL + Constants.Symbol.EQUAL + uri + QUESTION_ENCODE + params
+                    this.errorForward + Constants.Symbol.AND + Constants.Http.RequestParameter.RETURN_URL + Constants.Symbol.EQUAL + uri + QUESTION_ENCODE + params
                 } else {
-                    this.errorForward + Constants.Symbol.QUESTION_MARK + Constants.RequestParameter.RETURN_URL + Constants.Symbol.EQUAL + uri + QUESTION_ENCODE + params
+                    this.errorForward + Constants.Symbol.QUESTION_MARK + Constants.Http.RequestParameter.RETURN_URL + Constants.Symbol.EQUAL + uri + QUESTION_ENCODE + params
                 }
                 httpRequest.getRequestDispatcher(errorForwardUrl).forward(request, response)
             }

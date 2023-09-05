@@ -85,7 +85,7 @@ class PaginationTag : BodyTagSupport() {
 
     @Throws(JspException::class)
     override fun doEndTag(): Int {
-        val instance = if (this.scope == Constants.RequestScope.SESSION) {
+        val instance = if (this.scope == Constants.Http.RequestScope.SESSION) {
             this.pageContext.session.getAttribute(value)
         } else {
             this.pageContext.request.getAttribute(value)

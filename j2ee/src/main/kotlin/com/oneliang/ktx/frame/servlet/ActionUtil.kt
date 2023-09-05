@@ -51,6 +51,13 @@ object ActionUtil {
         get() = servletBeanThreadLocal.get().servletResponse!!
 
     /**
+     * get http request method
+     * @return String uppercase about http request method
+     */
+    val httpRequestMethod: String
+        get() = servletBeanThreadLocal.get().httpRequestMethod!!
+
+    /**
      * parse forward path and replace the parameter value
      * all by request.setAttribute() and request.getAttribute()
      * @param path
@@ -190,5 +197,10 @@ object ActionUtil {
          * @param servletResponse the servletResponse to set
          */
         var servletResponse: ServletResponse? = null
+
+        /**
+         * http request method, such as options get post and so on, use uppercase
+         */
+        var httpRequestMethod: String? = null
     }
 }

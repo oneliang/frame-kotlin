@@ -53,8 +53,8 @@ object SqlUtil {
                 instance = kClass.java.newInstance()// more instance
                 for (method in methods) {
                     val methodName = method.name
-                    val fieldName = if (methodName.startsWith(Constants.Method.PREFIX_SET)) {
-                        ObjectUtil.methodNameToFieldName(Constants.Method.PREFIX_SET, methodName)
+                    val fieldName = if (methodName.startsWith(Constants.Object.Method.PREFIX_SET)) {
+                        ObjectUtil.methodNameToFieldName(Constants.Object.Method.PREFIX_SET, methodName)
                     } else {
                         Constants.String.BLANK
                     }

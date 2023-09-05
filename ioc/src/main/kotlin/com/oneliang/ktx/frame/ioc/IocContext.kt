@@ -296,7 +296,7 @@ open class IocContext : AbstractContext() {
         val objectMethods = instance.javaClass.methods
         for (method in objectMethods) {
             val methodName = method.name
-            if (!methodName.startsWith(Constants.Method.PREFIX_SET)) {
+            if (!methodName.startsWith(Constants.Object.Method.PREFIX_SET)) {
                 continue
             }
             val types = method.parameterTypes ?: emptyArray()
@@ -337,14 +337,14 @@ open class IocContext : AbstractContext() {
         val objectMethods = instance.javaClass.methods
         for (method in objectMethods) {
             val methodName = method.name
-            if (!methodName.startsWith(Constants.Method.PREFIX_SET)) {
+            if (!methodName.startsWith(Constants.Object.Method.PREFIX_SET)) {
                 continue
             }
             val types = method.parameterTypes ?: emptyArray()
             if (types.size != 1) {
                 continue
             }
-            val fieldName = ObjectUtil.methodNameToFieldName(Constants.Method.PREFIX_SET, methodName)
+            val fieldName = ObjectUtil.methodNameToFieldName(Constants.Object.Method.PREFIX_SET, methodName)
             val instanceClassName = instance.javaClass.name
             val referenceObjectBean = objectMap[fieldName]
             var realType: String
@@ -398,10 +398,10 @@ open class IocContext : AbstractContext() {
             val objectMethods = instance!!.javaClass.methods
             for (method in objectMethods) {
                 val methodName = method.name
-                if (!methodName.startsWith(Constants.Method.PREFIX_SET)) {
+                if (!methodName.startsWith(Constants.Object.Method.PREFIX_SET)) {
                     continue
                 }
-                val fieldName = ObjectUtil.methodNameToFieldName(Constants.Method.PREFIX_SET, methodName)
+                val fieldName = ObjectUtil.methodNameToFieldName(Constants.Object.Method.PREFIX_SET, methodName)
                 if (propertyName != fieldName) {
                     continue
                 }

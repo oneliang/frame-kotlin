@@ -27,7 +27,7 @@ open class Forest<T : Any> {
         try {
             for (instance in list) {
                 if (fartherFieldName.isNotEmpty()) {
-                    val fartherMethodName = ObjectUtil.fieldNameToMethodName(Constants.Method.PREFIX_GET, fartherFieldName)
+                    val fartherMethodName = ObjectUtil.fieldNameToMethodName(Constants.Object.Method.PREFIX_GET, fartherFieldName)
                     val fartherMethod = instance.javaClass.getMethod(fartherMethodName)
                     val value = fartherMethod.invoke(instance)
                     if (Tree.checkValue(value, fartherValueSet)) {

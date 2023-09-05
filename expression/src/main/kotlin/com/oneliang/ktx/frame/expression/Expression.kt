@@ -156,7 +156,7 @@ object Expression {
         val node = nodeList[0]
         return when (node.type) {
             ExpressionNode.Type.NUMBER -> node.calculateValue
-            ExpressionNode.Type.STRING, ExpressionNode.Type.DATE -> node.calculateValue.toString().replace("\"", Constants.String.BLANK)
+            ExpressionNode.Type.STRING, ExpressionNode.Type.DATE -> node.calculateValue.toString().replace(Constants.Symbol.DOUBLE_QUOTE, Constants.String.BLANK)
             else -> {
                 throw ExpressionException("lose operator")
             }
@@ -391,7 +391,7 @@ object Expression {
         if (index > -1) {
             val stringOne = expression.substring(0, index)
             val stringTwo = expression.substring(index + 1)
-            index = stringTwo.indexOf(":")
+            index = stringTwo.indexOf(Constants.Symbol.COLON)
             return if (java.lang.Boolean.parseBoolean(evalExpression(parseExpression(stringOne)).toString())) {
                 eval(stringTwo.substring(0, index))
             } else eval(stringTwo.substring(index + 1))

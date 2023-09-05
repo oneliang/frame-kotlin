@@ -89,10 +89,14 @@ open class BaseAction {
         val byteArrayOutputStream = ByteArrayOutputStream()
         val servletRequest = ActionUtil.servletRequest
         val contentType = servletRequest.contentType
+        val httpRequestMethod = ActionUtil.httpRequestMethod
         if (checkContentType && !contentType.isNullOrBlank()) {
             if (contentType.indexOf(Constants.Http.ContentType.APPLICATION_OCTET_STREAM) >= 0
                 || contentType.indexOf(Constants.Http.ContentType.BINARY_OCTET_STREAM) >= 0
-                || contentType.indexOf(Constants.Http.ContentType.APPLICATION_JSON) >= 0) {
+                || (httpRequestMethod.isNotBlank()
+                        && httpRequestMethod.uppercase() == Constants.Http.RequestMethod.POST.value
+                        && contentType.indexOf(Constants.Http.ContentType.APPLICATION_JSON) >= 0)
+            ) {
                 copyBlock(servletRequest, byteArrayOutputStream)
             } else {
                 //nothing to do, byteArrayOutputStream will empty

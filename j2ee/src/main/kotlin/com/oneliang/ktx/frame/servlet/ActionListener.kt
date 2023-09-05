@@ -85,11 +85,13 @@ class ActionListener : HttpServlet() {
         servletBean.servletContext = this.servletContext
         servletBean.servletRequest = httpServletRequest
         servletBean.servletResponse = httpServletResponse
+        servletBean.httpRequestMethod = httpServletRequest.method.nullToBlank().uppercase()
         //execute default service method,distribute doGet or doPost or other http method
         super.service(httpServletRequest, httpServletResponse)
         //servlet bean request and response set null
         servletBean.servletRequest = null
         servletBean.servletResponse = null
+        servletBean.httpRequestMethod = null
     }
 
     override fun getLastModified(httpServletRequest: HttpServletRequest): Long {

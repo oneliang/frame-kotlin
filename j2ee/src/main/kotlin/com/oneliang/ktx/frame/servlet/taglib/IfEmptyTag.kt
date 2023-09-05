@@ -26,7 +26,7 @@ class IfEmptyTag : BodyTagSupport() {
      */
     @Throws(JspException::class)
     override fun doStartTag(): Int {
-        val o: Any? = if (this.scope == Constants.RequestScope.SESSION) {
+        val o: Any? = if (this.scope == Constants.Http.RequestScope.SESSION) {
             this.pageContext.session.getAttribute(this.value)
         } else {
             this.pageContext.request.getAttribute(this.value)
