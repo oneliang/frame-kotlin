@@ -233,11 +233,16 @@ class ActionListener : HttpServlet() {
 
         httpServletRequest.setAttribute(ConstantsAction.RequestKey.KEY_STRING_CURRENT_REQUEST_URI, uri)
 
+        val begin = System.currentTimeMillis()
         try {
             this.lifecycle?.onRequest(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
             this.dispatchToDoAction(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
         } finally {
-            this.lifecycle?.onResponse(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
+            try {
+                this.lifecycle?.onResponse(uri, httpServletRequest, httpServletResponse, httpRequestMethod)
+            } finally {
+                logger.info("ActionListener dispatch execute cost:%s(ms), uri:%s", (System.currentTimeMillis() - begin), uri)
+            }
         }
     }
 
@@ -380,7 +385,13 @@ class ActionListener : HttpServlet() {
      * @return boolean
      */
     @Throws(ActionExecuteException::class, ServletException::class, IOException::class)
-    private fun doAction(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
+    private fun doAction(
+        uri: String,
+        actionBean: ActionBean,
+        httpServletRequest: HttpServletRequest,
+        httpServletResponse: HttpServletResponse,
+        httpRequestMethod: ActionInterface.HttpRequestMethod
+    ): Boolean {
         val actionInstance = actionBean.actionObjectBean?.instance
         if (actionInstance !is ActionInterface) {
             logger.error("It is not ActionInterface, actionBean:%s, it is impossible", actionBean)
@@ -490,7 +501,13 @@ class ActionListener : HttpServlet() {
      * @throws ServletException
      */
     @Throws(IllegalArgumentException::class, InstantiationException::class, IllegalAccessException::class, InvocationTargetException::class, ServletException::class, IOException::class)
-    private fun doAnnotationAction(uri: String, actionBean: ActionBean, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, httpRequestMethod: ActionInterface.HttpRequestMethod): Boolean {
+    private fun doAnnotationAction(
+        uri: String,
+        actionBean: ActionBean,
+        httpServletRequest: HttpServletRequest,
+        httpServletResponse: HttpServletResponse,
+        httpRequestMethod: ActionInterface.HttpRequestMethod
+    ): Boolean {
         if (actionBean !is AnnotationActionBean) {
             logger.error("It is not AnnotationActionBean, actionBean:%s, it is impossible", actionBean)
             return false
@@ -601,7 +618,15 @@ class ActionListener : HttpServlet() {
      * @throws ServletException
      */
     @Throws(ServletException::class, IOException::class)
-    private fun doForward(normalExecute: Boolean, needToStaticExecute: Boolean, actionForwardBean: ActionForwardBean?, path: String, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, annotationBeanExecute: Boolean) {
+    private fun doForward(
+        normalExecute: Boolean,
+        needToStaticExecute: Boolean,
+        actionForwardBean: ActionForwardBean?,
+        path: String,
+        httpServletRequest: HttpServletRequest,
+        httpServletResponse: HttpServletResponse,
+        annotationBeanExecute: Boolean
+    ) {
         var realPath = path
         if (!normalExecute && !needToStaticExecute) {
             val staticFilePath = actionForwardBean!!.staticFilePath
@@ -648,7 +673,11 @@ class ActionListener : HttpServlet() {
      * @param httpServletResponse
      * @return InterceptorInterface.Result
      */
-    private fun doGlobalInterceptorBeanIterable(globalInterceptorBeanIterable: Iterable<GlobalInterceptorBean>, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): InterceptorInterface.Result {
+    private fun doGlobalInterceptorBeanIterable(
+        globalInterceptorBeanIterable: Iterable<GlobalInterceptorBean>,
+        httpServletRequest: HttpServletRequest,
+        httpServletResponse: HttpServletResponse
+    ): InterceptorInterface.Result {
         try {
             for (globalInterceptorBean in globalInterceptorBeanIterable) {
                 val result = globalInterceptorBean.interceptorInstance.intercept(httpServletRequest, httpServletResponse)
@@ -672,7 +701,11 @@ class ActionListener : HttpServlet() {
      * @param httpServletResponse
      * @return InterceptorInterface.Result
      */
-    private fun doActionInterceptorBeanList(actionInterceptorBeanList: List<ActionInterceptorBean>, httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): InterceptorInterface.Result {
+    private fun doActionInterceptorBeanList(
+        actionInterceptorBeanList: List<ActionInterceptorBean>,
+        httpServletRequest: HttpServletRequest,
+        httpServletResponse: HttpServletResponse
+    ): InterceptorInterface.Result {
         try {
             for (actionInterceptorBean in actionInterceptorBeanList) {
                 val actionInterceptor = actionInterceptorBean.interceptorInstance
