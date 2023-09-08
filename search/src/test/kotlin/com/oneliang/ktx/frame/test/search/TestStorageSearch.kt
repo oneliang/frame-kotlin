@@ -54,9 +54,9 @@ private fun searchData(documentStorage: DocumentStorage, value: String, outputFu
             println("id:%s, score:%s".format(documentInfo.documentId, documentInfo.totalScore))
             val documentByteArray = documentStorage.collectContent(documentInfo.documentId)
             writer.write("----------%s----------".format(index + 1))
-            writer.write(Constants.String.CRLF_STRING)
+            writer.write(Constants.String.NEW_LINE)
             writer.write(String(documentByteArray, Charsets.UTF_8))
-            writer.write(Constants.String.CRLF_STRING)
+            writer.write(Constants.String.NEW_LINE)
 //        String(documentByteArray)
         }
     }

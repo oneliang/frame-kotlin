@@ -106,7 +106,7 @@ class GenerateAnnotationTxtPlugin : Plugin<Project> {
                         val content = StringBuilder()
                         file.createFileIncludeDirectory()
                         classNameMutableList.forEach { line ->
-                            content.append(line + (if (isWindows) Constants.String.CRLF_STRING else Constants.String.LF_STRING))
+                            content.append(line + Constants.String.NEW_LINE)
                         }
                         file.write(content.toString().toByteArray())
                     } else {
