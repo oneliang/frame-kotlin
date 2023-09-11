@@ -26,7 +26,7 @@ class GenerateModelExtPlugin : Plugin<Project> {
                 return@afterEvaluate
             }
             val modelXmlArray = generateModelExt.modelXmlArray
-            val ignoreModelClassNameSet = generateModelExt.ignoreModelClassNameArray
+            val ignoreModelClassNameSet = generateModelExt.ignoreModelClassNameSet
             val modelExtensionsTemplate =
                 generateModelExt.modelExtensionsTemplate ?: throw RuntimeException("parameter(modelExtensionsTemplate) error, please input parameter(modelExtensionsTemplate).")
             val toDirectory = generateModelExt.toDirectory ?: throw RuntimeException("parameter(toDirectory) error, please input parameter(toDirectory).")

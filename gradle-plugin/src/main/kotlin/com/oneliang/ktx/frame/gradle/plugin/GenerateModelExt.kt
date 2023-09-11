@@ -12,7 +12,7 @@ open class GenerateModelExt {
     }
 
     var modelXmlArray = emptyArray<File>()
-    var ignoreModelClassNameArray = emptySet<String>()
+    var ignoreModelClassNameSet = emptySet<String>()
     var apiModelPackageName = Constants.String.BLANK
     var modelExtensionsPackageName = Constants.String.BLANK
     var modelExtensionsTemplate: File? = null
