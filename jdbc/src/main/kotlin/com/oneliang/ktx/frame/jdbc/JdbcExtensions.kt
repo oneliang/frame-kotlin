@@ -10,6 +10,14 @@ private fun <T> sqlConditionTransform(instance: T): String {
     }
 }
 
+private fun nonQuestionMarkTransform(value: String): String {
+    return if (value == Constants.Symbol.QUESTION_MARK) {
+        value
+    } else {
+        Constants.Symbol.SINGLE_QUOTE + value + Constants.Symbol.SINGLE_QUOTE
+    }
+}
+
 fun <T> Iterable<T>.toSqlCondition(transform: (T) -> String = { it.toString() }): String {
     return this.joinToString {
         sqlConditionTransform(transform(it))
@@ -23,35 +31,35 @@ fun <T> Array<T>.toSqlCondition(transform: (T) -> String = { it.toString() }): S
 }
 
 fun String.toSqlEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
-    return "$this=$value"
+    return "$this=${nonQuestionMarkTransform(value)}"
 }
 
 fun String.toSqlNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
-    return "$this!=$value"
+    return "$this!=${nonQuestionMarkTransform(value)}"
 }
 
 fun String.toSqlAndEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
-    return " ${Constants.Database.AND} $this=$value"
+    return " ${Constants.Database.AND} $this=${nonQuestionMarkTransform(value)}"
 }
 
 fun String.toSqlAndNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
-    return " ${Constants.Database.AND} $this!=$value"
+    return " ${Constants.Database.AND} $this!=${nonQuestionMarkTransform(value)}"
 }
 
 fun String.toSqlOrEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
-    return " ${Constants.Database.OR} $this=$value"
+    return " ${Constants.Database.OR} $this=${nonQuestionMarkTransform(value)}"
 }
 
 fun String.toSqlOrNotEqual(value: String = Constants.Symbol.QUESTION_MARK): String {
-    return " ${Constants.Database.OR} $this!=$value"
+    return " ${Constants.Database.OR} $this!=${nonQuestionMarkTransform(value)}"
 }
 
 fun String.toSqlAndLike(value: String = Constants.Symbol.QUESTION_MARK): String {
-    return " ${Constants.Database.AND} $this ${Constants.Database.LIKE} $value"
+    return " ${Constants.Database.AND} $this ${Constants.Database.LIKE} ${nonQuestionMarkTransform(value)}"
 }
 
 fun String.toSqlOrLike(value: String = Constants.Symbol.QUESTION_MARK): String {
-    return " ${Constants.Database.OR} $this ${Constants.Database.LIKE} $value"
+    return " ${Constants.Database.OR} $this ${Constants.Database.LIKE} ${nonQuestionMarkTransform(value)}"
 }
 
 fun String.toSqlIn(subSql: String): String {
