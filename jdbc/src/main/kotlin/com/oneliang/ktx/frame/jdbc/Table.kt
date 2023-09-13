@@ -12,7 +12,8 @@ annotation class Table(
     val table: String,
     val dropIfExist: Boolean = false,
     val condition: String = Constants.String.BLANK,
-    val columns: Array<Column> = []
+    val columns: Array<Column> = [],
+    val indexes: Array<Index> = []
 ) {
 
     @MustBeDocumented
@@ -23,5 +24,13 @@ annotation class Table(
         val column: String,
         val idFlag: Boolean = false,
         val condition: String = Constants.String.BLANK
+    )
+
+    @MustBeDocumented
+    @Target(AnnotationTarget.ANNOTATION_CLASS)
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Index(
+        val columns: String,
+        val otherCommands: String = Constants.String.BLANK
     )
 }

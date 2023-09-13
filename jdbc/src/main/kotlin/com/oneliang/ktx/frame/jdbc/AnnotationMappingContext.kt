@@ -48,23 +48,33 @@ class AnnotationMappingContext : MappingContext() {
         annotationMappingBean.condition = tableAnnotation.condition
         val columnAnnotations = tableAnnotation.columns
         for (columnAnnotation in columnAnnotations) {
-            val annotationMappingColumnBean = AnnotationMappingColumnBean()
-            annotationMappingColumnBean.field = columnAnnotation.field
-            annotationMappingColumnBean.column = columnAnnotation.column
-            annotationMappingColumnBean.idFlag = columnAnnotation.idFlag
-            annotationMappingColumnBean.condition = columnAnnotation.condition
+            val annotationMappingColumnBean = AnnotationMappingColumnBean.build(
+                columnAnnotation.field,
+                columnAnnotation.column,
+                columnAnnotation.idFlag,
+                columnAnnotation.condition
+            )
             annotationMappingBean.addMappingColumnBean(annotationMappingColumnBean)
+        }
+        val indexAnnotations = tableAnnotation.indexes
+        for (indexAnnotation in indexAnnotations) {
+            val annotationMappingIndexBean = AnnotationMappingIndexBean.build(
+                indexAnnotation.columns,
+                indexAnnotation.otherCommands
+            )
+            annotationMappingBean.addMappingIndexBean(annotationMappingIndexBean)
         }
         val fields = kClass.java.declaredFields
         if (!fields.isNullOrEmpty()) {
             for (field in fields) {
                 if (field.isAnnotationPresent(Table.Column::class.java)) {
                     val columnAnnotation = field.getAnnotation(Table.Column::class.java)
-                    val annotationMappingColumnBean = AnnotationMappingColumnBean()
-                    annotationMappingColumnBean.field = field.name
-                    annotationMappingColumnBean.column = columnAnnotation.column
-                    annotationMappingColumnBean.idFlag = columnAnnotation.idFlag
-                    annotationMappingColumnBean.condition = columnAnnotation.condition
+                    val annotationMappingColumnBean = AnnotationMappingColumnBean.build(
+                        field.name,
+                        columnAnnotation.column,
+                        columnAnnotation.idFlag,
+                        columnAnnotation.condition
+                    )
                     annotationMappingBean.addMappingColumnBean(annotationMappingColumnBean)
                 }
             }

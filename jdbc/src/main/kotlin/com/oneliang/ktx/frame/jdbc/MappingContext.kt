@@ -47,6 +47,11 @@ open class MappingContext : AbstractContext() {
                         val childNodeAttributeMap = childNode.attributes
                         JavaXmlUtil.initializeFromAttributeMap(mappingColumnBean, childNodeAttributeMap)
                         mappingBean.addMappingColumnBean(mappingColumnBean)
+                    }else if (nodeName == MappingIndexBean.TAG_INDEX) {
+                        val mappingIndexBean = MappingIndexBean()
+                        val childNodeAttributeMap = childNode.attributes
+                        JavaXmlUtil.initializeFromAttributeMap(mappingIndexBean, childNodeAttributeMap)
+                        mappingBean.addMappingIndexBean(mappingIndexBean)
                     }
                 }
                 val className = mappingBean.type

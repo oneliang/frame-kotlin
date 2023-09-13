@@ -13,6 +13,7 @@ open class MappingBean {
     var type: String = Constants.String.BLANK
     val mappingColumnBeanList = mutableListOf<MappingColumnBean>()
     private val mappingColumnBeanMap = mutableMapOf<String, MappingColumnBean>()
+    val mappingIndexBeanList = mutableListOf<MappingIndexBean>()
 
     /**
      * get column, when can not find the column because the field had not mapping
@@ -20,7 +21,7 @@ open class MappingBean {
      * @return column
      */
     fun getColumn(field: String): String {
-        val mappingColumnBean = mappingColumnBeanMap[field]
+        val mappingColumnBean = this.mappingColumnBeanMap[field]
         return mappingColumnBean?.column.nullToBlank()
     }
 
@@ -32,7 +33,7 @@ open class MappingBean {
     @Deprecated("not used yet")
     fun getField(column: String): String {
         var field: String? = null
-        for (mappingColumnBean in mappingColumnBeanList) {
+        for (mappingColumnBean in this.mappingColumnBeanList) {
             val fieldColumn = mappingColumnBean.column
             if (fieldColumn.isNotBlank() && fieldColumn == column) {
                 field = mappingColumnBean.field
@@ -48,7 +49,7 @@ open class MappingBean {
      * @return is id
      */
     fun isId(field: String): Boolean {
-        val mappingColumnBean = mappingColumnBeanMap[field]
+        val mappingColumnBean = this.mappingColumnBeanMap[field]
         mappingColumnBean ?: error("mapping column bean not found, field:$field")
         return mappingColumnBean.idFlag
     }
@@ -63,5 +64,16 @@ open class MappingBean {
         }
         this.mappingColumnBeanMap[mappingColumnBean.field] = mappingColumnBean
         return this.mappingColumnBeanList.add(mappingColumnBean)
+    }
+
+    /**
+     * @param mappingIndexBean
+     * @return boolean
+     */
+    fun addMappingIndexBean(mappingIndexBean: MappingIndexBean): Boolean {
+        if (mappingIndexBean.columns.isBlank()) {
+            error("mapping index columns can not blank")
+        }
+        return this.mappingIndexBeanList.add(mappingIndexBean)
     }
 }

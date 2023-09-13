@@ -51,7 +51,7 @@ class ModelTemplateBean : TableModel() {
     var tableIndexArray = emptyArray<TableIndex>()
     var codeInClassArray = emptyArray<String>()
 
-    class Field : TableModel.ColumnModel() {
+    class Field : ColumnModel() {
         var override: Boolean = false
         var name: String = Constants.String.BLANK
 

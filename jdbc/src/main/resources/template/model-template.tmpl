@@ -23,7 +23,15 @@ import com.oneliang.ktx.frame.jdbc.Table
         <%}%>
     <%}%>
 <%}%>
-    ]
+    ]<%=(tableIndexArray.length > 0 ? ", indexes = [" : "")%>
+<%for(var i=0;i<tableIndexArray.length;i++){%><%var tableIndexBean=tableIndexArray[i];%>
+    <%if (i == tableIndexArray.length - 1) {%>
+        Table.Index(columns = "<%=tableIndexBean.columns%>"<%=(tableIndexBean.otherCommands.length > 0 ? (", otherCommands = " + tableIndexBean.otherCommands) : "")%>)
+    <%} else {%>
+        Table.Index(columns = "<%=tableIndexBean.columns%>"<%=(tableIndexBean.otherCommands.length > 0 ? (", otherCommands = " + tableIndexBean.otherCommands) : "")%>),
+    <%}%>
+<%}%>
+    <%=(tableIndexArray.length > 0 ? "]" : "")%>
 )
 <%=(comment.length != 0 ? ("// " + comment) : "")%>
 open class <%=className%><%=(superClassNames.length != 0 ? " : "+superClassNames : "")%> {
