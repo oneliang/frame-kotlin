@@ -9,10 +9,10 @@ fun main() {
 //        configuration {
 //        }
         annotationMappingContext {
-            it.parameter = "-PATH=/@Interceptor.txt,-T=txt,-P=com.oneliang.platform"
+            it.parameters = "-PATH=/@Interceptor.txt,-T=txt,-P=com.oneliang.platform"
         }
         databaseContext {
-            it.parameter = "/config/xml/database.properties"
+            it.parameters = "/config/xml/database.properties"
         }
     }
 }

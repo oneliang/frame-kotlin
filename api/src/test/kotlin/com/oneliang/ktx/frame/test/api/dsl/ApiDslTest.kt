@@ -6,7 +6,7 @@ import com.oneliang.ktx.frame.configuration.dsl.configurationContext
 fun main() {
     configurationContext {
         annotationApiContext {
-            it.parameter = "/com/oneliang/platform/internal/api"
+            it.parameters = "/com/oneliang/platform/internal/api"
         }
     }
 }

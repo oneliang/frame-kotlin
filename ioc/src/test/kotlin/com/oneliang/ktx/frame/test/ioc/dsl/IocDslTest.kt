@@ -11,10 +11,10 @@ fun main() {
 //        configuration {
 //        }
         iocContext {
-            it.parameter = "/config/xml/ioc/system-ioc.xml"
+            it.parameters = "/config/xml/ioc/system-ioc.xml"
         }
         annotationIocContext {
-            it.parameter = "-PATH=/@Interceptor.txt,-T=txt,-P=com.oneliang.platform"
+            it.parameters = "-PATH=/@Interceptor.txt,-T=txt,-P=com.oneliang.platform"
         }
 
     }
