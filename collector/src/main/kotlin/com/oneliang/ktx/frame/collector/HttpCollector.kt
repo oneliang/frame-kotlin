@@ -12,10 +12,10 @@ abstract class HttpCollector<FROM,DATA> : Collector<FROM, DATA> {
      */
     protected fun replaceAllBlank(text: String): String {
         return text.replace(Constants.String.SPACE, Constants.String.BLANK)
-                .replace(Constants.String.CR_STRING, Constants.String.BLANK)
-                .replace(Constants.String.LF_STRING, Constants.String.BLANK)
-                .replace(Constants.String.TAB_STRING, Constants.String.BLANK)
-                .replace(Constants.String.CRLF_STRING, Constants.String.BLANK)
+                .replace(Constants.String.CR, Constants.String.BLANK)
+                .replace(Constants.String.LF, Constants.String.BLANK)
+                .replace(Constants.String.TAB, Constants.String.BLANK)
+                .replace(Constants.String.CRLF, Constants.String.BLANK)
                 .replace("&nbsp;", Constants.String.BLANK)
     }
 }
