@@ -31,7 +31,6 @@ class MqttReceiver(
         this.receiveHandler.start()
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun process(resource: FutureConnection): (FutureConnection) -> Unit {
         val message = resource.receive().await()
         message.ack()

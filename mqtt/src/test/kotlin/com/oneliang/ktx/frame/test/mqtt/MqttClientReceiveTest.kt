@@ -12,7 +12,7 @@ fun main() {
     val password = "test"
     val receiveHandler = ReceiveHandler(2, initialize = {
         MqttClient.connect(host, username, password) { connection ->
-            val topics = arrayOf(Topic("mqtt/example/publish", QoS.EXACTLY_ONCE), Topic("test/#", QoS.EXACTLY_ONCE), Topic("foo/+/bar", QoS.EXACTLY_ONCE))
+            val topics = arrayOf(Topic("/63/student/10", QoS.EXACTLY_ONCE), Topic("test/#", QoS.EXACTLY_ONCE), Topic("foo/+/bar", QoS.EXACTLY_ONCE))
             connection.subscribe(topics)
             println("Subscribed to topics.")
             println("Receiving messages.")
