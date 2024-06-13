@@ -32,23 +32,25 @@ class FileManager(maxThreads: Int = Runtime.getRuntime().availableProcessors()) 
         file: File,
         block: (file: File) -> Unit
     ) {
-        val processingFile = File(file.absolutePath + SUFFIX_PROCESSING)
-        val successFile = File(file.absolutePath + SUFFIX_SUCCESS)
-        //check file exist, will delete all processing file and success file
-        if (processingFile.exists()) {
-            processingFile.delete()
-        }
-        if (successFile.exists()) {
-            successFile.delete()
-        }
-        //then create new processing file before execute
-        if (!processingFile.exists()) {
-            processingFile.createNewFile()
-        }
-        block(file)
-        if (!successFile.exists()) {
-            successFile.createNewFile()
-            processingFile.delete()
+        synchronized(file.absolutePath) {//lock for same file
+            val processingFile = File(file.absolutePath + SUFFIX_PROCESSING)
+            val successFile = File(file.absolutePath + SUFFIX_SUCCESS)
+            //check file exist, will delete all processing file and success file
+            if (processingFile.exists()) {
+                processingFile.delete()
+            }
+            if (successFile.exists()) {
+                successFile.delete()
+            }
+            //then create new processing file before execute
+            if (!processingFile.exists()) {
+                processingFile.createNewFile()
+            }
+            block(file)
+            if (!successFile.exists()) {
+                successFile.createNewFile()
+                processingFile.delete()
+            }
         }
     }
 }
