@@ -7,11 +7,11 @@ class ParallelJobStep<IN : Any?> {
     internal lateinit var nextParallelJobStep: ParallelJobStep<Any?>
 
     @Suppress("UNCHECKED_CAST")
-    fun <OUT> addParallelTransformProcessor(parallelProcessor: ParallelTransformProcessor<IN, OUT>): ParallelJobStep<OUT> {
+    fun <OUT> addParallelTransformProcessor(parallelTransformProcessor: ParallelTransformProcessor<IN, OUT>): ParallelJobStep<OUT> {
         if (this::parallelTransformProcessor.isInitialized) {
             error("parallel transform processor has been initialized, only can initialize one time")
         }
-        this.parallelTransformProcessor = parallelProcessor as ParallelTransformProcessor<IN, Any?>
+        this.parallelTransformProcessor = parallelTransformProcessor as ParallelTransformProcessor<IN, Any?>
         val parallelJobStep = ParallelJobStep<OUT>()
         this.nextParallelJobStep = parallelJobStep as ParallelJobStep<Any?>
         return parallelJobStep

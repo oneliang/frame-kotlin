@@ -1,6 +1,6 @@
 package com.oneliang.ktx.frame.parallel
 
-interface ParallelContext<IN : Any?> {
+interface ParallelTransformContext<IN : Any?> {
 
     val parentParallelContextAction: ParallelContextAction
 

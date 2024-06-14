@@ -17,7 +17,7 @@ internal object ParallelContextUtil {
                 if (nextParallelJobStep == null) {
                     logger.error("this parallel job step is used for a transform processor, but next parallel job step is null, you may be need to add a transform processor or a sink processor for next job, this:%s", parallelJobStep)
                 } else {
-                    val nextParallelContext = DefaultParallelContext(coroutine, nextParallelJobStep, parentParallelContextAction, parallelJob)
+                    val nextParallelContext = DefaultParallelTransformContext(coroutine, nextParallelJobStep, parentParallelContextAction, parallelJob)
                     parallelJobStep.parallelTransformProcessor.process(value, nextParallelContext)
                 }
             }

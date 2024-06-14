@@ -92,12 +92,12 @@ fun main() {
     val queueParallelSourceProcessor = QueueParallelSourceProcessor<String>()
     parallelJob.addParallelSourceProcessor(queueParallelSourceProcessor)
     parallelJob.generateFirstParallelJobStep().addParallelTransformProcessor(object : ParallelTransformProcessor<String, String> {
-        override fun process(value: String, parallelContext: ParallelContext<String>) {
+        override fun process(value: String, parallelTransformContext: ParallelTransformContext<String>) {
             if (value.isBlank()) {
-                parallelContext.collect(Constants.String.BLANK)
+                parallelTransformContext.collect(Constants.String.BLANK)
                 return
             }
-            parallelContext.collect(value)
+            parallelTransformContext.collect(value)
         }
     }).addParallelSinkProcessor(object : ParallelSinkProcessor<String> {
         private var count = AtomicInteger()
