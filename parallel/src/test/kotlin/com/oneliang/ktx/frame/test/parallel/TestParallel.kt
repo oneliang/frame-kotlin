@@ -7,6 +7,7 @@ import com.oneliang.ktx.frame.parallel.processor.QueueParallelSourceProcessor
 import com.oneliang.ktx.util.common.toIntSafely
 import com.oneliang.ktx.util.concurrent.atomic.AwaitAndSignal
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -37,9 +38,11 @@ class SourceProcessor : ParallelSourceProcessor<String> {
                     1 -> {
                         parallelSourceContext.collect("1", ParallelContextAction.NONE)
                     }
+
                     2 -> {
                         parallelSourceContext.collect("2", ParallelContextAction.SAVEPOINT)
                     }
+
                     3 -> {
                         parallelSourceContext.collect("3", ParallelContextAction.NONE)
                     }
@@ -86,7 +89,7 @@ fun main() {
 //        this.useCache = true
 //        this.cacheDirectory = "/D:/cache"
 //    })
-    val parallelJob = ParallelJob<String>("testParallel")
+    val parallelJob = ParallelJob<String>("testParallel", ParallelJobConfiguration().also { it.async = true;it.useCache = false })
 //    val sourceProcessor = SourceProcessor()
 //    parallelJob.addParallelSourceProcessor(sourceProcessor)
     val queueParallelSourceProcessor = QueueParallelSourceProcessor<String>()
@@ -98,6 +101,23 @@ fun main() {
                 return
             }
             parallelTransformContext.collect(value)
+        }
+    }).addParallelTransformProcessor(object : ParallelTransformProcessor<String, String> {
+        override fun process(value: String, parallelTransformContext: ParallelTransformContext<String>) {
+            if (value.isBlank()) {
+                parallelTransformContext.collect(Constants.String.BLANK)
+                return
+            }
+            parallelTransformContext.collect("$value--1")
+        }
+    }).addParallelTransformProcessor(object : ParallelTransformProcessor<String, String> {
+        override fun process(value: String, parallelTransformContext: ParallelTransformContext<String>) {
+            if (value.isBlank()) {
+                parallelTransformContext.collect(Constants.String.BLANK)
+                return
+            }
+            Thread.sleep(100)
+            parallelTransformContext.collect("$value--2")
         }
     }).addParallelSinkProcessor(object : ParallelSinkProcessor<String> {
         private var count = AtomicInteger()

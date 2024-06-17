@@ -18,6 +18,9 @@ class ParallelJobStep<IN : Any?> {
     }
 
     fun addParallelSinkProcessor(parallelSinkProcessor: ParallelSinkProcessor<IN>) {
+        if (this::parallelTransformProcessor.isInitialized) {
+            error("parallel transform processor has been initialized in this instance, only can initialize transform processor or add sink processor")
+        }
         this.parallelSinkProcessorList += parallelSinkProcessor
     }
 

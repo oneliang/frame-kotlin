@@ -142,7 +142,7 @@ class ParallelJob<IN : Any?>(private val jobName: String, internal val parallelJ
     internal fun saveCache() {
         if (this.parallelJobConfiguration.useCache) {
             logDebug("saving cache.")
-            this.cacheManager.saveToCache(jobName, this.cacheData?.toJson().nullToBlank())
+            this.cacheManager.saveToCache(this.jobName, this.cacheData?.toJson().nullToBlank())
         }
     }
 
