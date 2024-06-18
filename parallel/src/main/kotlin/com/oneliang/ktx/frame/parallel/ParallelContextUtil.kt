@@ -14,7 +14,7 @@ internal object ParallelContextUtil {
         parallelContextAction: ParallelContextAction,
         parallelTransformContext: ParallelTransformContext<Any?>?
     ) {
-        logger.debug("parallelTransformContext:%s",parallelTransformContext)
+        logger.debug("parallelTransformContext:%s", parallelTransformContext)
         if (parallelJobStep.isParallelTransformProcessor() && parallelTransformContext != null) {
             if (parallelJob.parallelJobConfiguration.async) {
                 coroutine.launch {
