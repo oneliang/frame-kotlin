@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans SYSTEM "ioc.dtd">
 <beans>
-	<configuration objectInjectType="autoById"/>
+	<configuration objectInjectType="autoById" ignoreAfterInject="false"/>
 	<!-- data source connection type -->
 	<bean id="connector" type="com.lwx.frame.jdbc.ConnectorImpl"></bean>
 	<bean id="baseQuery" type="com.lwx.frame.jdbc.BaseQueryImpl">

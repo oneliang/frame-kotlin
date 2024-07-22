@@ -2,6 +2,7 @@
 <!ELEMENT beans (configuration?,bean*)>
 <!ELEMENT configuration EMPTY>
 <!ATTLIST configuration objectInjectType (autoById|autoByType) #REQUIRED>
+<!ATTLIST configuration ignoreAfterInject (false|true) #IMPLIED>
 <!ELEMENT bean (constructor?,property*,after-inject*)>
 <!ATTLIST bean id ID #REQUIRED>
 <!ATTLIST bean type CDATA #REQUIRED>

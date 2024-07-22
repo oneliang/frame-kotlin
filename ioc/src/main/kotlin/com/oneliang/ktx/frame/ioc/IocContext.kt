@@ -67,12 +67,14 @@ open class IocContext : AbstractContext() {
                             JavaXmlUtil.initializeFromAttributeMap(iocConstructorBean, iocConstructorAttributeMap)
                             iocBean.iocConstructorBean = iocConstructorBean
                         }
+
                         IocPropertyBean.TAG_PROPERTY -> {
                             val iocPropertyBean = IocPropertyBean()
                             val iocPropertyAttributeMap = childNode.attributes
                             JavaXmlUtil.initializeFromAttributeMap(iocPropertyBean, iocPropertyAttributeMap)
                             iocBean.addIocPropertyBean(iocPropertyBean)
                         }
+
                         IocAfterInjectBean.TAG_AFTER_INJECT -> {
                             val iocAfterInjectBean = IocAfterInjectBean()
                             val iocAfterInjectAttributeMap = childNode.attributes
@@ -253,6 +255,7 @@ open class IocContext : AbstractContext() {
                     ObjectBean.Type.REFERENCE, ObjectBean.Type.REFERENCE_BOTH -> {
                         this.autoInjectObjectById(id, objectBean.instance)
                     }
+
                     else -> {
                         error("Auto injecting by id error, object id:%s, can not reference other object".format(id))
                     }
@@ -264,6 +267,7 @@ open class IocContext : AbstractContext() {
                     ObjectBean.Type.REFERENCE, ObjectBean.Type.REFERENCE_BOTH -> {
                         this.autoInjectObjectByType(id, objectBean.instance)
                     }
+
                     else -> {
                         error("Auto injecting by type error, object id:%s, can not reference other object".format(id))
                     }
@@ -355,6 +359,7 @@ open class IocContext : AbstractContext() {
                         realType = referenceInstance.javaClass.name
                         referenceInstance
                     }
+
                     else -> {
                         error("Auto injecting by id error, reference object id:%s, can not be referenced by this object id:%s".format(fieldName, id))
                     }
@@ -433,6 +438,9 @@ open class IocContext : AbstractContext() {
      */
     @Throws(Exception::class)
     fun afterInject() {
+        if (iocConfigurationBean.ignoreAfterInject) {
+            return
+        }
         iocBeanMap.forEach { (id, iocBean) ->
             val iocAfterInjectBeanList = iocBean.iocAfterInjectBeanList
             for (iocAfterInjectBean in iocAfterInjectBeanList) {

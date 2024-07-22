@@ -15,4 +15,6 @@ class IocConfigurationBean {
      * @param objectInjectType the objectInjectType to set
      */
     var objectInjectType = INJECT_TYPE_AUTO_BY_ID
+
+    var ignoreAfterInject = false //true only run for unit test project in common scene
 }
