@@ -7,14 +7,20 @@ import com.oneliang.ktx.util.logging.Logger
 import com.oneliang.ktx.util.logging.LoggerManager
 import com.oneliang.ktx.util.packet.TlvPacket
 import com.oneliang.ktx.util.packet.TlvPacketProcessor
+import java.net.Socket
 
 fun main() {
     LoggerManager.registerLogger("*", BaseLogger(Logger.Level.DEBUG))
     val tlvPacketProcessor = TlvPacketProcessor()
-    ClientManager("localhost", 9999, 1) {
+    ClientManager("localhost", 9999, 1,{
         val tlvPacket = tlvPacketProcessor.receiveTlvPacket(it)
         println(String(tlvPacket.body))
-    }.also { clientManager ->
+    }, object:ClientManager.ClientStatusCallback{
+        override fun onConnect(clientIndex: Int) {
+        }
+        override fun onDisconnect(clientIndex: Int) {
+        }
+    }).also { clientManager ->
         clientManager.start()
         clientManager.send(TlvPacket(1.toByteArray(), "i am client".toByteArray()).toByteArray())
     }
