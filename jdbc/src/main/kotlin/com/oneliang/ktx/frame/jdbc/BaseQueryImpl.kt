@@ -15,9 +15,11 @@ open class BaseQueryImpl : BaseQuery {
     companion object {
         private val logger = LoggerManager.getLogger(BaseQueryImpl::class)
         private val DEFAULT_SQL_PROCESSOR = DefaultSqlProcessor()
+        private val DEFAULT_QUERY_TIMEOUT = 30 //seconds
     }
 
     internal var sqlProcessor: SqlUtil.SqlProcessor = DEFAULT_SQL_PROCESSOR
+    internal var queryTimeout = DEFAULT_QUERY_TIMEOUT //seconds
 
     /**
      * Method: execute by sql,for all sql
@@ -34,6 +36,7 @@ open class BaseQueryImpl : BaseQuery {
             val parameterString = parameters.joinToString()
             logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             preparedStatement = connection.prepareStatement(parsedSql)
+            preparedStatement.queryTimeout = this.queryTimeout
             var index = 1
             for (parameter in parameters) {
                 this.sqlProcessor.statementProcess(preparedStatement, index, parameter)
@@ -225,6 +228,7 @@ open class BaseQueryImpl : BaseQuery {
             val parameterString = parameters.joinToString()
             logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             val preparedStatement = connection.prepareStatement(parsedSql)
+            preparedStatement.queryTimeout = this.queryTimeout
             if (parameters.isNotEmpty()) {
                 var index = 1
                 for (parameter in parameters) {
@@ -459,13 +463,14 @@ open class BaseQueryImpl : BaseQuery {
             val parameterString = parameters.joinToString()
             logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             preparedStatement = connection.prepareStatement(parsedSql, Statement.RETURN_GENERATED_KEYS)
+            preparedStatement.queryTimeout = this.queryTimeout
             var index = 1
             for (parameter in parameters) {
                 this.sqlProcessor.statementProcess(preparedStatement, index, parameter)
                 index++
             }
             val begin = System.currentTimeMillis()
-            preparedStatement!!.execute()
+            preparedStatement.execute()
             logger.info("execute cost:%s, sql:%s, parameters:[%s]", (System.currentTimeMillis() - begin), parsedSql, parameterString)
             resultSet = preparedStatement.generatedKeys
             if (resultSet != null && resultSet.next()) {
@@ -620,6 +625,7 @@ open class BaseQueryImpl : BaseQuery {
                 val parsedSql = DatabaseMappingUtil.parseSql(sql, this.sqlProcessor)
                 logger.info(parsedSql)
                 preparedStatement = connection.prepareStatement(parsedSql)
+                preparedStatement.queryTimeout = this.queryTimeout
                 for (instance in collection) {
                     var index = 1
                     for (fieldName in fieldNameList) {
@@ -657,6 +663,7 @@ open class BaseQueryImpl : BaseQuery {
             val parameterString = parameters.joinToString()
             logger.info("%s, parameters:[%s]", parsedSql, parameterString)
             preparedStatement = connection.prepareStatement(parsedSql)!!
+            preparedStatement.queryTimeout = this.queryTimeout
             var index = 1
             for (parameter in parameters) {
                 this.sqlProcessor.statementProcess(preparedStatement, index, parameter)
@@ -708,6 +715,7 @@ open class BaseQueryImpl : BaseQuery {
             var statement: Statement? = null
             try {
                 statement = connection.createStatement()
+                statement.queryTimeout = this.queryTimeout
                 for (sql in sqlList) {
                     val parsedSql = DatabaseMappingUtil.parseSql(sql, this.sqlProcessor)
                     logger.info(parsedSql)
@@ -744,6 +752,7 @@ open class BaseQueryImpl : BaseQuery {
                 val parsedSql = DatabaseMappingUtil.parseSql(sql, this.sqlProcessor)
                 logger.info(parsedSql)
                 preparedStatement = connection.prepareStatement(parsedSql)
+                preparedStatement.queryTimeout = this.queryTimeout
                 for (parameters in parametersCollection) {
                     var index = 1
                     for (parameter in parameters) {
@@ -802,5 +811,12 @@ open class BaseQueryImpl : BaseQuery {
      */
     fun setSqlProcessor(sqlProcessor: SqlUtil.SqlProcessor) {
         this.sqlProcessor = sqlProcessor
+    }
+
+    /**
+     * @param queryTimeout the queryTimeout to set
+     */
+    fun setQueryTimeout(queryTimeout: Int) {
+        this.queryTimeout = queryTimeout
     }
 }
